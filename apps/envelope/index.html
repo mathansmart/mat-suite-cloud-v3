@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envelope Pro - Executive Printing Suite</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader-content">
+            <div class="loader-icon">✉️</div>
+            <h2>Envelope<span>PRO</span></h2>
+            <p id="loading-status">Connecting to System...</p>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+            <button id="emergency-repair-btn" class="btn tertiary hidden" style="margin-top: 20px;">Manual Repair Needed?</button>
+        </div>
+    </div>
+
+    <div class="glass-background"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar: Navigation & Stats -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <h2><span>✉️</span> Envelope<span>PRO</span></h2>
+            </div>
+            
+            <a href="http://127.0.0.1:3001/" style="display: flex; align-items: center; justify-content: center; background: #e11d48; color: #fff; font-weight: 600; padding: 8px 12px; border-radius: 6px; text-decoration: none; margin-bottom: 12px; font-size: 0.95rem; border: 1.5px solid #be123c;">
+                🏠 Back to Main Menu
+            </a>
+
+            <div class="control-group">
+                <h3 style="margin-bottom: 0.5rem;">Quick Stats</h3>
+                <div class="stats-card">
+                    <span class="label">Total Contacts</span>
+                    <span class="value" id="stat-total">0</span>
+                </div>
+            </div>
+
+            <button id="add-new-btn" class="btn primary" style="justify-content: center;">＋ New Contact</button>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button id="open-settings-btn" class="btn secondary" style="justify-content: center;">⚙️ Settings Panel</button>
+                <button id="share-app-btn" class="btn secondary" style="justify-content: center; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color: #38bdf8;">🔗 Share App</button>
+                <button id="reload-btn" class="btn tertiary" style="justify-content: center; font-size: 0.75rem; border: 1px solid transparent;">🔄 Reload System</button>
+            </div>
+            <div class="category-filters" style="margin-top: 0.5rem; flex: 1; overflow-y: auto;">
+                <h3 style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.5px;">Categories</h3>
+                <div id="category-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="new-password">
+                </div>
+                <div class="header-actions">
+                    <button id="bulk-print-btn" class="btn primary">🖨️ PRINT SELECTED</button>
+                    <button id="export-excel-btn" class="btn excel" title="Export to Excel">📊 EXCEL</button>
+                    <button id="select-all-btn" class="btn tertiary">Select All</button>
+                    <button id="unselect-all-btn" class="btn tertiary">Deselect All</button>
+                </div>
+            </header>
+
+            <div style="margin-bottom: 1.5rem;">
+                <h1 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Address Book</h1>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">Select the contacts you want to print.</p>
+            </div>
+
+            <section class="address-grid" id="address-list">
+                <!-- Address cards will be injected here -->
+            </section>
+
+            <!-- Footer Branding -->
+            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px; font-family: 'Outfit', sans-serif;">
+                <p style="font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7;">Designed & Developed</p>
+                <p style="font-size: 0.9rem; font-weight: 800; color: var(--text-primary); letter-spacing: 1px; opacity: 0.8;">by mathan</p>
+            </div>
+        </main>
+
+        <!-- Right panel removed for unified settings -->
+    </div>
+
+    <!-- Unified Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">⚙️ System Settings</h2>
+                <button id="close-settings-btn" class="btn ghost" style="padding: 5px; font-size: 1.2rem;">✖️</button>
+            </div>
+            
+            <div class="format-selector" style="margin-bottom: 20px;">
+                <button class="settings-tab-btn active" data-tab="envelope">Envelope</button>
+                <button class="settings-tab-btn" data-tab="a5">A5 Paper</button>
+                <button class="settings-tab-btn" data-tab="categories">Categories</button>
+            </div>
+
+            <!-- Envelope Settings Pane -->
+            <div id="pane-envelope" class="settings-pane active">
+                <div class="control-group">
+                    <h3>Font Styles</h3>
+                    <label>Font Family</label>
+                    <select id="font-family">
+                        <option value="'Outfit', sans-serif" style="font-family: 'Outfit', sans-serif;">Premium (Outfit)</option>
+                        <option value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Modern (Montserrat)</option>
+                        <option value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif;">Elegant (Playfair)</option>
+                        <option value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">Traditional (Times New Roman)</option>
+                        <option value="'Georgia', serif" style="font-family: 'Georgia', serif;">Refined (Georgia)</option>
+                        <option value="'Courier New', monospace" style="font-family: 'Courier New', monospace;">Classic (Typewriter)</option>
+                    </select>
+
+                    <label style="margin-top: 8px;">Size (pt)</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="font-size" min="12" max="60" value="18">
+                        <input type="number" id="font-size-num" min="12" max="60" value="18" style="width: 50px;">
+                    </div>
+
+                    <label style="margin-top: 8px;">Line Spacing</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="line-height" min="1" max="2.5" step="0.1" value="1.2">
+                        <input type="number" id="line-height-num" min="1" max="2.5" step="0.1" value="1.2" style="width: 50px;">
+                    </div>
+
+                    <label style="margin-top: 8px;">Weight</label>
+                    <select id="font-weight">
+                        <option value="400">Regular</option>
+                        <option value="600">Semi-Bold</option>
+                        <option value="700">Bold</option>
+                    </select>
+                </div>
+
+                <div class="control-group" style="margin-top: 1rem;">
+                    <h3>Alignment (mm)</h3>
+                    <div class="input-row">
+                        <label>Top Shift</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="range" id="top-margin" min="0" max="150" value="40">
+                            <input type="number" id="top-margin-num" min="0" max="150" value="40" style="width: 50px;">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <label>Left Shift</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="range" id="left-margin" min="0" max="250" value="0">
+                            <input type="number" id="left-margin-num" min="0" max="250" value="0" style="width: 50px;">
+                        </div>
+                    </div>
+                    <div style="display: none;">
+                        <input type="range" id="right-margin" value="0">
+                        <input type="number" id="right-margin-num" value="0">
+                        <input type="range" id="bottom-margin" value="0">
+                        <input type="number" id="bottom-margin-num" value="0">
+                    </div>
+                </div>
+
+                <div class="control-group" style="margin-top: 1rem;">
+                    <h3>Options</h3>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="add-prefix" checked style="width: 18px; height: 18px;"> Add "To. M/s,"
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 8px;">
+                        <input type="checkbox" id="rotate-text" style="width: 18px; height: 18px;"> Rotate Text 90°
+                    </label>
+                </div>
+            </div>
+
+            <!-- A5 Settings Pane -->
+            <div id="pane-a5" class="settings-pane">
+                <div class="control-group">
+                    <h3>Sender Profile (FROM)</h3>
+                    <div id="sender-list" style="margin-bottom: 1rem; max-height: 120px; overflow-y: auto; border: 1px solid var(--border-color); padding: 5px; border-radius: 8px; background: #fff;"></div>
+                    
+                    <input type="text" id="sender-name" placeholder="Contact Name" style="margin-bottom: 5px;">
+                    <input type="text" id="sender-address" placeholder="Address" style="margin-bottom: 5px;">
+                    <input type="text" id="sender-phone" placeholder="Phone" style="margin-bottom: 10px;">
+                    <button id="add-sender-btn" class="btn secondary" style="width: 100%; font-size: 0.7rem;">+ Save Sender</button>
+                </div>
+
+                <div class="control-group" style="margin-top: 1rem;">
+                    <h3>A5 Layout (mm)</h3>
+                    <label>Font Size</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="a5-font-size" min="12" max="60" value="24">
+                        <input type="number" id="a5-font-size-num" min="12" max="60" value="24" style="width: 50px;">
+                    </div>
+
+                    <label style="margin-top: 8px;">Top Margin</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="a5-top-margin" min="0" max="200" value="40">
+                        <input type="number" id="a5-top-margin-num" min="0" max="200" value="40" style="width: 50px;">
+                    </div>
+
+                    <label style="margin-top: 8px;">Left Margin</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="a5-left-margin" min="0" max="250" value="0">
+                        <input type="number" id="a5-left-margin-num" min="0" max="250" value="0" style="width: 50px;">
+                    </div>
+
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 15px;">
+                        <input type="checkbox" id="a5-add-prefix" style="width: 18px; height: 18px;"> Add "To. M/s,"
+                    </label>
+                </div>
+            </div>
+
+            <!-- Categories Pane -->
+            <div id="pane-categories" class="settings-pane">
+                <div class="control-group">
+                    <h3>Manage Categories</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">Add new categories to organize your contacts.</p>
+                    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                        <input type="text" id="new-category-input" placeholder="New Category Name..." style="padding: 0.8rem; font-size: 0.9rem; border-radius: 8px; border: 1px solid #E2E8F0; width: 100%; outline: none;" autocomplete="off">
+                        <button id="add-category-btn" class="btn secondary" style="padding: 0.4rem 1rem; font-size: 1rem; border-radius: 8px;">ADD</button>
+                    </div>
+                    <div id="manage-category-list" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; max-height: 300px; overflow-y: auto;">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center;">💾 SAVE SETTINGS</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <h2 id="modal-title">Edit Contact</h2>
+            <div class="input-field">
+                <label>Category</label>
+                <select id="input-category" style="width: 100%; padding: 0.8rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; background: #F8FAFC; outline: none; transition: all 0.2s;">
+                </select>
+            </div>
+            <div class="input-field">
+                <label>Name / Shop Name</label>
+                <input type="text" id="input-name" autocomplete="new-password">
+                <div id="name-warning" style="color: var(--danger); font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;"></div>
+            </div>
+            <div class="input-field">
+                <label>City / Town</label>
+                <input type="text" id="input-city" placeholder="Eg: Tirupur" autocomplete="new-password">
+            </div>
+            <div class="input-field">
+                <label>Phone Number</label>
+                <input type="text" id="input-phone" autocomplete="new-password">
+            </div>
+            <div class="input-field">
+                <label>Address Lines</label>
+                <div id="address-lines-container">
+                    <!-- Dynamic inputs will be added here -->
+                </div>
+                <button id="add-addr-line-btn" type="button" class="btn tertiary" style="font-size: 0.7rem; padding: 5px; margin-top: 5px; width: 100%; border: 1px dashed var(--border-color);">➕ Add Another Line</button>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancel-btn" class="btn ghost">Cancel</button>
+                <button id="save-address-btn" class="btn primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Format Modal -->
+    <div id="print-modal-overlay" class="modal-overlay hidden">
+        <div class="modal" style="width: 400px;">
+            <h2>Print Confirmation</h2>
+            <div class="control-group" style="margin-bottom: 1.5rem;">
+                <label style="margin-bottom: 0.5rem;">Choose Format:</label>
+                <div style="display: flex; gap: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="print-format" value="envelope" checked> Envelope
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="print-format" value="a5"> A5 Paper
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="print-format" value="a4-list"> A4 Name List
+                    </label>
+                </div>
+            </div>
+
+            <div id="print-sender-selector" class="hidden" style="margin-bottom: 1.5rem;">
+                <label style="margin-bottom: 0.5rem;">Select Sender:</label>
+                <select id="modal-sender-select" style="width: 100%;"></select>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.05); padding: 10px; border-radius: 8px; margin-bottom: 1.5rem; border-left: 3px solid var(--accent-blue);">
+                <p style="font-size: 0.7rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                    💡 <b>Tip:</b> If alignment is wrong on this computer, make sure <b>"Scale"</b> is set to <b>"100%"</b> or <b>"Actual Size"</b> in the print window.
+                </p>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="export-excel-modal-btn" class="btn excel hidden" title="Export to Excel">📊 EXCEL</button>
+                <button id="close-print-modal" class="btn ghost">Cancel</button>
+                <button id="confirm-print-btn" class="btn primary">🚀 PRINT NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-modal-overlay" class="modal-overlay hidden">
+        <div class="modal" style="width: 350px; text-align: center; border-top: 5px solid var(--accent-blue);" id="confirm-modal-box">
+            <div id="confirm-modal-icon" style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h2 id="confirm-modal-title" style="margin-bottom: 1rem;">Confirm</h2>
+            <p id="confirm-modal-message" style="color: var(--text-secondary); margin-bottom: 2rem;">Are you sure?</p>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button id="confirm-cancel-btn" class="btn ghost">Cancel</button>
+                <button id="confirm-ok-btn" class="btn primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Centered Input Modal (Prompt replacement) -->
+    <div id="prompt-modal-overlay" class="modal-overlay hidden">
+        <div class="modal" style="width: 400px; border-top: 5px solid var(--accent-blue);">
+            <h2 id="prompt-modal-title" style="margin-bottom: 10px;">Edit Category</h2>
+            <p id="prompt-modal-message" style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">Enter the new name:</p>
+            <div class="input-field">
+                <input type="text" id="prompt-modal-input" style="width: 100%;" autocomplete="off">
+            </div>
+            <div class="modal-buttons" style="margin-top: 30px;">
+                <button id="prompt-cancel-btn" class="btn ghost">Cancel</button>
+                <button id="prompt-ok-btn" class="btn primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
