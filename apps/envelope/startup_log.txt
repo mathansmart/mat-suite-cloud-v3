@@ -1,0 +1,32 @@
+------------------------------------
+Startup attempted at: 10-Apr-26 4:02:05 PM
+✅ Primary storage ready: D:\Desktop\PRINTER
+✅ Envelope Pro Server running at http://localhost:3000
+📂 Storage: D:\Desktop\PRINTER
+------------------------------------
+Startup attempted at: 10-Apr-26 4:05:13 PM
+✅ Primary storage ready: D:\Desktop\PRINTER
+✅ Envelope Pro Server running at http://localhost:3000
+📂 Storage: D:\Desktop\PRINTER
+------------------------------------
+Auto-Start Configuration Applied: 04/16/2026 12:20:14
+Mechanism: Registry (HKCU\...\Run)
+------------------------------------
+✅ Primary storage ready: D:\Desktop\PRINTER
+⚠️  Server is already running on port 3000. Closing duplicate instance.
+✅ Primary storage ready: D:\Desktop\PRINTER
+✅ Envelope Pro Server running at http://localhost:3000
+📂 Storage: D:\Desktop\PRINTER
+✅ Primary storage ready: D:\Desktop\PRINTER
+✅ Envelope Pro Server running at http://localhost:3000
+📂 Storage: D:\Desktop\PRINTER
+
+--- Startup Attempt: 4/16/2026, 5:22:35 PM ---
+✅ Primary storage ready: D:\Desktop\PRINTER
+✅ Envelope Pro Server running at http://localhost:3000
+📂 Storage: D:\Desktop\PRINTER
+
+--- Startup Attempt: 4/17/2026, 9:28:02 AM ---
+✅ Primary storage ready: D:\Desktop\PRINTER
+✅ Envelope Pro Server running at http://localhost:3000
+📂 Storage: D:\Desktop\PRINTER
