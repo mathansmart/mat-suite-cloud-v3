@@ -1,0 +1,13 @@
+{
+  "name": "envelope-pro-local",
+  "version": "1.0.0",
+  "description": "Local printer server for Envelope Pro",
+  "main": "server.js",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
