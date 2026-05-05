@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAT Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.4) 0px, transparent 50%);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .grid {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .card {
+            width: 350px;
+            height: 450px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-glow);
+        }
+
+        .card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            transition: transform 0.4s;
+        }
+
+        .card:hover .icon {
+            transform: scale(1.1);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .card-desc {
+            color: var(--muted);
+            text-align: center;
+            padding: 0 30px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .footer {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+
+        .btn-link {
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 30px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .card:hover .btn-link {
+            background: var(--accent);
+            color: var(--bg);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MAT</h1>
+        <p>Workspace</p>
+    </div>
+
+    <div class="grid">
+        <a href="http://127.0.0.1:3001/envelope/" class="card" id="card-envelope">
+            <div class="icon">✉️</div>
+            <div class="card-title">Envelope Pro</div>
+            <div class="card-desc">Advanced envelope printing and contact management system.</div>
+            <div class="btn-link">LAUNCH APP</div>
+        </a>
+
+        <a href="http://127.0.0.1:3001/stock/" class="card" id="card-stock">
+            <div class="icon">📦</div>
+            <div class="card-title">Stock Manager</div>
+            <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
+            <div class="btn-link">LAUNCH APP</div>
+        </a>
+    </div>
+
+    <div class="footer">
+        <div class="status">
+            <div class="status-dot"></div>
+            <span>System Online: localhost:3001</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div>v2.0.0 • Secure Local Machine</div>
+            <button onclick="window.close()" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; transition: all 0.2s;">Quit System</button>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            const statusDot = document.querySelector('.status-dot');
+            const statusText = document.querySelector('.status span');
+            try {
+                const res = await fetch('http://127.0.0.1:3001/api/envelope/status');
+                const data = await res.json();
+                if (data.status === 'online') {
+                    statusDot.style.background = '#22c55e';
+                    statusDot.style.boxShadow = '0 0 10px #22c55e';
+                    statusText.textContent = `System Online: ${data.ip}:3001`;
+                }
+            } catch (e) {
+                statusDot.style.background = '#ef4444';
+                statusDot.style.boxShadow = '0 0 10px #ef4444';
+                statusText.textContent = `System Offline / Searching...`;
+            }
+        }
+        checkStatus();
+        setInterval(checkStatus, 5000);
+    </script>
+</body>
+</html>
