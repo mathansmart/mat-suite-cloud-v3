@@ -173,14 +173,14 @@
     </div>
 
     <div class="grid">
-        <a href="http://127.0.0.1:3001/envelope/" class="card" id="card-envelope">
+        <a href="/envelope/" class="card" id="card-envelope">
             <div class="icon">✉️</div>
             <div class="card-title">Envelope Pro</div>
             <div class="card-desc">Advanced envelope printing and contact management system.</div>
             <div class="btn-link">LAUNCH APP</div>
         </a>
 
-        <a href="http://127.0.0.1:3001/stock/" class="card" id="card-stock">
+        <a href="/stock/" class="card" id="card-stock">
             <div class="icon">📦</div>
             <div class="card-title">Stock Manager</div>
             <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
@@ -191,11 +191,10 @@
     <div class="footer">
         <div class="status">
             <div class="status-dot"></div>
-            <span>System Online: localhost:3001</span>
+            <span>System Online</span>
         </div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div>v2.0.0 • Secure Local Machine</div>
-            <button onclick="window.close()" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; transition: all 0.2s;">Quit System</button>
+            <div>v2.1.0 (Cloud)</div>
         </div>
     </div>
 
@@ -204,7 +203,7 @@
             const statusDot = document.querySelector('.status-dot');
             const statusText = document.querySelector('.status span');
             try {
-                const res = await fetch('http://127.0.0.1:3001/api/envelope/status');
+                const res = await fetch('/api/envelope/status');
                 const data = await res.json();
                 if (data.status === 'online') {
                     statusDot.style.background = '#22c55e';
