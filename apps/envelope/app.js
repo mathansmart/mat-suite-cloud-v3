@@ -594,16 +594,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     senderList.addEventListener('click', (e) => {
-        const id = parseInt(e.target.dataset.id);
+        const rawId = e.target.dataset.id;
+        if (!rawId) return;
+        
         if (e.target.classList.contains('delete-sender')) {
-            senders = senders.filter(s => s.id !== id);
+            senders = senders.filter(s => String(s.id) !== rawId);
             saveSenders();
             renderSendersList();
             updateSenderDropdown(); // Sync print modal dropdown
         } else if (e.target.classList.contains('edit-sender')) {
-            const s = senders.find(x => x.id === id);
+            const s = senders.find(x => String(x.id) === rawId);
             if (s) {
-                editingSenderId = id;
+                editingSenderId = s.id;
                 senderName.value = s.name;
                 senderAddress.value = s.address;
                 senderPhone.value = s.phone;
@@ -943,8 +945,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             if (searchFocusIndex >= 0 && searchFocusIndex < cards.length) {
                 const focusedItem = cards[searchFocusIndex];
-                const id = parseInt(focusedItem.dataset.id);
-                toggleSelection(id);
+                const rawId = focusedItem.dataset.id;
+                const addr = addresses.find(a => String(a.id) === rawId);
+                if (addr) toggleSelection(addr.id);
             }
         }
     });
@@ -960,19 +963,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     addressList.addEventListener('click', (e) => {
-        const id = parseInt(e.target.dataset.id);
+        const rawId = e.target.dataset.id;
+        if (!rawId) return;
+        
         if (e.target.classList.contains('delete')) {
             showNotification('Are you sure you want to delete this contact?', 'confirm', 'Confirm Delete', () => {
-                addresses = addresses.filter(a => a.id !== id);
-                const idx = selectedIds.indexOf(id);
+                addresses = addresses.filter(a => String(a.id) !== rawId);
+                const idx = selectedIds.findIndex(id => String(id) === rawId);
                 if (idx !== -1) selectedIds.splice(idx, 1);
                 saveToLocal();
                 renderAddresses();
             });
         } else if (e.target.classList.contains('edit')) {
-            const addr = addresses.find(a => a.id === id);
+            const addr = addresses.find(a => String(a.id) === rawId);
             if (addr) {
-                editingId = id;
+                editingId = addr.id;
                 inputName.value = addr.name;
                 if (inputCity) inputCity.value = addr.city || '';
                 
