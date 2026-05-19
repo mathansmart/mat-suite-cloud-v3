@@ -16,7 +16,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // --- Schemas & Models ---
 
-// Envelope Models
+// Envelope Models (MILTON - Profile 1)
 const EnvelopeSenderSchema = new mongoose.Schema({ id: Number, name: String, address: String, phone: String }, { strict: false });
 const EnvelopeSender = mongoose.model('EnvelopeSender', EnvelopeSenderSchema);
 
@@ -28,6 +28,19 @@ const EnvelopeAddress = mongoose.model('EnvelopeAddress', EnvelopeAddressSchema)
 
 const EnvelopeSettingsSchema = new mongoose.Schema({ data: String });
 const EnvelopeSettings = mongoose.model('EnvelopeSettings', EnvelopeSettingsSchema);
+
+// Envelope Models (VESTER - Profile 2)
+const EnvelopeSender2 = mongoose.model('EnvelopeSender2', EnvelopeSenderSchema);
+const EnvelopeCategory2 = mongoose.model('EnvelopeCategory2', EnvelopeCategorySchema);
+const EnvelopeAddress2 = mongoose.model('EnvelopeAddress2', EnvelopeAddressSchema);
+const EnvelopeSettings2 = mongoose.model('EnvelopeSettings2', EnvelopeSettingsSchema);
+
+const getEnvelopeModels = (profile) => {
+    if (profile === '2') {
+        return { Sender: EnvelopeSender2, Category: EnvelopeCategory2, Address: EnvelopeAddress2, Settings: EnvelopeSettings2 };
+    }
+    return { Sender: EnvelopeSender, Category: EnvelopeCategory, Address: EnvelopeAddress, Settings: EnvelopeSettings };
+};
 
 // Stock Models
 const StockProductSchema = new mongoose.Schema({ id: String, data: String });
@@ -57,55 +70,63 @@ app.get('/api/envelope/status', (req, res) => {
 });
 
 app.get('/api/envelope/senders', async (req, res) => {
-    try { res.json(await EnvelopeSender.find()); } catch (err) { res.status(500).json([]); }
+    const { Sender } = getEnvelopeModels(req.query.profile);
+    try { res.json(await Sender.find()); } catch (err) { res.status(500).json([]); }
 });
 
 app.post('/api/envelope/senders', async (req, res) => {
+    const { Sender } = getEnvelopeModels(req.query.profile);
     try {
-        await EnvelopeSender.deleteMany({});
-        await EnvelopeSender.insertMany(req.body);
+        await Sender.deleteMany({});
+        await Sender.insertMany(req.body);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: 'Failed' }); }
 });
 
 app.get('/api/envelope/categories', async (req, res) => {
+    const { Category } = getEnvelopeModels(req.query.profile);
     try {
-        const data = await EnvelopeCategory.find();
+        const data = await Category.find();
         res.json(data.map(c => c.name));
     } catch (err) { res.status(500).json([]); }
 });
 
 app.post('/api/envelope/categories', async (req, res) => {
+    const { Category } = getEnvelopeModels(req.query.profile);
     try {
-        await EnvelopeCategory.deleteMany({});
-        await EnvelopeCategory.insertMany(req.body.map(name => ({ name })));
+        await Category.deleteMany({});
+        await Category.insertMany(req.body.map(name => ({ name })));
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: 'Failed' }); }
 });
 
 app.get('/api/envelope/addresses', async (req, res) => {
-    try { res.json(await EnvelopeAddress.find()); } catch (err) { res.status(500).json([]); }
+    const { Address } = getEnvelopeModels(req.query.profile);
+    try { res.json(await Address.find()); } catch (err) { res.status(500).json([]); }
 });
 
 app.post('/api/envelope/addresses', async (req, res) => {
+    const { Address } = getEnvelopeModels(req.query.profile);
     try {
-        await EnvelopeAddress.deleteMany({});
-        await EnvelopeAddress.insertMany(req.body);
+        await Address.deleteMany({});
+        await Address.insertMany(req.body);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: 'Failed' }); }
 });
 
 app.get('/api/envelope/settings', async (req, res) => {
+    const { Settings } = getEnvelopeModels(req.query.profile);
     try {
-        const doc = await EnvelopeSettings.findOne();
+        const doc = await Settings.findOne();
         res.json(doc ? JSON.parse(doc.data) : {});
     } catch (err) { res.status(500).json({}); }
 });
 
 app.post('/api/envelope/settings', async (req, res) => {
+    const { Settings } = getEnvelopeModels(req.query.profile);
     try {
-        await EnvelopeSettings.deleteMany({});
-        await EnvelopeSettings.create({ data: JSON.stringify(req.body) });
+        await Settings.deleteMany({});
+        await Settings.create({ data: JSON.stringify(req.body) });
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: 'Failed' }); }
 });

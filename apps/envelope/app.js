@@ -11,6 +11,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingConfirmCallback = null;
     let duplicateAlertTimeout = null;
     const API_BASE = window.location.origin;
+    const urlParams = new URLSearchParams(window.location.search);
+    const PROFILE = urlParams.get('profile') || '1';
+    const PROFILE_QUERY = `?profile=${PROFILE}`;
+    
+    // Set UI Badge
+    setTimeout(() => {
+        const badge = document.getElementById('profile-badge');
+        if(badge) {
+            badge.textContent = PROFILE === '1' ? 'MILTON' : 'VESTER';
+            if(PROFILE === '2') badge.style.background = '#f43f5e';
+        }
+    }, 100);
 
     // --- Startup Connection Check ---
     const initConnection = async (retries = 12) => {
@@ -20,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 0; i < retries; i++) {
             try {
-                const resp = await fetch(`${API_BASE}/api/envelope/status`);
+                const resp = await fetch(`${API_BASE}/api/envelope/status${PROFILE_QUERY}`);
                 if (resp.ok) {
                     const data = await resp.json();
                     console.log('✅ Connected to Envelope Pro Server v' + data.version);
@@ -177,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Always maintain alphabetical order in storage
         addresses.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
         try {
-            await fetch(`${API_BASE}/api/envelope/addresses`, {
+            await fetch(`${API_BASE}/api/envelope/addresses${PROFILE_QUERY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(addresses)
@@ -273,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         try {
-            await fetch(`${API_BASE}/api/envelope/settings`, {
+            await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
@@ -287,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSettings = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/settings`);
+            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`);
             const saved = await resp.json();
             
             if (saved.envelope) {
@@ -318,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSenders = async () => {
         try {
-            const res = await fetch(`${API_BASE}/api/envelope/senders`);
+            const res = await fetch(`${API_BASE}/api/envelope/senders${PROFILE_QUERY}`);
             senders = await res.json();
             renderSendersList();
             updateSenderDropdown();
@@ -329,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveSenders = async () => {
         try {
-            await fetch(`${API_BASE}/api/envelope/senders`, {
+            await fetch(`${API_BASE}/api/envelope/senders${PROFILE_QUERY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(senders)
@@ -343,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Categories Methods ---
     const loadCategories = async () => {
         try {
-            const res = await fetch(`${API_BASE}/api/envelope/categories`);
+            const res = await fetch(`${API_BASE}/api/envelope/categories${PROFILE_QUERY}`);
             categories = await res.json();
             renderCategories();
         } catch (err) {
@@ -353,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveCategories = async () => {
         try {
-            await fetch(`${API_BASE}/api/envelope/categories`, {
+            await fetch(`${API_BASE}/api/envelope/categories${PROFILE_QUERY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(categories)
@@ -616,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadAddresses = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/addresses`);
+            const resp = await fetch(`${API_BASE}/api/envelope/addresses${PROFILE_QUERY}`);
             addresses = await resp.json();
             renderAddresses();
             updateStats();
@@ -627,14 +639,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderAddresses = (filter = '') => {
         addressList.innerHTML = '';
-        const searchTerms = filter.toLowerCase().trim().split(/\s+/);
+        
+        // Remove punctuation from filter and split by spaces
+        const cleanFilter = filter.toLowerCase().replace(/[^a-z0-9\s]/gi, '');
+        const searchTerms = cleanFilter.trim().split(/\s+/).filter(Boolean);
         
         // 1. Filter
         let filtered = addresses.filter(addr => {
             if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return false;
             if (!filter.trim()) return true;
-            const combinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || '')].join(' ').toLowerCase();
-            return searchTerms.every(term => combinedText.includes(term));
+            
+            const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || '')].join(' ').toLowerCase();
+            // Remove punctuation from the target text as well
+            const cleanCombinedText = rawCombinedText.replace(/[^a-z0-9\s]/gi, '');
+            
+            return searchTerms.every(term => cleanCombinedText.includes(term));
         });
 
         // 2. Sort: Selected first, then Alphabetical (A-Z)
