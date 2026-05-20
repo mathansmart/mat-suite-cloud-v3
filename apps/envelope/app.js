@@ -10,6 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchFocusIndex = -1;
     let pendingConfirmCallback = null;
     let duplicateAlertTimeout = null;
+    let activeSettings = {
+        envelope: {
+            fontFamily: "'Montserrat', sans-serif",
+            fontSize: 18,
+            fontWeight: "400",
+            lineHeight: 1.2,
+            topMargin: 40,
+            leftMargin: 0,
+            rightMargin: 0,
+            bottomMargin: 0,
+            addPrefix: true,
+            rotateText: false
+        },
+        a5: {
+            fontSize: 24,
+            topMargin: 40,
+            leftMargin: 0,
+            addPrefix: false
+        }
+    };
     const API_BASE = window.location.origin;
     const urlParams = new URLSearchParams(window.location.search);
     const PROFILE = urlParams.get('profile') || '1';
@@ -256,31 +276,51 @@ document.addEventListener('DOMContentLoaded', () => {
         XLSX.utils.book_append_sheet(workbook, worksheet, "Contacts");
 
         // 5. Download
-        const selectedFont = document.getElementById('font-family') ? document.getElementById('font-family').value.replace(/'/g, "").split(',')[0] : "Arial";
+        const selectedFont = activeSettings.envelope.fontFamily.replace(/'/g, "").split(',')[0] || "Arial";
         
         XLSX.writeFile(workbook, `EnvelopePro_Export_${new Date().toLocaleDateString('en-IN').replace(/[\/]/g, '-')}.xlsx`);
         
         showNotification('Excel file exported successfully!', 'success', 'Export Complete');
     };
 
+    const applySettingsToInputs = () => {
+        const env = activeSettings.envelope;
+        if (fontFamilySelect) fontFamilySelect.value = env.fontFamily;
+        if (fontSizeSlider) fontSizeSlider.value = fontSizeNum.value = env.fontSize;
+        if (fontWeightSelect) fontWeightSelect.value = env.fontWeight;
+        if (lineHeightSlider) lineHeightSlider.value = lineHeightNum.value = env.lineHeight;
+        if (topMarginSlider) topMarginSlider.value = topMarginNum.value = env.topMargin;
+        if (leftMarginSlider) leftMarginSlider.value = leftMarginNum.value = env.leftMargin;
+        if (rightMarginSlider) rightMarginSlider.value = rightMarginNum.value = env.rightMargin;
+        if (bottomMarginSlider) bottomMarginSlider.value = bottomMarginNum.value = env.bottomMargin;
+        if (addPrefix) addPrefix.checked = env.addPrefix;
+        if (rotateText) rotateText.checked = env.rotateText;
+
+        const a5 = activeSettings.a5;
+        if (a5FontSizeSlider) a5FontSizeSlider.value = a5FontSizeNum.value = a5.fontSize;
+        if (a5TopMarginSlider) a5TopMarginSlider.value = a5TopMarginNum.value = a5.topMargin;
+        if (a5LeftMarginSlider) a5LeftMarginSlider.value = a5LeftMarginNum.value = a5.leftMargin;
+        if (a5AddPrefix) a5AddPrefix.checked = a5.addPrefix;
+    };
+
     const saveSettings = async () => {
         const settings = {
             envelope: {
                 fontFamily: fontFamilySelect.value,
-                fontSize: fontSizeSlider.value,
+                fontSize: parseInt(fontSizeSlider.value) || 18,
                 fontWeight: fontWeightSelect.value,
-                lineHeight: lineHeightSlider.value,
-                topMargin: topMarginSlider.value,
-                leftMargin: leftMarginSlider.value,
-                rightMargin: rightMarginSlider.value,
-                bottomMargin: bottomMarginSlider.value,
+                lineHeight: parseFloat(lineHeightSlider.value) || 1.2,
+                topMargin: parseInt(topMarginSlider.value) || 40,
+                leftMargin: parseInt(leftMarginSlider.value) || 0,
+                rightMargin: parseInt(rightMarginSlider.value) || 0,
+                bottomMargin: parseInt(bottomMarginSlider.value) || 0,
                 addPrefix: addPrefix.checked,
                 rotateText: rotateText.checked
             },
             a5: {
-                fontSize: a5FontSizeSlider.value,
-                topMargin: a5TopMarginSlider.value,
-                leftMargin: a5LeftMarginSlider.value,
+                fontSize: parseInt(a5FontSizeSlider.value) || 24,
+                topMargin: parseInt(a5TopMarginSlider.value) || 40,
+                leftMargin: parseInt(a5LeftMarginSlider.value) || 0,
                 addPrefix: a5AddPrefix.checked
             }
         };
@@ -290,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
             });
+            activeSettings = settings; // Update active settings
             showNotification('Settings Saved to Disk! 💾', 'success', 'Saved');
             if (settingsModal) settingsModal.classList.add('hidden');
         } catch (err) {
@@ -303,26 +344,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const saved = await resp.json();
             
             if (saved.envelope) {
-                const env = saved.envelope;
-                fontFamilySelect.value = env.fontFamily || "'Montserrat', sans-serif";
-                fontSizeSlider.value = fontSizeNum.value = env.fontSize || 18;
-                fontWeightSelect.value = env.fontWeight || "400";
-                lineHeightSlider.value = lineHeightNum.value = env.lineHeight || 1.2;
-                topMarginSlider.value = topMarginNum.value = env.topMargin || 40;
-                leftMarginSlider.value = leftMarginNum.value = env.leftMargin || 0;
-                rightMarginSlider.value = rightMarginNum.value = env.rightMargin || 0;
-                bottomMarginSlider.value = bottomMarginNum.value = env.bottomMargin || 0;
-                addPrefix.checked = env.addPrefix !== undefined ? env.addPrefix : true;
-                rotateText.checked = env.rotateText !== undefined ? env.rotateText : false;
+                activeSettings.envelope = { ...activeSettings.envelope, ...saved.envelope };
             }
-
             if (saved.a5) {
-                const a5 = saved.a5;
-                a5FontSizeSlider.value = a5FontSizeNum.value = a5.fontSize || 24;
-                a5TopMarginSlider.value = a5TopMarginNum.value = a5.topMargin || 40;
-                a5LeftMarginSlider.value = a5LeftMarginNum.value = a5.leftMargin || 0;
-                a5AddPrefix.checked = a5.addPrefix !== undefined ? a5.addPrefix : false;
+                activeSettings.a5 = { ...activeSettings.a5, ...saved.a5 };
             }
+            applySettingsToInputs();
         } catch (err) {
             console.warn('Failed to load settings from server.');
         }
@@ -1070,33 +1097,35 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let pageSize = 'auto';
         
+        const env = activeSettings.envelope;
+        const a5 = activeSettings.a5;
+
         // Apply Correct Settings based on format
         if (layoutType === 'a4-list') {
             pageSize = 'A4 portrait';
-            root.style.setProperty('--print-font-family', fontFamilySelect.value);
-            // Defaulting margins for standard A4
+            root.style.setProperty('--print-font-family', env.fontFamily);
             root.style.setProperty('--print-top-margin', '0mm');
             root.style.setProperty('--print-left-margin', '0mm');
         } else if (layoutType === 'a5') {
             pageSize = 'A5 landscape'; // More compatible standard
-            root.style.setProperty('--print-font-family', fontFamilySelect.value);
-            root.style.setProperty('--print-font-size', a5FontSizeSlider.value + 'pt');
-            root.style.setProperty('--print-font-weight', fontWeightSelect.value);
-            root.style.setProperty('--print-line-height', lineHeightSlider.value);
+            root.style.setProperty('--print-font-family', env.fontFamily);
+            root.style.setProperty('--print-font-size', a5.fontSize + 'pt');
+            root.style.setProperty('--print-font-weight', env.fontWeight);
+            root.style.setProperty('--print-line-height', env.lineHeight);
             
             // Use user-defined top margin for TO section at the top
-            root.style.setProperty('--print-top-margin', (a5TopMarginSlider.value || 10) + 'mm');
-            root.style.setProperty('--print-left-margin', a5LeftMarginSlider.value + 'mm');
+            root.style.setProperty('--print-top-margin', (a5.topMargin || 10) + 'mm');
+            root.style.setProperty('--print-left-margin', a5.leftMargin + 'mm');
         } else {
             pageSize = '265mm 114mm landscape'; // Synced with CSS height to avoid blank page
-            root.style.setProperty('--print-font-family', fontFamilySelect.value);
-            root.style.setProperty('--print-font-size', fontSizeSlider.value + 'pt');
-            root.style.setProperty('--print-font-weight', fontWeightSelect.value);
-            root.style.setProperty('--print-line-height', lineHeightSlider.value);
-            root.style.setProperty('--print-top-margin', topMarginSlider.value + 'mm');
-            root.style.setProperty('--print-left-margin', leftMarginSlider.value + 'mm');
-            root.style.setProperty('--print-right-margin', rightMarginSlider.value + 'mm');
-            root.style.setProperty('--print-bottom-margin', bottomMarginSlider.value + 'mm');
+            root.style.setProperty('--print-font-family', env.fontFamily);
+            root.style.setProperty('--print-font-size', env.fontSize + 'pt');
+            root.style.setProperty('--print-font-weight', env.fontWeight);
+            root.style.setProperty('--print-line-height', env.lineHeight);
+            root.style.setProperty('--print-top-margin', env.topMargin + 'mm');
+            root.style.setProperty('--print-left-margin', env.leftMargin + 'mm');
+            root.style.setProperty('--print-right-margin', env.rightMargin + 'mm');
+            root.style.setProperty('--print-bottom-margin', env.bottomMargin + 'mm');
         }
 
         styleTag.innerHTML = `
@@ -1107,8 +1136,8 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.head.appendChild(styleTag);
 
-        const addPrefixChecked = layoutType === 'a5' ? (a5AddPrefix ? a5AddPrefix.checked : false) : (addPrefix ? addPrefix.checked : false);
-        const rotateTextChecked = rotateText ? rotateText.checked : false;
+        const addPrefixChecked = layoutType === 'a5' ? a5.addPrefix : env.addPrefix;
+        const rotateTextChecked = env.rotateText;
 
         // Populate Print Area
         const printArea = document.getElementById('print-temp-container');
@@ -1256,10 +1285,16 @@ document.addEventListener('DOMContentLoaded', () => {
     reloadBtn.addEventListener('click', () => location.reload());
 
     if (openSettingsBtn) {
-        openSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        openSettingsBtn.addEventListener('click', () => {
+            applySettingsToInputs();
+            settingsModal.classList.remove('hidden');
+        });
     }
     if (closeSettingsBtn) {
-        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+        closeSettingsBtn.addEventListener('click', () => {
+            applySettingsToInputs();
+            settingsModal.classList.add('hidden');
+        });
     }
     if (shareAppBtn) {
         shareAppBtn.addEventListener('click', async () => {
