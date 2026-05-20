@@ -1442,7 +1442,16 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
         <!-- ALERTS -->
         <div class="section" id="section-alerts">
-          <div class="sec-title">Low Stock & Out of Stock</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+            <div class="sec-title" style="margin:0;">Low Stock & Out of Stock</div>
+            <div style="width:300px;">
+              <div class="search-wrapper">
+                <div class="search-icon-left">🔍</div>
+                <input type="text" id="alerts-search" placeholder="Search alerts..." class="premium-search" autocomplete="off" oninput="renderAlerts()">
+                <button class="search-clear-btn" id="alerts-search-clear" onclick="clearAlertsSearch()" style="display:none;">✕</button>
+              </div>
+            </div>
+          </div>
           <div id="alert-list"></div>
         </div>
 
@@ -1644,6 +1653,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             </div>
           </div>
 
+          <div class="table-wrap" style="padding:20px;margin-top:20px;margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <div class="sec-title" style="margin:0;">Recycle Bin 🗑️</div>
+              <button class="btn btn-ghost btn-sm" onclick="clearRecycleBin()">Empty Bin</button>
+            </div>
+            <p style="color:var(--muted); font-size:12px; margin-bottom:15px;">Deleted items are kept here for 30 days before being permanently deleted.</p>
+            <div id="settings-recycle-bin-list"></div>
+          </div>
+
           <!-- User Accounts Removed -->
           
           <div style="margin-top: 40px; padding: 20px; text-align: center; border-top: 1px dashed var(--border);">
@@ -1764,7 +1782,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       ],
       subCategories: ['T-SHIRT', 'SHIRT', 'GENERAL'],
       defMin: 5,
-      company: 'Milton Garments'
+      company: 'Milton Garments',
+      recycleBin: []
     };
     let gsm3_p = [], gsm3_t = [], gsm3_users = [];
     let S = gsm3_s, P = gsm3_p, T = gsm3_t, USERS = gsm3_users;
@@ -3150,6 +3169,12 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         // find all txns for this product on this date with this type
         const toDelete = T.filter(t => t.pid === pid && t.d.slice(0, 10) === date && t.tp === txnType && String(t.ci) === String(ci));
         if (!toDelete.length) { alert('Entry not found!'); return; }
+        S.recycleBin.push({
+          id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+          type: 'transaction',
+          data: toDelete,
+          deletedAt: new Date().toISOString()
+        });
         const p = P.find(x => x.id === pid);
         if (p) {
           toDelete.forEach(t => {
@@ -3161,6 +3186,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         persist();
         renderSiHistory(); renderSoHistory();
         updateBadge(); renderDashboard();
+        showCenterToast('Transaction entry moved to Recycle Bin!');
       });
     }
     function getMonthsFromTxns(type) {
@@ -3582,9 +3608,34 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const dr = document.getElementById('so-search-drop'); if (dr) dr.style.display = 'none';
       renderSoEntries(); renderSoHistory();
     }
+    function clearAlertsSearch() {
+      const searchEl = document.getElementById('alerts-search');
+      if (searchEl) searchEl.value = '';
+      renderAlerts();
+    }
     function renderAlerts() {
-      const items = getLow(); const list = document.getElementById('alert-list');
-      if (!items.length) { list.innerHTML = '<div class="empty-state">✅ All sizes have healthy stock!</div>'; return }
+      const searchEl = document.getElementById('alerts-search');
+      const searchVal = searchEl ? searchEl.value.trim().toLowerCase() : '';
+      const clearBtn = document.getElementById('alerts-search-clear');
+      if (clearBtn) {
+        clearBtn.style.display = searchVal ? 'block' : 'none';
+      }
+
+      let items = getLow();
+      if (searchVal) {
+        items = items.filter(x => 
+          x.p.n.toLowerCase().includes(searchVal) || 
+          cn(x.p.ci).toLowerCase().includes(searchVal)
+        );
+      }
+
+      const list = document.getElementById('alert-list');
+      if (!items.length) { 
+        list.innerHTML = searchVal 
+          ? '<div class="empty-state">No matching alerts found.</div>' 
+          : '<div class="empty-state">✅ All sizes have healthy stock!</div>'; 
+        return; 
+      }
 
       let html = '';
       S.categories.forEach(catObj => {
@@ -4119,7 +4170,139 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       renderUsersTable();
       renderSettingsCategories();
       renderSettingsSubCategories();
+      renderRecycleBin();
       checkAdmin();
+    }
+
+    function renderRecycleBin() {
+      const container = document.getElementById('settings-recycle-bin-list');
+      if (!container) return;
+      
+      const items = S.recycleBin || [];
+      if (items.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Recycle Bin is empty</div>';
+        return;
+      }
+      
+      let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+      items.forEach(item => {
+        let label = '';
+        let details = '';
+        const dateStr = item.deletedAt ? new Date(item.deletedAt).toLocaleString() : 'Unknown date';
+        
+        if (item.type === 'product') {
+          label = `Product: <strong>${item.data.product.n}</strong>`;
+          details = `Category: ${cn(item.data.product.ci)} · Transactions: ${item.data.txns.length}`;
+        } else if (item.type === 'category') {
+          label = `Category: <strong>${item.data.n}</strong>`;
+          details = `Sizes: ${item.data.sizes.join(', ')}`;
+        } else if (item.type === 'subcategory') {
+          label = `Sub Category: <strong>${item.data}</strong>`;
+          details = `Name of subcategory`;
+        } else if (item.type === 'transaction') {
+          const first = item.data[0];
+          if (first) {
+            label = `Transaction: <strong>${first.tp} entry</strong> (${item.data.length} item(s))`;
+            details = `Product: ${first.pn} · Party: ${first.pa || '-'} · Date: ${first.d.slice(0, 10)}`;
+          } else {
+            label = `Empty Transaction`;
+          }
+        } else if (item.type === 'bulkupload') {
+          label = `Bulk Upload: <strong>${item.data.bid}</strong>`;
+          details = `Items: ${item.data.txns.length} entries reversed`;
+        }
+        
+        html += `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;">
+            <div>
+              <div style="font-size:14px;color:var(--text);">${label}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">${details}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px;font-style:italic;">Deleted on: ${dateStr}</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-sm" onclick="restoreRecycleItem('${item.id}')">Restore</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteRecycleItemPermanent('${item.id}')" style="padding:4px 8px;">✕</button>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function restoreRecycleItem(id) {
+      const idx = S.recycleBin.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      const item = S.recycleBin[idx];
+      
+      if (item.type === 'product') {
+        const prod = item.data.product;
+        if (!S.categories.some(c => String(c.id) === String(prod.ci))) {
+          showAlert('Cannot Restore', 'The category for this product does not exist anymore. Please restore the category first.');
+          return;
+        }
+        P.push(prod);
+        T.push(...item.data.txns);
+        showCenterToast(`${prod.n} restored!`);
+      } else if (item.type === 'category') {
+        S.categories.push(item.data);
+        showCenterToast(`Category "${item.data.n}" restored!`);
+      } else if (item.type === 'subcategory') {
+        S.subCategories.push(item.data);
+        showCenterToast(`Sub Category "${item.data}" restored!`);
+      } else if (item.type === 'transaction') {
+        const first = item.data[0];
+        if (!first) return;
+        const p = P.find(x => x.id === first.pid);
+        if (!p) {
+          showAlert('Cannot Restore', 'The product for this transaction does not exist. Please restore the product first.');
+          return;
+        }
+        item.data.forEach(t => {
+          if (t.tp === 'IN') p.s[t.sz] = (p.s[t.sz] || 0) + t.q;
+          else p.s[t.sz] = (p.s[t.sz] || 0) - t.q;
+          T.push(t);
+        });
+        showCenterToast(`Transaction entry restored!`);
+      } else if (item.type === 'bulkupload') {
+        const invalid = item.data.txns.some(t => !P.some(p => p.id === t.pid));
+        if (invalid) {
+          showAlert('Cannot Restore', 'Some products in this bulk upload do not exist. Please restore the products first.');
+          return;
+        }
+        item.data.txns.forEach(t => {
+          const p = P.find(x => x.id === t.pid);
+          if (p) {
+            p.s[t.sz] = (p.s[t.sz] || 0) - t.q;
+          }
+          T.push(t);
+        });
+        showCenterToast(`Bulk upload restored!`);
+      }
+      
+      S.recycleBin.splice(idx, 1);
+      persist();
+      loadSettings();
+      renderDashboard();
+      renderInventory();
+      updateBadge();
+    }
+
+    function deleteRecycleItemPermanent(id) {
+      showConfirm('Delete Permanently', 'Are you sure you want to permanently delete this item? This action cannot be undone.', () => {
+        S.recycleBin = S.recycleBin.filter(x => x.id !== id);
+        persist();
+        loadSettings();
+      });
+    }
+
+    function clearRecycleBin() {
+      if ((S.recycleBin || []).length === 0) return;
+      showConfirm('Empty Recycle Bin', 'Are you sure you want to permanently delete all items in the Recycle Bin?', () => {
+        S.recycleBin = [];
+        persist();
+        loadSettings();
+      });
     }
     function saveSettings() {
       const m = document.getElementById('s-min'); if (m) S.defMin = parseInt(m.value) || 5;
@@ -4231,12 +4414,18 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
     function deleteSubCategory(sc) {
       showConfirm('Delete Sub Category', `Are you sure you want to delete "${sc}"?`, () => {
+        S.recycleBin.push({
+          id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+          type: 'subcategory',
+          data: sc,
+          deletedAt: new Date().toISOString()
+        });
         S.subCategories = S.subCategories.filter(x => x !== sc);
         persist();
         renderSettingsSubCategories();
         updateCatOpts();
         renderDashboard();
-        showCenterToast(`Deleted "${sc}"`);
+        showCenterToast(`Sub Category "${sc}" moved to Recycle Bin!`);
       });
     }
 
@@ -4249,9 +4438,19 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       }
       
       showConfirm('Delete Category', 'Are you sure you want to delete this category?', () => {
+        const cat = S.categories.find(c => String(c.id) === String(id));
+        if (cat) {
+          S.recycleBin.push({
+            id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            type: 'category',
+            data: cat,
+            deletedAt: new Date().toISOString()
+          });
+        }
         S.categories = S.categories.filter(c => String(c.id) !== String(id));
         persist();
         loadSettings();
+        showCenterToast('Category moved to Recycle Bin!');
       });
     }
     function openAddCategory(editId = null) {
@@ -4419,12 +4618,22 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
     function deleteProd(pid) { 
       showConfirm('Delete Product', 'Are you sure you want to delete this product?', () => {
+        const prod = P.find(p => p.id === pid);
+        if (prod) {
+          const prodtxns = T.filter(t => t.pid === pid);
+          S.recycleBin.push({
+            id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            type: 'product',
+            data: { product: prod, txns: prodtxns },
+            deletedAt: new Date().toISOString()
+          });
+        }
         P = P.filter(p => p.id !== pid); 
         T = T.filter(t => t.pid !== pid);
         persist(); 
         renderInventory(); 
         updateBadge(); 
-        showCenterToast('Product deleted!'); 
+        showCenterToast('Product moved to Recycle Bin!'); 
       });
     }
     function closeModal() { 
@@ -5031,6 +5240,13 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         const toDelete = T.filter(t => t.bid === bid);
         if (!toDelete.length) return;
 
+        S.recycleBin.push({
+          id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+          type: 'bulkupload',
+          data: { bid, txns: toDelete },
+          deletedAt: new Date().toISOString()
+        });
+
         toDelete.forEach(t => {
           const p = P.find(x => x.id === t.pid);
           if (p) {
@@ -5044,7 +5260,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         renderDashboard();
         renderInventory();
         updateBadge();
-        showCenterToast('Bulk upload reversed and deleted!');
+        showCenterToast('Bulk upload reversed and moved to Recycle Bin!');
       });
     }
 
@@ -5068,6 +5284,17 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         if (!S.categories || S.categories.length === 0) {
             S = gsm3_s; // Restore local defaults
             persist();  // Sync to server
+        }
+        S.recycleBin = S.recycleBin || [];
+        const nowTime = Date.now();
+        const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+        const startLen = S.recycleBin.length;
+        S.recycleBin = S.recycleBin.filter(item => {
+          const itemTime = item.deletedAt ? new Date(item.deletedAt).getTime() : nowTime;
+          return (nowTime - itemTime) <= THIRTY_DAYS_MS;
+        });
+        if (S.recycleBin.length !== startLen) {
+          persist();
         }
         document.getElementById('si-date').value = todayD();
         document.getElementById('so-date').value = todayD();
