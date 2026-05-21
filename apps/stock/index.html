@@ -1601,6 +1601,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <p style="color:var(--muted); margin-bottom:24px; font-size:14px;" id="lbl-bulk-desc">Upload an Excel sheet to automatically subtract stock in bulk. Even if stock is low, it will be reduced.</p>
             
             <div style="max-width:400px; margin:0 auto; padding:20px; border:2px dashed var(--border); border-radius:12px; background:var(--surface2);">
+              <div class="form-group" style="text-align:left; margin-bottom:15px;">
+                <label class="form-label" style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Transaction Date</label>
+                <input type="text" id="bulk-txn-date" placeholder="DD-MM-YYYY" class="form-input" style="text-align:center; font-weight:700;" autocomplete="off">
+              </div>
               <label class="btn btn-primary" style="display:inline-block; cursor:pointer; padding:12px 24px; width:100%; box-sizing:border-box;">
                 📂 Select Excel File
                 <input type="file" id="bulk-file-input" accept=".xlsx, .xls" style="display:none;" onchange="handleBulkExcel(this)">
@@ -5001,6 +5005,17 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
       
+      // Smart Date Extraction from Filename (e.g., 15-04-2026 or 15.04.2026 or 15/04/2026)
+      const dateMatches = file.name.match(/(\d{1,2})[-./](\d{1,2})[-./](\d{2,4})/g);
+      if (dateMatches && dateMatches.length > 0) {
+        const lastMatch = dateMatches[dateMatches.length - 1];
+        const normalized = lastMatch.replace(/[./]/g, '-');
+        const iso = d2i(normalized);
+        if (iso) {
+          document.getElementById('bulk-txn-date').value = i2d(iso);
+        }
+      }
+      
       showConfirm(t('bulk_title'), t('confirm_bulk_upload'), () => {
         processBulkExcel(file, input);
       });
@@ -5024,20 +5039,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           const bulkId = 'B' + Date.now();
           const summary = {}; // Track success per product
 
-          let txnDate = new Date().toISOString().slice(0, 10) + 'T00:00:00';
-          
-          // Smart Date Extraction from Filename (e.g., 15-04-2026 or 15.04.2026 or 15/04/2026)
-          const dateMatches = file.name.match(/(\d{1,2})[-./](\d{1,2})[-./](\d{2,4})/g);
-          if (dateMatches && dateMatches.length > 0) {
-            // Pick the last date in the filename (usually the 'TO' date in a range)
-            const lastMatch = dateMatches[dateMatches.length - 1];
-            // Normalize separators to '-' for d2i
-            const iso = d2i(lastMatch.replace(/[./]/g, '-'));
-            if (iso) {
-              txnDate = iso + 'T00:00:00';
-              console.log('Smart Date Extracted from Filename:', txnDate);
-            }
-          }
+          let bulkInputDate = document.getElementById('bulk-txn-date').value || todayD();
+          let isoInputDate = d2i(bulkInputDate);
+          let txnDate = (isoInputDate ? isoInputDate : new Date().toISOString().slice(0, 10)) + 'T00:00:00';
 
           // 1. Find Header Indices Dynamically
           let idxA = 0, idxB = 1, idxC = 2; // Defaults
@@ -5147,11 +5151,36 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     let curBulkMonth = todayStr().slice(0, 7);
     function renderBulkHistory(monthDisp) {
       if (monthDisp) {
-        const iso = d2i(monthDisp);
-        if (iso) curBulkMonth = iso.slice(0, 7);
+        if (monthDisp.includes('-') && monthDisp.split('-')[0].length === 4) {
+          curBulkMonth = monthDisp;
+        } else {
+          const iso = d2i(monthDisp);
+          if (iso) curBulkMonth = iso.slice(0, 7);
+        }
       }
       const wrap = document.getElementById('bulk-history-wrap');
       if (!wrap) return;
+
+      // Calculate unique months with bulk uploads
+      const bulkMonths = new Set();
+      bulkMonths.add(todayStr().slice(0, 7)); // Always include current month
+      T.forEach(t => {
+        if (t.bid && t.d) {
+          const m = t.d.slice(0, 7); // YYYY-MM
+          if (m && m.length === 7) {
+            bulkMonths.add(m);
+          }
+        }
+      });
+      const sortedMonths = Array.from(bulkMonths).sort().reverse();
+      
+      const monthOptions = sortedMonths.map(m => {
+        const [y, mm] = m.split('-');
+        const dateObj = new Date(parseInt(y), parseInt(mm) - 1);
+        const label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+        const isSelected = m === curBulkMonth ? 'selected' : '';
+        return `<option value="${m}" ${isSelected}>${label}</option>`;
+      }).join('');
 
       const bulkTxns = T.filter(t => t.bid && t.d.startsWith(curBulkMonth));
       const [ay, am] = curBulkMonth.split('-');
@@ -5161,16 +5190,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         wrap.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <div class="sec-title" style="margin:0;">${t('bulk_history_title')}</div>
-            <div class="form-group" style="margin:0; width:160px;">
-              <div class="search-wrapper">
-                <div class="search-icon-left" style="top:11px; font-size:14px;">📅</div>
-                <input type="text" value="${i2d(curBulkMonth)}" 
-                  placeholder="MM-YYYY"
-                  class="premium-search" 
-                  autocomplete="off"
-                  style="height:36px; padding-left:34px; font-size:13px; font-weight:700;"
-                  oninput="if(this.value.length>=7) renderBulkHistory(this.value)">
-              </div>
+            <div class="form-group" style="margin:0; width:180px; position:relative;">
+              <div style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; z-index:2;">📅</div>
+              <select class="form-select" onchange="renderBulkHistory(this.value)" style="height:36px; padding-left:34px; font-size:13px; font-weight:700; width:100%;">
+                ${monthOptions}
+              </select>
             </div>
           </div>
           <div class="empty-state">No bulk uploads found for ${mName}</div>`;
@@ -5195,7 +5219,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
       const rows = Object.values(groups).reverse().map(g => `
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:12px; font-weight:700; font-size:13px;">${g.date}</td>
+          <td style="padding:12px; font-weight:700; font-size:13px;">${i2d(g.date)}</td>
           <td style="padding:12px; font-size:13px; color:var(--muted);">${g.file}</td>
           <td style="padding:12px; font-family:'JetBrains Mono',monospace; font-weight:700;">${g.total} boxes <span style="font-size:10px; font-weight:400; color:var(--muted)">(${g.count} rows)</span></td>
           <td style="padding:12px; text-align:right;">
@@ -5207,16 +5231,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       wrap.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div class="sec-title" style="margin:0;">${t('bulk_history_title')}</div>
-          <div class="form-group" style="margin:0; width:160px;">
-            <div class="search-wrapper">
-              <div class="search-icon-left" style="top:11px; font-size:14px;">📅</div>
-              <input type="text" value="${i2d(curBulkMonth)}" 
-                placeholder="MM-YYYY"
-                class="premium-search" 
-                autocomplete="off"
-                style="height:36px; padding-left:34px; font-size:13px; font-weight:700;"
-                oninput="if(this.value.length>=7) renderBulkHistory(this.value)">
-            </div>
+          <div class="form-group" style="margin:0; width:180px; position:relative;">
+            <div style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; z-index:2;">📅</div>
+            <select class="form-select" onchange="renderBulkHistory(this.value)" style="height:36px; padding-left:34px; font-size:13px; font-weight:700; width:100%;">
+              ${monthOptions}
+            </select>
           </div>
         </div>
         <div class="table-wrap" style="overflow:hidden;">
@@ -5298,6 +5317,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         }
         document.getElementById('si-date').value = todayD();
         document.getElementById('so-date').value = todayD();
+        document.getElementById('bulk-txn-date').value = todayD();
         
         curSiMonth = todayStr().slice(0, 7);
         curSoMonth = todayStr().slice(0, 7);
