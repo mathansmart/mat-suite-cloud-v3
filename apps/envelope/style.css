@@ -678,7 +678,7 @@ select, input[type="range"], input[type="number"] {
 
     /* Remove default block margin from all divs inside address blocks */
     .address-content div, .address-content span { 
-        color: #000 !important; 
+        color: inherit !important; 
         margin: 0;
         padding: 0;
         font-family: var(--print-font-family, 'Outfit', sans-serif) !important; 
@@ -687,7 +687,9 @@ select, input[type="range"], input[type="number"] {
     .name-line {
         font-weight: inherit;
         margin-bottom: 3px; /* Tight spacing - just enough to separate name from address */
-        white-space: nowrap; /* Force name to stay on one line */
+        white-space: normal; /* Allow long name to wrap to next line instead of cutting off */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     .print-only.format-a5 .envelope-page { 
         width: 210mm; 
@@ -706,42 +708,43 @@ select, input[type="range"], input[type="number"] {
         margin-top: auto; /* Pushes to bottom but only if space allows */
         margin-bottom: 10mm;
         margin-left: var(--print-left-margin, 15mm); 
-        width: 70%;
+        width: calc(100% - var(--print-left-margin, 15mm) - 15mm);
     }
     
     .print-only.format-a5 .from-section .address-content {
-        margin: 0 0 0 3em;
+        margin: 0 0 0 10mm !important; /* Reduced indent to give address text maximum horizontal space */
         font-family: var(--print-font-family, 'Outfit', sans-serif) !important;
         font-size: var(--print-font-size, 24pt); /* Same size as TO address */
-        font-weight: 500;
+        font-weight: var(--print-font-weight, 400); /* Default to Regular weight (400) */
         line-height: var(--print-line-height, 1.2);
-        color: #000 !important;
+        color: #000 !important; /* Pure black, restored to original darkness */
     }
 
     .print-only.format-a5 .to-section { 
         position: relative;
         margin-top: var(--print-top-margin, 15mm);
         margin-left: var(--print-left-margin, 15mm);
-        width: 95%;
-        /* No clipping here to see full address */
+        width: calc(100% - var(--print-left-margin, 15mm) - 15mm);
     }
 
     .print-only.format-a5 .to-section .address-content {
-        margin: 0 0 0 2em !important;
+        margin: 0 0 0 10mm !important; /* Reduced indent to give address text maximum horizontal space */
         font-family: var(--print-font-family, 'Outfit', sans-serif) !important;
         font-size: var(--print-font-size, 24pt);
-        font-weight: 500; /* Less dark per user request */
+        font-weight: var(--print-font-weight, 400); /* Default to Regular weight (400) */
         line-height: var(--print-line-height, 1.2);
+        color: #000 !important; /* Pure black, restored to original darkness */
     }
     
-    .print-only.format-a5 .label { 
+    .print-only.format-a5 .to-section .label,
+    .print-only.format-a5 .from-section .label { 
         font-family: var(--print-font-family, 'Outfit', sans-serif) !important;
-        font-weight: 900; 
+        font-weight: var(--print-font-weight, 400); /* Default to Regular weight (400) */
         text-transform: uppercase; 
-        font-size: 18pt; /* slightly bigger to match scaled up fonts */
+        font-size: 14pt; /* Neat, identical size for both labels */
         margin-bottom: 6px;
-        color: #000 !important;
-        display: block; /* Simpler than flex for print */
+        color: #000 !important; /* Pure black, restored to original darkness */
+        display: block;
         width: 100%;
     }
 }

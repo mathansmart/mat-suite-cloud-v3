@@ -26,8 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         a5: {
             fontSize: 24,
             topMargin: 40,
-            leftMargin: 0,
-            addPrefix: false
+            leftMargin: 40, // Default to 40mm to prevent printing off the left edge of physical paper
+            addPrefix: false,
+            fontWeight: "400",
+            lineHeight: 1.2
         }
     };
     const API_BASE = window.location.origin;
@@ -177,6 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // A5 Settings Controls
     const a5FontSizeSlider = document.getElementById('a5-font-size');
     const a5FontSizeNum = document.getElementById('a5-font-size-num');
+    const a5LineHeightSlider = document.getElementById('a5-line-height');
+    const a5LineHeightNum = document.getElementById('a5-line-height-num');
+    const a5FontWeightSelect = document.getElementById('a5-font-weight');
     const a5TopMarginSlider = document.getElementById('a5-top-margin');
     const a5TopMarginNum = document.getElementById('a5-top-margin-num');
     const a5LeftMarginSlider = document.getElementById('a5-left-margin');
@@ -297,13 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rotateText) rotateText.checked = env.rotateText;
 
         const a5 = activeSettings.a5;
-        if (a5FontSizeSlider) a5FontSizeSlider.value = a5FontSizeNum.value = a5.fontSize;
-        if (a5TopMarginSlider) a5TopMarginSlider.value = a5TopMarginNum.value = a5.topMargin;
-        if (a5LeftMarginSlider) a5LeftMarginSlider.value = a5LeftMarginNum.value = a5.leftMargin;
-        if (a5AddPrefix) a5AddPrefix.checked = a5.addPrefix;
+        if (a5FontSizeSlider) a5FontSizeSlider.value = a5FontSizeNum.value = a5.fontSize || 24;
+        if (a5TopMarginSlider) a5TopMarginSlider.value = a5TopMarginNum.value = a5.topMargin || 40;
+        if (a5LeftMarginSlider) a5LeftMarginSlider.value = a5LeftMarginNum.value = a5.leftMargin || 40;
+        if (a5AddPrefix) a5AddPrefix.checked = a5.addPrefix || false;
+        if (a5LineHeightSlider) a5LineHeightSlider.value = a5LineHeightNum.value = a5.lineHeight || 1.2;
+        if (a5FontWeightSelect) a5FontWeightSelect.value = a5.fontWeight || "400";
     };
 
-    const saveSettings = async () => {
+    const saveSettings = () => {
         const settings = {
             envelope: {
                 fontFamily: fontFamilySelect.value,
@@ -321,21 +328,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 fontSize: parseInt(a5FontSizeSlider.value) || 24,
                 topMargin: parseInt(a5TopMarginSlider.value) || 40,
                 leftMargin: parseInt(a5LeftMarginSlider.value) || 0,
-                addPrefix: a5AddPrefix.checked
+                addPrefix: a5AddPrefix.checked,
+                lineHeight: parseFloat(a5LineHeightSlider.value) || 1.2,
+                fontWeight: a5FontWeightSelect.value
             }
         };
-        try {
-            await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
-            });
-            activeSettings = settings; // Update active settings
-            showNotification('Settings Saved to Disk! 💾', 'success', 'Saved');
-            if (settingsModal) settingsModal.classList.add('hidden');
-        } catch (err) {
-            showNotification('Failed to save settings.', 'error', 'Error');
-        }
+
+        // 1. Instantly update memory and hide settings modal to prevent any UI delay or saving lag
+        activeSettings = settings;
+        if (settingsModal) settingsModal.classList.add('hidden');
+        showNotification('Settings Saved to Disk! 💾', 'success', 'Saved');
+
+        // 2. Execute network request in the background asynchronously without blocking the user
+        fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        }).catch(err => {
+            console.error('Failed to save settings to server in background', err);
+        });
     };
 
     const loadSettings = async () => {
@@ -1107,11 +1118,11 @@ document.addEventListener('DOMContentLoaded', () => {
             root.style.setProperty('--print-top-margin', '0mm');
             root.style.setProperty('--print-left-margin', '0mm');
         } else if (layoutType === 'a5') {
-            pageSize = 'A5 landscape'; // More compatible standard
+            pageSize = '210mm 148mm landscape'; // Explicit landscape orientation for A5
             root.style.setProperty('--print-font-family', env.fontFamily);
             root.style.setProperty('--print-font-size', a5.fontSize + 'pt');
-            root.style.setProperty('--print-font-weight', env.fontWeight);
-            root.style.setProperty('--print-line-height', env.lineHeight);
+            root.style.setProperty('--print-font-weight', a5.fontWeight || '400');
+            root.style.setProperty('--print-line-height', a5.lineHeight || 1.2);
             
             // Use user-defined top margin for TO section at the top
             root.style.setProperty('--print-top-margin', (a5.topMargin || 10) + 'mm');
@@ -1273,8 +1284,11 @@ document.addEventListener('DOMContentLoaded', () => {
     syncControls(rightMarginSlider, rightMarginNum);
     syncControls(bottomMarginSlider, bottomMarginNum);
     syncControls(a5FontSizeSlider, a5FontSizeNum);
+    syncControls(a5LineHeightSlider, a5LineHeightNum);
     syncControls(a5TopMarginSlider, a5TopMarginNum);
     syncControls(a5LeftMarginSlider, a5LeftMarginNum);
+
+
 
     unselectAllBtn.addEventListener('click', () => {
         selectedIds = [];
