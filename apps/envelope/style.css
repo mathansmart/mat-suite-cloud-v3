@@ -918,3 +918,67 @@ select, input[type="range"], input[type="number"] {
     text-transform: uppercase;
     padding: 4px !important;
 }
+
+/* Digital Counter Digit Box */
+/* Digital Counter Display */
+.digital-counter-wrapper {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: var(--radius-md);
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.digital-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.digital-display {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: #020617;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1.5px solid #1e293b;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.digit-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 28px;
+    background: linear-gradient(to bottom, #1e293b 50%, #0f172a 50%);
+    border: 1px solid #0f172a;
+    border-radius: 4px;
+    color: #facc15; /* Amber-yellow LED color */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+.digit-box::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 2;
+    box-shadow: 0 0.5px 0.5px rgba(255,255,255,0.08);
+}

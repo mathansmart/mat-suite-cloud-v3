@@ -227,6 +227,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateStats = () => {
         statTotal.textContent = addresses.length;
+        
+        const count = selectedIds.length;
+        const paddedCount = String(count).padStart(4, '0');
+        for (let i = 0; i < 4; i++) {
+            const digitEl = document.getElementById(`digit-${i + 1}`);
+            if (digitEl) {
+                digitEl.textContent = paddedCount[i];
+            }
+        }
+        
+        const statSelected = document.getElementById('stat-selected');
+        if (statSelected) {
+            statSelected.textContent = count;
+        }
     };
 
     // --- Export Logic ---
@@ -730,6 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addressList.appendChild(card);
             index++;
         });
+        updateStats();
     };
 
     const toggleSelection = (id) => {
