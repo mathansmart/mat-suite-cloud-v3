@@ -49,6 +49,9 @@ const StockProduct = mongoose.model('StockProduct', StockProductSchema);
 const StockTransactionSchema = new mongoose.Schema({ id: String, data: String });
 const StockTransaction = mongoose.model('StockTransaction', StockTransactionSchema);
 
+const StockRecycleSchema = new mongoose.Schema({ id: String, data: String });
+const StockRecycle = mongoose.model('StockRecycle', StockRecycleSchema);
+
 const StockUserSchema = new mongoose.Schema({ username: { type: String, unique: true }, password: String });
 const StockUser = mongoose.model('StockUser', StockUserSchema);
 
@@ -74,13 +77,15 @@ app.get('/api/envelope/senders', async (req, res) => {
     try { res.json(await Sender.find()); } catch (err) { res.status(500).json([]); }
 });
 
-app.post('/api/envelope/senders', async (req, res) => {
+app.post('/api/envelope/senders', (req, res) => {
     const { Sender } = getEnvelopeModels(req.query.profile);
-    try {
-        await Sender.deleteMany({});
-        await Sender.insertMany(req.body);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Failed' }); }
+    res.json({ success: true });
+    (async () => {
+        try {
+            await Sender.deleteMany({});
+            await Sender.insertMany(req.body);
+        } catch (err) { console.error('Failed to save senders in background:', err); }
+    })();
 });
 
 app.get('/api/envelope/categories', async (req, res) => {
@@ -91,13 +96,15 @@ app.get('/api/envelope/categories', async (req, res) => {
     } catch (err) { res.status(500).json([]); }
 });
 
-app.post('/api/envelope/categories', async (req, res) => {
+app.post('/api/envelope/categories', (req, res) => {
     const { Category } = getEnvelopeModels(req.query.profile);
-    try {
-        await Category.deleteMany({});
-        await Category.insertMany(req.body.map(name => ({ name })));
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Failed' }); }
+    res.json({ success: true });
+    (async () => {
+        try {
+            await Category.deleteMany({});
+            await Category.insertMany(req.body.map(name => ({ name })));
+        } catch (err) { console.error('Failed to save categories in background:', err); }
+    })();
 });
 
 app.get('/api/envelope/addresses', async (req, res) => {
@@ -105,13 +112,15 @@ app.get('/api/envelope/addresses', async (req, res) => {
     try { res.json(await Address.find()); } catch (err) { res.status(500).json([]); }
 });
 
-app.post('/api/envelope/addresses', async (req, res) => {
+app.post('/api/envelope/addresses', (req, res) => {
     const { Address } = getEnvelopeModels(req.query.profile);
-    try {
-        await Address.deleteMany({});
-        await Address.insertMany(req.body);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Failed' }); }
+    res.json({ success: true });
+    (async () => {
+        try {
+            await Address.deleteMany({});
+            await Address.insertMany(req.body);
+        } catch (err) { console.error('Failed to save addresses in background:', err); }
+    })();
 });
 
 app.get('/api/envelope/settings', async (req, res) => {
@@ -122,13 +131,15 @@ app.get('/api/envelope/settings', async (req, res) => {
     } catch (err) { res.status(500).json({}); }
 });
 
-app.post('/api/envelope/settings', async (req, res) => {
+app.post('/api/envelope/settings', (req, res) => {
     const { Settings } = getEnvelopeModels(req.query.profile);
-    try {
-        await Settings.deleteMany({});
-        await Settings.create({ data: JSON.stringify(req.body) });
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Failed' }); }
+    res.json({ success: true });
+    (async () => {
+        try {
+            await Settings.deleteMany({});
+            await Settings.create({ data: JSON.stringify(req.body) });
+        } catch (err) { console.error('Failed to save settings in background:', err); }
+    })();
 });
 
 // --- Stock APIs ---
@@ -151,39 +162,47 @@ app.post('/api/stock/login', async (req, res) => {
 
 app.get('/api/stock/data', async (req, res) => {
     try {
-        const [settingsDoc, products, transactions, users] = await Promise.all([
+        const [settingsDoc, products, transactions, users, recycleBin] = await Promise.all([
             StockSettings.findOne({ id: 1 }),
             StockProduct.find(),
             StockTransaction.find(),
-            StockUser.find()
+            StockUser.find(),
+            StockRecycle.find()
         ]);
         res.json({
             settings: settingsDoc ? JSON.parse(settingsDoc.data) : { categories: [], defMin: 5 },
             products: products.map(p => JSON.parse(p.data)),
             transactions: transactions.map(t => JSON.parse(t.data)),
-            users: users.map(u => ({ username: u.username, password: u.password }))
+            users: users.map(u => ({ username: u.username, password: u.password })),
+            recycleBin: recycleBin.map(r => JSON.parse(r.data))
         });
     } catch (err) { res.status(500).json({ error: 'Failed' }); }
 });
 
-app.post('/api/stock/data', async (req, res) => {
-    const { settings, products, transactions, users } = req.body;
-    try {
-        if (settings) await StockSettings.findOneAndUpdate({ id: 1 }, { data: JSON.stringify(settings) }, { upsert: true });
-        if (products) {
-            await StockProduct.deleteMany({});
-            await StockProduct.insertMany(products.map(p => ({ id: p.id, data: JSON.stringify(p) })));
-        }
-        if (transactions) {
-            await StockTransaction.deleteMany({});
-            await StockTransaction.insertMany(transactions.map(t => ({ id: t.id, data: JSON.stringify(t) })));
-        }
-        if (users) {
-            await StockUser.deleteMany({});
-            await StockUser.insertMany(users);
-        }
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Failed' }); }
+app.post('/api/stock/data', (req, res) => {
+    const { settings, products, transactions, users, recycleBin } = req.body;
+    res.json({ success: true });
+    (async () => {
+        try {
+            if (settings) await StockSettings.findOneAndUpdate({ id: 1 }, { data: JSON.stringify(settings) }, { upsert: true });
+            if (products) {
+                await StockProduct.deleteMany({});
+                await StockProduct.insertMany(products.map(p => ({ id: p.id, data: JSON.stringify(p) })));
+            }
+            if (transactions) {
+                await StockTransaction.deleteMany({});
+                await StockTransaction.insertMany(transactions.map(t => ({ id: t.id, data: JSON.stringify(t) })));
+            }
+            if (users) {
+                await StockUser.deleteMany({});
+                await StockUser.insertMany(users);
+            }
+            if (recycleBin) {
+                await StockRecycle.deleteMany({});
+                await StockRecycle.insertMany(recycleBin.map(r => ({ id: r.id || Date.now() + Math.random(), data: JSON.stringify(r) })));
+            }
+        } catch (err) { console.error('Failed to save stock data in background:', err); }
+    })();
 });
 
 app.get('/api/server-info', (req, res) => {
