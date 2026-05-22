@@ -1871,10 +1871,17 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const hasGirls1 = /\bgirls?\b/.test(n1);
       const hasGirls2 = /\bgirls?\b/.test(n2);
       if ((hasBoys1 && hasGirls2) || (hasGirls1 && hasBoys2)) return false;
+
+      const hasPrint1 = /\bprint(ed|s)?\b/.test(n1);
+      const hasPrint2 = /\bprint(ed|s)?\b/.test(n2);
+      const hasPlain1 = /\bplain\b/.test(n1);
+      const hasPlain2 = /\bplain\b/.test(n2);
+      if ((hasPrint1 && hasPlain2) || (hasPlain1 && hasPrint2)) return false;
+
       const stopWords = new Set([
         'big', 'small', 'kids', 'baby', 'set', 
         'boys', 'boy\'s', 'girls', 'girl\'s', 
-        'printed', 'plain', 'fancy', 'fancys',
+        'print', 'printed', 'plain', 'fancy', 'fancys',
         '3', '4', '3/4', '1', '2', '5', '6', '7', '8', '9', '0'
       ]);
       const getTokens = (s) => s.split(' ').filter(w => w.length > 0 && !stopWords.has(w));
