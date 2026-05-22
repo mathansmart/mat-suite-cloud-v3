@@ -970,7 +970,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       z-index: 200;
       display: none;
       align-items: center;
-      justify-content: center
+      justify-content: center;
+      overflow-y: auto;
+      padding: 20px 10px;
     }
 
     .modal-overlay.open {
@@ -2476,17 +2478,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       cont.innerHTML = html;
     }
 
-    function showProductInfo(pid) {
-      const p = P.find(x => x.id === pid);
-      if (!p) return;
-      const cat = S.categories.find(c => String(c.id) === String(p.ci));
+    function renderProductColumn(prod, isMain) {
+      const cat = S.categories.find(c => String(c.id) === String(prod.ci));
       const catName = cat ? cat.n : 'Unknown';
-      const sz = cat ? cat.sizes : Object.keys(p.s);
-      const tot = sz.reduce((a, s) => a + (p.s[s] || 0), 0);
+      const sz = cat ? cat.sizes : Object.keys(prod.s);
+      const tot = sz.reduce((a, s) => a + (prod.s[s] || 0), 0);
 
       const sizeRows = sz.map(s => {
-        const qty = p.s[s] || 0;
-        const io = qty === 0, il = !io && qty <= p.m;
+        const qty = prod.s[s] || 0;
+        const io = qty === 0, il = !io && qty <= prod.m;
         const color = io ? 'var(--danger)' : il ? 'var(--warn)' : 'var(--accent3)';
         const badge = io ? '🔴 OUT' : il ? '🟡 LOW' : '🟢 OK';
         return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
@@ -2496,84 +2496,77 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         </div>`;
       }).join('');
 
-      // Find similar products in other categories
-      const similarProds = P.filter(otherP => otherP.id !== p.id && areNamesSimilar(p.n, otherP.n));
-      let similarSection = '';
-      if (similarProds.length > 0) {
-        similarSection = `
-          <div style="margin-top:20px;border-top:2px dashed var(--border);padding-top:15px;">
-            <div style="font-size:12px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-              <span>🔄 Similar Products (Other Categories)</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              ${similarProds.map(sp => {
-                const spCat = S.categories.find(c => String(c.id) === String(sp.ci));
-                const spCatName = spCat ? spCat.n : 'Unknown';
-                const spSz = spCat ? spCat.sizes : Object.keys(sp.s);
-                const spTot = spSz.reduce((sum, s) => sum + (sp.s[s] || 0), 0);
-                
-                const spSizeBadges = spSz.map(s => {
-                  const qty = sp.s[s] || 0;
-                  const color = qty === 0 ? 'var(--danger)' : qty <= sp.m ? 'var(--warn)' : 'var(--accent3)';
-                  return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;display:flex;align-items:center;gap:6px;font-size:11px;">
-                    <span style="font-weight:800;color:var(--text);">${s}:</span>
-                    <span style="font-weight:900;font-family:'JetBrains Mono',monospace;color:${color};">${qty}</span>
-                  </div>`;
-                }).join('');
+      const mainBadge = isMain ? `<span style="font-size:10px; font-weight:800; background:rgba(99, 102, 241, 0.15); color:var(--primary); padding:2px 6px; border-radius:4px; border:1px solid var(--primary); letter-spacing:0.5px; text-transform:uppercase;">Selected</span>` : '';
 
-                return `
-                  <div style="background:var(--surface2);border-radius:8px;padding:12px;border:1px solid var(--border);position:relative;">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
-                      <div>
-                        <div style="font-size:13px;font-weight:700;color:var(--text);">${sp.n}</div>
-                        <div style="font-size:10px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">${spCatName}</div>
-                      </div>
-                      <div style="font-size:11px;font-weight:800;color:var(--accent2);background:var(--surface);padding:3px 8px;border-radius:20px;white-space:nowrap;font-family:'JetBrains Mono',monospace;">
-                        Total: ${spTot} box
-                      </div>
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                      ${spSizeBadges}
-                    </div>
-                  </div>
-                `;
-              }).join('')}
+      return `
+        <div class="product-info-column" style="flex:1; min-width:320px; max-width:420px; display:flex; flex-direction:column; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.15);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--border); padding-bottom:10px; margin-bottom:4px;">
+            <div style="font-size:16px; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${prod.n}">
+              📦 ${prod.n}
+            </div>
+            ${mainBadge}
+          </div>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px 14px;display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between;">
+            <div>
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Category</div>
+              <div style="font-size:14px;font-weight:800;margin-top:4px;color:var(--accent);">${catName}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Total Stock</div>
+              <div style="font-size:18px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--accent3);margin-top:2px;">${tot} <span style="font-size:10px;font-weight:600;">boxes</span></div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Min/Size</div>
+              <div style="font-size:14px;font-weight:800;margin-top:4px;">${prod.m}</div>
             </div>
           </div>
-        `;
-      }
-
-      document.getElementById('modal-title').innerHTML = `📦 ${p.n}`;
-      document.getElementById('modal-content').innerHTML = `
-        <div style="background:var(--surface2);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;gap:24px;flex-wrap:wrap;">
-          <div>
-            <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">Category</div>
-            <div style="font-size:15px;font-weight:800;margin-top:4px;color:var(--accent);">${catName}</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">Total Stock</div>
-            <div style="font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--accent3);margin-top:2px;">${tot} <span style="font-size:12px;font-weight:600;">boxes</span></div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">Min/Size</div>
-            <div style="font-size:15px;font-weight:800;margin-top:4px;">${p.m}</div>
+          <div style="max-height:360px;overflow-y:auto;padding-right:4px;">
+            ${sizeRows}
           </div>
         </div>
-        <div style="max-height:360px;overflow-y:auto;padding-right:4px;">
-          ${sizeRows}
-          ${similarSection}
-        </div>`;
+      `;
+    }
+
+    function showProductInfo(pid) {
+      const p = P.find(x => x.id === pid);
+      if (!p) return;
+
+      const similarProds = P.filter(otherP => otherP.id !== p.id && areNamesSimilar(p.n, otherP.n));
+      const columns = [p, ...similarProds];
+
+      const modalEl = document.getElementById('modal-overlay').querySelector('.modal');
+      if (columns.length > 1) {
+        modalEl.style.width = columns.length === 2 ? '800px' : '1180px';
+        modalEl.style.maxWidth = '95vw';
+        document.getElementById('modal-title').innerHTML = `🔍 Product Stock Comparison`;
+      } else {
+        modalEl.style.width = '440px';
+        modalEl.style.maxWidth = '95vw';
+        document.getElementById('modal-title').innerHTML = `📦 ${p.n}`;
+      }
+
+      const columnsHtml = columns.map((prod, idx) => renderProductColumn(prod, idx === 0)).join('');
+
+      document.getElementById('modal-content').innerHTML = `
+        <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center; align-items:stretch; width:100%; margin-top:10px;">
+          ${columnsHtml}
+        </div>
+      `;
+
       const btn = document.getElementById('modal-btn');
       btn.style.display = 'none';
       const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
       if (cancelBtn) cancelBtn.textContent = 'Close';
+      
       const overlay = document.getElementById('modal-overlay');
       overlay.classList.add('open');
-      // restore modal btn on close
+
       overlay.addEventListener('click', function restorer(e) {
         if (e.target === overlay || e.target === cancelBtn) {
           btn.style.display = '';
           if (cancelBtn) cancelBtn.textContent = 'Cancel';
+          modalEl.style.width = '';
+          modalEl.style.maxWidth = '';
           overlay.removeEventListener('click', restorer);
         }
       });
@@ -4781,6 +4774,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       document.getElementById('modal-overlay').classList.remove('open');
       const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
       if (cancelBtn) cancelBtn.style.display = '';
+      const modalEl = document.getElementById('modal-overlay').querySelector('.modal');
+      if (modalEl) {
+        modalEl.style.width = '';
+        modalEl.style.maxWidth = '';
+      }
     }
 
     function showAlert(title, msg) {
