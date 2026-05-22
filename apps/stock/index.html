@@ -1853,6 +1853,41 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     function cn(i) { const c = S.categories.find(x => String(x.id) === String(i)); return c ? c.n : 'Unknown Cat' }
     function szs(i) { const c = S.categories.find(x => String(x.id) === String(i)); return c ? c.sizes : [] }
 
+    function areNamesSimilar(name1, name2) {
+      if (!name1 || !name2) return false;
+      const clean = (str) => {
+        return str.toLowerCase()
+          .replace(/[-–—/()]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      };
+      const n1 = clean(name1);
+      const n2 = clean(name2);
+      if (n1 === n2) return true;
+      const hasBoys1 = /\bboys?\b/.test(n1);
+      const hasBoys2 = /\bboys?\b/.test(n2);
+      const hasGirls1 = /\bgirls?\b/.test(n1);
+      const hasGirls2 = /\bgirls?\b/.test(n2);
+      if ((hasBoys1 && hasGirls2) || (hasGirls1 && hasBoys2)) return false;
+      const stopWords = new Set(['big', 'small', 'kids', 'baby', 'set']);
+      const getTokens = (s) => s.split(' ').filter(w => w.length > 0 && !stopWords.has(w));
+      const t1 = getTokens(n1);
+      const t2 = getTokens(n2);
+      if (t1.length === 0 || t2.length === 0) return false;
+      const k1 = t1.join(' ');
+      const k2 = t2.join(' ');
+      if (k1 === k2) return true;
+      const set1 = new Set(t1);
+      const set2 = new Set(t2);
+      let matchCount = 0;
+      for (let w of set1) {
+        if (set2.has(w)) matchCount++;
+      }
+      const maxLen = Math.max(t1.length, t2.length);
+      if (matchCount >= 2 && (matchCount / maxLen) >= 0.6) return true;
+      return false;
+    }
+
     // ===== LANGUAGE SYSTEM =====
     const LANG = {
       en: {
@@ -2240,6 +2275,50 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const catVal = document.getElementById('dash-cat-filter') ? document.getElementById('dash-cat-filter').value : '';
       const scVal = document.getElementById('dash-sc-filter') ? document.getElementById('dash-sc-filter').value : '';
       
+      // Expand selected PIDs automatically
+      let activePids = [...dashSelectedPids];
+      if (activePids.length > 0) {
+        const extraPids = [];
+        activePids.forEach(id => {
+          const baseP = P.find(x => x.id === id);
+          if (baseP) {
+            P.forEach(otherP => {
+              if (otherP.id !== id && areNamesSimilar(baseP.n, otherP.n)) {
+                if (!activePids.includes(otherP.id) && !extraPids.includes(otherP.id)) {
+                  extraPids.push(otherP.id);
+                }
+              }
+            });
+          }
+        });
+        activePids = activePids.concat(extraPids);
+      }
+
+      // Expand query matches automatically
+      let queryPids = null;
+      if (query) {
+        queryPids = [];
+        P.forEach(p => {
+          if (p.n.toLowerCase().includes(query) || cn(p.ci).toLowerCase().includes(query)) {
+            queryPids.push(p.id);
+          }
+        });
+        const extraPids = [];
+        queryPids.forEach(id => {
+          const baseP = P.find(x => x.id === id);
+          if (baseP) {
+            P.forEach(otherP => {
+              if (otherP.id !== id && areNamesSimilar(baseP.n, otherP.n)) {
+                if (!queryPids.includes(otherP.id) && !extraPids.includes(otherP.id)) {
+                  extraPids.push(otherP.id);
+                }
+              }
+            });
+          }
+        });
+        queryPids = queryPids.concat(extraPids);
+      }
+
       const subCatMap = {};
       P.forEach(p => {
         const sc = (p.sc || 'General').trim().toUpperCase();
@@ -2262,8 +2341,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           if (catVal !== '' && String(catVal) !== String(ci)) return;
 
           let cp = prodsInSc.filter(p => String(p.ci) === String(ci));
-          if (dashSelectedPids.length > 0) cp = cp.filter(p => dashSelectedPids.includes(p.id));
-          else if (query) cp = cp.filter(p => p.n.toLowerCase().includes(query) || cn(p.ci).toLowerCase().includes(query));
+          if (dashSelectedPids.length > 0) {
+            cp = cp.filter(p => activePids.includes(p.id));
+          } else if (query) {
+            cp = cp.filter(p => queryPids.includes(p.id));
+          }
           if (!cp.length) return;
           
           const sz = szs(ci);
@@ -2409,6 +2491,53 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         </div>`;
       }).join('');
 
+      // Find similar products in other categories
+      const similarProds = P.filter(otherP => otherP.id !== p.id && areNamesSimilar(p.n, otherP.n));
+      let similarSection = '';
+      if (similarProds.length > 0) {
+        similarSection = `
+          <div style="margin-top:20px;border-top:2px dashed var(--border);padding-top:15px;">
+            <div style="font-size:12px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+              <span>🔄 Similar Products (Other Categories)</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              ${similarProds.map(sp => {
+                const spCat = S.categories.find(c => String(c.id) === String(sp.ci));
+                const spCatName = spCat ? spCat.n : 'Unknown';
+                const spSz = spCat ? spCat.sizes : Object.keys(sp.s);
+                const spTot = spSz.reduce((sum, s) => sum + (sp.s[s] || 0), 0);
+                
+                const spSizeBadges = spSz.map(s => {
+                  const qty = sp.s[s] || 0;
+                  const color = qty === 0 ? 'var(--danger)' : qty <= sp.m ? 'var(--warn)' : 'var(--accent3)';
+                  return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;display:flex;align-items:center;gap:6px;font-size:11px;">
+                    <span style="font-weight:800;color:var(--text);">${s}:</span>
+                    <span style="font-weight:900;font-family:'JetBrains Mono',monospace;color:${color};">${qty}</span>
+                  </div>`;
+                }).join('');
+
+                return `
+                  <div style="background:var(--surface2);border-radius:8px;padding:12px;border:1px solid var(--border);position:relative;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
+                      <div>
+                        <div style="font-size:13px;font-weight:700;color:var(--text);">${sp.n}</div>
+                        <div style="font-size:10px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">${spCatName}</div>
+                      </div>
+                      <div style="font-size:11px;font-weight:800;color:var(--accent2);background:var(--surface);padding:3px 8px;border-radius:20px;white-space:nowrap;font-family:'JetBrains Mono',monospace;">
+                        Total: ${spTot} box
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      ${spSizeBadges}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
       document.getElementById('modal-title').innerHTML = `📦 ${p.n}`;
       document.getElementById('modal-content').innerHTML = `
         <div style="background:var(--surface2);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;gap:24px;flex-wrap:wrap;">
@@ -2425,7 +2554,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <div style="font-size:15px;font-weight:800;margin-top:4px;">${p.m}</div>
           </div>
         </div>
-        <div style="max-height:320px;overflow-y:auto;">${sizeRows}</div>`;
+        <div style="max-height:360px;overflow-y:auto;padding-right:4px;">
+          ${sizeRows}
+          ${similarSection}
+        </div>`;
       const btn = document.getElementById('modal-btn');
       btn.style.display = 'none';
       const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
