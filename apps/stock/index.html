@@ -1733,6 +1733,17 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
     function todayD() { return i2d(new Date().toISOString().slice(0, 10)) }
     function todayStr() { return new Date().toISOString().slice(0, 10) }
+    function getMonthFromDateStr(dStr) {
+      if (!dStr || typeof dStr !== 'string') return '';
+      const datePart = dStr.slice(0, 10);
+      const iso = d2i(datePart);
+      return (iso && iso.length >= 7) ? iso.slice(0, 7) : '';
+    }
+    function getIsoDateStr(dStr) {
+      if (!dStr || typeof dStr !== 'string') return '';
+      const datePart = dStr.slice(0, 10);
+      return d2i(datePart);
+    }
 
     /* ===== KEYBOARD NAVIGATION FOR ALL DROPDOWNS ===== */
     function dropKeyNav(e, dropId) {
@@ -3062,7 +3073,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
     function saveSoEntries() {
       if (!soAddedPids.length) { showAlert('Stock Out', 'Please select a product!'); return }
-      const date = document.getElementById('so-date').value || todayStr();
+      const dateDisp = document.getElementById('so-date').value || todayD();
+      const date = d2i(dateDisp);
       const now = new Date().toTimeString().slice(0, 8);
       let saved = 0;
       soAddedPids.forEach(pid => {
@@ -3399,8 +3411,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const daysInMonth = new Date(year, month, 0).getDate();
       const firstDay = new Date(year, month-1, 1).getDay();
       const monthStr = String(year)+'-'+String(month).padStart(2,'0');
-      const txns = T.filter(t => t.tp === rs.type && t.d && t.d.startsWith(monthStr));
-      const daysWithData = new Set(txns.map(t => parseInt(t.d.slice(8,10))));
+      const txns = T.filter(t => t.tp === rs.type && t.d && getMonthFromDateStr(t.d) === monthStr);
+      const daysWithData = new Set(txns.map(t => {
+        const iso = getIsoDateStr(t.d);
+        return iso ? parseInt(iso.slice(8, 10)) : 0;
+      }));
 
       const mName = new Date(year, month-1).toLocaleString('default',{month:'long', year:'numeric'});
 
@@ -3691,11 +3706,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (q) {
         filtered = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else if (curSiRangeStart && curSiRangeEnd) {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && t.d.slice(0,10) >= curSiRangeStart && t.d.slice(0,10) <= curSiRangeEnd);
+        filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd);
       } else if (curSiFilterDate) {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && t.d.startsWith(curSiFilterDate));
+        filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) === curSiFilterDate);
       } else {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && t.d.startsWith(curSiMonth));
+        filtered = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curSiMonth);
       }
       document.getElementById('si-history-content').innerHTML = buildTxnTable(filtered, 'IN');
     }
@@ -3726,11 +3741,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (q) {
         filtered = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else if (curSoRangeStart && curSoRangeEnd) {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && t.d.slice(0,10) >= curSoRangeStart && t.d.slice(0,10) <= curSoRangeEnd);
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd);
       } else if (curSoFilterDate) {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && t.d.startsWith(curSoFilterDate));
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) === curSoFilterDate);
       } else {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && t.d.startsWith(curSoMonth));
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curSoMonth);
       }
       document.getElementById('so-history-content').innerHTML = buildTxnTable(filtered, 'OUT');
     }
@@ -3921,8 +3936,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         filteredIn = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
         filteredOut = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else {
-        filteredIn = T.filter(t => t.tp === 'IN' && t.d && t.d.startsWith(curTxnMonth));
-        filteredOut = T.filter(t => t.tp === 'OUT' && t.d && t.d.startsWith(curTxnMonth));
+        filteredIn = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
+        filteredOut = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
       }
       
       document.getElementById('txn-in-wrap').innerHTML = buildSimpleTxnTable(filteredIn, 'IN');
@@ -4955,7 +4970,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         XLSX.writeFile(wb, `Dashboard_Stock_${date}.xlsx`);
       } else if (id === 'transactions') {
         const isIn = document.getElementById('txn-tab-in').style.background.includes('var(--dark)');
-        const data = T.filter(t => t.tp === (isIn ? 'IN' : 'OUT') && t.d.startsWith(curTxnMonth));
+        const data = T.filter(t => t.tp === (isIn ? 'IN' : 'OUT') && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
         if (!data.length) { showAlert('Export', `No ${isIn ? 'In' : 'Out'} transactions found for ${curTxnMonth}!`); return; }
         XLSX.utils.book_append_sheet(wb, buildExcelSheet(txnsToProds(data)), isIn ? 'Stock In' : 'Stock Out');
         XLSX.writeFile(wb, `Transactions_${isIn ? 'In' : 'Out'}_${curTxnMonth}_${date}.xlsx`);
@@ -5308,8 +5323,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       bulkMonths.add(todayStr().slice(0, 7)); // Always include current month
       T.forEach(t => {
         if (t.bid && t.d) {
-          const m = t.d.slice(0, 7); // YYYY-MM
-          if (m && m.length === 7) {
+          const m = getMonthFromDateStr(t.d);
+          if (m) {
             bulkMonths.add(m);
           }
         }
@@ -5324,7 +5339,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         return `<option value="${m}" ${isSelected}>${label}</option>`;
       }).join('');
 
-      const bulkTxns = T.filter(t => t.bid && t.d.startsWith(curBulkMonth));
+      const bulkTxns = T.filter(t => t.bid && getMonthFromDateStr(t.d) === curBulkMonth);
       const [ay, am] = curBulkMonth.split('-');
       const mName = new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
 
