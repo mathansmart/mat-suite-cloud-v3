@@ -982,3 +982,8 @@ select, input[type="range"], input[type="number"] {
     z-index: 2;
     box-shadow: 0 0.5px 0.5px rgba(255,255,255,0.08);
 }
+
+/* Layering priority for overlays (Confirm dialogs show on top of settings/recycle bin) */
+#confirm-modal-overlay, #prompt-modal-overlay {
+    z-index: 2000;
+}
