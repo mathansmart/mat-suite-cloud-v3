@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAT Dashboard</title>
+    <title>MAT WORK SPACE</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-bg: rgba(30, 41, 59, 0.65);
             --accent: #38bdf8;
             --accent-glow: rgba(56, 189, 248, 0.3);
             --text: #f8fafc;
@@ -20,26 +20,54 @@
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.4) 0px, transparent 50%);
             color: var(--text);
             height: 100vh;
             display: flex;
-            flex-direction: column;
             overflow: hidden;
         }
 
-        .header {
+        .split-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .left-panel {
+            flex: 1.2;
+            background: var(--bg) url('fabric_rolls_bg.webp') no-repeat center;
+            background-size: cover;
+            position: relative;
+        }
+
+        /* Subtle gradient overlay to tie image to the UI theme */
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to left, rgba(15, 23, 42, 0) 40%, rgba(15, 23, 42, 1) 100%);
+            pointer-events: none;
+        }
+
+        .right-panel {
+            width: 500px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             padding: 40px;
-            text-align: center;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 20px;
         }
 
         .header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 5rem;
+            font-size: 4rem;
             font-weight: 800;
-            letter-spacing: 4px;
+            letter-spacing: 2px;
             background: linear-gradient(to right, #fff, var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -48,32 +76,31 @@
 
         .header p {
             color: var(--muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
             letter-spacing: 3px;
             text-transform: uppercase;
             font-weight: 600;
         }
 
         .grid {
-            flex: 1;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            padding: 40px;
+            flex-direction: column;
+            gap: 25px;
+            margin: auto 0;
         }
 
         .card {
-            width: 350px;
-            height: 450px;
+            width: 100%;
+            height: 180px;
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 32px;
+            border-radius: 24px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            padding: 24px;
+            gap: 20px;
             text-decoration: none;
             color: inherit;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -92,9 +119,9 @@
         }
 
         .card:hover {
-            transform: translateY(-15px) scale(1.02);
+            transform: translateY(-5px) scale(1.02);
             border-color: var(--accent);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-glow);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-glow);
         }
 
         .card:hover::before {
@@ -102,60 +129,43 @@
         }
 
         .icon {
-            font-size: 80px;
-            margin-bottom: 30px;
+            font-size: 55px;
             transition: transform 0.4s;
+            flex-shrink: 0;
         }
 
         .card:hover .icon {
             transform: scale(1.1);
         }
 
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            flex: 1;
+        }
+
         .card-title {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
 
         .card-desc {
             color: var(--muted);
-            text-align: center;
-            padding: 0 30px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .footer {
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-            box-shadow: 0 0 10px #22c55e;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 12px;
         }
 
         .btn-link {
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 6px 14px;
+            border-radius: 8px;
             background: rgba(56, 189, 248, 0.1);
             color: var(--accent);
             font-weight: 600;
-            margin-top: 30px;
+            font-size: 0.8rem;
             border: 1px solid transparent;
             transition: all 0.3s;
         }
@@ -165,12 +175,37 @@
             color: var(--bg);
         }
 
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            padding-top: 15px;
+            font-size: 0.7rem;
+            color: var(--muted);
+            opacity: 0.5;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 6px #22c55e;
+        }
+
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(8px);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -183,14 +218,16 @@
             pointer-events: none;
         }
         .modal {
-            background: var(--card-bg);
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 40px;
             text-align: center;
             transform: translateY(0) scale(1);
             transition: all 0.3s;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            color: #f8fafc;
         }
         .modal-overlay.hidden .modal {
             transform: translateY(20px) scale(0.95);
@@ -200,59 +237,92 @@
             flex-direction: column;
             align-items: center;
             padding: 30px 40px;
-            border-radius: 16px;
+            border-radius: 18px;
             text-decoration: none;
-            color: var(--text);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s;
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(255, 255, 255, 0.05);
             min-width: 180px;
         }
         .profile-btn:hover {
             transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
         }
         .milton-btn:hover {
             border-color: #38bdf8;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.15);
         }
         .vester-btn:hover {
-            border-color: #f43f5e;
-            box-shadow: 0 10px 20px rgba(244, 63, 94, 0.2);
+            border-color: #e11d48;
+            box-shadow: 0 10px 20px rgba(225, 29, 72, 0.15);
         }
         .profile-btn h3 { margin: 15px 0 5px; font-size: 1.2rem; }
         .profile-btn p { font-size: 0.8rem; color: var(--muted); }
+
+        /* Responsive Layout */
+        @media (max-width: 992px) {
+            .split-container {
+                flex-direction: column;
+            }
+            .left-panel {
+                flex: 1;
+                min-height: 40vh;
+            }
+            .right-panel {
+                width: 100%;
+                flex: 1.5;
+                min-height: 60vh;
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                padding: 30px;
+            }
+            .grid {
+                margin: 20px 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>MAT</h1>
-        <p>Workspace</p>
-    </div>
+    <div class="split-container">
+        <!-- Workspace tools stacked one by one (now on the left) -->
+        <div class="right-panel">
+            <div class="header">
+                <h1>MAT</h1>
+                <p>WORKSPACE</p>
+            </div>
 
-    <div class="grid">
-        <div class="card" id="card-envelope">
-            <div class="icon">✉️</div>
-            <div class="card-title">Envelope Pro</div>
-            <div class="card-desc">Advanced envelope printing and contact management system.</div>
-            <div class="btn-link">LAUNCH APP</div>
+            <div class="grid">
+                <div class="card" id="card-envelope">
+                    <div class="card-content">
+                        <div class="card-title">Envelope Pro</div>
+                        <div class="card-desc">Advanced envelope printing and contact management system.</div>
+                        <div class="btn-link">LAUNCH APP</div>
+                    </div>
+                    <div class="icon">✉️</div>
+                </div>
+
+                <a href="/stock/" class="card" id="card-stock">
+                    <div class="card-content">
+                        <div class="card-title">Stock Manager</div>
+                        <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
+                        <div class="btn-link">LAUNCH APP</div>
+                    </div>
+                    <div class="icon">📦</div>
+                </a>
+            </div>
+
+            <div class="footer">
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>System Online</span>
+                </div>
+                <div>v2.1.0 (Cloud)</div>
+            </div>
         </div>
 
-        <a href="/stock/" class="card" id="card-stock">
-            <div class="icon">📦</div>
-            <div class="card-title">Stock Manager</div>
-            <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
-            <div class="btn-link">LAUNCH APP</div>
-        </a>
-    </div>
-
-    <div class="footer">
-        <div class="status">
-            <div class="status-dot"></div>
-            <span>System Online</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <div>v2.1.0 (Cloud)</div>
-        </div>
+        <!-- Full image view (now on the right) -->
+        <div class="left-panel"></div>
     </div>
 
     <!-- Profile Selection Modal -->
@@ -303,7 +373,7 @@
                 if (data.status === 'online') {
                     statusDot.style.background = '#22c55e';
                     statusDot.style.boxShadow = '0 0 10px #22c55e';
-                    statusText.textContent = `System Online: ${data.ip}:3001`;
+                    statusText.textContent = `System Online`;
                 }
             } catch (e) {
                 statusDot.style.background = '#ef4444';
