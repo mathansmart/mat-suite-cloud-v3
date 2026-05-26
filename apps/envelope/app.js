@@ -701,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return false;
             if (!filter.trim()) return true;
             
-            const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || '')].join(' ').toLowerCase();
+            const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || ''), (addr.category || '')].join(' ').toLowerCase();
             // Remove punctuation from the target text as well
             const cleanCombinedText = rawCombinedText.replace(/[^a-z0-9\s]/gi, '');
             
@@ -970,12 +970,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', () => {
             const filter = searchInput.value;
-            const searchTerms = filter.toLowerCase().trim().split(/\s+/);
+            const cleanFilter = filter.toLowerCase().replace(/[^a-z0-9\s]/gi, '');
+            const searchTerms = cleanFilter.trim().split(/\s+/).filter(Boolean);
+            
             addresses.forEach(addr => {
                 if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return;
                 if (filter.trim()) {
-                    const combinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || '')].join(' ').toLowerCase();
-                    if (!searchTerms.every(term => combinedText.includes(term))) return;
+                    const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || ''), (addr.category || '')].join(' ').toLowerCase();
+                    const cleanCombinedText = rawCombinedText.replace(/[^a-z0-9\s]/gi, '');
+                    if (!searchTerms.every(term => cleanCombinedText.includes(term))) return;
                 }
                 if (!selectedIds.includes(addr.id)) {
                     selectedIds.push(addr.id);
