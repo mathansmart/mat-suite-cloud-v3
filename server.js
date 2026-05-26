@@ -29,17 +29,21 @@ const EnvelopeAddress = mongoose.model('EnvelopeAddress', EnvelopeAddressSchema)
 const EnvelopeSettingsSchema = new mongoose.Schema({ data: String });
 const EnvelopeSettings = mongoose.model('EnvelopeSettings', EnvelopeSettingsSchema);
 
+const EnvelopeRecycleSchema = new mongoose.Schema({ id: String, name: String, address: String, city: String, phone: String, category: String, deletedAt: String }, { strict: false });
+const EnvelopeRecycle = mongoose.model('EnvelopeRecycle', EnvelopeRecycleSchema);
+
 // Envelope Models (VESTER - Profile 2)
 const EnvelopeSender2 = mongoose.model('EnvelopeSender2', EnvelopeSenderSchema);
 const EnvelopeCategory2 = mongoose.model('EnvelopeCategory2', EnvelopeCategorySchema);
 const EnvelopeAddress2 = mongoose.model('EnvelopeAddress2', EnvelopeAddressSchema);
 const EnvelopeSettings2 = mongoose.model('EnvelopeSettings2', EnvelopeSettingsSchema);
+const EnvelopeRecycle2 = mongoose.model('EnvelopeRecycle2', EnvelopeRecycleSchema);
 
 const getEnvelopeModels = (profile) => {
     if (profile === '2') {
-        return { Sender: EnvelopeSender2, Category: EnvelopeCategory2, Address: EnvelopeAddress2, Settings: EnvelopeSettings2 };
+        return { Sender: EnvelopeSender2, Category: EnvelopeCategory2, Address: EnvelopeAddress2, Settings: EnvelopeSettings2, Recycle: EnvelopeRecycle2 };
     }
-    return { Sender: EnvelopeSender, Category: EnvelopeCategory, Address: EnvelopeAddress, Settings: EnvelopeSettings };
+    return { Sender: EnvelopeSender, Category: EnvelopeCategory, Address: EnvelopeAddress, Settings: EnvelopeSettings, Recycle: EnvelopeRecycle };
 };
 
 // Stock Models
@@ -120,6 +124,34 @@ app.post('/api/envelope/addresses', (req, res) => {
             await Address.deleteMany({});
             await Address.insertMany(req.body);
         } catch (err) { console.error('Failed to save addresses in background:', err); }
+    })();
+});
+
+app.get('/api/envelope/recycle', async (req, res) => {
+    const { Recycle } = getEnvelopeModels(req.query.profile);
+    try {
+        // Auto-cleanup: Delete items older than 15 days
+        const fifteenDaysAgo = new Date();
+        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+        try {
+            await Recycle.deleteMany({ deletedAt: { $lt: fifteenDaysAgo.toISOString() } });
+        } catch (err) {
+            console.error('Failed to clean up old recycled entries:', err);
+        }
+        res.json(await Recycle.find());
+    } catch (err) {
+        res.status(500).json([]);
+    }
+});
+
+app.post('/api/envelope/recycle', (req, res) => {
+    const { Recycle } = getEnvelopeModels(req.query.profile);
+    res.json({ success: true });
+    (async () => {
+        try {
+            await Recycle.deleteMany({});
+            await Recycle.insertMany(req.body);
+        } catch (err) { console.error('Failed to save recycled addresses in background:', err); }
     })();
 });
 
