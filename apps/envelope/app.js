@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State & DOM Elements ---
     let addresses = [];
+    let recycledAddresses = [];
     let senders = []; // Multiple FROM profiles
     let categories = [];
     let activeCategoryFilter = "All";
@@ -99,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSettings();
         loadSenders();
         loadCategories();
+        loadRecycled();
     };
 
     if (document.getElementById('emergency-repair-btn')) {
@@ -1043,11 +1045,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (e.target.classList.contains('delete')) {
             showNotification('Are you sure you want to delete this contact?', 'confirm', 'Confirm Delete', () => {
+                const deletedItem = addresses.find(a => String(a.id) === rawId);
                 addresses = addresses.filter(a => String(a.id) !== rawId);
                 const idx = selectedIds.findIndex(id => String(id) === rawId);
                 if (idx !== -1) selectedIds.splice(idx, 1);
                 saveToLocal();
                 renderAddresses();
+                if (deletedItem) {
+                    recycledAddresses.push({ ...deletedItem, deletedAt: new Date().toISOString() });
+                    saveRecycled();
+                    showNotification(`"${deletedItem.name}" moved to Recycle Bin!`, 'success', 'Moved to Trash');
+                }
             });
         } else if (e.target.classList.contains('edit')) {
             const addr = addresses.find(a => String(a.id) === rawId);
@@ -1377,6 +1385,120 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    // --- Recycle Bin Logic ---
+    const loadRecycled = async () => {
+        try {
+            const resp = await fetch(`${API_BASE}/api/envelope/recycle${PROFILE_QUERY}`);
+            recycledAddresses = await resp.json();
+            renderRecycleBin();
+        } catch (err) {
+            console.error('Failed to load recycled items:', err);
+        }
+    };
+
+    const saveRecycled = async () => {
+        try {
+            await fetch(`${API_BASE}/api/envelope/recycle${PROFILE_QUERY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(recycledAddresses)
+            });
+            renderRecycleBin();
+        } catch (err) {
+            console.error('Failed to save recycled items:', err);
+        }
+    };
+
+    const renderRecycleBin = () => {
+        const recycleList = document.getElementById('recycle-list');
+        const recycleEmptyMsg = document.getElementById('recycle-empty-msg');
+        if (!recycleList || !recycleEmptyMsg) return;
+        
+        recycleList.innerHTML = '';
+        
+        // Auto-cleanup: filter out items older than 15 days on client side as a safeguard
+        const fifteenDaysAgo = new Date();
+        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+        recycledAddresses = recycledAddresses.filter(item => {
+            if (!item.deletedAt) return true;
+            return new Date(item.deletedAt) >= fifteenDaysAgo;
+        });
+        
+        if (recycledAddresses.length === 0) {
+            recycleEmptyMsg.classList.remove('hidden');
+            recycleList.classList.add('hidden');
+            return;
+        }
+        
+        recycleEmptyMsg.classList.add('hidden');
+        recycleList.classList.remove('hidden');
+        
+        // Sort recycled items by deletion date (newest first)
+        recycledAddresses.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
+        
+        recycledAddresses.forEach(item => {
+            const delDate = new Date(item.deletedAt);
+            const diffTime = Math.max(0, new Date(delDate.getTime() + 15 * 24 * 60 * 60 * 1000) - new Date());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const div = document.createElement('div');
+            div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; margin-bottom: 8px; transition: all 0.2s;';
+            div.innerHTML = `
+                <div style="flex: 1; min-width: 0; padding-right: 15px; text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.city || ''} ${item.phone ? '• PH: ' + item.phone : ''}</div>
+                    <div style="font-size: 0.7rem; color: #ef4444; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                        🕒 ${diffDays} day${diffDays !== 1 ? 's' : ''} left
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <button class="btn secondary restore-btn" data-id="${item.id}" style="padding: 6px 12px; font-size: 0.75rem; border-color: rgba(56, 189, 248, 0.3); color: #38bdf8; background: rgba(56, 189, 248, 0.05);">Restore</button>
+                    <button class="btn secondary perm-delete-btn" data-id="${item.id}" style="padding: 6px 12px; font-size: 0.75rem; border-color: rgba(239, 68, 68, 0.3); color: #ef4444; background: rgba(239, 68, 68, 0.05);">Delete</button>
+                </div>
+            `;
+            
+            // Restore button handler
+            div.querySelector('.restore-btn').addEventListener('click', () => {
+                recycledAddresses = recycledAddresses.filter(r => String(r.id) !== String(item.id));
+                if (!addresses.some(a => String(a.id) === String(item.id))) {
+                    const { deletedAt, ...rest } = item;
+                    addresses.push(rest);
+                }
+                saveToLocal();
+                saveRecycled();
+                renderAddresses();
+                showNotification(`"${item.name}" restored to Address Book!`, 'success', 'Restored');
+            });
+            
+            // Permanent delete button handler
+            div.querySelector('.perm-delete-btn').addEventListener('click', () => {
+                showNotification(`Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`, 'confirm', 'Delete Permanently', () => {
+                    recycledAddresses = recycledAddresses.filter(r => String(r.id) !== String(item.id));
+                    saveRecycled();
+                    showNotification(`"${item.name}" permanently deleted!`, 'success', 'Deleted');
+                });
+            });
+            
+            recycleList.appendChild(div);
+        });
+    };
+
+    const recycleBinBtn = document.getElementById('recycle-bin-btn');
+    const recycleBinModal = document.getElementById('recycle-bin-modal');
+    const closeRecycleModal = document.getElementById('close-recycle-modal');
+    
+    if (recycleBinBtn && recycleBinModal) {
+        recycleBinBtn.addEventListener('click', () => {
+            loadRecycled();
+            recycleBinModal.classList.remove('hidden');
+        });
+    }
+    if (closeRecycleModal && recycleBinModal) {
+        closeRecycleModal.addEventListener('click', () => {
+            recycleBinModal.classList.add('hidden');
+        });
+    }
 
     // --- Initialization ---
     initConnection();

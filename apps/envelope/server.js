@@ -6,7 +6,7 @@ const os = require('os');
 const { existsSync, mkdirSync } = require('fs');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Storage Configuration
 const VERSION = '1.0.1';
@@ -42,6 +42,7 @@ function initStorage() {
 initStorage();
 
 const DATA_FILE = path.join(STORAGE_DIR, 'addresses.json');
+const RECYCLE_FILE = path.join(STORAGE_DIR, 'recycle_bin.json');
 const SETTINGS_FILE = path.join(STORAGE_DIR, 'settings.json');
 const SENDERS_FILE = path.join(STORAGE_DIR, 'senders.json');
 const CATEGORIES_FILE = path.join(STORAGE_DIR, 'categories.json');
@@ -53,7 +54,7 @@ app.use(express.static(__dirname)); // Serve the frontend from current directory
 // --- API Endpoints ---
 
 // Check Status
-app.get('/api/status', (req, res) => {
+app.get(['/api/status', '/api/envelope/status'], (req, res) => {
     res.json({ 
         status: 'online', 
         version: VERSION,
@@ -63,7 +64,7 @@ app.get('/api/status', (req, res) => {
 });
 
 // Senders (FROM Profiles)
-app.get('/api/senders', async (req, res) => {
+app.get(['/api/senders', '/api/envelope/senders'], async (req, res) => {
     try {
         if (!existsSync(SENDERS_FILE)) return res.json([]);
         const data = await fs.readFile(SENDERS_FILE, 'utf8');
@@ -73,7 +74,7 @@ app.get('/api/senders', async (req, res) => {
     }
 });
 
-app.post('/api/senders', async (req, res) => {
+app.post(['/api/senders', '/api/envelope/senders'], async (req, res) => {
     try {
         await fs.writeFile(SENDERS_FILE, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
@@ -83,7 +84,7 @@ app.post('/api/senders', async (req, res) => {
 });
 
 // Categories
-app.get('/api/categories', async (req, res) => {
+app.get(['/api/categories', '/api/envelope/categories'], async (req, res) => {
     try {
         if (!existsSync(CATEGORIES_FILE)) return res.json([]); // Empty by default
         const data = await fs.readFile(CATEGORIES_FILE, 'utf8');
@@ -93,7 +94,7 @@ app.get('/api/categories', async (req, res) => {
     }
 });
 
-app.post('/api/categories', async (req, res) => {
+app.post(['/api/categories', '/api/envelope/categories'], async (req, res) => {
     try {
         await fs.writeFile(CATEGORIES_FILE, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
@@ -103,7 +104,7 @@ app.post('/api/categories', async (req, res) => {
 });
 
 // Addresses
-app.get('/api/addresses', async (req, res) => {
+app.get(['/api/addresses', '/api/envelope/addresses'], async (req, res) => {
     try {
         if (!existsSync(DATA_FILE)) return res.json([]);
         const data = await fs.readFile(DATA_FILE, 'utf8');
@@ -113,7 +114,7 @@ app.get('/api/addresses', async (req, res) => {
     }
 });
 
-app.post('/api/addresses', async (req, res) => {
+app.post(['/api/addresses', '/api/envelope/addresses'], async (req, res) => {
     try {
         await fs.writeFile(DATA_FILE, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
@@ -122,8 +123,44 @@ app.post('/api/addresses', async (req, res) => {
     }
 });
 
+app.get(['/api/recycle', '/api/envelope/recycle'], async (req, res) => {
+    try {
+        const { existsSync } = require('fs');
+        if (!existsSync(RECYCLE_FILE)) return res.json([]);
+        const data = await fs.readFile(RECYCLE_FILE, 'utf8');
+        let recycled = JSON.parse(data);
+        
+        // Auto-cleanup: Filter out entries older than 15 days
+        const fifteenDaysAgo = new Date();
+        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+        
+        const filtered = recycled.filter(item => {
+            if (!item.deletedAt) return true;
+            return new Date(item.deletedAt) >= fifteenDaysAgo;
+        });
+
+        if (filtered.length !== recycled.length) {
+            fs.writeFile(RECYCLE_FILE, JSON.stringify(filtered, null, 2)).catch(err => {
+                console.error('Failed to clean up old recycled entries on disk:', err);
+            });
+        }
+        res.json(filtered);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to read recycle data' });
+    }
+});
+
+app.post(['/api/recycle', '/api/envelope/recycle'], async (req, res) => {
+    try {
+        await fs.writeFile(RECYCLE_FILE, JSON.stringify(req.body, null, 2));
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to save recycle data' });
+    }
+});
+
 // Settings
-app.get('/api/settings', async (req, res) => {
+app.get(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     try {
         if (!existsSync(SETTINGS_FILE)) return res.json({});
         const data = await fs.readFile(SETTINGS_FILE, 'utf8');
@@ -133,7 +170,7 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
-app.post('/api/settings', async (req, res) => {
+app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     try {
         await fs.writeFile(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
