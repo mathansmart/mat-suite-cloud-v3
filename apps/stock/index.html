@@ -1275,6 +1275,93 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       transform: translateY(-2px);
       background: #fff0b3;
     }
+
+    /* Luxury Bar Chart Styles */
+    .lux-bar-container {
+      margin-bottom: 20px;
+      cursor: pointer;
+      position: relative;
+    }
+    .lux-bar-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .lux-bar-track {
+      height: 24px;
+      background: rgba(226, 232, 240, 0.5); /* Slate 200 soft */
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(0,0,0,0.03);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+    .lux-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%);
+      border-radius: 12px;
+      width: 0; /* Animated on render */
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+    }
+    .lux-bar-container:hover .lux-bar-track {
+      background: rgba(226, 232, 240, 0.8);
+      transform: scaleY(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .lux-bar-container.active .lux-bar-fill {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
+    .lux-bar-container:hover .lux-bar-fill {
+      filter: brightness(1.05);
+    }
+    
+    .lux-month-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .lux-month-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+    }
+    .lux-month-card.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+    .lux-month-card.active .lux-month-lbl {
+      color: rgba(255,255,255,0.8);
+    }
+    .lux-month-card.active .lux-month-val {
+      color: #fff;
+    }
+    .lux-month-lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .lux-month-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+    }
   </style>
 </head>
 
@@ -1495,15 +1582,13 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
         <!-- REPORTS -->
         <div class="section" id="section-reports">
+          <!-- TABS -->
           <div class="premium-tabs">
             <div class="tab-pill active inv" id="rtab-inventory" onclick="switchRptTab('inventory')">
-              <span class="tab-icon">📊</span> <span class="tab-text" id="lbl-rpt-inv">Inventory</span>
+              📦 Inventory Balance
             </div>
-            <div class="tab-pill in" id="rtab-stock-in" onclick="switchRptTab('stock-in')">
-              <span class="tab-icon">↓</span> <span class="tab-text" id="lbl-rpt-inward">Stock In</span>
-            </div>
-            <div class="tab-pill out" id="rtab-stock-out" onclick="switchRptTab('stock-out')">
-              <span class="tab-icon">↑</span> <span class="tab-text" id="lbl-rpt-outward">Stock Out</span>
+            <div class="tab-pill" id="rtab-prod-analysis" onclick="switchRptTab('prod-analysis')">
+              📈 Product Analysis
             </div>
           </div>
 
@@ -1543,88 +1628,70 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <div id="rpt-inventory-tables"></div>
           </div>
 
-          <!-- STOCK IN REPORT -->
-          <div id="rpt-stock-in" style="display:none;">
-            <div
-              style="background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:18px;margin-bottom:18px;">
-              <div class="sec-title" style="margin-bottom:14px;">Filter</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-                <div class="form-group">
-                  <label class="form-label">Category</label>
-                  <select class="form-select" id="rsi-cat"
-                    onchange="rsiSelectedPids=[];renderRsiChips();renderRsiProductDrop()">
-                    <option value="">All Categories</option>
-                  </select>
+          <!-- PRODUCT WISE REPORT (NEW) -->
+          <div id="rpt-prod-analysis" style="display:none;">
+            <!-- Search Section -->
+            <div style="margin-bottom: 24px;">
+              <div class="sec-title">Search & Select Product</div>
+              <div style="position: relative; max-width: 500px;">
+                <div class="search-wrapper" style="margin:0;">
+                  <span class="search-icon-left">🔍</span>
+                  <input type="text" id="pa-search-input" placeholder="Type product name to search..." class="premium-search" autocomplete="off" oninput="onProductAnalysisSearch()" onfocus="onProductAnalysisSearchFocus()">
+                  <button class="search-clear-btn" id="pa-search-clear" onclick="clearProductAnalysisSearch()" style="display:none;">✕</button>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">From Date</label>
-                  <input type="text" class="form-input" id="rsi-from" placeholder="DD-MM-YYYY" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('rsi-to').focus();}">
+                <!-- Search Suggestions Dropdown -->
+                <div id="pa-search-dropdown" class="premium-dropdown" style="display:none; position:absolute; width:100%; z-index:1000; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; max-height:250px; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.1); margin-top:4px;">
+                  <!-- Dynamically populated products -->
                 </div>
-                <div class="form-group">
-                  <label class="form-label">To Date</label>
-                  <input type="text" class="form-input" id="rsi-to" placeholder="DD-MM-YYYY" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();applyRsiFilter();}">
-                </div>
-              </div>
-              <div class="form-group" style="margin-bottom:10px;">
-                <label class="form-label">Products (select multiple)</label>
-                <div class="search-wrapper">
-                  <div class="search-icon-left">🔍</div>
-                  <input type="text" id="rsi-search" placeholder="Search and select products..." class="premium-search"
-                    autocomplete="off" oninput="renderRsiProductDrop()" onfocus="renderRsiProductDrop()"
-                    onkeydown="dropKeyNav(event,'rsi-search-drop')">
-                  <button class="search-clear-btn" id="rsi-search-clear" onclick="clearRsiSearch()">✕</button>
-                  <div id="rsi-search-drop" class="premium-dropdown"></div>
-                </div>
-                <div id="rsi-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
-              </div>
-              <div style="display:flex;gap:10px;align-items:center;">
-                <button class="btn btn-primary" onclick="applyRsiFilter()">Apply Filter</button>
-                <button class="btn btn-ghost" onclick="clearRsiFilter()">Clear</button>
               </div>
             </div>
-            <div id="rsi-result"></div>
-          </div>
 
-          <!-- STOCK OUT REPORT -->
-          <div id="rpt-stock-out" style="display:none;">
-            <div
-              style="background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:18px;margin-bottom:18px;">
-              <div class="sec-title" style="margin-bottom:14px;">Filter</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-                <div class="form-group">
-                  <label class="form-label">Category</label>
-                  <select class="form-select" id="rso-cat"
-                    onchange="rsoSelectedPids=[];renderRsoChips();renderRsoProductDrop()">
-                    <option value="">All Categories</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">From Date</label>
-                  <input type="text" class="form-input" id="rso-from" placeholder="DD-MM-YYYY" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('rso-to').focus();}">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">To Date</label>
-                  <input type="text" class="form-input" id="rso-to" placeholder="DD-MM-YYYY" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();applyRsoFilter();}">
-                </div>
-              </div>
-              <div class="form-group" style="margin-bottom:10px;">
-                <label class="form-label">Products (select multiple)</label>
-                <div class="search-wrapper">
-                  <div class="search-icon-left">🔍</div>
-                  <input type="text" id="rso-search" placeholder="Search and select products..." class="premium-search"
-                    autocomplete="off" oninput="renderRsoProductDrop()" onfocus="renderRsoProductDrop()"
-                    onkeydown="dropKeyNav(event,'rso-search-drop')">
-                  <button class="search-clear-btn" id="rso-search-clear" onclick="clearRsoSearch()">✕</button>
-                  <div id="rso-search-drop" class="premium-dropdown"></div>
-                </div>
-                <div id="rso-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
-              </div>
-              <div style="display:flex;gap:10px;align-items:center;">
-                <button class="btn btn-warn" onclick="applyRsoFilter()">Apply Filter</button>
-                <button class="btn btn-ghost" onclick="clearRsoFilter()">Clear</button>
+            <!-- Active Selected Product info & Matched Similar Products -->
+            <div id="pa-selection-summary" style="display:none; margin-bottom:24px; padding:16px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
+              <!-- Will be updated dynamically -->
+            </div>
+
+            <!-- KPI Box: Total In / Out Summary -->
+            <div id="pa-kpi-container" style="display:none; margin-bottom:24px;">
+              <!-- Cards for Total In and Total Out -->
+            </div>
+
+            <!-- Size-wise Bar Chart Container -->
+            <div id="pa-chart-section" style="display:none; margin-bottom:30px;">
+              <div class="sec-title" id="pa-chart-title">Size-wise Distribution (Outflow)</div>
+              <div id="pa-chart-wrap" class="report-cat-card" style="padding:24px; background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border);">
+                <!-- Premium bars will be rendered here -->
               </div>
             </div>
-            <div id="rso-result"></div>
+
+            <!-- Month-wise Breakdown (Shows after size click) -->
+            <div id="pa-month-section" style="display:none; margin-bottom:30px;">
+              <div class="sec-title" id="pa-month-title">Month-wise Outflow for Size</div>
+              <div id="pa-month-wrap" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
+                <!-- Cards for month outflow -->
+              </div>
+            </div>
+
+            <!-- Date-wise Breakdown (Shows after month click) -->
+            <div id="pa-date-section" style="display:none; margin-bottom:30px;">
+              <div class="sec-title" id="pa-date-title">Date-wise Outflow for Month</div>
+              <div class="table-wrap">
+                <table id="pa-date-table">
+                  <thead>
+                    <tr>
+                      <th style="padding:12px; text-align:left;">Date</th>
+                      <th style="padding:12px; text-align:center;">Product Name</th>
+                      <th style="padding:12px; text-align:center;">Size</th>
+                      <th style="padding:12px; text-align:right;">Quantity Out (Boxes)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pa-date-tbody">
+                    <!-- Date rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
 
         </div>
@@ -1746,6 +1813,49 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       </div>
     </div>
   </div>
+
+  <!-- CUSTOM RANGE MODAL -->
+  <div class="modal-overlay" id="custom-range-modal-overlay" onclick="if(event.target===this)closeCustomRangeModal()">
+    <div class="modal" style="width: 500px; max-width: 95vw; display: flex; flex-direction: column; gap: 16px;">
+      <div class="modal-title" style="font-size: 18px; font-weight: 700; border-bottom: 1.5px solid var(--border); padding-bottom: 8px; margin: 0;">Filter History by Product & Range</div>
+      
+      <!-- Step 1: Product Selection -->
+      <div class="form-group" style="margin: 0; display: flex; flex-direction: column; gap: 8px;">
+        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
+          <span>Select Products</span>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; text-transform: none; font-weight: 600; margin: 0;">
+            <input type="checkbox" id="cr-select-all" onchange="toggleSelectAllRangeProducts()" style="width: 15px; height: 15px; cursor: pointer; margin: 0;"> Select All
+          </label>
+        </label>
+        
+        <div class="search-wrapper" style="margin: 0;">
+          <div class="search-icon-left" style="top: 11px;">🔍</div>
+          <input type="text" id="cr-product-search" placeholder="Search product name..." class="premium-search" style="height: 36px; padding-left: 34px; font-size: 13px; margin: 0;" oninput="filterRangeProductsList()">
+        </div>
+        
+        <div id="cr-products-list" style="max-height: 185px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; background: var(--surface2); display: flex; flex-direction: column; gap: 6px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      
+      <!-- Step 2: Date Range Selection -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0;">
+        <div class="form-group" style="margin: 0; display: flex; flex-direction: column; gap: 6px;">
+          <label class="form-label" style="margin: 0;">Start Date</label>
+          <input class="form-input" type="date" id="cr-start-date" required style="margin: 0;">
+        </div>
+        <div class="form-group" style="margin: 0; display: flex; flex-direction: column; gap: 6px;">
+          <label class="form-label" style="margin: 0;">End Date</label>
+          <input class="form-input" type="date" id="cr-end-date" required style="margin: 0;">
+        </div>
+      </div>
+      
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1.5px solid var(--border); padding-top: 12px; margin-top: 8px;">
+        <button class="btn btn-ghost" onclick="closeCustomRangeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyCustomRangeFilter()">Apply Filter</button>
+      </div>
+    </div>
+  </div>
   
   <div id="center-toast">
     <div class="toast-icon">🔔</div>
@@ -1794,6 +1904,140 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (!dStr || typeof dStr !== 'string') return '';
       const datePart = dStr.slice(0, 10);
       return d2i(datePart);
+    }
+
+    /* ===== CUSTOM PRODUCT RANGE MODAL HELPERS ===== */
+    function openCustomRangeModal(type) {
+      curRangeFilterType = type; // 'IN' or 'OUT'
+      const searchInput = document.getElementById('cr-product-search');
+      if (searchInput) searchInput.value = '';
+
+      const existingProducts = type === 'IN' ? curSiRangeProducts : curSoRangeProducts;
+      const existingStart = type === 'IN' ? curSiRangeStart : curSoRangeStart;
+      const existingEnd = type === 'IN' ? curSiRangeEnd : curSoRangeEnd;
+
+      const startDateInput = document.getElementById('cr-start-date');
+      const endDateInput = document.getElementById('cr-end-date');
+      if (startDateInput) startDateInput.value = existingStart || todayStr();
+      if (endDateInput) endDateInput.value = existingEnd || todayStr();
+
+      const sortedProducts = [...P].sort((a, b) => a.n.localeCompare(b.n));
+      const listContainer = document.getElementById('cr-products-list');
+      
+      listContainer.innerHTML = sortedProducts.map(p => {
+        const isChecked = existingProducts ? existingProducts.includes(p.id) : true;
+        return `
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; margin: 0; padding: 4px; border-radius: 4px; transition: background 0.15s;" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='transparent'">
+            <input type="checkbox" class="cr-product-item" data-pid="${p.id}" ${isChecked ? 'checked' : ''} onchange="onRangeProductCheckChange()" style="width: 15px; height: 15px; cursor: pointer; margin: 0;">
+            <span style="color: var(--text-main);">${p.n}</span>
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: auto;">${cn(p.ci)}</span>
+          </label>
+        `;
+      }).join('');
+
+      updateSelectAllCheckboxState();
+      document.getElementById('custom-range-modal-overlay').classList.add('open');
+    }
+
+    function closeCustomRangeModal() {
+      document.getElementById('custom-range-modal-overlay').classList.remove('open');
+    }
+
+    function toggleSelectAllRangeProducts() {
+      const selectAll = document.getElementById('cr-select-all');
+      const checkboxes = document.querySelectorAll('.cr-product-item');
+      checkboxes.forEach(cb => {
+        const parentLabel = cb.closest('label');
+        if (parentLabel && parentLabel.style.display !== 'none') {
+          cb.checked = selectAll.checked;
+        }
+      });
+    }
+
+    function onRangeProductCheckChange() {
+      updateSelectAllCheckboxState();
+    }
+
+    function updateSelectAllCheckboxState() {
+      const selectAll = document.getElementById('cr-select-all');
+      const checkboxes = Array.from(document.querySelectorAll('.cr-product-item'));
+      const visibleCheckboxes = checkboxes.filter(cb => {
+        const parentLabel = cb.closest('label');
+        return !parentLabel || parentLabel.style.display !== 'none';
+      });
+
+      if (visibleCheckboxes.length === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+        return;
+      }
+
+      const allChecked = visibleCheckboxes.every(cb => cb.checked);
+      const noneChecked = visibleCheckboxes.every(cb => !cb.checked);
+
+      selectAll.checked = allChecked;
+      selectAll.indeterminate = !allChecked && !noneChecked;
+    }
+
+    function filterRangeProductsList() {
+      const q = document.getElementById('cr-product-search').value.toLowerCase().trim();
+      const checkboxes = document.querySelectorAll('.cr-product-item');
+      checkboxes.forEach(cb => {
+        const parentLabel = cb.closest('label');
+        if (!parentLabel) return;
+        const text = parentLabel.textContent.toLowerCase();
+        if (text.includes(q)) {
+          parentLabel.style.display = 'flex';
+        } else {
+          parentLabel.style.display = 'none';
+        }
+      });
+      updateSelectAllCheckboxState();
+    }
+
+    function applyCustomRangeFilter() {
+      const startDate = document.getElementById('cr-start-date').value;
+      const endDate = document.getElementById('cr-end-date').value;
+
+      if (!startDate || !endDate) {
+        alert('Please select both Start Date and End Date!');
+        return;
+      }
+      if (startDate > endDate) {
+        alert('Start Date cannot be after End Date!');
+        return;
+      }
+
+      const checkboxes = document.querySelectorAll('.cr-product-item');
+      const selectedPids = [];
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          selectedPids.push(cb.dataset.pid);
+        }
+      });
+
+      if (selectedPids.length === 0) {
+        alert('Please select at least one product!');
+        return;
+      }
+
+      if (curRangeFilterType === 'IN') {
+        curSiRangeStart = startDate;
+        curSiRangeEnd = endDate;
+        curSiRangeProducts = selectedPids;
+        curSiFilterDate = null;
+        curSiMonth = startDate.slice(0, 7);
+        renderSiHistory(curSiMonth, '');
+      } else {
+        curSoRangeStart = startDate;
+        curSoRangeEnd = endDate;
+        curSoRangeProducts = selectedPids;
+        curSoFilterDate = null;
+        curSoMonth = startDate.slice(0, 7);
+        renderSoHistory(curSoMonth, '');
+      }
+
+      closeCustomRangeModal();
     }
 
     /* ===== KEYBOARD NAVIGATION FOR ALL DROPDOWNS ===== */
@@ -3456,6 +3700,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     let curSiFilterDate = null, curSoFilterDate = null;
     let curSiRangeStart = null, curSiRangeEnd = null;
     let curSoRangeStart = null, curSoRangeEnd = null;
+    let curSiRangeProducts = null, curSoRangeProducts = null;
+    let curRangeFilterType = 'IN';
     let todayM = todayStr().slice(0, 7);
     let curSiMonth = todayM, curSoMonth = todayM, curTxnMonth = todayM, curRptMonth = todayM;
     let siHistorySearch = '', soHistorySearch = '', txnHistorySearch = '';
@@ -3734,23 +3980,29 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const _prevWasSearch = _prevSearchVal !== null;
 
       cont.innerHTML = `
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
-          <div class="form-group" style="margin:0; width:180px;">
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
+          <div class="form-group" style="margin:0; width:180px; flex-shrink: 0;">
             <div class="search-wrapper">
               <div class="search-icon-left" style="top:11px; font-size:14px;">📅</div>
               <input type="text" value="${rawVal}" 
                 placeholder="DD-MM-YYYY"
                 class="premium-search" 
                 autocomplete="off"
-                style="height:38px; padding-left:34px; font-size:13px; font-weight:700;"
+                style="height:38px; padding-left:34px; font-size:13px; font-weight:700; width: 100% !important;"
                 oninput="if(this.value.length>=7) ${onSelect}(this.value)">
             </div>
           </div>
 
+          <button onclick="openCustomRangeModal('${type}')"
+            class="btn btn-primary"
+            style="height:38px; padding:0 16px; border-radius:10px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:var(--shadow-sm); z-index: 5; cursor:pointer;">
+            📅 Range
+          </button>
 
 
-          ${hasFilter ? `<button onclick="${onSelect==='renderSiHistory'?'curSiRangeStart=null;curSiRangeEnd=null;curSiFilterDate=null;renderSiHistory':'curSoRangeStart=null;curSoRangeEnd=null;curSoFilterDate=null;renderSoHistory'}('${activeMonth}','')"
-            style="padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:11px;font-weight:700;color:var(--danger);">
+
+          ${hasFilter ? `<button onclick="${onSelect==='renderSiHistory'?'curSiRangeStart=null;curSiRangeEnd=null;curSiFilterDate=null;curSiRangeProducts=null;renderSiHistory':'curSoRangeStart=null;curSoRangeEnd=null;curSoFilterDate=null;curSoRangeProducts=null;renderSoHistory'}('${activeMonth}','')"
+            style="padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:11px;font-weight:700;color:var(--danger); z-index: 5;">
             ✕ Clear Filter
           </button>` : ''}
 
@@ -3786,13 +4038,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           curSiFilterDate = monthOrDate;
           curSiMonth = monthOrDate.slice(0, 7);
           curSiRangeStart = null; curSiRangeEnd = null;
+          curSiRangeProducts = null;
         } else if (monthOrDate.length === 7) {
           curSiMonth = monthOrDate;
           curSiFilterDate = null;
           curSiRangeStart = null; curSiRangeEnd = null;
+          curSiRangeProducts = null;
         }
       }
-      if (search !== undefined) { siHistorySearch = search; if (search) { curSiFilterDate = null; curSiRangeStart = null; curSiRangeEnd = null; } }
+      if (search !== undefined) { siHistorySearch = search; if (search) { curSiFilterDate = null; curSiRangeStart = null; curSiRangeEnd = null; curSiRangeProducts = null; } }
       
       const el = document.getElementById('si-history-wrap');
       if (!el) return;
@@ -3804,7 +4058,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (q) {
         filtered = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else if (curSiRangeStart && curSiRangeEnd) {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd);
+        filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd && (!curSiRangeProducts || curSiRangeProducts.includes(t.pid)));
       } else if (curSiFilterDate) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) === curSiFilterDate);
       } else {
@@ -3821,13 +4075,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           curSoFilterDate = monthOrDate;
           curSoMonth = monthOrDate.slice(0, 7);
           curSoRangeStart = null; curSoRangeEnd = null;
+          curSoRangeProducts = null;
         } else if (monthOrDate.length === 7) {
           curSoMonth = monthOrDate;
           curSoFilterDate = null;
           curSoRangeStart = null; curSoRangeEnd = null;
+          curSoRangeProducts = null;
         }
       }
-      if (search !== undefined) { soHistorySearch = search; if (search) { curSoFilterDate = null; curSoRangeStart = null; curSoRangeEnd = null; } }
+      if (search !== undefined) { soHistorySearch = search; if (search) { curSoFilterDate = null; curSoRangeStart = null; curSoRangeEnd = null; curSoRangeProducts = null; } }
       
       const el = document.getElementById('so-history-wrap');
       if (!el) return;
@@ -3839,7 +4095,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (q) {
         filtered = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else if (curSoRangeStart && curSoRangeEnd) {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd);
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd && (!curSoRangeProducts || curSoRangeProducts.includes(t.pid)));
       } else if (curSoFilterDate) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) === curSoFilterDate);
       } else {
@@ -4229,20 +4485,293 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
     function switchRptTab(tab) {
       curRptTab = tab;
-      ['inventory', 'stock-in', 'stock-out'].forEach(t => {
-        document.getElementById('rtab-' + t).classList.toggle('active', t === tab);
-        document.getElementById('rpt-' + t).style.display = t === tab ? 'block' : 'none';
+      ['inventory', 'prod-analysis'].forEach(t => {
+        const btn = document.getElementById('rtab-' + t);
+        const pane = document.getElementById('rpt-' + t);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (pane) pane.style.display = t === tab ? 'block' : 'none';
       });
       if (tab === 'inventory') renderReportsInventory();
-      if (tab === 'stock-in') { updateRptCatOpts(); document.getElementById('rsi-result').innerHTML = ''; }
-      if (tab === 'stock-out') { updateRptCatOpts(); document.getElementById('rso-result').innerHTML = ''; }
+      if (tab === 'prod-analysis') renderProductAnalysis();
     }
 
     function updateRptCatOpts() {
       updateCatOpts();
     }
 
-    // Stock In filter
+    // Product Analysis state
+    let paSelectedProduct = null;
+    let paSimilarProducts = [];
+    let paSelectedSize = null;
+    let paSelectedMonth = null;
+
+    function onProductAnalysisSearch() {
+      const q = document.getElementById('pa-search-input').value.toLowerCase().trim();
+      const drop = document.getElementById('pa-search-dropdown');
+      const clearBtn = document.getElementById('pa-search-clear');
+      
+      if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+      
+      if (!q) {
+        if (drop) drop.style.display = 'none';
+        return;
+      }
+      
+      const matches = P.filter(p => p.n.toLowerCase().includes(q));
+      if (!matches.length) {
+        if (drop) {
+          drop.innerHTML = '<div style="padding:10px; text-align:center; color:var(--muted); font-size:12px;">No products found</div>';
+          drop.style.display = 'block';
+        }
+        return;
+      }
+      
+      if (drop) {
+        drop.innerHTML = matches.map(p => `
+          <div class="drop-item" onclick="selectProductAnalysis('${p.id}')">
+            <span>${p.n}</span>
+            <span style="font-size:10px; color:var(--text-muted);">${cn(p.ci)}</span>
+          </div>
+        `).join('');
+        drop.style.display = 'block';
+      }
+    }
+
+    function onProductAnalysisSearchFocus() {
+      const q = document.getElementById('pa-search-input').value.toLowerCase().trim();
+      if (q) {
+        onProductAnalysisSearch();
+      } else {
+        const drop = document.getElementById('pa-search-dropdown');
+        if (drop) {
+          const sorted = [...P].sort((a, b) => a.n.localeCompare(b.n)).slice(0, 20);
+          drop.innerHTML = sorted.map(p => `
+            <div class="drop-item" onclick="selectProductAnalysis('${p.id}')">
+              <span>${p.n}</span>
+              <span style="font-size:10px; color:var(--text-muted);">${cn(p.ci)}</span>
+            </div>
+          `).join('');
+          drop.style.display = 'block';
+        }
+      }
+    }
+
+    function selectProductAnalysis(pid) {
+      const selected = P.find(x => x.id === pid);
+      if (!selected) return;
+      paSelectedProduct = selected;
+      
+      paSimilarProducts = getSimilarProducts(selected);
+      
+      paSelectedSize = null;
+      paSelectedMonth = null;
+      
+      document.getElementById('pa-month-section').style.display = 'none';
+      document.getElementById('pa-date-section').style.display = 'none';
+      
+      document.getElementById('pa-search-input').value = selected.n;
+      document.getElementById('pa-search-dropdown').style.display = 'none';
+      document.getElementById('pa-search-clear').style.display = 'block';
+      
+      renderProductAnalysisDetails();
+    }
+
+    function getSimilarProducts(selectedProduct) {
+      const name = selectedProduct.n.toLowerCase();
+      const ignore = ['set', 'and', 'the', 'for', 'with', 'pcs'];
+      const tokens = name.split(/[\s\-,\/]+/).filter(t => t.length >= 3 && !ignore.includes(t));
+      
+      return P.filter(p => {
+        if (p.id === selectedProduct.id) return true;
+        const pName = p.n.toLowerCase();
+        if (pName.includes(name) || name.includes(pName)) return true;
+        return tokens.some(t => pName.includes(t));
+      });
+    }
+
+    function clearProductAnalysisSearch() {
+      paSelectedProduct = null;
+      paSimilarProducts = [];
+      paSelectedSize = null;
+      paSelectedMonth = null;
+      
+      document.getElementById('pa-search-input').value = '';
+      document.getElementById('pa-search-dropdown').style.display = 'none';
+      document.getElementById('pa-search-clear').style.display = 'none';
+      
+      document.getElementById('pa-selection-summary').style.display = 'none';
+      document.getElementById('pa-kpi-container').style.display = 'none';
+      document.getElementById('pa-chart-section').style.display = 'none';
+      document.getElementById('pa-month-section').style.display = 'none';
+      document.getElementById('pa-date-section').style.display = 'none';
+    }
+
+    function renderProductAnalysisDetails() {
+      if (!paSelectedProduct) return;
+      
+      const summaryEl = document.getElementById('pa-selection-summary');
+      const similarListText = paSimilarProducts.map(p => `<span class="badge" style="display:inline-block; background:rgba(99,102,241,0.1); color:var(--primary); padding:3px 8px; border-radius:4px; margin:2px; font-size:11px; font-weight:600;">${p.n}</span>`).join(' ');
+      summaryEl.innerHTML = `
+        <div style="font-weight:700; color:var(--text-main); margin-bottom:8px;">
+          Selected Product: <span style="color:var(--primary);">${paSelectedProduct.n}</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+          Aggregating data for <strong>${paSimilarProducts.length}</strong> matching/similar products:<br/>
+          <div style="margin-top:6px;">${similarListText}</div>
+        </div>
+      `;
+      summaryEl.style.display = 'block';
+      
+      const pids = paSimilarProducts.map(p => p.id);
+      const txns = T.filter(t => pids.includes(t.pid));
+      const totalIn = txns.filter(t => t.tp === 'IN').reduce((a, t) => a + t.q, 0);
+      const totalOut = txns.filter(t => t.tp === 'OUT').reduce((a, t) => a + t.q, 0);
+      
+      document.getElementById('pa-kpi-container').innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-card c2">
+            <div class="stat-icon-wrap">↓</div>
+            <div class="stat-info">
+              <div class="stat-label">Total In (Boxes)</div>
+              <div class="stat-value" style="font-family:'JetBrains Mono',monospace;">${totalIn}</div>
+            </div>
+          </div>
+          <div class="stat-card c1">
+            <div class="stat-icon-wrap">↑</div>
+            <div class="stat-info">
+              <div class="stat-label">Total Out (Boxes)</div>
+              <div class="stat-value" style="font-family:'JetBrains Mono',monospace; color:var(--danger);">${totalOut}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('pa-kpi-container').style.display = 'block';
+      
+      const categoryIds = [...new Set(paSimilarProducts.map(p => String(p.ci)))];
+      const allSizes = [];
+      categoryIds.forEach(cid => {
+        const catObj = S.categories.find(c => String(c.id) === cid);
+        if (catObj && catObj.sizes) {
+          catObj.sizes.forEach(sz => {
+            if (!allSizes.includes(sz)) allSizes.push(sz);
+          });
+        }
+      });
+      
+      const sizeOutflow = {};
+      allSizes.forEach(sz => sizeOutflow[sz] = 0);
+      txns.filter(t => t.tp === 'OUT').forEach(t => {
+        if (sizeOutflow[t.sz] !== undefined) {
+          sizeOutflow[t.sz] += t.q;
+        } else {
+          sizeOutflow[t.sz] = t.q;
+          if (!allSizes.includes(t.sz)) allSizes.push(t.sz);
+        }
+      });
+      
+      const maxVal = Math.max(...Object.values(sizeOutflow), 1);
+      
+      const barsHtml = allSizes.map(sz => {
+        const val = sizeOutflow[sz] || 0;
+        const pct = ((val / maxVal) * 100).toFixed(0);
+        const isActive = paSelectedSize === sz ? 'active' : '';
+        return `
+          <div class="lux-bar-container ${isActive}" id="pa-bar-${sz}" onclick="onSelectSizeReport('${sz}')">
+            <div class="lux-bar-header">
+              <span style="font-size:13px; font-weight:700; color:var(--text-main);">Size ${sz}</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-weight:800; color:var(--primary);">${val} Boxes Out</span>
+            </div>
+            <div class="lux-bar-track">
+              <div class="lux-bar-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('pa-chart-title').textContent = `Size-wise Outflow (Boxes Out)`;
+      document.getElementById('pa-chart-wrap').innerHTML = barsHtml || '<div class="empty-state">No outflows recorded for this product</div>';
+      document.getElementById('pa-chart-section').style.display = 'block';
+    }
+
+    function onSelectSizeReport(sz) {
+      paSelectedSize = sz;
+      paSelectedMonth = null;
+      document.getElementById('pa-date-section').style.display = 'none';
+      
+      document.querySelectorAll('.lux-bar-container').forEach(el => el.classList.remove('active'));
+      const barEl = document.getElementById('pa-bar-' + sz);
+      if (barEl) barEl.classList.add('active');
+      
+      const pids = paSimilarProducts.map(p => p.id);
+      const outTxns = T.filter(t => pids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz));
+      
+      const monthMap = {};
+      outTxns.forEach(t => {
+        const month = getMonthFromDateStr(t.d);
+        if (month) monthMap[month] = (monthMap[month] || 0) + t.q;
+      });
+      
+      const sortedMonths = Object.keys(monthMap).sort((a, b) => b.localeCompare(a));
+      
+      const monthHtml = sortedMonths.map(month => {
+        const val = monthMap[month];
+        const [y, m] = month.split('-');
+        const monthLabel = new Date(parseInt(y), parseInt(m) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+        return `
+          <div class="lux-month-card" id="pa-month-${month}" onclick="onSelectMonthReport('${sz}', '${month}')">
+            <div class="lux-month-lbl">${monthLabel}</div>
+            <div class="lux-month-val">${val}</div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Boxes Out</div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('pa-month-title').textContent = `Month-wise Outflow for Size: ${sz}`;
+      document.getElementById('pa-month-wrap').innerHTML = monthHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--muted); font-size:13px;">No monthly history found for this size</div>';
+      document.getElementById('pa-month-section').style.display = 'block';
+      
+      document.getElementById('pa-month-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function onSelectMonthReport(sz, month) {
+      paSelectedMonth = month;
+      
+      document.querySelectorAll('.lux-month-card').forEach(el => el.classList.remove('active'));
+      const monthEl = document.getElementById('pa-month-' + month);
+      if (monthEl) monthEl.classList.add('active');
+      
+      const pids = paSimilarProducts.map(p => p.id);
+      const filtered = T.filter(t => pids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz) && getMonthFromDateStr(t.d) === month);
+      
+      filtered.sort((a, b) => b.d.localeCompare(a.d));
+      
+      const rowsHtml = filtered.map(t => {
+        const formattedDate = i2d(t.d.slice(0, 10));
+        return `
+          <tr>
+            <td style="padding:10px 12px; font-weight:700; font-family:'JetBrains Mono',monospace;">${formattedDate}</td>
+            <td style="padding:10px 12px; text-align:center;">${t.pn}</td>
+            <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--primary);">${t.sz}</td>
+            <td style="padding:10px 12px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--danger);">${t.q}</td>
+          </tr>
+        `;
+      }).join('');
+      
+      const [y, m] = month.split('-');
+      const monthLabel = new Date(parseInt(y), parseInt(m) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+      
+      document.getElementById('pa-date-title').textContent = `Date-wise Outflow for ${monthLabel} (Size: ${sz})`;
+      document.getElementById('pa-date-tbody').innerHTML = rowsHtml || '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No record found</td></tr>';
+      document.getElementById('pa-date-section').style.display = 'block';
+      
+      document.getElementById('pa-date-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderProductAnalysis() {
+      if (paSelectedProduct) {
+        renderProductAnalysisDetails();
+      }
+    }
 
 
     document.addEventListener('click', function (e) {
@@ -4252,6 +4781,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (d && s && !s.contains(e.target) && !d.contains(e.target)) d.style.display = 'none';
       const s2 = document.getElementById('rso-search'); const d2 = document.getElementById('rso-search-drop');
       if (d2 && s2 && !s2.contains(e.target) && !d2.contains(e.target)) d2.style.display = 'none';
+      
+      const s3 = document.getElementById('pa-search-input'); const d3 = document.getElementById('pa-search-dropdown');
+      if (d3 && s3 && !s3.contains(e.target) && !d3.contains(e.target)) d3.style.display = 'none';
+      
       const um = document.getElementById('user-menu'); const userWrap = document.querySelector('.sidebar-user');
       if (um && userWrap && !userWrap.contains(e.target) && um.classList.contains('open')) um.classList.remove('open');
     });
