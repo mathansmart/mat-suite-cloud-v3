@@ -1636,7 +1636,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               <div style="position: relative; max-width: 500px;">
                 <div class="search-wrapper" style="margin:0;">
                   <span class="search-icon-left">🔍</span>
-                  <input type="text" id="pa-search-input" placeholder="Type product name to search..." class="premium-search" autocomplete="off" oninput="onProductAnalysisSearch()" onfocus="onProductAnalysisSearchFocus()">
+                  <input type="text" id="pa-search-input" placeholder="Type product name to search..." class="premium-search" autocomplete="off" oninput="onProductAnalysisSearch()" onfocus="this.select(); onProductAnalysisSearchFocus()">
                   <button class="search-clear-btn" id="pa-search-clear" onclick="clearProductAnalysisSearch()" style="display:none;">✕</button>
                 </div>
                 <!-- Search Suggestions Dropdown -->
@@ -4577,15 +4577,24 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
 
     function getSimilarProducts(selectedProduct) {
-      const name = selectedProduct.n.toLowerCase();
-      const ignore = ['set', 'and', 'the', 'for', 'with', 'pcs'];
-      const tokens = name.split(/[\s\-,\/]+/).filter(t => t.length >= 3 && !ignore.includes(t));
+      const getBase = (name) => {
+        const parts = name.split('-');
+        return parts[0].trim().toLowerCase();
+      };
+      
+      const baseSelected = getBase(selectedProduct.n);
+      const ignore = ['set', 'and', 'the', 'for', 'with', 'pcs', 'piece', 'boys', "boys'", "boy's", 'girls', "girls'", "girl's", 'kids', 'kid', 'big', 'small', 'large', 'mini', 'super', 'combo'];
+      const tokensSelected = baseSelected.split(/[\s,\/]+/).filter(t => t.length >= 3 && !ignore.includes(t));
       
       return P.filter(p => {
         if (p.id === selectedProduct.id) return true;
-        const pName = p.n.toLowerCase();
-        if (pName.includes(name) || name.includes(pName)) return true;
-        return tokens.some(t => pName.includes(t));
+        const baseOther = getBase(p.n);
+        if (baseSelected === baseOther) return true;
+        if (baseOther.includes(baseSelected) || baseSelected.includes(baseOther)) {
+          if (baseSelected.length >= 3 && baseOther.length >= 3) return true;
+        }
+        const tokensOther = baseOther.split(/[\s,\/]+/).filter(t => t.length >= 3 && !ignore.includes(t));
+        return tokensSelected.some(t => tokensOther.includes(t));
       });
     }
 
