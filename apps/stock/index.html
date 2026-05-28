@@ -4582,19 +4582,23 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         return parts[0].trim().toLowerCase();
       };
       
-      const baseSelected = getBase(selectedProduct.n);
       const ignore = ['set', 'and', 'the', 'for', 'with', 'pcs', 'piece', 'boys', "boys'", "boy's", 'girls', "girls'", "girl's", 'kids', 'kid', 'big', 'small', 'large', 'mini', 'super', 'combo'];
-      const tokensSelected = baseSelected.split(/[\s,\/]+/).filter(t => t.length >= 3 && !ignore.includes(t));
+      
+      const getPrefixes = (name) => {
+        const base = getBase(name);
+        const words = base.split(/[\s,\/]+/).filter(w => w.length >= 2 && !ignore.includes(w));
+        return words.map(w => w.slice(0, 5));
+      };
+      
+      const selectedPrefixes = getPrefixes(selectedProduct.n);
       
       return P.filter(p => {
         if (p.id === selectedProduct.id) return true;
-        const baseOther = getBase(p.n);
-        if (baseSelected === baseOther) return true;
-        if (baseOther.includes(baseSelected) || baseSelected.includes(baseOther)) {
-          if (baseSelected.length >= 3 && baseOther.length >= 3) return true;
-        }
-        const tokensOther = baseOther.split(/[\s,\/]+/).filter(t => t.length >= 3 && !ignore.includes(t));
-        return tokensSelected.some(t => tokensOther.includes(t));
+        const otherPrefixes = getPrefixes(p.n);
+        
+        return selectedPrefixes.some(p1 => 
+          otherPrefixes.some(p2 => p2.startsWith(p1) || p1.startsWith(p2))
+        );
       });
     }
 
