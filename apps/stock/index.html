@@ -4596,9 +4596,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         if (p.id === selectedProduct.id) return true;
         const otherPrefixes = getPrefixes(p.n);
         
-        return selectedPrefixes.some(p1 => 
-          otherPrefixes.some(p2 => p2.startsWith(p1) || p1.startsWith(p2))
-        );
+        return selectedPrefixes.some(p1 => otherPrefixes.includes(p1));
       });
     }
 
