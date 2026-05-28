@@ -4500,8 +4500,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
 
     // Product Analysis state
-    let paSelectedProduct = null;
-    let paSimilarProducts = [];
+    let paSelectedPids = [];
     let paSelectedSize = null;
     let paSelectedMonth = null;
 
@@ -4557,52 +4556,35 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
 
     function selectProductAnalysis(pid) {
-      const selected = P.find(x => x.id === pid);
-      if (!selected) return;
-      paSelectedProduct = selected;
-      
-      paSimilarProducts = getSimilarProducts(selected);
-      
+      if (!paSelectedPids.includes(pid)) {
+        paSelectedPids.push(pid);
+      }
       paSelectedSize = null;
       paSelectedMonth = null;
       
       document.getElementById('pa-month-section').style.display = 'none';
       document.getElementById('pa-date-section').style.display = 'none';
       
-      document.getElementById('pa-search-input').value = selected.n;
+      document.getElementById('pa-search-input').value = '';
       document.getElementById('pa-search-dropdown').style.display = 'none';
-      document.getElementById('pa-search-clear').style.display = 'block';
+      document.getElementById('pa-search-clear').style.display = 'none';
       
       renderProductAnalysisDetails();
     }
 
-    function getSimilarProducts(selectedProduct) {
-      const getBase = (name) => {
-        const parts = name.split('-');
-        return parts[0].trim().toLowerCase();
-      };
+    function deselectProductAnalysis(pid) {
+      paSelectedPids = paSelectedPids.filter(id => id !== pid);
+      paSelectedSize = null;
+      paSelectedMonth = null;
       
-      const ignore = ['set', 'and', 'the', 'for', 'with', 'pcs', 'piece', 'boys', "boys'", "boy's", 'girls', "girls'", "girl's", 'kids', 'kid', 'big', 'small', 'large', 'mini', 'super', 'combo'];
+      document.getElementById('pa-month-section').style.display = 'none';
+      document.getElementById('pa-date-section').style.display = 'none';
       
-      const getPrefixes = (name) => {
-        const base = getBase(name);
-        const words = base.split(/[\s,\/]+/).filter(w => w.length >= 2 && !ignore.includes(w));
-        return words.map(w => w.slice(0, 5));
-      };
-      
-      const selectedPrefixes = getPrefixes(selectedProduct.n);
-      
-      return P.filter(p => {
-        if (p.id === selectedProduct.id) return true;
-        const otherPrefixes = getPrefixes(p.n);
-        
-        return selectedPrefixes.some(p1 => otherPrefixes.includes(p1));
-      });
+      renderProductAnalysisDetails();
     }
 
     function clearProductAnalysisSearch() {
-      paSelectedProduct = null;
-      paSimilarProducts = [];
+      paSelectedPids = [];
       paSelectedSize = null;
       paSelectedMonth = null;
       
@@ -4618,23 +4600,33 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
 
     function renderProductAnalysisDetails() {
-      if (!paSelectedProduct) return;
+      if (paSelectedPids.length === 0) {
+        document.getElementById('pa-selection-summary').style.display = 'none';
+        document.getElementById('pa-kpi-container').style.display = 'none';
+        document.getElementById('pa-chart-section').style.display = 'none';
+        return;
+      }
+      
+      const selectedProds = P.filter(p => paSelectedPids.includes(p.id));
       
       const summaryEl = document.getElementById('pa-selection-summary');
-      const similarListText = paSimilarProducts.map(p => `<span class="badge" style="display:inline-block; background:rgba(99,102,241,0.1); color:var(--primary); padding:3px 8px; border-radius:4px; margin:2px; font-size:11px; font-weight:600;">${p.n}</span>`).join(' ');
+      const chipsHtml = selectedProds.map(p => `
+        <span class="badge" style="display:inline-flex; align-items:center; gap:6px; background:rgba(99,102,241,0.08); color:var(--primary); padding:5px 12px; border-radius:30px; margin:4px; font-size:12px; font-weight:700; border:1.5px solid rgba(99,102,241,0.15);">
+          ${p.n} 
+          <span onclick="deselectProductAnalysis('${p.id}')" style="cursor:pointer; color:var(--danger); font-weight:800; font-size:12px; margin-left:4px; display:inline-block; padding:0 2px;">✕</span>
+        </span>
+      `).join(' ');
+      
       summaryEl.innerHTML = `
-        <div style="font-weight:700; color:var(--text-main); margin-bottom:8px;">
-          Selected Product: <span style="color:var(--primary);">${paSelectedProduct.n}</span>
+        <div style="font-weight:700; color:var(--text-main); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+          <span>Selected Products (${selectedProds.length}):</span>
+          <button class="btn btn-ghost btn-sm" onclick="clearProductAnalysisSearch()" style="border-radius:4px; padding:2px 8px; font-size:10px;">Clear All</button>
         </div>
-        <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-          Aggregating data for <strong>${paSimilarProducts.length}</strong> matching/similar products:<br/>
-          <div style="margin-top:6px;">${similarListText}</div>
-        </div>
+        <div style="display:flex; flex-wrap:wrap; margin:-4px;">${chipsHtml}</div>
       `;
       summaryEl.style.display = 'block';
       
-      const pids = paSimilarProducts.map(p => p.id);
-      const txns = T.filter(t => pids.includes(t.pid));
+      const txns = T.filter(t => paSelectedPids.includes(t.pid));
       const totalIn = txns.filter(t => t.tp === 'IN').reduce((a, t) => a + t.q, 0);
       const totalOut = txns.filter(t => t.tp === 'OUT').reduce((a, t) => a + t.q, 0);
       
@@ -4658,7 +4650,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       `;
       document.getElementById('pa-kpi-container').style.display = 'block';
       
-      const categoryIds = [...new Set(paSimilarProducts.map(p => String(p.ci)))];
+      const categoryIds = [...new Set(selectedProds.map(p => String(p.ci)))];
       const allSizes = [];
       categoryIds.forEach(cid => {
         const catObj = S.categories.find(c => String(c.id) === cid);
@@ -4700,7 +4692,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       }).join('');
       
       document.getElementById('pa-chart-title').textContent = `Size-wise Outflow (Boxes Out)`;
-      document.getElementById('pa-chart-wrap').innerHTML = barsHtml || '<div class="empty-state">No outflows recorded for this product</div>';
+      document.getElementById('pa-chart-wrap').innerHTML = barsHtml || '<div class="empty-state">No outflows recorded for selected products</div>';
       document.getElementById('pa-chart-section').style.display = 'block';
     }
 
@@ -4713,8 +4705,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const barEl = document.getElementById('pa-bar-' + sz);
       if (barEl) barEl.classList.add('active');
       
-      const pids = paSimilarProducts.map(p => p.id);
-      const outTxns = T.filter(t => pids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz));
+      const outTxns = T.filter(t => paSelectedPids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz));
       
       const monthMap = {};
       outTxns.forEach(t => {
@@ -4751,8 +4742,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const monthEl = document.getElementById('pa-month-' + month);
       if (monthEl) monthEl.classList.add('active');
       
-      const pids = paSimilarProducts.map(p => p.id);
-      const filtered = T.filter(t => pids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz) && getMonthFromDateStr(t.d) === month);
+      const filtered = T.filter(t => paSelectedPids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz) && getMonthFromDateStr(t.d) === month);
       
       filtered.sort((a, b) => b.d.localeCompare(a.d));
       
@@ -4779,9 +4769,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
 
     function renderProductAnalysis() {
-      if (paSelectedProduct) {
-        renderProductAnalysisDetails();
-      }
+      renderProductAnalysisDetails();
     }
 
 
