@@ -2027,14 +2027,14 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         curSiRangeProducts = selectedPids;
         curSiFilterDate = null;
         curSiMonth = startDate.slice(0, 7);
-        renderSiHistory(curSiMonth, '');
+        renderSiHistory('', '');
       } else {
         curSoRangeStart = startDate;
         curSoRangeEnd = endDate;
         curSoRangeProducts = selectedPids;
         curSoFilterDate = null;
         curSoMonth = startDate.slice(0, 7);
-        renderSoHistory(curSoMonth, '');
+        renderSoHistory('', '');
       }
 
       closeCustomRangeModal();
