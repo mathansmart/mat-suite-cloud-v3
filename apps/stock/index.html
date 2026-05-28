@@ -1276,91 +1276,90 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       background: #fff0b3;
     }
 
-    /* Luxury Bar Chart Styles */
-    .lux-bar-container {
-      margin-bottom: 20px;
-      cursor: pointer;
-      position: relative;
-    }
-    .lux-bar-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .lux-bar-track {
-      height: 24px;
-      background: rgba(226, 232, 240, 0.5); /* Slate 200 soft */
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      border: 1px solid rgba(0,0,0,0.03);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-      transition: all 0.2s ease;
-    }
-    .lux-bar-fill {
-      height: 100%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%);
-      border-radius: 12px;
-      width: 0; /* Animated on render */
-      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
-    }
-    .lux-bar-container:hover .lux-bar-track {
-      background: rgba(226, 232, 240, 0.8);
-      transform: scaleY(1.05);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .lux-bar-container.active .lux-bar-fill {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
-    }
-    .lux-bar-container:hover .lux-bar-fill {
-      filter: brightness(1.05);
+    /* Premium Vertical Bar Chart Styles */
+    .pa-chart-container {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-end !important;
+      justify-content: flex-start !important;
+      height: 280px !important;
+      padding: 24px !important;
+      background: var(--surface) !important;
+      border: 1.5px solid var(--border) !important;
+      border-radius: var(--radius) !important;
+      gap: 16px !important;
+      margin-top: 10px !important;
+      overflow-x: auto !important;
+      box-shadow: var(--shadow) !important;
     }
     
-    .lux-month-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow);
-      text-align: center;
+    .pa-chart-col {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      flex: 1 !important;
+      min-width: 70px !important;
+      max-width: 100px !important;
+      height: 100% !important;
+      justify-content: flex-end !important;
+      transition: all 0.2s ease !important;
     }
-    .lux-month-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--primary);
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+    
+    .pa-chart-val {
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      color: var(--primary) !important;
+      margin-bottom: 8px !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      text-align: center !important;
+      transition: all 0.2s ease !important;
     }
-    .lux-month-card.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    
+    .pa-chart-bar-wrap {
+      width: 100% !important;
+      height: 160px !important;
+      display: flex !important;
+      align-items: flex-end !important;
+      position: relative !important;
     }
-    .lux-month-card.active .lux-month-lbl {
-      color: rgba(255,255,255,0.8);
+    
+    .pa-chart-bar {
+      width: 100% !important;
+      border-radius: 8px 8px 0 0 !important;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--violet) 100%) !important;
+      transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s, box-shadow 0.3s !important;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
     }
-    .lux-month-card.active .lux-month-val {
-      color: #fff;
+    
+    .pa-chart-lbl {
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      color: var(--text-muted) !important;
+      margin-top: 10px !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      transition: all 0.2s ease !important;
     }
-    .lux-month-lbl {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-      margin-bottom: 6px;
+    
+    /* Hover and Active states */
+    .pa-chart-col:hover .pa-chart-bar {
+      filter: brightness(1.08) !important;
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35) !important;
     }
-    .lux-month-val {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text-main);
-      font-family: 'Outfit', sans-serif;
+    
+    .pa-chart-col:hover .pa-chart-lbl {
+      color: var(--text-main) !important;
+    }
+    
+    .pa-chart-col.active .pa-chart-bar {
+      background: linear-gradient(180deg, var(--accent) 0%, var(--success) 100%) !important;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+    }
+    
+    .pa-chart-col.active .pa-chart-lbl {
+      color: var(--accent) !important;
+      font-weight: 900 !important;
     }
   </style>
 </head>
@@ -1659,36 +1658,16 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <!-- Size-wise Bar Chart Container -->
             <div id="pa-chart-section" style="display:none; margin-bottom:30px;">
               <div class="sec-title" id="pa-chart-title">Size-wise Distribution (Outflow)</div>
-              <div id="pa-chart-wrap" class="report-cat-card" style="padding:24px; background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border);">
-                <!-- Premium bars will be rendered here -->
+              <div id="pa-chart-wrap" class="pa-chart-container">
+                <!-- Premium vertical columns will be rendered here -->
               </div>
             </div>
 
-            <!-- Month-wise Breakdown (Shows after size click) -->
-            <div id="pa-month-section" style="display:none; margin-bottom:30px;">
-              <div class="sec-title" id="pa-month-title">Month-wise Outflow for Size</div>
-              <div id="pa-month-wrap" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
-                <!-- Cards for month outflow -->
-              </div>
-            </div>
-
-            <!-- Date-wise Breakdown (Shows after month click) -->
-            <div id="pa-date-section" style="display:none; margin-bottom:30px;">
-              <div class="sec-title" id="pa-date-title">Date-wise Outflow for Month</div>
-              <div class="table-wrap">
-                <table id="pa-date-table">
-                  <thead>
-                    <tr>
-                      <th style="padding:12px; text-align:left;">Date</th>
-                      <th style="padding:12px; text-align:center;">Product Name</th>
-                      <th style="padding:12px; text-align:center;">Size</th>
-                      <th style="padding:12px; text-align:right;">Quantity Out (Boxes)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="pa-date-tbody">
-                    <!-- Date rows -->
-                  </tbody>
-                </table>
+            <!-- Detailed Outflow Drilldown Section (Shows after size click) -->
+            <div id="pa-drilldown-section" style="display:none; margin-bottom:30px;">
+              <div class="sec-title" id="pa-drilldown-title">Outflow Details for Size</div>
+              <div id="pa-drilldown-content">
+                <!-- Grouped monthly tables will go here -->
               </div>
             </div>
 
@@ -1895,9 +1874,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     function todayD() { return i2d(new Date().toISOString().slice(0, 10)) }
     function todayStr() { return new Date().toISOString().slice(0, 10) }
     function getMonthFromDateStr(dStr) {
-      if (!dStr || typeof dStr !== 'string') return '';
-      const datePart = dStr.slice(0, 10);
-      const iso = d2i(datePart);
+      if (!dStr) return '';
+      const cleanDate = String(dStr).split('T')[0].split(' ')[0].trim();
+      const iso = d2i(cleanDate);
       return (iso && iso.length >= 7) ? iso.slice(0, 7) : '';
     }
     function getIsoDateStr(dStr) {
@@ -4562,8 +4541,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       paSelectedSize = null;
       paSelectedMonth = null;
       
-      document.getElementById('pa-month-section').style.display = 'none';
-      document.getElementById('pa-date-section').style.display = 'none';
+      document.getElementById('pa-drilldown-section').style.display = 'none';
       
       document.getElementById('pa-search-input').value = '';
       document.getElementById('pa-search-dropdown').style.display = 'none';
@@ -4577,8 +4555,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       paSelectedSize = null;
       paSelectedMonth = null;
       
-      document.getElementById('pa-month-section').style.display = 'none';
-      document.getElementById('pa-date-section').style.display = 'none';
+      document.getElementById('pa-drilldown-section').style.display = 'none';
       
       renderProductAnalysisDetails();
     }
@@ -4595,8 +4572,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       document.getElementById('pa-selection-summary').style.display = 'none';
       document.getElementById('pa-kpi-container').style.display = 'none';
       document.getElementById('pa-chart-section').style.display = 'none';
-      document.getElementById('pa-month-section').style.display = 'none';
-      document.getElementById('pa-date-section').style.display = 'none';
+      document.getElementById('pa-drilldown-section').style.display = 'none';
     }
 
     function renderProductAnalysisDetails() {
@@ -4604,6 +4580,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         document.getElementById('pa-selection-summary').style.display = 'none';
         document.getElementById('pa-kpi-container').style.display = 'none';
         document.getElementById('pa-chart-section').style.display = 'none';
+        document.getElementById('pa-drilldown-section').style.display = 'none';
         return;
       }
       
@@ -4674,98 +4651,108 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       
       const maxVal = Math.max(...Object.values(sizeOutflow), 1);
       
-      const barsHtml = allSizes.map(sz => {
+      const columnsHtml = allSizes.map(sz => {
         const val = sizeOutflow[sz] || 0;
-        const pct = ((val / maxVal) * 100).toFixed(0);
+        const pct = ((val / maxVal) * 160).toFixed(0); // max bar height is 160px
         const isActive = paSelectedSize === sz ? 'active' : '';
         return `
-          <div class="lux-bar-container ${isActive}" id="pa-bar-${sz}" onclick="onSelectSizeReport('${sz}')">
-            <div class="lux-bar-header">
-              <span style="font-size:13px; font-weight:700; color:var(--text-main);">Size ${sz}</span>
-              <span style="font-family:'JetBrains Mono',monospace; font-weight:800; color:var(--primary);">${val} Boxes Out</span>
+          <div class="pa-chart-col ${isActive}" id="pa-col-${sz}" onclick="onSelectSizeReport('${sz}')">
+            <div class="pa-chart-val">${val} Box${val !== 1 ? 'es' : ''}</div>
+            <div class="pa-chart-bar-wrap">
+              <div class="pa-chart-bar" style="height: ${pct}px;"></div>
             </div>
-            <div class="lux-bar-track">
-              <div class="lux-bar-fill" style="width: ${pct}%;"></div>
-            </div>
+            <div class="pa-chart-lbl">Size ${sz}</div>
           </div>
         `;
       }).join('');
       
       document.getElementById('pa-chart-title').textContent = `Size-wise Outflow (Boxes Out)`;
-      document.getElementById('pa-chart-wrap').innerHTML = barsHtml || '<div class="empty-state">No outflows recorded for selected products</div>';
+      document.getElementById('pa-chart-wrap').innerHTML = columnsHtml || '<div class="empty-state">No outflows recorded for selected products</div>';
       document.getElementById('pa-chart-section').style.display = 'block';
     }
 
     function onSelectSizeReport(sz) {
       paSelectedSize = sz;
-      paSelectedMonth = null;
-      document.getElementById('pa-date-section').style.display = 'none';
       
-      document.querySelectorAll('.lux-bar-container').forEach(el => el.classList.remove('active'));
-      const barEl = document.getElementById('pa-bar-' + sz);
-      if (barEl) barEl.classList.add('active');
+      document.querySelectorAll('.pa-chart-col').forEach(el => el.classList.remove('active'));
+      const colEl = document.getElementById('pa-col-' + sz);
+      if (colEl) colEl.classList.add('active');
       
-      const outTxns = T.filter(t => paSelectedPids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz));
+      const outTxns = T.filter(t => 
+        paSelectedPids.includes(t.pid) && 
+        t.tp && t.tp.toUpperCase() === 'OUT' && 
+        t.sz && String(t.sz).trim().toUpperCase() === String(sz).trim().toUpperCase()
+      );
       
       const monthMap = {};
       outTxns.forEach(t => {
         const month = getMonthFromDateStr(t.d);
-        if (month) monthMap[month] = (monthMap[month] || 0) + t.q;
+        if (month) {
+          if (!monthMap[month]) monthMap[month] = [];
+          monthMap[month].push(t);
+        }
       });
       
       const sortedMonths = Object.keys(monthMap).sort((a, b) => b.localeCompare(a));
       
-      const monthHtml = sortedMonths.map(month => {
-        const val = monthMap[month];
-        const [y, m] = month.split('-');
-        const monthLabel = new Date(parseInt(y), parseInt(m) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+      if (sortedMonths.length === 0) {
+        document.getElementById('pa-drilldown-content').innerHTML = '<div class="empty-state">No monthly outflow history found for this size</div>';
+        document.getElementById('pa-drilldown-section').style.display = 'block';
+        return;
+      }
+      
+      const drilldownHtml = sortedMonths.map(month => {
+        const txns = monthMap[month];
+        txns.sort((a, b) => b.d.localeCompare(a.d));
+        
+        const parts = month.split('-');
+        const y = parseInt(parts[0]) || new Date().getFullYear();
+        const m = parseInt(parts[1]) || (new Date().getMonth() + 1);
+        const monthLabel = new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+        const monthTotal = txns.reduce((sum, t) => sum + t.q, 0);
+        
+        const rowsHtml = txns.map(t => {
+          const formattedDate = i2d(t.d.slice(0, 10));
+          return `
+            <tr>
+              <td style="padding:10px 12px; font-weight:700; font-family:'JetBrains Mono',monospace;">${formattedDate}</td>
+              <td style="padding:10px 12px; text-align:center;">${t.pn}</td>
+              <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--primary);">${t.sz}</td>
+              <td style="padding:10px 12px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--danger);">${t.q}</td>
+            </tr>
+          `;
+        }).join('');
+        
         return `
-          <div class="lux-month-card" id="pa-month-${month}" onclick="onSelectMonthReport('${sz}', '${month}')">
-            <div class="lux-month-lbl">${monthLabel}</div>
-            <div class="lux-month-val">${val}</div>
-            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Boxes Out</div>
+          <div style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:var(--surface2); padding:10px 16px; border-radius:8px; border:1px solid var(--border);">
+              <span style="font-size:14px; font-weight:800; color:var(--text-main); font-family:'Outfit', sans-serif;">📅 ${monthLabel}</span>
+              <span style="font-size:13px; font-weight:800; color:var(--danger); font-family:'JetBrains Mono',monospace;">Total: ${monthTotal} Boxes Out</span>
+            </div>
+            <div class="table-wrap" style="margin-bottom:0;">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="padding:10px 12px; text-align:left;">Date</th>
+                    <th style="padding:10px 12px; text-align:center;">Product Name</th>
+                    <th style="padding:10px 12px; text-align:center;">Size</th>
+                    <th style="padding:10px 12px; text-align:right;">Quantity Out (Boxes)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml}
+                </tbody>
+              </table>
+            </div>
           </div>
         `;
       }).join('');
       
-      document.getElementById('pa-month-title').textContent = `Month-wise Outflow for Size: ${sz}`;
-      document.getElementById('pa-month-wrap').innerHTML = monthHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--muted); font-size:13px;">No monthly history found for this size</div>';
-      document.getElementById('pa-month-section').style.display = 'block';
+      document.getElementById('pa-drilldown-title').textContent = `Outflow Breakdown for Size: ${sz}`;
+      document.getElementById('pa-drilldown-content').innerHTML = drilldownHtml;
+      document.getElementById('pa-drilldown-section').style.display = 'block';
       
-      document.getElementById('pa-month-section').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function onSelectMonthReport(sz, month) {
-      paSelectedMonth = month;
-      
-      document.querySelectorAll('.lux-month-card').forEach(el => el.classList.remove('active'));
-      const monthEl = document.getElementById('pa-month-' + month);
-      if (monthEl) monthEl.classList.add('active');
-      
-      const filtered = T.filter(t => paSelectedPids.includes(t.pid) && t.tp === 'OUT' && String(t.sz) === String(sz) && getMonthFromDateStr(t.d) === month);
-      
-      filtered.sort((a, b) => b.d.localeCompare(a.d));
-      
-      const rowsHtml = filtered.map(t => {
-        const formattedDate = i2d(t.d.slice(0, 10));
-        return `
-          <tr>
-            <td style="padding:10px 12px; font-weight:700; font-family:'JetBrains Mono',monospace;">${formattedDate}</td>
-            <td style="padding:10px 12px; text-align:center;">${t.pn}</td>
-            <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--primary);">${t.sz}</td>
-            <td style="padding:10px 12px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--danger);">${t.q}</td>
-          </tr>
-        `;
-      }).join('');
-      
-      const [y, m] = month.split('-');
-      const monthLabel = new Date(parseInt(y), parseInt(m) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-      
-      document.getElementById('pa-date-title').textContent = `Date-wise Outflow for ${monthLabel} (Size: ${sz})`;
-      document.getElementById('pa-date-tbody').innerHTML = rowsHtml || '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">No record found</td></tr>';
-      document.getElementById('pa-date-section').style.display = 'block';
-      
-      document.getElementById('pa-date-section').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('pa-drilldown-section').scrollIntoView({ behavior: 'smooth' });
     }
 
     function renderProductAnalysis() {
