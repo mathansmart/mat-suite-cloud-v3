@@ -1650,25 +1650,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               <!-- Will be updated dynamically -->
             </div>
 
-            <!-- KPI Box: Total In / Out Summary -->
-            <div id="pa-kpi-container" style="display:none; margin-bottom:24px;">
-              <!-- Cards for Total In and Total Out -->
-            </div>
-
-            <!-- Size-wise Bar Chart Container -->
-            <div id="pa-chart-section" style="display:none; margin-bottom:30px;">
-              <div class="sec-title" id="pa-chart-title">Size-wise Distribution (Outflow)</div>
-              <div id="pa-chart-wrap" class="pa-chart-container">
-                <!-- Premium vertical columns will be rendered here -->
-              </div>
-            </div>
-
-            <!-- Detailed Outflow Drilldown Section (Shows after size click) -->
-            <div id="pa-drilldown-section" style="display:none; margin-bottom:30px;">
-              <div class="sec-title" id="pa-drilldown-title">Outflow Details for Size</div>
-              <div id="pa-drilldown-content">
-                <!-- Grouped monthly tables will go here -->
-              </div>
+            <!-- Container for decoupled product analyses -->
+            <div id="pa-products-container" style="display:none; margin-top:24px;">
+              <!-- Dynamically rendered per-product blocks -->
             </div>
 
           </div>
@@ -4480,8 +4464,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
     // Product Analysis state
     let paSelectedPids = [];
-    let paSelectedSize = null;
-    let paSelectedMonth = null;
+    let paProductSizeSelection = {};
+    let paProductMonthSelection = {};
 
     function onProductAnalysisSearch() {
       const q = document.getElementById('pa-search-input').value.toLowerCase().trim();
@@ -4538,10 +4522,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       if (!paSelectedPids.includes(pid)) {
         paSelectedPids.push(pid);
       }
-      paSelectedSize = null;
-      paSelectedMonth = null;
-      
-      document.getElementById('pa-drilldown-section').style.display = 'none';
+      paProductSizeSelection[pid] = null;
+      paProductMonthSelection[pid] = null;
       
       document.getElementById('pa-search-input').value = '';
       document.getElementById('pa-search-dropdown').style.display = 'none';
@@ -4552,207 +4534,278 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
     function deselectProductAnalysis(pid) {
       paSelectedPids = paSelectedPids.filter(id => id !== pid);
-      paSelectedSize = null;
-      paSelectedMonth = null;
-      
-      document.getElementById('pa-drilldown-section').style.display = 'none';
+      delete paProductSizeSelection[pid];
+      delete paProductMonthSelection[pid];
       
       renderProductAnalysisDetails();
     }
 
     function clearProductAnalysisSearch() {
       paSelectedPids = [];
-      paSelectedSize = null;
-      paSelectedMonth = null;
+      paProductSizeSelection = {};
+      paProductMonthSelection = {};
       
       document.getElementById('pa-search-input').value = '';
       document.getElementById('pa-search-dropdown').style.display = 'none';
       document.getElementById('pa-search-clear').style.display = 'none';
       
       document.getElementById('pa-selection-summary').style.display = 'none';
-      document.getElementById('pa-kpi-container').style.display = 'none';
-      document.getElementById('pa-chart-section').style.display = 'none';
-      document.getElementById('pa-drilldown-section').style.display = 'none';
+      document.getElementById('pa-products-container').innerHTML = '';
+      document.getElementById('pa-products-container').style.display = 'none';
     }
 
     function renderProductAnalysisDetails() {
+      const container = document.getElementById('pa-products-container');
+      const summaryEl = document.getElementById('pa-selection-summary');
+
       if (paSelectedPids.length === 0) {
-        document.getElementById('pa-selection-summary').style.display = 'none';
-        document.getElementById('pa-kpi-container').style.display = 'none';
-        document.getElementById('pa-chart-section').style.display = 'none';
-        document.getElementById('pa-drilldown-section').style.display = 'none';
+        if (summaryEl) summaryEl.style.display = 'none';
+        if (container) {
+          container.innerHTML = '';
+          container.style.display = 'none';
+        }
         return;
       }
       
       const selectedProds = P.filter(p => paSelectedPids.includes(p.id));
       
-      const summaryEl = document.getElementById('pa-selection-summary');
-      const chipsHtml = selectedProds.map(p => `
-        <span class="badge" style="display:inline-flex; align-items:center; gap:6px; background:rgba(99,102,241,0.08); color:var(--primary); padding:5px 12px; border-radius:30px; margin:4px; font-size:12px; font-weight:700; border:1.5px solid rgba(99,102,241,0.15);">
-          ${p.n} 
-          <span onclick="deselectProductAnalysis('${p.id}')" style="cursor:pointer; color:var(--danger); font-weight:800; font-size:12px; margin-left:4px; display:inline-block; padding:0 2px;">✕</span>
-        </span>
-      `).join(' ');
-      
-      summaryEl.innerHTML = `
-        <div style="font-weight:700; color:var(--text-main); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-          <span>Selected Products (${selectedProds.length}):</span>
-          <button class="btn btn-ghost btn-sm" onclick="clearProductAnalysisSearch()" style="border-radius:4px; padding:2px 8px; font-size:10px;">Clear All</button>
-        </div>
-        <div style="display:flex; flex-wrap:wrap; margin:-4px;">${chipsHtml}</div>
-      `;
-      summaryEl.style.display = 'block';
-      
-      const txns = T.filter(t => paSelectedPids.includes(t.pid));
-      const totalIn = txns.filter(t => t.tp === 'IN').reduce((a, t) => a + t.q, 0);
-      const totalOut = txns.filter(t => t.tp === 'OUT').reduce((a, t) => a + t.q, 0);
-      
-      document.getElementById('pa-kpi-container').innerHTML = `
-        <div class="stat-grid">
-          <div class="stat-card c2">
-            <div class="stat-icon-wrap">↓</div>
-            <div class="stat-info">
-              <div class="stat-label">Total In (Boxes)</div>
-              <div class="stat-value" style="font-family:'JetBrains Mono',monospace;">${totalIn}</div>
-            </div>
+      if (summaryEl) {
+        const chipsHtml = selectedProds.map(p => `
+          <span class="badge" style="display:inline-flex; align-items:center; gap:6px; background:rgba(99,102,241,0.08); color:var(--primary); padding:5px 12px; border-radius:30px; margin:4px; font-size:12px; font-weight:700; border:1.5px solid rgba(99,102,241,0.15);">
+            ${p.n} 
+            <span onclick="deselectProductAnalysis('${p.id}')" style="cursor:pointer; color:var(--danger); font-weight:800; font-size:12px; margin-left:4px; display:inline-block; padding:0 2px;">✕</span>
+          </span>
+        `).join(' ');
+        
+        summaryEl.innerHTML = `
+          <div style="font-weight:700; color:var(--text-main); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Selected Products (${selectedProds.length}):</span>
+            <button class="btn btn-ghost btn-sm" onclick="clearProductAnalysisSearch()" style="border-radius:4px; padding:2px 8px; font-size:10px;">Clear All</button>
           </div>
-          <div class="stat-card c1">
-            <div class="stat-icon-wrap">↑</div>
-            <div class="stat-info">
-              <div class="stat-label">Total Out (Boxes)</div>
-              <div class="stat-value" style="font-family:'JetBrains Mono',monospace; color:var(--danger);">${totalOut}</div>
-            </div>
-          </div>
-        </div>
-      `;
-      document.getElementById('pa-kpi-container').style.display = 'block';
+          <div style="display:flex; flex-wrap:wrap; margin:-4px;">${chipsHtml}</div>
+        `;
+        summaryEl.style.display = 'block';
+      }
       
-      const categoryIds = [...new Set(selectedProds.map(p => String(p.ci)))];
-      const allSizes = [];
-      categoryIds.forEach(cid => {
-        const catObj = S.categories.find(c => String(c.id) === cid);
-        if (catObj && catObj.sizes) {
-          catObj.sizes.forEach(sz => {
-            if (!allSizes.includes(sz)) allSizes.push(sz);
+      const productsHtml = selectedProds.map(p => {
+        const pid = p.id;
+        const pTxns = T.filter(t => t.pid === pid);
+        const totalIn = pTxns.filter(t => t.tp === 'IN').reduce((a, t) => a + t.q, 0);
+        const totalOut = pTxns.filter(t => t.tp === 'OUT').reduce((a, t) => a + t.q, 0);
+        
+        const catObj = S.categories.find(c => String(c.id) === String(p.ci));
+        const sizes = (catObj && catObj.sizes) ? [...catObj.sizes] : [];
+        
+        const sizeOutflow = {};
+        sizes.forEach(sz => sizeOutflow[sz] = 0);
+        pTxns.filter(t => t.tp === 'OUT').forEach(t => {
+          const tSize = String(t.sz).trim();
+          if (sizeOutflow[tSize] !== undefined) {
+            sizeOutflow[tSize] += t.q;
+          } else {
+            sizeOutflow[tSize] = t.q;
+            if (!sizes.includes(tSize)) sizes.push(tSize);
+          }
+        });
+        
+        const maxVal = Math.max(...Object.values(sizeOutflow), 1);
+        const selectedSize = paProductSizeSelection[pid];
+        
+        const columnsHtml = sizes.map(sz => {
+          const val = sizeOutflow[sz] || 0;
+          const pct = ((val / maxVal) * 160).toFixed(0);
+          const isActive = selectedSize === sz ? 'active' : '';
+          return `
+            <div class="pa-chart-col ${isActive}" id="pa-col-${pid}-${sz}" onclick="onSelectSizeReport('${pid}', '${sz}')" style="cursor:pointer;">
+              <div class="pa-chart-val">${val} Box${val !== 1 ? 'es' : ''}</div>
+              <div class="pa-chart-bar-wrap">
+                <div class="pa-chart-bar" style="height: ${pct}px;"></div>
+              </div>
+              <div class="pa-chart-lbl">Size ${sz}</div>
+            </div>
+          `;
+        }).join('');
+        
+        let drilldownSectionHtml = '';
+        if (selectedSize) {
+          const outTxns = pTxns.filter(t => 
+            t.tp && t.tp.toUpperCase() === 'OUT' && 
+            t.sz && String(t.sz).trim().toUpperCase() === String(selectedSize).trim().toUpperCase()
+          );
+          
+          const monthMap = {};
+          outTxns.forEach(t => {
+            const m = getMonthFromDateStr(t.d);
+            if (m) {
+              if (!monthMap[m]) monthMap[m] = [];
+              monthMap[m].push(t);
+            }
           });
-        }
-      });
-      
-      const sizeOutflow = {};
-      allSizes.forEach(sz => sizeOutflow[sz] = 0);
-      txns.filter(t => t.tp === 'OUT').forEach(t => {
-        if (sizeOutflow[t.sz] !== undefined) {
-          sizeOutflow[t.sz] += t.q;
+          
+          const sortedMonths = Object.keys(monthMap).sort((a, b) => b.localeCompare(a));
+          
+          if (sortedMonths.length === 0) {
+            drilldownSectionHtml = `
+              <div style="margin-top:20px; border-top: 1px solid var(--border); padding-top:20px;">
+                <div style="font-weight: 800; color: var(--text-main); font-size:14px; margin-bottom:12px;">Outflow Details for Size: ${selectedSize}</div>
+                <div class="empty-state" style="padding:20px;">No monthly outflow history found for Size ${selectedSize}</div>
+              </div>
+            `;
+          } else {
+            let selectedMonth = paProductMonthSelection[pid];
+            if (!selectedMonth || !sortedMonths.includes(selectedMonth)) {
+              selectedMonth = sortedMonths[0];
+              paProductMonthSelection[pid] = selectedMonth;
+            }
+            
+            const monthTabsHtml = sortedMonths.map(m => {
+              const parts = m.split('-');
+              const y = parseInt(parts[0]) || new Date().getFullYear();
+              const mon = parseInt(parts[1]) || (new Date().getMonth() + 1);
+              const monthLabel = new Date(y, mon - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+              const isActive = selectedMonth === m;
+              
+              const mTotal = monthMap[m].reduce((sum, t) => sum + t.q, 0);
+              
+              const activeStyle = isActive 
+                ? 'background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;' 
+                : 'background: var(--surface2); color: var(--text-main); border-color: var(--border);';
+                
+              return `
+                <button class="btn btn-sm" onclick="onSelectMonthReport('${pid}', '${m}')" style="border-radius: 20px; padding: 6px 14px; font-size: 12px; transition: all 0.2s ease; border: 1.5px solid var(--border); margin-right: 8px; margin-bottom: 8px; ${activeStyle}">
+                  ${monthLabel} (${mTotal})
+                </button>
+              `;
+            }).join('');
+            
+            const txnsForMonth = monthMap[selectedMonth] || [];
+            txnsForMonth.sort((a, b) => b.d.localeCompare(a.d));
+            
+            const monthParts = selectedMonth.split('-');
+            const y = parseInt(monthParts[0]) || new Date().getFullYear();
+            const mon = parseInt(monthParts[1]) || (new Date().getMonth() + 1);
+            const selectedMonthLabel = new Date(y, mon - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+            const monthTotal = txnsForMonth.reduce((sum, t) => sum + t.q, 0);
+            
+            const rowsHtml = txnsForMonth.map(t => {
+              const formattedDate = i2d(t.d.slice(0, 10));
+              return `
+                <tr>
+                  <td style="padding:10px 12px; font-weight:700; font-family:'JetBrains Mono',monospace;">${formattedDate}</td>
+                  <td style="padding:10px 12px; text-align:center;">${t.pn}</td>
+                  <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--primary);">${t.sz}</td>
+                  <td style="padding:10px 12px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--danger);">${t.q}</td>
+                </tr>
+              `;
+            }).join('');
+            
+            drilldownSectionHtml = `
+              <div style="margin-top:20px; border-top: 1px solid var(--border); padding-top:20px;">
+                <div style="font-weight: 800; color: var(--text-main); font-size:14px; margin-bottom:12px;">Outflow Details for Size: ${selectedSize}</div>
+                <div style="margin-bottom: 8px; font-weight: 700; color: var(--text-muted); font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Select Month:</div>
+                <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px;">
+                  ${monthTabsHtml}
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:var(--surface2); padding:10px 16px; border-radius:8px; border:1px solid var(--border);">
+                  <span style="font-size:14px; font-weight:800; color:var(--text-main); font-family:'Outfit', sans-serif;">📅 ${selectedMonthLabel} Details</span>
+                  <span style="font-size:13px; font-weight:800; color:var(--danger); font-family:'JetBrains Mono',monospace;">Total: ${monthTotal} Boxes Out</span>
+                </div>
+                <div class="table-wrap" style="margin-bottom:0; overflow-x:auto;">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style="padding:10px 12px; text-align:left;">Date</th>
+                        <th style="padding:10px 12px; text-align:center;">Product Name</th>
+                        <th style="padding:10px 12px; text-align:center;">Size</th>
+                        <th style="padding:10px 12px; text-align:right;">Quantity Out (Boxes)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${rowsHtml}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            `;
+          }
         } else {
-          sizeOutflow[t.sz] = t.q;
-          if (!allSizes.includes(t.sz)) allSizes.push(t.sz);
-        }
-      });
-      
-      const maxVal = Math.max(...Object.values(sizeOutflow), 1);
-      
-      const columnsHtml = allSizes.map(sz => {
-        const val = sizeOutflow[sz] || 0;
-        const pct = ((val / maxVal) * 160).toFixed(0); // max bar height is 160px
-        const isActive = paSelectedSize === sz ? 'active' : '';
-        return `
-          <div class="pa-chart-col ${isActive}" id="pa-col-${sz}" onclick="onSelectSizeReport('${sz}')">
-            <div class="pa-chart-val">${val} Box${val !== 1 ? 'es' : ''}</div>
-            <div class="pa-chart-bar-wrap">
-              <div class="pa-chart-bar" style="height: ${pct}px;"></div>
+          drilldownSectionHtml = `
+            <div style="margin-top:20px; border-top: 1px solid var(--border); padding-top:20px; text-align:center; color:var(--muted); font-size:13px;">
+              💡 Click any size column in the chart above to view monthly outflow breakdown.
             </div>
-            <div class="pa-chart-lbl">Size ${sz}</div>
+          `;
+        }
+        
+        return `
+          <div class="card premium-card" style="margin-bottom:30px; padding:24px; border:1.5px solid var(--border); background:var(--surface); border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.02);">
+            <!-- Product Header -->
+            <div style="font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+              <span style="display:flex; align-items:center; gap:8px;">📦 ${p.n} <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">(${cn(p.ci)})</span></span>
+              <button class="btn btn-ghost btn-sm" onclick="deselectProductAnalysis('${pid}')" style="color:var(--danger); padding:2px 8px; font-size:11px;">Remove</button>
+            </div>
+            
+            <!-- KPIs -->
+            <div class="stat-grid" style="margin-bottom:20px; display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+              <div class="stat-card c2" style="padding: 12px 16px;">
+                <div class="stat-icon-wrap" style="width: 32px; height: 32px; font-size: 14px; line-height: 32px;">↓</div>
+                <div class="stat-info">
+                  <div class="stat-label" style="font-size: 11px;">Total In (Boxes)</div>
+                  <div class="stat-value" style="font-size: 18px; font-family:'JetBrains Mono',monospace;">${totalIn}</div>
+                </div>
+              </div>
+              <div class="stat-card c1" style="padding: 12px 16px;">
+                <div class="stat-icon-wrap" style="width: 32px; height: 32px; font-size: 14px; line-height: 32px;">↑</div>
+                <div class="stat-info">
+                  <div class="stat-label" style="font-size: 11px;">Total Out (Boxes)</div>
+                  <div class="stat-value" style="font-size: 18px; font-family:'JetBrains Mono',monospace; color:var(--danger);">${totalOut}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:12px;">Size-wise Distribution (Outflow)</div>
+              <div class="pa-chart-container" style="display: flex; gap: 12px; align-items: flex-end; padding: 20px 10px; background: var(--surface2); border-radius: 12px; border: 1.5px solid var(--border); overflow-x: auto; min-height: 220px;">
+                ${columnsHtml || '<div class="empty-state" style="width:100%; text-align:center;">No outflows recorded for this product</div>'}
+              </div>
+            </div>
+            
+            <!-- Drilldown Details Section -->
+            ${drilldownSectionHtml}
           </div>
         `;
       }).join('');
-      
-      document.getElementById('pa-chart-title').textContent = `Size-wise Outflow (Boxes Out)`;
-      document.getElementById('pa-chart-wrap').innerHTML = columnsHtml || '<div class="empty-state">No outflows recorded for selected products</div>';
-      document.getElementById('pa-chart-section').style.display = 'block';
+
+      if (container) {
+        container.innerHTML = productsHtml;
+        container.style.display = 'block';
+      }
     }
 
-    function onSelectSizeReport(sz) {
-      paSelectedSize = sz;
-      
-      document.querySelectorAll('.pa-chart-col').forEach(el => el.classList.remove('active'));
-      const colEl = document.getElementById('pa-col-' + sz);
-      if (colEl) colEl.classList.add('active');
+    function onSelectSizeReport(pid, sz) {
+      paProductSizeSelection[pid] = sz;
       
       const outTxns = T.filter(t => 
-        paSelectedPids.includes(t.pid) && 
+        t.pid === pid && 
         t.tp && t.tp.toUpperCase() === 'OUT' && 
         t.sz && String(t.sz).trim().toUpperCase() === String(sz).trim().toUpperCase()
       );
       
-      const monthMap = {};
-      outTxns.forEach(t => {
-        const month = getMonthFromDateStr(t.d);
-        if (month) {
-          if (!monthMap[month]) monthMap[month] = [];
-          monthMap[month].push(t);
-        }
-      });
+      const months = [...new Set(outTxns.map(t => getMonthFromDateStr(t.d)).filter(Boolean))].sort((a, b) => b.localeCompare(a));
       
-      const sortedMonths = Object.keys(monthMap).sort((a, b) => b.localeCompare(a));
-      
-      if (sortedMonths.length === 0) {
-        document.getElementById('pa-drilldown-content').innerHTML = '<div class="empty-state">No monthly outflow history found for this size</div>';
-        document.getElementById('pa-drilldown-section').style.display = 'block';
-        return;
+      if (months.length > 0) {
+        paProductMonthSelection[pid] = months[0];
+      } else {
+        paProductMonthSelection[pid] = null;
       }
       
-      const drilldownHtml = sortedMonths.map(month => {
-        const txns = monthMap[month];
-        txns.sort((a, b) => b.d.localeCompare(a.d));
-        
-        const parts = month.split('-');
-        const y = parseInt(parts[0]) || new Date().getFullYear();
-        const m = parseInt(parts[1]) || (new Date().getMonth() + 1);
-        const monthLabel = new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-        const monthTotal = txns.reduce((sum, t) => sum + t.q, 0);
-        
-        const rowsHtml = txns.map(t => {
-          const formattedDate = i2d(t.d.slice(0, 10));
-          return `
-            <tr>
-              <td style="padding:10px 12px; font-weight:700; font-family:'JetBrains Mono',monospace;">${formattedDate}</td>
-              <td style="padding:10px 12px; text-align:center;">${t.pn}</td>
-              <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--primary);">${t.sz}</td>
-              <td style="padding:10px 12px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--danger);">${t.q}</td>
-            </tr>
-          `;
-        }).join('');
-        
-        return `
-          <div style="margin-bottom:24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:var(--surface2); padding:10px 16px; border-radius:8px; border:1px solid var(--border);">
-              <span style="font-size:14px; font-weight:800; color:var(--text-main); font-family:'Outfit', sans-serif;">📅 ${monthLabel}</span>
-              <span style="font-size:13px; font-weight:800; color:var(--danger); font-family:'JetBrains Mono',monospace;">Total: ${monthTotal} Boxes Out</span>
-            </div>
-            <div class="table-wrap" style="margin-bottom:0;">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="padding:10px 12px; text-align:left;">Date</th>
-                    <th style="padding:10px 12px; text-align:center;">Product Name</th>
-                    <th style="padding:10px 12px; text-align:center;">Size</th>
-                    <th style="padding:10px 12px; text-align:right;">Quantity Out (Boxes)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rowsHtml}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      document.getElementById('pa-drilldown-title').textContent = `Outflow Breakdown for Size: ${sz}`;
-      document.getElementById('pa-drilldown-content').innerHTML = drilldownHtml;
-      document.getElementById('pa-drilldown-section').style.display = 'block';
-      
-      document.getElementById('pa-drilldown-section').scrollIntoView({ behavior: 'smooth' });
+      renderProductAnalysisDetails();
+    }
+
+    function onSelectMonthReport(pid, month) {
+      paProductMonthSelection[pid] = month;
+      renderProductAnalysisDetails();
     }
 
     function renderProductAnalysis() {
