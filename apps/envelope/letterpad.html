@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Pad Suite - Envelope Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader-content">
+            <div class="loader-icon">📝</div>
+            <h2>Letter Pad<span>SUITE</span></h2>
+            <p id="loading-status">Loading Company Profile...</p>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+        </div>
+    </div>
+
+    <div class="glass-background"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <h2 style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px;">
+                    <span style="font-size: 1.8rem;">📝</span>
+                    <span style="font-size: 1.1rem; letter-spacing: 1px; font-weight: 800;">Letter Pad<span>SUITE</span></span>
+                </h2>
+                <div id="selected-company-badge" style="background: linear-gradient(135deg, #ec4899, #db2777); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.5px; margin-top: 10px; text-transform: uppercase; text-align: center; box-shadow: 0 4px 10px rgba(219,39,119,0.25); max-width: 100%; word-break: break-all;"></div>
+            </div>
+            
+            <a href="#" id="back-to-addressbook-btn" style="display: flex; align-items: center; justify-content: center; background: #e11d48; color: #fff; font-weight: 600; padding: 8px 10px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; border: 1.5px solid #be123c; gap: 5px;">
+                🏠 Back to Address Book
+            </a>
+
+
+
+            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.2);">＋ New Contact</button>
+            
+            <button id="open-settings-btn" class="btn secondary" style="justify-content: center; padding: 8px; font-size: 0.8rem; width: 100%;">⚙️ Letter Pad Settings</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="off">
+                </div>
+                <div class="header-actions">
+                    <button id="bulk-print-btn" class="btn primary" style="background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.25);">🖨️ PRINT LETTER PAD</button>
+                    <button id="select-all-btn" class="btn tertiary">Select All</button>
+                    <button id="unselect-all-btn" class="btn tertiary">Deselect All</button>
+                </div>
+            </header>
+
+            <div style="margin-bottom: 1.5rem;">
+                <h1 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Letter Pad Address Book</h1>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">Select the contacts to print on this company's Letter Pad.</p>
+            </div>
+
+            <!-- Category Filter Cards -->
+            <div style="margin-bottom: 1.8rem;">
+                <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+
+            <section class="address-grid" id="address-list">
+                <!-- Address cards will be injected here -->
+            </section>
+
+            <!-- Footer -->
+            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px; font-family: 'Outfit', sans-serif;">
+                <p style="font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7;">Designed & Developed</p>
+                <p style="font-size: 0.9rem; font-weight: 800; color: var(--text-primary); letter-spacing: 1px; opacity: 0.8;">by mathan</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Letter Pad Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden" style="z-index: 2000;">
+        <div class="modal" style="max-width: 550px; width: 90%; max-height: 95vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 8px;">⚙️ Letter Pad Settings</h2>
+                <button id="close-settings-btn" class="btn ghost" style="padding: 5px; font-size: 1.2rem;">✖️</button>
+            </div>
+            
+            <div class="format-selector" style="margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <button class="settings-tab-btn active" data-tab="layout">Print Layout</button>
+                <button class="settings-tab-btn" data-tab="categories">Categories</button>
+            </div>
+
+            <!-- Print Layout Settings Pane -->
+            <div id="pane-layout" class="settings-pane active">
+                <div class="control-group">
+                    <h3>Font Options</h3>
+                    <label>Font Family (Letter Model)</label>
+                    <select id="font-family">
+                        <option value="'Outfit', sans-serif" style="font-family: 'Outfit', sans-serif;">Premium (Outfit)</option>
+                        <option value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Modern (Montserrat)</option>
+                        <option value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif;">Elegant (Playfair)</option>
+                        <option value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">Traditional (Times New Roman)</option>
+                        <option value="'Georgia', serif" style="font-family: 'Georgia', serif;">Refined (Georgia)</option>
+                        <option value="'Courier New', monospace" style="font-family: 'Courier New', monospace;">Classic (Typewriter)</option>
+                    </select>
+
+                    <label style="margin-top: 8px;">Font Size (pt)</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="font-size" min="12" max="60" value="18">
+                        <input type="number" id="font-size-num" min="12" max="60" value="18" style="width: 50px;">
+                    </div>
+
+                    <label style="margin-top: 8px;">Line Spacing</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="range" id="line-height" min="1" max="2.5" step="0.1" value="1.2">
+                        <input type="number" id="line-height-num" min="1" max="2.5" step="0.1" value="1.2" style="width: 50px;">
+                    </div>
+
+                    <label style="margin-top: 8px;">Weight</label>
+                    <select id="font-weight">
+                        <option value="300">Light</option>
+                        <option value="400">Regular</option>
+                        <option value="600">Semi-Bold</option>
+                        <option value="700">Bold</option>
+                    </select>
+                </div>
+
+                <div class="control-group" style="margin-top: 1rem;">
+                    <h3>Layout Margins (mm)</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">Adjust to position text perfectly on physical pre-printed Letter Pad sheets.</p>
+                    <div class="input-row">
+                        <label>Top Shift</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="range" id="top-margin" min="0" max="200" value="50">
+                            <input type="number" id="top-margin-num" min="0" max="200" value="50" style="width: 50px;">
+                        </div>
+                    </div>
+                    <div class="input-row" style="margin-top: 8px;">
+                        <label>Left Shift</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="range" id="left-margin" min="0" max="200" value="20">
+                            <input type="number" id="left-margin-num" min="0" max="200" value="20" style="width: 50px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group" style="margin-top: 1rem;">
+                    <h3>Letter Pad Header Options</h3>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="print-header" checked style="width: 18px; height: 18px;"> Print Company Name Header
+                    </label>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 28px; margin-top: 2px;">
+                        If checked, prints the company name at the top. If unchecked, leaves empty space for pre-printed letterheads.
+                    </p>
+                    
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px;">
+                        <input type="checkbox" id="add-prefix" checked style="width: 18px; height: 18px;"> Add "To. M/s,"
+                    </label>
+                </div>
+            </div>
+
+            <!-- Categories Settings Pane -->
+            <div id="pane-categories" class="settings-pane">
+                <div class="control-group">
+                    <h3>Manage Letter Pad Categories</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">Add categories to organize this company's Letter Pad contacts.</p>
+                    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                        <input type="text" id="new-category-input" placeholder="New Category Name..." style="padding: 0.8rem; font-size: 0.9rem; border-radius: 8px; border: 1px solid #E2E8F0; width: 100%; outline: none;" autocomplete="off">
+                        <button id="add-category-btn" class="btn secondary" style="padding: 0.4rem 1rem; font-size: 1rem; border-radius: 8px;">ADD</button>
+                    </div>
+                    <div id="manage-category-list" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; max-height: 250px; overflow-y: auto;">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center; background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.2);">💾 SAVE SETTINGS</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Contact Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <h2 id="modal-title">Edit Letter Pad Contact</h2>
+            <div class="input-field">
+                <label>Category</label>
+                <select id="input-category" style="width: 100%; padding: 0.8rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; background: #F8FAFC; outline: none; transition: all 0.2s;">
+                </select>
+            </div>
+            <div class="input-field">
+                <label>Name / Shop Name</label>
+                <input type="text" id="input-name" autocomplete="off">
+                <div id="name-warning" style="color: var(--danger); font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;"></div>
+            </div>
+            <div class="input-field">
+                <label>City / Town</label>
+                <input type="text" id="input-city" placeholder="Eg: Tirupur" autocomplete="off">
+            </div>
+            <div class="input-field">
+                <label>Phone Number</label>
+                <input type="text" id="input-phone" autocomplete="off">
+            </div>
+            <div class="input-field">
+                <label>Address Lines</label>
+                <div id="address-lines-container">
+                    <!-- Dynamic inputs will be added here -->
+                </div>
+                <button id="add-addr-line-btn" type="button" class="btn tertiary" style="font-size: 0.7rem; padding: 5px; margin-top: 5px; width: 100%; border: 1px dashed var(--border-color);">➕ Add Another Line</button>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancel-btn" class="btn ghost">Cancel</button>
+                <button id="save-address-btn" class="btn primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal-overlay" class="modal-overlay hidden">
+        <div class="modal" style="width: 350px; text-align: center; border-top: 5px solid var(--accent-blue);" id="confirm-modal-box">
+            <div id="confirm-modal-icon" style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h2 id="confirm-modal-title" style="margin-bottom: 1rem;">Confirm</h2>
+            <p id="confirm-modal-message" style="color: var(--text-secondary); margin-bottom: 2rem;">Are you sure?</p>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button id="confirm-cancel-btn" class="btn ghost">Cancel</button>
+                <button id="confirm-ok-btn" class="btn primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Modal (Rename Categories) -->
+    <div id="prompt-modal-overlay" class="modal-overlay hidden">
+        <div class="modal" style="width: 400px; border-top: 5px solid var(--accent-blue);">
+            <h2 id="prompt-modal-title" style="margin-bottom: 10px;">Edit Category</h2>
+            <p id="prompt-modal-message" style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">Enter the new name:</p>
+            <div class="input-field">
+                <input type="text" id="prompt-modal-input" style="width: 100%;" autocomplete="off">
+            </div>
+            <div class="modal-buttons" style="margin-top: 30px;">
+                <button id="prompt-cancel-btn" class="btn ghost">Cancel</button>
+                <button id="prompt-ok-btn" class="btn primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Template container -->
+    <div id="print-temp-container" class="print-only"></div>
+
+    <script src="letterpad.js"></script>
+</body>
+</html>

@@ -1212,7 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.addEventListener('click', () => {
                 letterpadModal.classList.add('hidden');
-                showNotification(`Selected Profile: ${company}`, 'success', 'Letter Pad');
+                window.location.href = `letterpad.html?company=${encodeURIComponent(company)}&profile=${PROFILE}`;
             });
 
             letterpadCompanyList.appendChild(btn);
