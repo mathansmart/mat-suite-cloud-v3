@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeSettings = {}; // Full server settings object
     let companySettings = {
         fontFamily: "'Outfit', sans-serif",
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: "400",
         fontStyle: "normal",
         textDecoration: "none",
@@ -24,8 +24,26 @@ document.addEventListener('DOMContentLoaded', () => {
         lineHeight: 1.2,
         topMargin: 50,
         leftMargin: 20,
+        rightMargin: 20,
         printHeader: true,
-        addPrefix: true
+        headerStyle: 'standard',
+        useCustomHeader: false,
+        headerImage: null,
+        addPrefix: true,
+        // Milton Premium layout customizer fields
+        miltonLogoTop: "Quality is our motto",
+        miltonLogoMid: "MILTON",
+        miltonLogoBot: "Garments",
+        miltonLogoImg: null,
+        miltonCenterName: "MILTON GARMENTS PRIVATE LIMITED",
+        miltonCenterSubtitle: "Manufacturers Fancy Hosiery",
+        miltonCenterAddress1: "12, SRI KANCHI KAMATCHI NAGAR, KANGAYAM PALAYAM PUDUR,",
+        miltonCenterAddress2: "KANGAYAM ROAD, TIRUPUR - 641 604.",
+        miltonCenterContact: "E-mail: miltongarmentsprivatelimited@gmail.com &nbsp;&middot;&nbsp; Web: www.miltongarments.com",
+        miltonRightPhone1: "0421-2428545",
+        miltonRightPhone2: "0421-2429439",
+        miltonRightWhatsapp: "99526 07134",
+        miltonRightGstin: "33AAQCM3608R1ZU"
     };
     let companyCategories = [];
     let companyAddresses = [];
@@ -76,8 +94,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const topMarginNum = document.getElementById('top-margin-num');
     const leftMarginSlider = document.getElementById('left-margin');
     const leftMarginNum = document.getElementById('left-margin-num');
+    const rightMarginSlider = document.getElementById('right-margin');
+    const rightMarginNum = document.getElementById('right-margin-num');
     const printHeaderCheckbox = document.getElementById('print-header');
+    const useCustomHeaderCheckbox = document.getElementById('use-custom-header');
+    const headerStyleSelect = document.getElementById('header-style');
+    const customHeaderUploadWrapper = document.getElementById('custom-header-upload-wrapper');
+    const customHeaderFile = document.getElementById('custom-header-file');
+    const customHeaderPreviewContainer = document.getElementById('custom-header-preview-container');
+    const removeCustomHeaderBtn = document.getElementById('remove-custom-header-btn');
     const addPrefixCheckbox = document.getElementById('add-prefix');
+
+    // Milton Customizer inputs
+    const settingMiltonLogoTop = document.getElementById('setting-milton-logo-top');
+    const settingMiltonLogoMid = document.getElementById('setting-milton-logo-mid');
+    const settingMiltonLogoBot = document.getElementById('setting-milton-logo-bot');
+    const settingMiltonLogoFile = document.getElementById('setting-milton-logo-file');
+    const settingMiltonLogoPreview = document.getElementById('setting-milton-logo-preview');
+    const settingMiltonLogoRemove = document.getElementById('setting-milton-logo-remove');
+    const settingMiltonCenterName = document.getElementById('setting-milton-center-name');
+    const settingMiltonCenterSubtitle = document.getElementById('setting-milton-center-subtitle');
+    const settingMiltonCenterAddress1 = document.getElementById('setting-milton-center-address1');
+    const settingMiltonCenterAddress2 = document.getElementById('setting-milton-center-address2');
+    const settingMiltonCenterContact = document.getElementById('setting-milton-center-contact');
+    const settingMiltonRightPhone1 = document.getElementById('setting-milton-right-phone1');
+    const settingMiltonRightPhone2 = document.getElementById('setting-milton-right-phone2');
+    const settingMiltonRightWhatsapp = document.getElementById('setting-milton-right-whatsapp');
+    const settingMiltonRightGstin = document.getElementById('setting-milton-right-gstin');
 
     // Category Controls
     const newCategoryInput = document.getElementById('new-category-input');
@@ -96,6 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorTextarea = document.getElementById('editor-textarea');
     const editorCompanyHeader = document.getElementById('editor-company-header');
     const editorHeaderText = document.getElementById('editor-header-text');
+    const editorHeaderImage = document.getElementById('editor-header-image');
+    const editorMiltonHeader = document.getElementById('editor-milton-header');
+    const editorDateLine = document.getElementById('editor-date-line');
+    const editorDateVal = document.getElementById('editor-date-val');
     const editorPrefixIndicator = document.getElementById('editor-prefix-indicator');
     const editorA4Sheet = document.getElementById('editor-a4-sheet');
 
@@ -113,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorLineHeight = document.getElementById('editor-line-height');
     const editorTopMargin = document.getElementById('editor-top-margin');
     const editorLeftMargin = document.getElementById('editor-left-margin');
+    const editorRightMargin = document.getElementById('editor-right-margin');
     const editorPrintHeader = document.getElementById('editor-print-header');
     const editorAddPrefix = document.getElementById('editor-add-prefix');
 
@@ -294,6 +342,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const toggleMiltonCustomFields = () => {
+        const miltonDiv = document.getElementById('milton-custom-fields');
+        if (!miltonDiv) return;
+        if (printHeaderCheckbox && printHeaderCheckbox.checked) {
+            miltonDiv.style.display = 'flex';
+        } else {
+            miltonDiv.style.display = 'none';
+        }
+    };
+    if (printHeaderCheckbox) {
+        printHeaderCheckbox.addEventListener('change', toggleMiltonCustomFields);
+    }
+
+    const getMiltonHeaderHTML = (settings, isPrint = false) => {
+        const logoTop = settings.miltonLogoTop || "Quality is our motto";
+        const logoMid = settings.miltonLogoMid || "MILTON";
+        const logoBot = settings.miltonLogoBot || "Garments";
+        const logoImg = settings.miltonLogoImg || null;
+        
+        const centerName = settings.miltonCenterName || "MILTON GARMENTS PRIVATE LIMITED";
+        const centerSubtitle = settings.miltonCenterSubtitle || "Manufacturers Fancy Hosiery";
+        const centerAddr1 = settings.miltonCenterAddress1 || "12, SRI KANCHI KAMATCHI NAGAR, KANGAYAM PALAYAM PUDUR,";
+        const centerAddr2 = settings.miltonCenterAddress2 || "KANGAYAM ROAD, TIRUPUR - 641 604.";
+        const centerContact = settings.miltonCenterContact || "E-mail: miltongarmentsprivatelimited@gmail.com &nbsp;&middot;&nbsp; Web: www.miltongarments.com";
+        
+        const phone1 = settings.miltonRightPhone1 || "0421-2428545";
+        const phone2 = settings.miltonRightPhone2 || "0421-2429439";
+        const whatsapp = settings.miltonRightWhatsapp || "99526 07134";
+        const gstin = settings.miltonRightGstin || "33AAQCM3608R1ZU";
+
+        let logoHtml = '';
+        if (logoImg) {
+            logoHtml = `
+                <div style="display: flex; align-items: center; justify-content: center; width: 175px; flex-shrink: 0; height: auto; box-sizing: border-box; margin-left: 15px; margin-right: 15px; align-self: center; margin-top: 8px;">
+                    <img src="${logoImg}" style="width: 100%; max-height: 75px; object-fit: contain;" />
+                </div>
+            `;
+        } else {
+            logoHtml = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #000; padding: 4px 8px; width: 85px; text-align: center; flex-shrink: 0; height: fit-content; box-sizing: border-box; align-self: center; margin-left: 15px; margin-top: 8px;">
+                    <span style="font-size: 7px; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 800; line-height: 1;">${logoTop}</span>
+                    <span style="font-size: 18px; font-weight: 900; letter-spacing: -1px; border-bottom: 2.2px solid #000; border-top: 2.2px solid #000; padding: 1px 0; margin: 2px 0; width: 100%; line-height: 1.1;">${logoMid}</span>
+                    <span style="font-size: 7px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; line-height: 1;">${logoBot}</span>
+                </div>
+            `;
+        }
+
+        const containerStyle = isPrint 
+            ? 'border-bottom: none; padding-bottom: 0; position: static; margin-bottom: 10px; width: 100%; text-align: left; font-family: \'Outfit\', \'Segoe UI\', sans-serif; color: #000; box-sizing: border-box;'
+            : 'width: 100%; font-family: \'Outfit\', \'Segoe UI\', sans-serif; color: #000; box-sizing: border-box; text-align: left;';
+
+        const phonePart = phone2 ? `
+            <div>Phone : ${phone1}</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" : ${phone2}</div>
+        ` : `
+            <div>Phone : ${phone1}</div>
+        `;
+
+        const whatsappPart = whatsapp ? `
+            <div style="margin-top: 1px; display: flex; align-items: center; gap: 3px; justify-content: flex-end;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Whats app : ${whatsapp}
+            </div>
+        ` : '';
+
+        const gstinPart = gstin ? `
+            <div style="margin-top: 3px; font-size: 7.5pt; border: 1px solid #4b5563; padding: 1px 4px; border-radius: 2px; background: #f9fafb; font-weight: 800; display: inline-block;">GSTIN : ${gstin}</div>
+        ` : '';
+
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: stretch; width: 100%;">
+                <!-- Left Logo -->
+                ${logoHtml}
+                
+                <!-- Center Details -->
+                <div style="flex: 1; text-align: center; padding: 0 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="background: #1f2937; color: #ffffff; padding: 5px 12px; font-weight: 900; font-size: 13pt; border-radius: 2px; letter-spacing: 1px; display: inline-block; text-transform: uppercase; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; text-shadow: none;">
+                        ${centerName}
+                    </div>
+                    ${centerSubtitle ? `
+                    <div style="font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 11pt; color: #374151; font-weight: 600; margin-bottom: 3px; line-height: 1;">
+                        ${centerSubtitle}
+                    </div>` : ''}
+                    <div style="font-size: 7.5pt; line-height: 1.3; color: #111827; font-weight: 700;">
+                        ${centerAddr1}${centerAddr2 ? `<br>${centerAddr2}` : ''}
+                    </div>
+                    ${centerContact ? `
+                    <div style="font-size: 7pt; margin-top: 2px; color: #4b5563; font-weight: 700;">
+                        ${centerContact}
+                    </div>` : ''}
+                </div>
+                
+                <!-- Right Details -->
+                <div style="text-align: right; font-size: 8pt; line-height: 1.3; color: #111827; font-weight: 700; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0; min-width: 145px;">
+                    ${phonePart}
+                    ${whatsappPart}
+                    ${gstinPart}
+                </div>
+            </div>
+            <div style="border-bottom: 2px dotted #000000; margin-top: 8px; width: 100%;"></div>
+        `;
+    };
+
     const applySettingsToInputs = () => {
         if (fontFamilySelect) fontFamilySelect.value = companySettings.fontFamily;
         if (fontSizeSlider) fontSizeSlider.value = fontSizeNum.value = companySettings.fontSize;
@@ -301,25 +452,85 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lineHeightSlider) lineHeightSlider.value = lineHeightNum.value = companySettings.lineHeight;
         if (topMarginSlider) topMarginSlider.value = topMarginNum.value = companySettings.topMargin;
         if (leftMarginSlider) leftMarginSlider.value = leftMarginNum.value = companySettings.leftMargin;
+        if (rightMarginSlider) rightMarginSlider.value = rightMarginNum.value = companySettings.rightMargin || 20;
         if (printHeaderCheckbox) printHeaderCheckbox.checked = companySettings.printHeader;
         if (addPrefixCheckbox) addPrefixCheckbox.checked = companySettings.addPrefix;
+        
+        toggleMiltonCustomFields();
+
+        // Apply Milton Custom inputs
+        if (settingMiltonLogoTop) settingMiltonLogoTop.value = companySettings.miltonLogoTop || "Quality is our motto";
+        if (settingMiltonLogoMid) settingMiltonLogoMid.value = companySettings.miltonLogoMid || "MILTON";
+        if (settingMiltonLogoBot) settingMiltonLogoBot.value = companySettings.miltonLogoBot || "Garments";
+        if (settingMiltonCenterName) settingMiltonCenterName.value = companySettings.miltonCenterName || "";
+        if (settingMiltonCenterSubtitle) settingMiltonCenterSubtitle.value = companySettings.miltonCenterSubtitle || "";
+        if (settingMiltonCenterAddress1) settingMiltonCenterAddress1.value = companySettings.miltonCenterAddress1 || "";
+        if (settingMiltonCenterAddress2) settingMiltonCenterAddress2.value = companySettings.miltonCenterAddress2 || "";
+        if (settingMiltonCenterContact) settingMiltonCenterContact.value = (companySettings.miltonCenterContact || "").replace(/&nbsp;&middot;&nbsp;/g, ' · ').replace(/&middot;/g, ' · ');
+        if (settingMiltonRightPhone1) settingMiltonRightPhone1.value = companySettings.miltonRightPhone1 || "";
+        if (settingMiltonRightPhone2) settingMiltonRightPhone2.value = companySettings.miltonRightPhone2 || "";
+        if (settingMiltonRightWhatsapp) settingMiltonRightWhatsapp.value = companySettings.miltonRightWhatsapp || "";
+        if (settingMiltonRightGstin) settingMiltonRightGstin.value = companySettings.miltonRightGstin || "";
+        
+        if (settingMiltonLogoPreview) {
+            if (companySettings.miltonLogoImg) {
+                settingMiltonLogoPreview.style.display = 'flex';
+            } else {
+                settingMiltonLogoPreview.style.display = 'none';
+            }
+        }
+
+        if (useCustomHeaderCheckbox) {
+            useCustomHeaderCheckbox.checked = companySettings.useCustomHeader || false;
+            if (useCustomHeaderCheckbox.checked) {
+                customHeaderUploadWrapper.style.display = 'flex';
+            } else {
+                customHeaderUploadWrapper.style.display = 'none';
+            }
+        }
+        
+        if (companySettings.headerImage) {
+            if (customHeaderPreviewContainer) customHeaderPreviewContainer.style.display = 'flex';
+        } else {
+            if (customHeaderPreviewContainer) customHeaderPreviewContainer.style.display = 'none';
+        }
     };
 
     const saveSettings = () => {
         companySettings = {
             fontFamily: fontFamilySelect.value,
-            fontSize: parseInt(fontSizeSlider.value) || 18,
+            fontSize: parseInt(fontSizeSlider.value) || 14,
             fontWeight: fontWeightSelect.value,
             lineHeight: parseFloat(lineHeightSlider.value) || 1.2,
             topMargin: parseInt(topMarginSlider.value) || 50,
             leftMargin: parseInt(leftMarginSlider.value) || 20,
+            rightMargin: parseInt(rightMarginSlider.value) || 20,
             printHeader: printHeaderCheckbox.checked,
-            addPrefix: addPrefixCheckbox.checked
+            headerStyle: 'milton',
+            useCustomHeader: useCustomHeaderCheckbox ? useCustomHeaderCheckbox.checked : false,
+            headerImage: companySettings.headerImage,
+            addPrefix: addPrefixCheckbox.checked,
+            
+            // Milton customized fields
+            miltonLogoTop: settingMiltonLogoTop ? settingMiltonLogoTop.value : "Quality is our motto",
+            miltonLogoMid: settingMiltonLogoMid ? settingMiltonLogoMid.value : "MILTON",
+            miltonLogoBot: settingMiltonLogoBot ? settingMiltonLogoBot.value : "Garments",
+            miltonLogoImg: companySettings.miltonLogoImg,
+            miltonCenterName: settingMiltonCenterName ? settingMiltonCenterName.value : "",
+            miltonCenterSubtitle: settingMiltonCenterSubtitle ? settingMiltonCenterSubtitle.value : "",
+            miltonCenterAddress1: settingMiltonCenterAddress1 ? settingMiltonCenterAddress1.value : "",
+            miltonCenterAddress2: settingMiltonCenterAddress2 ? settingMiltonCenterAddress2.value : "",
+            miltonCenterContact: settingMiltonCenterContact ? settingMiltonCenterContact.value.replace(/ · /g, ' &nbsp;&middot;&nbsp; ') : "",
+            miltonRightPhone1: settingMiltonRightPhone1 ? settingMiltonRightPhone1.value : "",
+            miltonRightPhone2: settingMiltonRightPhone2 ? settingMiltonRightPhone2.value : "",
+            miltonRightWhatsapp: settingMiltonRightWhatsapp ? settingMiltonRightWhatsapp.value : "",
+            miltonRightGstin: settingMiltonRightGstin ? settingMiltonRightGstin.value : ""
         };
 
         settingsModal.classList.add('hidden');
         showNotification('Letter Pad layout settings saved successfully! 💾', 'success', 'Saved');
         saveToServer();
+        formatEditorA4Sheet();
     };
 
     // --- Categories Render & Actions ---
@@ -362,10 +573,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; font-weight: 700; font-size: 0.85rem; border-radius: 12px; transition: all 0.25s ease; border: 1px solid rgba(0,0,0,0.04); cursor: pointer; box-sizing: border-box;';
         
         if (isActive) {
-            btn.style.background = 'linear-gradient(135deg, #ec4899, #db2777)';
+            btn.style.background = 'linear-gradient(135deg, #f59e0b, #ea580c)';
             btn.style.color = '#fff';
             btn.style.borderColor = 'transparent';
-            btn.style.boxShadow = '0 4px 12px rgba(219, 39, 119, 0.25)';
+            btn.style.boxShadow = '0 4px 12px rgba(234, 88, 12, 0.25)';
         } else {
             btn.style.background = 'rgba(255, 255, 255, 0.7)';
             btn.style.color = 'var(--text-secondary)';
@@ -376,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('mouseenter', () => {
             btn.style.transform = 'translateY(-2px)';
             if (isActive) {
-                btn.style.boxShadow = '0 6px 16px rgba(219, 39, 119, 0.35)';
+                btn.style.boxShadow = '0 6px 16px rgba(234, 88, 12, 0.35)';
             } else {
                 btn.style.background = 'rgba(255, 255, 255, 0.9)';
                 btn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.05)';
@@ -387,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('mouseleave', () => {
             btn.style.transform = 'none';
             if (isActive) {
-                btn.style.boxShadow = '0 4px 12px rgba(219, 39, 119, 0.25)';
+                btn.style.boxShadow = '0 4px 12px rgba(234, 88, 12, 0.25)';
             } else {
                 btn.style.background = 'rgba(255, 255, 255, 0.7)';
                 btn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.02)';
@@ -567,6 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editorLineHeight) editorLineHeight.value = companySettings.lineHeight;
         if (editorTopMargin) editorTopMargin.value = companySettings.topMargin;
         if (editorLeftMargin) editorLeftMargin.value = companySettings.leftMargin;
+        if (editorRightMargin) editorRightMargin.value = companySettings.rightMargin || 20;
         if (editorPrintHeader) editorPrintHeader.checked = companySettings.printHeader;
         if (editorAddPrefix) editorAddPrefix.checked = companySettings.addPrefix;
 
@@ -608,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Apply Margins (padding on sheet)
         editorA4Sheet.style.paddingTop = companySettings.topMargin + 'mm';
         editorA4Sheet.style.paddingLeft = companySettings.leftMargin + 'mm';
-        editorA4Sheet.style.paddingRight = '20mm';
+        editorA4Sheet.style.paddingRight = (companySettings.rightMargin || 20) + 'mm';
         editorA4Sheet.style.paddingBottom = '20mm';
         
         // Apply Font configurations to text area
@@ -623,9 +835,48 @@ document.addEventListener('DOMContentLoaded', () => {
         // Apply Header Display
         if (companySettings.printHeader) {
             editorCompanyHeader.style.display = 'block';
-            editorHeaderText.textContent = COMPANY;
+            
+            const style = 'milton';
+            
+            if (style === 'milton') {
+                if (editorHeaderText) editorHeaderText.style.display = 'none';
+                if (editorHeaderImage) editorHeaderImage.style.display = 'none';
+                if (editorMiltonHeader) {
+                    editorMiltonHeader.style.display = 'block';
+                    editorMiltonHeader.innerHTML = getMiltonHeaderHTML(companySettings, false);
+                }
+                if (editorDateLine) editorDateLine.style.display = 'flex';
+                
+                // Set default current date if not set or placeholder is present
+                if (editorDateVal && (editorDateVal.textContent.trim() === '' || editorDateVal.textContent.includes('Date'))) {
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const yyyy = today.getFullYear();
+                    editorDateVal.textContent = `${dd}.${mm}.${yyyy}`;
+                }
+            } else {
+                if (editorMiltonHeader) editorMiltonHeader.style.display = 'none';
+                if (editorDateLine) editorDateLine.style.display = 'none';
+                
+                if (companySettings.useCustomHeader && companySettings.headerImage) {
+                    if (editorHeaderText) editorHeaderText.style.display = 'none';
+                    if (editorHeaderImage) {
+                        editorHeaderImage.style.display = 'block';
+                        editorHeaderImage.src = companySettings.headerImage;
+                    }
+                } else {
+                    if (editorHeaderText) {
+                        editorHeaderText.style.display = 'block';
+                        editorHeaderText.textContent = COMPANY;
+                    }
+                    if (editorHeaderImage) editorHeaderImage.style.display = 'none';
+                }
+            }
         } else {
             editorCompanyHeader.style.display = 'none';
+            if (editorMiltonHeader) editorMiltonHeader.style.display = 'none';
+            if (editorDateLine) editorDateLine.style.display = 'none';
         }
 
         // Apply Prefix Display
@@ -809,21 +1060,23 @@ document.addEventListener('DOMContentLoaded', () => {
     syncControls(lineHeightSlider, lineHeightNum);
     syncControls(topMarginSlider, topMarginNum);
     syncControls(leftMarginSlider, leftMarginNum);
+    syncControls(rightMarginSlider, rightMarginNum);
 
     // --- Ribbon Event Listeners ---
     const updateFromRibbon = () => {
         companySettings.fontFamily = editorFontFamily.value;
-        companySettings.fontSize = parseInt(editorFontSize.value) || 18;
+        companySettings.fontSize = parseInt(editorFontSize.value) || 14;
         companySettings.lineHeight = parseFloat(editorLineHeight.value) || 1.2;
         companySettings.topMargin = parseInt(editorTopMargin.value) || 50;
         companySettings.leftMargin = parseInt(editorLeftMargin.value) || 20;
+        companySettings.rightMargin = parseInt(editorRightMargin.value) || 20;
         companySettings.printHeader = editorPrintHeader.checked;
         companySettings.addPrefix = editorAddPrefix.checked;
 
         // Apply style to A4 page preview immediately
         editorA4Sheet.style.paddingTop = companySettings.topMargin + 'mm';
         editorA4Sheet.style.paddingLeft = companySettings.leftMargin + 'mm';
-        editorA4Sheet.style.paddingRight = '20mm';
+        editorA4Sheet.style.paddingRight = (companySettings.rightMargin || 20) + 'mm';
         editorA4Sheet.style.paddingBottom = '20mm';
         editorTextarea.style.fontFamily = companySettings.fontFamily;
         editorTextarea.style.fontSize = companySettings.fontSize + 'pt';
@@ -848,6 +1101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editorLineHeight) editorLineHeight.addEventListener('change', updateFromRibbon);
     if (editorTopMargin) editorTopMargin.addEventListener('input', updateFromRibbon);
     if (editorLeftMargin) editorLeftMargin.addEventListener('input', updateFromRibbon);
+    if (editorRightMargin) editorRightMargin.addEventListener('input', updateFromRibbon);
     if (editorPrintHeader) editorPrintHeader.addEventListener('change', updateFromRibbon);
     if (editorAddPrefix) editorAddPrefix.addEventListener('change', updateFromRibbon);
 
@@ -1125,8 +1379,13 @@ document.addEventListener('DOMContentLoaded', () => {
         root.style.setProperty('--print-text-decoration', companySettings.textDecoration || 'none');
         root.style.setProperty('--print-text-align', companySettings.textAlign || 'left');
         root.style.setProperty('--print-line-height', companySettings.lineHeight);
-        root.style.setProperty('--print-top-margin', companySettings.topMargin + 'mm');
+        if (companySettings.printHeader && (companySettings.headerStyle || 'standard') === 'milton') {
+            root.style.setProperty('--print-top-margin', '15mm');
+        } else {
+            root.style.setProperty('--print-top-margin', companySettings.topMargin + 'mm');
+        }
         root.style.setProperty('--print-left-margin', companySettings.leftMargin + 'mm');
+        root.style.setProperty('--print-right-margin', (companySettings.rightMargin || 20) + 'mm');
 
         styleTag.innerHTML = `
             @media print {
@@ -1141,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 box-sizing: border-box;
                 padding-top: var(--print-top-margin);
                 padding-left: var(--print-left-margin);
-                padding-right: 20mm;
+                padding-right: var(--print-right-margin);
                 position: relative;
                 font-family: var(--print-font-family);
                 font-size: var(--print-font-size);
@@ -1176,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 text-align: var(--print-text-align);
             }
             .letterpad-body * {
-                white-space: normal !important;
+                white-space: pre-wrap !important;
                 word-break: normal !important;
                 overflow-wrap: break-word !important;
             }
@@ -1219,20 +1478,40 @@ document.addEventListener('DOMContentLoaded', () => {
             page.className = 'letterpad-page';
 
             let headerHtml = '';
+            let dateHtml = '';
             if (companySettings.printHeader) {
-                headerHtml = `
-                    <div class="letterpad-header">
-                        <h1>${COMPANY}</h1>
-                    </div>
-                `;
+                const style = 'milton';
+                if (style === 'milton') {
+                    headerHtml = getMiltonHeaderHTML(companySettings, true);
+                    
+                    const currentDate = editorDateVal ? editorDateVal.textContent : '';
+                    dateHtml = `
+                        <div style="display: flex; justify-content: flex-end; font-size: 11pt; font-weight: 700; margin-top: 8px; margin-bottom: 12px; font-family: 'Outfit', sans-serif; width: 100%;">
+                            Date : &nbsp;<span style="border-bottom: 1px dotted #000; min-width: 100px; display: inline-block; text-align: center;">${currentDate}</span>
+                        </div>
+                    `;
+                } else if (companySettings.useCustomHeader && companySettings.headerImage) {
+                    headerHtml = `
+                        <div class="letterpad-header" style="border-bottom: none; padding-bottom: 0; display: flex; justify-content: center; align-items: center;">
+                            <img src="${companySettings.headerImage}" style="width: 100%; max-height: 120px; object-fit: contain;" />
+                        </div>
+                    `;
+                } else {
+                    headerHtml = `
+                        <div class="letterpad-header">
+                            <h1>${COMPANY}</h1>
+                        </div>
+                    `;
+                }
             }
 
             page.innerHTML = `
                 ${headerHtml}
+                ${dateHtml}
                 <div class="letterpad-body">
                     ${companySettings.addPrefix ? '<div class="letterpad-to-prefix">To. M/s,</div>' : ''}
                     <div class="letterpad-name-line">${item.name}</div>
-                    <div style="white-space: normal; word-break: normal; overflow-wrap: break-word; width: 100%;">${item.address}</div>
+                    <div style="white-space: pre-wrap; word-break: normal; overflow-wrap: break-word; width: 100%;">${item.address}</div>
                     ${item.phone ? `<div style="margin-top: 5px; font-weight: 600;">PH: ${item.phone}</div>` : ''}
                 </div>
             `;
@@ -1247,6 +1526,217 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { document.title = originalTitle; }, 50);
         }, 150);
     };
+
+    // --- PDF to Image Conversion (using PDF.js CDN) ---
+    const loadPdfJsAndConvert = (file, callback) => {
+        if (typeof pdfjsLib === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
+            script.onload = () => {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                convertPdfToImage(file, callback);
+            };
+            script.onerror = () => {
+                showNotification('Failed to load PDF converter helper. Please upload PNG/JPG directly.', 'error', 'Conversion Error');
+            };
+            document.head.appendChild(script);
+        } else {
+            convertPdfToImage(file, callback);
+        }
+    };
+
+    const convertPdfToImage = (file, callback) => {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            const typedarray = new Uint8Array(event.target.result);
+            try {
+                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                const page = await pdf.getPage(1);
+                
+                // Use scale 4.0 for extreme crispness (HD quality)
+                const viewport = page.getViewport({ scale: 4.0 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                
+                await page.render(renderContext).promise;
+                const base64Img = canvas.toDataURL('image/png');
+                callback(base64Img);
+            } catch (err) {
+                console.error('PDF.js render error', err);
+                showNotification('Failed to read or render PDF logo. Please upload a standard PNG/JPG image.', 'error', 'Rendering Error');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    // --- Automatic White Space Border Cropping Algorithm ---
+    const cropCanvasWhiteMargins = (canvas) => {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        let minX = width, minY = height, maxX = 0, maxY = 0;
+        
+        // Scan pixel grid for non-white/non-transparent pixels
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const index = (y * width + x) * 4;
+                const r = data[index];
+                const g = data[index + 1];
+                const b = data[index + 2];
+                const a = data[index + 3];
+                
+                // Pixel is considered blank/white if RGB values are near 255 or alpha is 0
+                const isWhite = (r > 248 && g > 248 && b > 248) || a === 0;
+                
+                if (!isWhite) {
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        
+        // If the canvas is completely blank, return original
+        if (maxX < minX || maxY < minY) return canvas;
+        
+        // Add small safety padding around the bounds
+        const padding = 15;
+        minX = Math.max(0, minX - padding);
+        minY = Math.max(0, minY - padding);
+        maxX = Math.min(width - 1, maxX + padding);
+        maxY = Math.min(height - 1, maxY + padding);
+        
+        const cropWidth = maxX - minX + 1;
+        const cropHeight = maxY - minY + 1;
+        
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = cropWidth;
+        croppedCanvas.height = cropHeight;
+        
+        const croppedCtx = croppedCanvas.getContext('2d');
+        croppedCtx.drawImage(canvas, minX, minY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+        
+        return croppedCanvas;
+    };
+
+    const cropImageWhiteMargins = (dataURL, callback) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            try {
+                const croppedCanvas = cropCanvasWhiteMargins(canvas);
+                callback(croppedCanvas.toDataURL('image/png'));
+            } catch (err) {
+                console.error('Cropping error, falling back to original image', err);
+                callback(dataURL);
+            }
+        };
+        img.onerror = () => {
+            callback(dataURL);
+        };
+        img.src = dataURL;
+    };
+
+    // --- Custom Header Upload Listeners ---
+    if (useCustomHeaderCheckbox) {
+        useCustomHeaderCheckbox.addEventListener('change', () => {
+            if (useCustomHeaderCheckbox.checked) {
+                customHeaderUploadWrapper.style.display = 'flex';
+            } else {
+                customHeaderUploadWrapper.style.display = 'none';
+            }
+            formatEditorA4Sheet();
+        });
+    }
+
+    if (customHeaderFile) {
+        customHeaderFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+                loadPdfJsAndConvert(file, (base64Img) => {
+                    cropImageWhiteMargins(base64Img, (croppedImg) => {
+                        companySettings.headerImage = croppedImg;
+                        if (customHeaderPreviewContainer) customHeaderPreviewContainer.style.display = 'flex';
+                        formatEditorA4Sheet();
+                    });
+                });
+            } else {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    cropImageWhiteMargins(event.target.result, (croppedImg) => {
+                        companySettings.headerImage = croppedImg;
+                        if (customHeaderPreviewContainer) customHeaderPreviewContainer.style.display = 'flex';
+                        formatEditorA4Sheet();
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (removeCustomHeaderBtn) {
+        removeCustomHeaderBtn.addEventListener('click', () => {
+            companySettings.headerImage = null;
+            if (customHeaderFile) customHeaderFile.value = '';
+            if (customHeaderPreviewContainer) customHeaderPreviewContainer.style.display = 'none';
+            formatEditorA4Sheet();
+        });
+    }
+
+    // --- Milton Custom Logo Upload Listeners ---
+    if (settingMiltonLogoFile) {
+        settingMiltonLogoFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+                loadPdfJsAndConvert(file, (base64Img) => {
+                    cropImageWhiteMargins(base64Img, (croppedImg) => {
+                        companySettings.miltonLogoImg = croppedImg;
+                        if (settingMiltonLogoPreview) settingMiltonLogoPreview.style.display = 'flex';
+                        formatEditorA4Sheet();
+                    });
+                });
+            } else {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    cropImageWhiteMargins(event.target.result, (croppedImg) => {
+                        companySettings.miltonLogoImg = croppedImg;
+                        if (settingMiltonLogoPreview) settingMiltonLogoPreview.style.display = 'flex';
+                        formatEditorA4Sheet();
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (settingMiltonLogoRemove) {
+        settingMiltonLogoRemove.addEventListener('click', () => {
+            companySettings.miltonLogoImg = null;
+            if (settingMiltonLogoFile) settingMiltonLogoFile.value = '';
+            if (settingMiltonLogoPreview) settingMiltonLogoPreview.style.display = 'none';
+            formatEditorA4Sheet();
+        });
+    }
 
     // --- Startup connection ---
     loadSettings();

@@ -28,7 +28,7 @@
                     <span style="font-size: 1.8rem;">📝</span>
                     <span style="font-size: 1.1rem; letter-spacing: 1px; font-weight: 800;">Letter Pad<span>SUITE</span></span>
                 </h2>
-                <div id="selected-company-badge" style="background: linear-gradient(135deg, #ec4899, #db2777); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.5px; margin-top: 10px; text-transform: uppercase; text-align: center; box-shadow: 0 4px 10px rgba(219,39,119,0.25); max-width: 100%; word-break: break-all;"></div>
+                <div id="selected-company-badge" style="background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.5px; margin-top: 10px; text-transform: uppercase; text-align: center; box-shadow: 0 4px 10px rgba(234,88,12,0.25); max-width: 100%; word-break: break-all;"></div>
             </div>
             
             <a href="#" id="back-to-addressbook-btn" style="display: flex; align-items: center; justify-content: center; background: #e11d48; color: #fff; font-weight: 600; padding: 8px 10px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; border: 1.5px solid #be123c; gap: 5px;">
@@ -37,7 +37,7 @@
 
 
 
-            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.2);">＋ New Address / Letter</button>
+            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.2);">＋ New Address / Letter</button>
             
             <button id="open-settings-btn" class="btn secondary" style="justify-content: center; padding: 8px; font-size: 0.8rem; width: 100%;">⚙️ Letter Pad Settings</button>
         </aside>
@@ -49,7 +49,7 @@
                     <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="off">
                 </div>
                 <div class="header-actions">
-                    <button id="bulk-print-btn" class="btn primary" style="background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.25);">🖨️ PRINT LETTER PAD</button>
+                    <button id="bulk-print-btn" class="btn primary" style="background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.255);">🖨️ PRINT LETTER PAD</button>
                     <button id="select-all-btn" class="btn tertiary">Select All</button>
                     <button id="unselect-all-btn" class="btn tertiary">Deselect All</button>
                 </div>
@@ -94,7 +94,7 @@
 
             <!-- Print Layout Settings Pane -->
             <div id="pane-layout" class="settings-pane active">
-                <div class="control-group">
+                <div class="control-group" style="display: none;">
                     <h3>Font Options</h3>
                     <label>Font Family (Letter Model)</label>
                     <select id="font-family">
@@ -108,8 +108,8 @@
 
                     <label style="margin-top: 8px;">Font Size (pt)</label>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="range" id="font-size" min="12" max="60" value="18">
-                        <input type="number" id="font-size-num" min="12" max="60" value="18" style="width: 50px;">
+                        <input type="range" id="font-size" min="12" max="60" value="14">
+                        <input type="number" id="font-size-num" min="12" max="60" value="14" style="width: 50px;">
                     </div>
 
                     <label style="margin-top: 8px;">Line Spacing</label>
@@ -127,7 +127,7 @@
                     </select>
                 </div>
 
-                <div class="control-group" style="margin-top: 1rem;">
+                <div class="control-group" style="display: none; margin-top: 1rem;">
                     <h3>Layout Margins (mm)</h3>
                     <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">Adjust to position text perfectly on physical pre-printed Letter Pad sheets.</p>
                     <div class="input-row">
@@ -144,6 +144,13 @@
                             <input type="number" id="left-margin-num" min="0" max="200" value="20" style="width: 50px;">
                         </div>
                     </div>
+                    <div class="input-row" style="margin-top: 8px;">
+                        <label>Right Shift</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="range" id="right-margin" min="0" max="200" value="20">
+                            <input type="number" id="right-margin-num" min="0" max="200" value="20" style="width: 50px;">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="control-group" style="margin-top: 1rem;">
@@ -155,7 +162,72 @@
                         If checked, prints the company name at the top. If unchecked, leaves empty space for pre-printed letterheads.
                     </p>
                     
-                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px;">
+                    <div id="header-style-wrapper" style="display: none; margin-left: 28px; margin-top: 8px; margin-bottom: 12px; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Header Layout Style</label>
+                        <select id="header-style" style="background: #f8fafc; color: #1f2937; border: 1px solid #cbd5e1; padding: 6px; border-radius: 6px; font-size: 0.8rem; outline: none; cursor: pointer; width: 220px;">
+                            <option value="standard">Standard (Company Name Text)</option>
+                            <option value="milton">Milton Garments Premium Letterhead</option>
+                        </select>
+                    </div>
+
+                    <!-- Milton Premium Header Custom Fields -->
+                    <div id="milton-custom-fields" style="margin-left: 28px; margin-top: 10px; display: none; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.02); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); max-height: 250px; overflow-y: auto;">
+                        <h4 style="margin: 0; font-size: 0.85rem; color: var(--text-primary); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Milton Style Customizer</h4>
+                        
+                        <!-- Left Logo Text or Image -->
+                        <div style="display: none; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Left Logo Options</label>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <input type="text" id="setting-milton-logo-top" placeholder="Logo Top Small Text (e.g. Quality is our motto)" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                                <input type="text" id="setting-milton-logo-mid" placeholder="Logo Main Text (e.g. MILTON)" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                                <input type="text" id="setting-milton-logo-bot" placeholder="Logo Bottom Text (e.g. Garments)" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                                <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px;">OR Upload Left Logo Image:</div>
+                                <input type="file" id="setting-milton-logo-file" accept="image/*" style="font-size: 0.75rem;">
+                                <div id="setting-milton-logo-preview" style="display: none; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.7rem; color: #16a34a; font-weight: 600;">✓ Logo image loaded</span>
+                                    <button id="setting-milton-logo-remove" type="button" class="btn ghost" style="padding: 1px 4px; font-size: 0.7rem; color: var(--danger); border: 1px solid var(--danger); border-radius: 3px; cursor: pointer;">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Center Details -->
+                        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 5px;">
+                            <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Center Details</label>
+                            <input type="text" id="setting-milton-center-name" placeholder="Company Name" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-center-subtitle" placeholder="Tagline / Subtitle" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-center-address1" placeholder="Address Line 1" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-center-address2" placeholder="Address Line 2" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-center-contact" placeholder="Email / Website" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                        </div>
+
+                        <!-- Right Details -->
+                        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 5px;">
+                            <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Right Details</label>
+                            <input type="text" id="setting-milton-right-phone1" placeholder="Phone 1" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-right-phone2" placeholder="Phone 2" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-right-whatsapp" placeholder="WhatsApp Number" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                            <input type="text" id="setting-milton-right-gstin" placeholder="GSTIN Number" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
+                        </div>
+                    </div>
+                    
+                    <div id="custom-header-section" style="display: none;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px;">
+                            <input type="checkbox" id="use-custom-header" style="width: 18px; height: 18px;"> Use Custom Header Image (PNG/JPG)
+                        </label>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 28px; margin-top: 2px; margin-bottom: 8px;">
+                            Replaces the text header with a custom image banner/logo.
+                        </p>
+                        
+                        <div id="custom-header-upload-wrapper" style="margin-left: 28px; display: none; flex-direction: column; gap: 6px;">
+                            <input type="file" id="custom-header-file" accept="image/*" style="font-size: 0.8rem; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 6px; border-radius: 6px; width: 100%; cursor: pointer;">
+                            <div id="custom-header-preview-container" style="display: none; align-items: center; gap: 8px; margin-top: 5px;">
+                                <span style="font-size: 0.75rem; color: #16a34a; font-weight: 600;">✓ Image loaded</span>
+                                <button id="remove-custom-header-btn" type="button" class="btn ghost" style="padding: 2px 6px; font-size: 0.75rem; color: var(--danger); border: 1px solid var(--danger); border-radius: 4px;">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 15px;">
                         <input type="checkbox" id="add-prefix" checked style="width: 18px; height: 18px;"> Add "To. M/s,"
                     </label>
                 </div>
@@ -176,7 +248,7 @@
                 </div>
             </div>
 
-            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center; background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.2);">💾 SAVE SETTINGS</button>
+            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center; background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.2);">💾 SAVE SETTINGS</button>
         </div>
     </div>
 
@@ -199,7 +271,7 @@
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <button id="cancel-btn" class="btn ghost" style="padding: 8px 15px; font-size: 0.85rem;">Cancel</button>
-                    <button id="save-address-btn" class="btn primary" style="background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; padding: 8px 20px; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(219,39,119,0.2);">💾 Save Letter</button>
+                    <button id="save-address-btn" class="btn primary" style="background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; padding: 8px 20px; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(234,88,12,0.25);">💾 Save Letter</button>
                 </div>
             </div>
 
@@ -222,7 +294,7 @@
                         <!-- Font size dropdown -->
                         <select id="editor-font-size" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 4px 6px; border-radius: 3px; font-size: 0.8rem; width: 60px; font-family: inherit; outline: none; cursor: pointer; text-align: center;">
                             <option value="12">12</option>
-                            <option value="14">14</option>
+                            <option value="14" selected>14</option>
                             <option value="16">16</option>
                             <option value="18">18</option>
                             <option value="20">20</option>
@@ -302,6 +374,10 @@
                             <span style="font-size: 0.75rem; color: #888;">Left</span>
                             <input type="number" id="editor-left-margin" min="0" max="200" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 3px; border-radius: 3px; font-size: 0.8rem; width: 45px; text-align: center; outline: none;">
                         </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 0.75rem; color: #888;">Right</span>
+                            <input type="number" id="editor-right-margin" min="0" max="200" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 3px; border-radius: 3px; font-size: 0.8rem; width: 45px; text-align: center; outline: none;">
+                        </div>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 15px;">
@@ -325,13 +401,23 @@
                     <!-- Company Header Preview inside Editor -->
                     <div id="editor-company-header" style="text-align: center; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 25px; display: none; font-family: 'Montserrat', sans-serif;">
                         <h1 id="editor-header-text" style="font-size: 20pt; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">COMPANY NAME</h1>
+                        <img id="editor-header-image" style="width: 100%; max-height: 120px; object-fit: contain; display: none;" src="" />
+                        
+                        <!-- Milton Garments Custom Header Layout -->
+                        <div id="editor-milton-header" style="display: none; width: 100%; font-family: 'Outfit', 'Segoe UI', sans-serif; color: #000; box-sizing: border-box; text-align: left;">
+                        </div>
+                    </div>
+                    
+                    <!-- Date Line Preview inside Editor -->
+                    <div id="editor-date-line" style="display: none; justify-content: flex-end; font-size: 11pt; font-weight: 700; margin-top: 8px; margin-bottom: 12px; font-family: 'Outfit', sans-serif;">
+                        Date : &nbsp;<span id="editor-date-val" contenteditable="true" style="border-bottom: 1px dotted #000; min-width: 100px; display: inline-block; text-align: center; outline: none; cursor: text;">[Date]</span>
                     </div>
                     
                     <!-- Prefix indicator -->
                     <div id="editor-prefix-indicator" style="font-weight: 600; margin-bottom: 8px; display: none;">To. M/s,</div>
                     
                     <!-- Word-style Text Input Area -->
-                    <div id="editor-textarea" contenteditable="true" placeholder="Type your letter content or address details here..." style="width: 100%; border: none; outline: none; background: transparent; padding: 0; margin: 0; font-size: 18pt; line-height: 1.5; font-family: 'Outfit', sans-serif; box-sizing: border-box; white-space: normal; word-break: normal; overflow-wrap: break-word; min-height: 900px; display: block;" autocomplete="off"></div>
+                    <div id="editor-textarea" contenteditable="true" placeholder="Type your letter content or address details here..." style="width: 100%; border: none; outline: none; background: transparent; padding: 0; margin: 0; font-size: 14pt; line-height: 1.5; font-family: 'Outfit', sans-serif; box-sizing: border-box; white-space: pre-wrap; word-break: normal; overflow-wrap: break-word; min-height: 900px; display: block;" autocomplete="off"></div>
                 </div>
             </div>
         </div>

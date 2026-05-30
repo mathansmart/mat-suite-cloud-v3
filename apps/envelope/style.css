@@ -1035,7 +1035,7 @@ select, input[type="range"], input[type="number"] {
 
 /* Formatted elements inside A4 sheet editor */
 #editor-textarea * {
-    white-space: normal !important;
+    white-space: pre-wrap !important;
     word-break: normal !important;
     overflow-wrap: break-word !important;
 }
@@ -1068,7 +1068,7 @@ select, input[type="range"], input[type="number"] {
 }
 
 #editor-btn-format-painter.active {
-    background-color: #ec4899 !important;
+    background-color: #ea580c !important;
     border-color: #fff !important;
 }
 

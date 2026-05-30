@@ -1196,11 +1196,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Premium hover effects
             btn.addEventListener('mouseenter', () => {
-                btn.style.background = 'linear-gradient(135deg, #ec4899, #db2777)';
+                btn.style.background = 'linear-gradient(135deg, #f59e0b, #ea580c)';
                 btn.style.color = '#fff';
                 btn.style.borderColor = 'transparent';
                 btn.style.transform = 'translateY(-2px)';
-                btn.style.boxShadow = '0 4px 12px rgba(219, 39, 119, 0.2)';
+                btn.style.boxShadow = '0 4px 12px rgba(234, 88, 12, 0.2)';
             });
             btn.addEventListener('mouseleave', () => {
                 btn.style.background = '#fff';
@@ -1280,6 +1280,12 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification('Please select at least one address to print.', 'warning', 'No selection');
             return;
         }
+        // Reset modal selections to default (Envelope) on open to prevent layout/UI mismatches
+        const defaultRadio = document.querySelector('input[name="print-format"][value="envelope"]');
+        if (defaultRadio) defaultRadio.checked = true;
+        if (printSenderSelector) printSenderSelector.classList.add('hidden');
+        if (exportExcelModalBtn) exportExcelModalBtn.classList.add('hidden');
+        
         printModalOverlay.classList.remove('hidden');
     });
 
@@ -1302,7 +1308,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     confirmPrintBtn.addEventListener('click', () => {
-        const selectedFormat = Array.from(printFormatRadios).find(r => r.checked).value;
+        const checkedRadio = document.querySelector('input[name="print-format"]:checked');
+        const selectedFormat = checkedRadio ? checkedRadio.value : 'envelope';
         const selectedSenderId = modalSenderSelect.value;
         const toPrint = selectedIds.map(id => addresses.find(a => a.id === id)).filter(Boolean);
         
@@ -1327,22 +1334,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const env = activeSettings.envelope;
         const a5 = activeSettings.a5;
 
-        // Apply Correct Settings based on format
+        // Apply Correct Settings based on format (Explicitly set/reset all properties to prevent bleed-over)
         if (layoutType === 'a4-list') {
             pageSize = 'A4 portrait';
             root.style.setProperty('--print-font-family', env.fontFamily);
+            root.style.setProperty('--print-font-size', '12pt');
+            root.style.setProperty('--print-font-weight', '400');
+            root.style.setProperty('--print-line-height', '1.2');
             root.style.setProperty('--print-top-margin', '0mm');
             root.style.setProperty('--print-left-margin', '0mm');
+            root.style.setProperty('--print-right-margin', '0mm');
+            root.style.setProperty('--print-bottom-margin', '0mm');
         } else if (layoutType === 'a5') {
             pageSize = '210mm 148mm landscape'; // Explicit landscape orientation for A5
             root.style.setProperty('--print-font-family', env.fontFamily);
             root.style.setProperty('--print-font-size', a5.fontSize + 'pt');
             root.style.setProperty('--print-font-weight', a5.fontWeight || '400');
             root.style.setProperty('--print-line-height', a5.lineHeight || 1.2);
-            
-            // Use user-defined top margin for TO section at the top
             root.style.setProperty('--print-top-margin', (a5.topMargin || 10) + 'mm');
             root.style.setProperty('--print-left-margin', a5.leftMargin + 'mm');
+            root.style.setProperty('--print-right-margin', '0mm');
+            root.style.setProperty('--print-bottom-margin', '0mm');
         } else {
             pageSize = '265mm 114mm landscape'; // Synced with CSS height to avoid blank page
             root.style.setProperty('--print-font-family', env.fontFamily);
