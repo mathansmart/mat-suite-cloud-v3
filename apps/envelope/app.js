@@ -1008,13 +1008,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            searchFocusIndex = (searchFocusIndex + 1) % cards.length;
+            if (searchFocusIndex < cards.length - 1) {
+                searchFocusIndex = searchFocusIndex + 1;
+            }
             renderAddresses(searchInput.value);
             const focusedItem = addressList.querySelectorAll('.address-card')[searchFocusIndex];
             if (focusedItem) focusedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            searchFocusIndex = (searchFocusIndex - 1 + cards.length) % cards.length;
+            if (searchFocusIndex > 0) {
+                searchFocusIndex = searchFocusIndex - 1;
+            }
             renderAddresses(searchInput.value);
             const focusedItem = addressList.querySelectorAll('.address-card')[searchFocusIndex];
             if (focusedItem) focusedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
