@@ -119,12 +119,12 @@ body {
     margin: 1.5rem 0.75rem 1.5rem 1.5rem;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    padding: 1.5rem 1.25rem; /* Reduced padding */
+    padding: 1rem 0.8rem;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem; /* Reduced gap */
+    gap: 0.6rem;
     z-index: 10;
-    min-height: 0; /* Ensures container can shrink if needed */
+    min-height: 0;
 }
 
 /* Right Panel Styling (Permanent Settings) */
@@ -476,13 +476,13 @@ select, input[type="range"], input[type="number"] {
 .stats-card {
     margin-top: auto;
     background: linear-gradient(135deg, var(--accent-blue), #2563EB);
-    padding: 1.5rem;
+    padding: 0.75rem 1rem;
     border-radius: var(--radius-md);
     color: white;
 }
 
-.stats-card .label { font-size: 0.75rem; opacity: 0.8; font-weight: 600; text-transform: uppercase; }
-.stats-card .value { font-size: 2rem; font-weight: 700; display: block; margin-top: 0.5rem; }
+.stats-card .label { font-size: 0.7rem; opacity: 0.8; font-weight: 600; text-transform: uppercase; }
+.stats-card .value { font-size: 1.5rem; font-weight: 700; display: block; margin-top: 0.25rem; }
 
 /* Modals */
 .modal-overlay {
