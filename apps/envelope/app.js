@@ -1033,6 +1033,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const letterPadBtn = document.getElementById('letter-pad-btn');
+    if (letterPadBtn) {
+        letterPadBtn.addEventListener('click', () => {
+            showNotification('Letter Pad feature coming soon! Please stay tuned.', 'info', 'Letter Pad');
+        });
+    }
+
     // --- Key Shortcuts ---
     window.addEventListener('keydown', (e) => {
         // Ctrl + P shortcut for printing selected contacts - Robust detection and prevention

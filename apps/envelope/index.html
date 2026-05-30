@@ -50,9 +50,17 @@
             </div>
 
             <div class="control-group">
-                <div class="stats-card">
-                    <span class="label">Total Contacts</span>
-                    <span class="value" id="stat-total">0</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <!-- Total Contacts Card -->
+                    <div class="stats-card" style="padding: 0.5rem 0.75rem !important; display: flex !important; flex-direction: column !important; justify-content: center !important; height: 100% !important; box-sizing: border-box !important; margin: 0 !important;">
+                        <span class="label" style="font-size: 0.6rem !important;">Total Contacts</span>
+                        <span class="value" id="stat-total" style="font-size: 1.3rem !important; margin-top: 2px !important;">0</span>
+                    </div>
+                    <!-- Letter Pad Button -->
+                    <button id="letter-pad-btn" class="btn" style="background: linear-gradient(135deg, #ec4899, #db2777) !important; color: #fff !important; padding: 0.5rem 0.75rem !important; border-radius: var(--radius-md) !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; height: 100% !important; border: none !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.2) !important; margin: 0 !important; box-sizing: border-box !important; width: 100% !important; gap: 2px !important;">
+                        <span style="font-size: 1.1rem !important; line-height: 1.1 !important; margin-bottom: 2px !important;">📝</span>
+                        <span style="font-size: 0.7rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important;">Letter Pad</span>
+                    </button>
                 </div>
             </div>
 
