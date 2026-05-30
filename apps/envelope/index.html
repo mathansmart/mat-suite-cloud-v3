@@ -125,6 +125,7 @@
                 <button class="settings-tab-btn active" data-tab="envelope">Envelope</button>
                 <button class="settings-tab-btn" data-tab="a5">A5 Paper</button>
                 <button class="settings-tab-btn" data-tab="categories">Categories</button>
+                <button class="settings-tab-btn" data-tab="letterpad">Letter Pad</button>
             </div>
 
             <!-- Envelope Settings Pane -->
@@ -264,6 +265,21 @@
                 </div>
             </div>
 
+            <!-- Letter Pad Pane -->
+            <div id="pane-letterpad" class="settings-pane">
+                <div class="control-group">
+                    <h3>Manage Letter Pad Companies</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">Add company names for your Letter Pad layouts.</p>
+                    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                        <input type="text" id="new-company-input" placeholder="New Company Name..." style="padding: 0.8rem; font-size: 0.9rem; border-radius: 8px; border: 1px solid #E2E8F0; width: 100%; outline: none;" autocomplete="off">
+                        <button id="add-company-btn" class="btn secondary" style="padding: 0.4rem 1rem; font-size: 1rem; border-radius: 8px;">ADD</button>
+                    </div>
+                    <div id="manage-company-list" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; max-height: 250px; overflow-y: auto;">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
             <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center;">💾 SAVE SETTINGS</button>
         </div>
     </div>
@@ -387,6 +403,19 @@
             <div id="recycle-empty-msg" class="hidden" style="text-align: center; color: var(--text-secondary); padding: 40px 10px; font-size: 0.9rem; flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px;">
                 <span style="font-size: 2.5rem; opacity: 0.5;">🗑️</span>
                 <span>Your Recycle Bin is empty.</span>
+            </div>
+        </div>
+    </div>
+    <!-- Letter Pad Selection Modal -->
+    <div id="letterpad-modal" class="modal-overlay hidden" style="z-index: 1500;">
+        <div class="modal" style="width: 400px; border-top: 5px solid #ec4899;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">📝 Select Company</h2>
+                <button id="close-letterpad-modal" class="btn ghost" style="padding: 5px; font-size: 1.2rem;">✖️</button>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px;">Select a company profile for your Letter Pad:</p>
+            <div id="letterpad-company-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto;">
+                <!-- Filled by JS -->
             </div>
         </div>
     </div>

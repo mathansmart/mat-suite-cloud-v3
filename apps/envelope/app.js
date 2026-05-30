@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             addPrefix: false,
             fontWeight: "400",
             lineHeight: 1.2
-        }
+        },
+        letterPadCompanies: []
     };
     const API_BASE = window.location.origin;
     const urlParams = new URLSearchParams(window.location.search);
@@ -119,6 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const addCategoryBtn = document.getElementById('add-category-btn');
     const inputCategory = document.getElementById('input-category');
     const manageCategoryList = document.getElementById('manage-category-list');
+    
+    // Letter Pad Controls
+    const newCompanyInput = document.getElementById('new-company-input');
+    const addCompanyBtn = document.getElementById('add-company-btn');
+    const manageCompanyList = document.getElementById('manage-company-list');
     
     const modalOverlay = document.getElementById('modal-overlay');
     const addNewBtn = document.getElementById('add-new-btn');
@@ -347,7 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 addPrefix: a5AddPrefix.checked,
                 lineHeight: parseFloat(a5LineHeightSlider.value) || 1.2,
                 fontWeight: a5FontWeightSelect.value
-            }
+            },
+            letterPadCompanies: activeSettings.letterPadCompanies || []
         };
 
         // 1. Instantly update memory and hide settings modal to prevent any UI delay or saving lag
@@ -355,11 +362,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settingsModal) settingsModal.classList.add('hidden');
         showNotification('Settings Saved to Disk! 💾', 'success', 'Saved');
 
-        // 2. Execute network request in the background asynchronously without blocking the user
+        // 2. Execute network request in the background
+        saveSettingsToServer();
+    };
+
+    const saveSettingsToServer = () => {
         fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(settings)
+            body: JSON.stringify(activeSettings)
         }).catch(err => {
             console.error('Failed to save settings to server in background', err);
         });
@@ -376,7 +387,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (saved.a5) {
                 activeSettings.a5 = { ...activeSettings.a5, ...saved.a5 };
             }
+            if (saved.letterPadCompanies) {
+                activeSettings.letterPadCompanies = saved.letterPadCompanies;
+            } else {
+                activeSettings.letterPadCompanies = [];
+            }
             applySettingsToInputs();
+            renderManageCompaniesList();
         } catch (err) {
             console.warn('Failed to load settings from server.');
         }
@@ -596,6 +613,101 @@ document.addEventListener('DOMContentLoaded', () => {
             newCategoryInput.value = '';
             saveCategories();
             showNotification('Category added successfully!', 'success', 'Added');
+        });
+    }
+
+    // --- Letter Pad Companies Methods ---
+    const renderManageCompaniesList = () => {
+        if (!manageCompanyList) return;
+        manageCompanyList.innerHTML = '';
+        
+        const companies = activeSettings.letterPadCompanies || [];
+        if (companies.length === 0) {
+            manageCompanyList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.8rem; text-align: center; padding: 10px;">No companies added yet.</div>';
+            return;
+        }
+        
+        companies.forEach((company, index) => {
+            const item = document.createElement('div');
+            item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #F8FAFC; border-radius: 8px; margin-bottom: 8px; border: 1px solid #E2E8F0;';
+            item.innerHTML = `
+                <span style="font-weight: 600; font-size: 0.9rem;">${company}</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="edit-company-btn" data-index="${index}" style="background:none; border:none; color:var(--accent-blue); cursor:pointer; font-size: 0.8rem; font-weight:700;">✏️ Edit</button>
+                    <button class="delete-company-btn" data-index="${index}" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size: 0.8rem; font-weight:700;">🗑️ Delete</button>
+                </div>
+            `;
+            manageCompanyList.appendChild(item);
+        });
+
+        // Add Event Listeners for Edit/Delete
+        manageCompanyList.querySelectorAll('.delete-company-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                const companyName = companies[index];
+                showNotification(`Are you sure you want to delete the company "${companyName}"?`, 'confirm', 'Delete Company', () => {
+                    activeSettings.letterPadCompanies.splice(index, 1);
+                    renderManageCompaniesList();
+                    saveSettingsToServer();
+                    showNotification('Company deleted successfully!', 'success', 'Deleted');
+                });
+            });
+        });
+
+        manageCompanyList.querySelectorAll('.edit-company-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                const oldName = companies[index];
+                
+                showPromptModal("Rename Company", `Enter a new name for "${oldName}":`, oldName, (newName) => {
+                    if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+                        const trimmedNew = newName.trim();
+                        
+                        const existingCompany = companies.find((c, i) => i !== index && c.toLowerCase() === trimmedNew.toLowerCase());
+                        if (existingCompany) {
+                            showNotification(`Company "${existingCompany}" already exists!`, 'warning', 'Duplicate Company');
+                            return;
+                        }
+
+                        activeSettings.letterPadCompanies[index] = trimmedNew;
+                        renderManageCompaniesList();
+                        saveSettingsToServer();
+                        showNotification('Company renamed successfully!', 'success', 'Renamed');
+                    }
+                });
+            });
+        });
+    };
+
+    if (addCompanyBtn) {
+        addCompanyBtn.addEventListener('click', () => {
+            const newCompany = newCompanyInput.value.trim();
+            if (!newCompany) return;
+            
+            if (!activeSettings.letterPadCompanies) {
+                activeSettings.letterPadCompanies = [];
+            }
+            
+            const existingCompany = activeSettings.letterPadCompanies.find(c => c.toLowerCase() === newCompany.toLowerCase());
+            if (existingCompany) {
+                showNotification(`Company "${existingCompany}" already exists!`, 'warning', 'Duplicate Company');
+                return;
+            }
+
+            activeSettings.letterPadCompanies.push(newCompany);
+            newCompanyInput.value = '';
+            renderManageCompaniesList();
+            saveSettingsToServer();
+            showNotification('Company added successfully!', 'success', 'Added');
+        });
+    }
+
+    if (newCompanyInput) {
+        newCompanyInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addCompanyBtn.click();
+            }
         });
     }
 
@@ -1034,11 +1146,78 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const letterPadBtn = document.getElementById('letter-pad-btn');
-    if (letterPadBtn) {
+    const letterpadModal = document.getElementById('letterpad-modal');
+    const closeLetterpadModal = document.getElementById('close-letterpad-modal');
+    const letterpadCompanyList = document.getElementById('letterpad-company-list');
+
+    if (letterPadBtn && letterpadModal) {
         letterPadBtn.addEventListener('click', () => {
-            showNotification('Letter Pad feature coming soon! Please stay tuned.', 'info', 'Letter Pad');
+            renderLetterpadCompanies();
+            letterpadModal.classList.remove('hidden');
         });
     }
+
+    if (closeLetterpadModal && letterpadModal) {
+        closeLetterpadModal.addEventListener('click', () => {
+            letterpadModal.classList.add('hidden');
+        });
+    }
+
+    const renderLetterpadCompanies = () => {
+        if (!letterpadCompanyList) return;
+        letterpadCompanyList.innerHTML = '';
+        
+        const companies = activeSettings.letterPadCompanies || [];
+        if (companies.length === 0) {
+            letterpadCompanyList.innerHTML = `
+                <div style="text-align: center; color: var(--text-secondary); padding: 20px 10px;">
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem;">No companies added yet.</p>
+                    <button id="go-to-settings-letterpad" class="btn secondary" style="font-size: 0.8rem; padding: 6px 12px; margin: 0 auto; display: flex; align-items: center; gap: 5px;">⚙️ Add in Settings</button>
+                </div>
+            `;
+            const goBtn = document.getElementById('go-to-settings-letterpad');
+            if (goBtn) {
+                goBtn.addEventListener('click', () => {
+                    letterpadModal.classList.add('hidden');
+                    // Open settings modal and select letterpad tab
+                    if (openSettingsBtn) openSettingsBtn.click();
+                    const letterpadTabBtn = Array.from(settingsTabBtns).find(btn => btn.dataset.tab === 'letterpad');
+                    if (letterpadTabBtn) letterpadTabBtn.click();
+                });
+            }
+            return;
+        }
+
+        companies.forEach(company => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.style.cssText = 'width: 100%; text-align: left; padding: 12px 15px; font-weight: 600; font-size: 0.95rem; justify-content: flex-start; background: #fff; border: 1px solid #E2E8F0; color: var(--text-primary); border-radius: var(--radius-md); transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer;';
+            btn.innerHTML = `<span style="font-size: 1.2rem;">🏢</span> <span>${company}</span>`;
+            
+            // Premium hover effects
+            btn.addEventListener('mouseenter', () => {
+                btn.style.background = 'linear-gradient(135deg, #ec4899, #db2777)';
+                btn.style.color = '#fff';
+                btn.style.borderColor = 'transparent';
+                btn.style.transform = 'translateY(-2px)';
+                btn.style.boxShadow = '0 4px 12px rgba(219, 39, 119, 0.2)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.background = '#fff';
+                btn.style.color = 'var(--text-primary)';
+                btn.style.borderColor = '#E2E8F0';
+                btn.style.transform = 'none';
+                btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+            });
+
+            btn.addEventListener('click', () => {
+                letterpadModal.classList.add('hidden');
+                showNotification(`Selected Profile: ${company}`, 'success', 'Letter Pad');
+            });
+
+            letterpadCompanyList.appendChild(btn);
+        });
+    };
 
     // --- Key Shortcuts ---
     window.addEventListener('keydown', (e) => {
