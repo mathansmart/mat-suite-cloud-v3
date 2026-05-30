@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fontFamily: "'Outfit', sans-serif",
         fontSize: 18,
         fontWeight: "400",
+        fontStyle: "normal",
+        textDecoration: "none",
+        textAlign: "left",
         lineHeight: 1.2,
         topMargin: 50,
         leftMargin: 20,
@@ -86,13 +89,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTitle = document.getElementById('modal-title');
     const inputCategory = document.getElementById('input-category');
     const inputName = document.getElementById('input-name');
-    const nameWarning = document.getElementById('name-warning');
-    const inputCity = document.getElementById('input-city');
-    const inputPhone = document.getElementById('input-phone');
-    const addressLinesContainer = document.getElementById('address-lines-container');
-    const addAddrLineBtn = document.getElementById('add-addr-line-btn');
     const cancelBtn = document.getElementById('cancel-btn');
     const saveAddressBtn = document.getElementById('save-address-btn');
+
+    // A4 Editor elements
+    const editorTextarea = document.getElementById('editor-textarea');
+    const editorCompanyHeader = document.getElementById('editor-company-header');
+    const editorHeaderText = document.getElementById('editor-header-text');
+    const editorPrefixIndicator = document.getElementById('editor-prefix-indicator');
+    const editorA4Sheet = document.getElementById('editor-a4-sheet');
+
+    // Ribbon Toolbar elements
+    const editorFontFamily = document.getElementById('editor-font-family');
+    const editorFontSize = document.getElementById('editor-font-size');
+    const editorBtnBold = document.getElementById('editor-btn-bold');
+    const editorBtnItalic = document.getElementById('editor-btn-italic');
+    const editorBtnUnderline = document.getElementById('editor-btn-underline');
+    const editorBtnFormatPainter = document.getElementById('editor-btn-format-painter');
+    const editorAlignLeft = document.getElementById('editor-align-left');
+    const editorAlignCenter = document.getElementById('editor-align-center');
+    const editorAlignRight = document.getElementById('editor-align-right');
+    const editorAlignJustify = document.getElementById('editor-align-justify');
+    const editorLineHeight = document.getElementById('editor-line-height');
+    const editorTopMargin = document.getElementById('editor-top-margin');
+    const editorLeftMargin = document.getElementById('editor-left-margin');
+    const editorPrintHeader = document.getElementById('editor-print-header');
+    const editorAddPrefix = document.getElementById('editor-add-prefix');
 
     // Confirm Modal
     const confirmModalOverlay = document.getElementById('confirm-modal-overlay');
@@ -245,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const loader = document.getElementById('loading-overlay');
                 if (loader) loader.classList.add('fade-out');
-            }, 500);
+            }, 20);
 
         } catch (err) {
             console.error('Failed to load settings', err);
@@ -535,57 +557,95 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAddresses(searchInput.value);
     };
 
-    // --- Dynamic Address Lines Helper ---
-    const addAddressLine = (value = "") => {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'addr-line-input';
-        input.placeholder = "Address Line " + (addressLinesContainer.children.length + 1);
-        input.value = value;
-        input.autocomplete = 'off';
-        input.style.marginBottom = '5px';
-        
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const next = input.nextElementSibling;
-                if (next && next.tagName === 'INPUT') {
-                    next.focus();
-                } else {
-                    addAddressLine("");
-                    setTimeout(() => addressLinesContainer.lastElementChild.focus(), 10);
-                }
-            } else if (e.key === 'Backspace' && input.value === '') {
-                e.preventDefault();
-                const prev = input.previousElementSibling;
-                if (prev && prev.tagName === 'INPUT') {
-                    prev.focus();
-                    input.remove();
-                }
-            }
-        });
-        
-        addressLinesContainer.appendChild(input);
-    };
+    // Helper to format/apply styles to the A4 Editor Workspace
+    const formatEditorA4Sheet = () => {
+        if (!editorA4Sheet || !editorTextarea) return;
 
-    addAddrLineBtn.addEventListener('click', () => addAddressLine(""));
+        // Sync ribbon toolbar inputs with companySettings
+        if (editorFontFamily) editorFontFamily.value = companySettings.fontFamily;
+        if (editorFontSize) editorFontSize.value = companySettings.fontSize;
+        if (editorLineHeight) editorLineHeight.value = companySettings.lineHeight;
+        if (editorTopMargin) editorTopMargin.value = companySettings.topMargin;
+        if (editorLeftMargin) editorLeftMargin.value = companySettings.leftMargin;
+        if (editorPrintHeader) editorPrintHeader.checked = companySettings.printHeader;
+        if (editorAddPrefix) editorAddPrefix.checked = companySettings.addPrefix;
+
+        // Sync ribbon buttons active classes
+        if (editorBtnBold) {
+            if (companySettings.fontWeight === "700") {
+                editorBtnBold.classList.add('active');
+            } else {
+                editorBtnBold.classList.remove('active');
+            }
+        }
+        if (editorBtnItalic) {
+            if (companySettings.fontStyle === "italic") {
+                editorBtnItalic.classList.add('active');
+            } else {
+                editorBtnItalic.classList.remove('active');
+            }
+        }
+        if (editorBtnUnderline) {
+            if (companySettings.textDecoration === "underline") {
+                editorBtnUnderline.classList.add('active');
+            } else {
+                editorBtnUnderline.classList.remove('active');
+            }
+        }
+
+        // Alignment active class sync
+        if (editorAlignLeft) editorAlignLeft.classList.remove('active');
+        if (editorAlignCenter) editorAlignCenter.classList.remove('active');
+        if (editorAlignRight) editorAlignRight.classList.remove('active');
+        if (editorAlignJustify) editorAlignJustify.classList.remove('active');
+
+        const align = companySettings.textAlign || "left";
+        if (align === "left" && editorAlignLeft) editorAlignLeft.classList.add('active');
+        if (align === "center" && editorAlignCenter) editorAlignCenter.classList.add('active');
+        if (align === "right" && editorAlignRight) editorAlignRight.classList.add('active');
+        if (align === "justify" && editorAlignJustify) editorAlignJustify.classList.add('active');
+        
+        // Apply Margins (padding on sheet)
+        editorA4Sheet.style.paddingTop = companySettings.topMargin + 'mm';
+        editorA4Sheet.style.paddingLeft = companySettings.leftMargin + 'mm';
+        editorA4Sheet.style.paddingRight = '20mm';
+        editorA4Sheet.style.paddingBottom = '20mm';
+        
+        // Apply Font configurations to text area
+        editorTextarea.style.fontFamily = companySettings.fontFamily;
+        editorTextarea.style.fontSize = companySettings.fontSize + 'pt';
+        editorTextarea.style.fontWeight = companySettings.fontWeight;
+        editorTextarea.style.lineHeight = companySettings.lineHeight;
+        editorTextarea.style.fontStyle = companySettings.fontStyle || 'normal';
+        editorTextarea.style.textDecoration = companySettings.textDecoration || 'none';
+        editorTextarea.style.textAlign = companySettings.textAlign || 'left';
+
+        // Apply Header Display
+        if (companySettings.printHeader) {
+            editorCompanyHeader.style.display = 'block';
+            editorHeaderText.textContent = COMPANY;
+        } else {
+            editorCompanyHeader.style.display = 'none';
+        }
+
+        // Apply Prefix Display
+        if (companySettings.addPrefix) {
+            editorPrefixIndicator.style.display = 'block';
+        } else {
+            editorPrefixIndicator.style.display = 'none';
+        }
+    };
 
     // --- Contact Edit Modal Trigger ---
     addNewBtn.addEventListener('click', () => {
         editingId = null;
-        modalTitle.textContent = 'Add New Letter Pad Contact';
+        modalTitle.textContent = 'Create New Letter';
         inputName.value = '';
-        if (inputCity) inputCity.value = '';
-        inputPhone.value = '';
-        addressLinesContainer.innerHTML = '';
-        addAddressLine("");
-        addAddressLine("");
-        addAddressLine("");
+        if (editorTextarea) editorTextarea.innerHTML = '';
+        
         if (inputCategory) inputCategory.value = activeCategoryFilter !== 'All' ? activeCategoryFilter : '';
-        if (nameWarning) {
-            nameWarning.style.display = 'none';
-            nameWarning.textContent = '';
-        }
+        
+        formatEditorA4Sheet();
         modalOverlay.classList.remove('hidden');
         setTimeout(() => inputName.focus(), 10);
     });
@@ -594,34 +654,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveAddressBtn.addEventListener('click', () => {
         const name = inputName.value.trim();
-        const city = inputCity ? inputCity.value.trim() : '';
-        
-        const lineInputs = addressLinesContainer.querySelectorAll('input');
-        const address = Array.from(lineInputs)
-            .map(i => i.value.trim())
-            .filter(v => v !== '')
-            .join('\n');
-
-        const phone = inputPhone.value.trim();
+        const address = editorTextarea ? editorTextarea.innerHTML.trim() : '';
         const category = inputCategory ? inputCategory.value : '';
 
         if (!name || !address) {
-            showNotification('Please fill in both name and address.', 'warning', 'Required');
+            showNotification('Please fill in both Document Name and Content.', 'warning', 'Required');
             return;
         }
 
         const existing = checkDuplicateName(name);
         if (existing) {
-            showNotification(`Contact with name "${name}" already exists!`, 'error', 'Duplicate');
+            showNotification(`A document with name "${name}" already exists!`, 'error', 'Duplicate');
             return;
         }
 
         if (editingId) {
             const index = companyAddresses.findIndex(a => a.id === editingId);
-            companyAddresses[index] = { id: editingId, name, city, address, phone, category };
+            companyAddresses[index] = { id: editingId, name, address, category };
             editingId = null;
         } else {
-            companyAddresses.push({ id: Date.now(), name, city, address, phone, category });
+            companyAddresses.push({ id: Date.now(), name, address, category });
         }
 
         // Sort alphabetically
@@ -630,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveToServer();
         renderAddresses();
         modalOverlay.classList.add('hidden');
-        showNotification('Contact saved successfully!', 'success', 'Saved');
+        showNotification('Document saved successfully!', 'success', 'Saved');
     });
 
     addressList.addEventListener('click', (e) => {
@@ -650,18 +702,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (addr) {
                 editingId = addr.id;
                 inputName.value = addr.name;
-                if (inputCity) inputCity.value = addr.city || '';
-                inputPhone.value = addr.phone || '';
-                
-                addressLinesContainer.innerHTML = '';
-                const lines = (addr.address || '').split('\n');
-                lines.forEach(line => addAddressLine(line));
-                if (lines.length === 0) addAddressLine("");
-
+                if (editorTextarea) editorTextarea.innerHTML = addr.address || '';
                 if (inputCategory) inputCategory.value = addr.category || '';
-                modalTitle.textContent = 'Edit Letter Pad Contact';
+                
+                modalTitle.textContent = 'Edit Letter';
+                formatEditorA4Sheet();
                 modalOverlay.classList.remove('hidden');
-                setTimeout(() => inputName.focus(), 10);
+                setTimeout(() => editorTextarea.focus(), 10);
             }
         }
     });
@@ -763,6 +810,293 @@ document.addEventListener('DOMContentLoaded', () => {
     syncControls(topMarginSlider, topMarginNum);
     syncControls(leftMarginSlider, leftMarginNum);
 
+    // --- Ribbon Event Listeners ---
+    const updateFromRibbon = () => {
+        companySettings.fontFamily = editorFontFamily.value;
+        companySettings.fontSize = parseInt(editorFontSize.value) || 18;
+        companySettings.lineHeight = parseFloat(editorLineHeight.value) || 1.2;
+        companySettings.topMargin = parseInt(editorTopMargin.value) || 50;
+        companySettings.leftMargin = parseInt(editorLeftMargin.value) || 20;
+        companySettings.printHeader = editorPrintHeader.checked;
+        companySettings.addPrefix = editorAddPrefix.checked;
+
+        // Apply style to A4 page preview immediately
+        editorA4Sheet.style.paddingTop = companySettings.topMargin + 'mm';
+        editorA4Sheet.style.paddingLeft = companySettings.leftMargin + 'mm';
+        editorA4Sheet.style.paddingRight = '20mm';
+        editorA4Sheet.style.paddingBottom = '20mm';
+        editorTextarea.style.fontFamily = companySettings.fontFamily;
+        editorTextarea.style.fontSize = companySettings.fontSize + 'pt';
+        editorTextarea.style.lineHeight = companySettings.lineHeight;
+
+        if (companySettings.printHeader) {
+            editorCompanyHeader.style.display = 'block';
+            editorHeaderText.textContent = COMPANY;
+        } else {
+            editorCompanyHeader.style.display = 'none';
+        }
+
+        if (companySettings.addPrefix) {
+            editorPrefixIndicator.style.display = 'block';
+        } else {
+            editorPrefixIndicator.style.display = 'none';
+        }
+    };
+
+    if (editorFontFamily) editorFontFamily.addEventListener('change', updateFromRibbon);
+    if (editorFontSize) editorFontSize.addEventListener('change', updateFromRibbon);
+    if (editorLineHeight) editorLineHeight.addEventListener('change', updateFromRibbon);
+    if (editorTopMargin) editorTopMargin.addEventListener('input', updateFromRibbon);
+    if (editorLeftMargin) editorLeftMargin.addEventListener('input', updateFromRibbon);
+    if (editorPrintHeader) editorPrintHeader.addEventListener('change', updateFromRibbon);
+    if (editorAddPrefix) editorAddPrefix.addEventListener('change', updateFromRibbon);
+
+    // Sync ribbon button active states from browser cursor selection state
+    const updateRibbonFromSelection = () => {
+        if (!editorTextarea) return;
+        
+        if (editorBtnBold) {
+            if (document.queryCommandState('bold')) editorBtnBold.classList.add('active');
+            else editorBtnBold.classList.remove('active');
+        }
+        
+        if (editorBtnItalic) {
+            if (document.queryCommandState('italic')) editorBtnItalic.classList.add('active');
+            else editorBtnItalic.classList.remove('active');
+        }
+        
+        if (editorBtnUnderline) {
+            if (document.queryCommandState('underline')) editorBtnUnderline.classList.add('active');
+            else editorBtnUnderline.classList.remove('active');
+        }
+
+        // Alignments
+        if (editorAlignLeft) {
+            if (document.queryCommandState('justifyLeft')) editorAlignLeft.classList.add('active');
+            else editorAlignLeft.classList.remove('active');
+        }
+        if (editorAlignCenter) {
+            if (document.queryCommandState('justifyCenter')) editorAlignCenter.classList.add('active');
+            else editorAlignCenter.classList.remove('active');
+        }
+        if (editorAlignRight) {
+            if (document.queryCommandState('justifyRight')) editorAlignRight.classList.add('active');
+            else editorAlignRight.classList.remove('active');
+        }
+        if (editorAlignJustify) {
+            if (document.queryCommandState('justifyFull')) editorAlignJustify.classList.add('active');
+            else editorAlignJustify.classList.remove('active');
+        }
+    };
+
+    if (editorTextarea) {
+        editorTextarea.addEventListener('keyup', updateRibbonFromSelection);
+        editorTextarea.addEventListener('mouseup', updateRibbonFromSelection);
+        document.addEventListener('selectionchange', () => {
+            if (document.activeElement === editorTextarea) {
+                updateRibbonFromSelection();
+            }
+        });
+    }
+
+    // Ribbon Toggle Button Listeners via document.execCommand
+    if (editorBtnBold) {
+        editorBtnBold.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('bold', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+    if (editorBtnItalic) {
+        editorBtnItalic.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('italic', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+    if (editorBtnUnderline) {
+        editorBtnUnderline.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('underline', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+
+    // --- Format Painter Logic ---
+    let paintBrushFormat = null;
+    let paintBrushActive = false;
+    let paintBrushPersistent = false;
+
+    function copyFormatting() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.isCollapsed) {
+            showNotification("Please select some styled text first to copy formatting.", "warning", "No Text Selected");
+            return null;
+        }
+
+        const range = selection.getRangeAt(0);
+        let node = range.startContainer;
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentElement;
+        }
+
+        const computed = window.getComputedStyle(node);
+
+        const isBold = document.queryCommandState('bold') || 
+                       computed.fontWeight === 'bold' || 
+                       parseInt(computed.fontWeight) >= 600;
+
+        const isItalic = document.queryCommandState('italic') || 
+                         computed.fontStyle === 'italic';
+
+        const isUnderline = document.queryCommandState('underline') || 
+                            computed.textDecoration.includes('underline');
+
+        return {
+            bold: isBold,
+            italic: isItalic,
+            underline: isUnderline,
+            fontFamily: computed.fontFamily,
+            fontSize: computed.fontSize,
+            color: computed.color,
+            backgroundColor: computed.backgroundColor
+        };
+    }
+
+    function applyFormatting(format) {
+        if (!format) return;
+        
+        // Match selection command states with source format
+        const targetBold = document.queryCommandState('bold');
+        if (targetBold !== format.bold) {
+            document.execCommand('bold', false, null);
+        }
+        
+        const targetItalic = document.queryCommandState('italic');
+        if (targetItalic !== format.italic) {
+            document.execCommand('italic', false, null);
+        }
+        
+        const targetUnderline = document.queryCommandState('underline');
+        if (targetUnderline !== format.underline) {
+            document.execCommand('underline', false, null);
+        }
+
+        // Apply text and highlight colors
+        if (format.color && format.color !== 'rgba(0, 0, 0, 0)') {
+            document.execCommand('foreColor', false, format.color);
+        }
+        
+        if (format.backgroundColor && format.backgroundColor !== 'rgba(0, 0, 0, 0)' && format.backgroundColor !== 'transparent') {
+            document.execCommand('hiliteColor', false, format.backgroundColor);
+        }
+
+        if (format.fontFamily) {
+            document.execCommand('fontName', false, format.fontFamily);
+        }
+    }
+
+    const deactivateFormatPainter = () => {
+        paintBrushActive = false;
+        paintBrushPersistent = false;
+        paintBrushFormat = null;
+        if (editorBtnFormatPainter) {
+            editorBtnFormatPainter.classList.remove('active');
+            editorBtnFormatPainter.style.background = 'transparent';
+            editorBtnFormatPainter.style.borderColor = 'transparent';
+        }
+        if (editorTextarea) {
+            editorTextarea.classList.remove('format-painting-mode');
+        }
+    };
+
+    const activateFormatPainter = (persistent = false) => {
+        const format = copyFormatting();
+        if (!format) {
+            deactivateFormatPainter();
+            return;
+        }
+        
+        paintBrushFormat = format;
+        paintBrushActive = true;
+        paintBrushPersistent = persistent;
+        
+        if (editorBtnFormatPainter) {
+            editorBtnFormatPainter.classList.add('active');
+        }
+        if (editorTextarea) {
+            editorTextarea.classList.add('format-painting-mode');
+        }
+    };
+
+    if (editorBtnFormatPainter) {
+        editorBtnFormatPainter.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (paintBrushActive) {
+                deactivateFormatPainter();
+            } else {
+                activateFormatPainter(false);
+            }
+        });
+
+        editorBtnFormatPainter.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            activateFormatPainter(true);
+        });
+    }
+
+    if (editorTextarea) {
+        editorTextarea.addEventListener('mouseup', () => {
+            if (paintBrushActive && paintBrushFormat) {
+                const selection = window.getSelection();
+                if (selection.rangeCount && !selection.isCollapsed) {
+                    applyFormatting(paintBrushFormat);
+                    
+                    if (!paintBrushPersistent) {
+                        deactivateFormatPainter();
+                    }
+                }
+            }
+        });
+
+        // Cancel with Escape key
+        editorTextarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && paintBrushActive) {
+                deactivateFormatPainter();
+            }
+        });
+    }
+
+    // Alignment buttons listeners
+    if (editorAlignLeft) {
+        editorAlignLeft.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('justifyLeft', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+    if (editorAlignCenter) {
+        editorAlignCenter.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('justifyCenter', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+    if (editorAlignRight) {
+        editorAlignRight.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('justifyRight', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+    if (editorAlignJustify) {
+        editorAlignJustify.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('justifyFull', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+
     // --- Print Layout Generation ---
     bulkPrintBtn.addEventListener('click', () => {
         if (selectedIds.length === 0) {
@@ -787,6 +1121,9 @@ document.addEventListener('DOMContentLoaded', () => {
         root.style.setProperty('--print-font-family', companySettings.fontFamily);
         root.style.setProperty('--print-font-size', companySettings.fontSize + 'pt');
         root.style.setProperty('--print-font-weight', companySettings.fontWeight);
+        root.style.setProperty('--print-font-style', companySettings.fontStyle || 'normal');
+        root.style.setProperty('--print-text-decoration', companySettings.textDecoration || 'none');
+        root.style.setProperty('--print-text-align', companySettings.textAlign || 'left');
         root.style.setProperty('--print-line-height', companySettings.lineHeight);
         root.style.setProperty('--print-top-margin', companySettings.topMargin + 'mm');
         root.style.setProperty('--print-left-margin', companySettings.leftMargin + 'mm');
@@ -834,6 +1171,33 @@ document.addEventListener('DOMContentLoaded', () => {
             .letterpad-body {
                 display: flex;
                 flex-direction: column;
+                font-style: var(--print-font-style);
+                text-decoration: var(--print-text-decoration);
+                text-align: var(--print-text-align);
+            }
+            .letterpad-body * {
+                white-space: normal !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
+            }
+            .letterpad-body table {
+                width: 100% !important;
+                max-width: 100% !important;
+                border-collapse: collapse !important;
+                margin: 15px 0 !important;
+                table-layout: auto !important;
+            }
+            .letterpad-body td, .letterpad-body th {
+                border: 1px solid #000 !important;
+                padding: 8px 12px !important;
+                min-width: 40px;
+                font-size: inherit;
+                font-family: inherit;
+                line-height: inherit;
+            }
+            .letterpad-body img {
+                max-width: 100% !important;
+                height: auto !important;
             }
             .letterpad-to-prefix {
                 margin-bottom: 5px;
@@ -868,7 +1232,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="letterpad-body">
                     ${companySettings.addPrefix ? '<div class="letterpad-to-prefix">To. M/s,</div>' : ''}
                     <div class="letterpad-name-line">${item.name}</div>
-                    <div style="white-space: pre-line;">${item.address}</div>
+                    <div style="white-space: normal; word-break: normal; overflow-wrap: break-word; width: 100%;">${item.address}</div>
                     ${item.phone ? `<div style="margin-top: 5px; font-weight: 600;">PH: ${item.phone}</div>` : ''}
                 </div>
             `;

@@ -37,7 +37,7 @@
 
 
 
-            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.2);">＋ New Contact</button>
+            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(219,39,119,0.2);">＋ New Address / Letter</button>
             
             <button id="open-settings-btn" class="btn secondary" style="justify-content: center; padding: 8px; font-size: 0.8rem; width: 100%;">⚙️ Letter Pad Settings</button>
         </aside>
@@ -180,38 +180,159 @@
         </div>
     </div>
 
-    <!-- Add/Edit Contact Modal -->
-    <div id="modal-overlay" class="modal-overlay hidden">
-        <div class="modal">
-            <h2 id="modal-title">Edit Letter Pad Contact</h2>
-            <div class="input-field">
-                <label>Category</label>
-                <select id="input-category" style="width: 100%; padding: 0.8rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; background: #F8FAFC; outline: none; transition: all 0.2s;">
-                </select>
-            </div>
-            <div class="input-field">
-                <label>Name / Shop Name</label>
-                <input type="text" id="input-name" autocomplete="off">
-                <div id="name-warning" style="color: var(--danger); font-size: 0.75rem; margin-top: 5px; display: none; font-weight: 600;"></div>
-            </div>
-            <div class="input-field">
-                <label>City / Town</label>
-                <input type="text" id="input-city" placeholder="Eg: Tirupur" autocomplete="off">
-            </div>
-            <div class="input-field">
-                <label>Phone Number</label>
-                <input type="text" id="input-phone" autocomplete="off">
-            </div>
-            <div class="input-field">
-                <label>Address Lines</label>
-                <div id="address-lines-container">
-                    <!-- Dynamic inputs will be added here -->
+    <!-- Add/Edit Letter Pad Document Modal (MS Word / A4 style) -->
+    <div id="modal-overlay" class="modal-overlay hidden" style="z-index: 1800;">
+        <div class="modal" style="width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; display: flex; flex-direction: column; padding: 0; background: #f8fafc; border-radius: 0; border: none; margin: 0; overflow: hidden; animation: none;">
+            <!-- Toolbar Header -->
+            <div style="padding: 15px 25px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">📝</span>
+                    <h2 id="modal-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">New Document</h2>
                 </div>
-                <button id="add-addr-line-btn" type="button" class="btn tertiary" style="font-size: 0.7rem; padding: 5px; margin-top: 5px; width: 100%; border: 1px dashed var(--border-color);">➕ Add Another Line</button>
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 250px; justify-content: flex-end;">
+                    <div style="display: flex; align-items: center; gap: 8px; max-width: 180px; width: 100%;">
+                        <select id="input-category" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; background: #f8fafc; font-weight: 600;"></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1; max-width: 280px;">
+                        <input type="text" id="input-name" placeholder="Document Name / Title..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none;" autocomplete="off">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <button id="cancel-btn" class="btn ghost" style="padding: 8px 15px; font-size: 0.85rem;">Cancel</button>
+                    <button id="save-address-btn" class="btn primary" style="background: linear-gradient(135deg, #ec4899, #db2777); border: none; font-weight: 700; padding: 8px 20px; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(219,39,119,0.2);">💾 Save Letter</button>
+                </div>
             </div>
-            <div class="modal-buttons">
-                <button id="cancel-btn" class="btn ghost">Cancel</button>
-                <button id="save-address-btn" class="btn primary">Save Changes</button>
+
+            <!-- Ribbon Toolbar (MS Word Style) -->
+            <div class="word-ribbon" style="background: #2b2b2b; color: #fff; padding: 6px 15px; border-bottom: 1.5px solid #1e1e1e; display: flex; align-items: stretch; gap: 0px; flex-shrink: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none;">
+                
+                <!-- FONT SECTION -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px 4px 0; border-right: 1px solid #444; gap: 4px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <!-- Font dropdown -->
+                        <select id="editor-font-family" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 4px 8px; border-radius: 3px; font-size: 0.8rem; width: 140px; font-family: inherit; outline: none; cursor: pointer;">
+                            <option value="'Outfit', sans-serif">Outfit</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Playfair Display', serif">Playfair Display</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Georgia', serif">Georgia</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                        </select>
+                        
+                        <!-- Font size dropdown -->
+                        <select id="editor-font-size" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 4px 6px; border-radius: 3px; font-size: 0.8rem; width: 60px; font-family: inherit; outline: none; cursor: pointer; text-align: center;">
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                            <option value="20">20</option>
+                            <option value="24">24</option>
+                            <option value="28">28</option>
+                            <option value="32">32</option>
+                            <option value="36">36</option>
+                            <option value="40">40</option>
+                            <option value="48">48</option>
+                            <option value="60">60</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <!-- Bold Toggle -->
+                        <button id="editor-btn-bold" title="Bold" style="background: transparent; color: #fff; border: 1px solid transparent; width: 26px; height: 26px; border-radius: 3px; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">B</button>
+                        <!-- Italic Toggle -->
+                        <button id="editor-btn-italic" title="Italic" style="background: transparent; color: #fff; border: 1px solid transparent; width: 26px; height: 26px; border-radius: 3px; font-style: italic; font-family: Georgia, serif; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">I</button>
+                        <!-- Underline Toggle -->
+                        <button id="editor-btn-underline" title="Underline" style="background: transparent; color: #fff; border: 1px solid transparent; width: 26px; height: 26px; border-radius: 3px; text-decoration: underline; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">U</button>
+                        <!-- Format Painter -->
+                        <button id="editor-btn-format-painter" title="Format Painter (Double click to lock)" style="background: transparent; color: #fff; border: 1px solid transparent; width: 26px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12l-6-6-8 8c-1.33 1.33-1.33 3.5 0 4.83L6.8 21.5c1.33 1.33 3.5 1.33 4.83 0l8-8zM14.5 8.5l2-2 4 4-2 2M16 3l1.5-1.5a1 1 0 0 1 1.42 0l1.58 1.58a1 1 0 0 1 0 1.42L19 6"/></svg>
+                        </button>
+                    </div>
+                    
+                    <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Font</div>
+                </div>
+
+                <!-- PARAGRAPH SECTION -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px; border-right: 1px solid #444; gap: 4px; margin-left: 10px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <!-- Align Left -->
+                        <button id="editor-align-left" title="Align Left" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2V3zm0 3h8v1H2V6zm0 3h12v1H2V9zm0 3h8v1H2v-1z"/></svg>
+                        </button>
+                        <!-- Align Center -->
+                        <button id="editor-align-center" title="Align Center" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2V3zm2 3h8v1H4V6zm-2 3h12v1H2V9zm2 3h8v1H4v-1z"/></svg>
+                        </button>
+                        <!-- Align Right -->
+                        <button id="editor-align-right" title="Align Right" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H6V6zm-4 3h12v1H2V9zm4 3h8v1H6v-1z"/></svg>
+                        </button>
+                        <!-- Align Justify -->
+                        <button id="editor-align-justify" title="Justify" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2V3zm0 3h12v1H2V6zm0 3h12v1H2V9zm0 3h12v1H2v-1z"/></svg>
+                        </button>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.75rem; color: #aaa;">Spacing:</span>
+                        <select id="editor-line-height" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 2px 4px; border-radius: 3px; font-size: 0.8rem; width: 65px; font-family: inherit; outline: none; cursor: pointer;">
+                            <option value="1">1.0</option>
+                            <option value="1.15">1.15</option>
+                            <option value="1.2">1.2</option>
+                            <option value="1.3">1.3</option>
+                            <option value="1.5">1.5</option>
+                            <option value="1.8">1.8</option>
+                            <option value="2">2.0</option>
+                            <option value="2.5">2.5</option>
+                        </select>
+                    </div>
+                    
+                    <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Paragraph</div>
+                </div>
+
+                <!-- PAGE SETUP SECTION -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px; border-right: 1px solid #444; gap: 4px; margin-left: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.75rem; color: #aaa;">Margins (mm):</span>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 0.75rem; color: #888;">Top</span>
+                            <input type="number" id="editor-top-margin" min="0" max="200" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 3px; border-radius: 3px; font-size: 0.8rem; width: 45px; text-align: center; outline: none;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 0.75rem; color: #888;">Left</span>
+                            <input type="number" id="editor-left-margin" min="0" max="200" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 3px; border-radius: 3px; font-size: 0.8rem; width: 45px; text-align: center; outline: none;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #ccc; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="editor-print-header" style="cursor: pointer; width: 13px; height: 13px;"> Print Header
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #ccc; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="editor-add-prefix" style="cursor: pointer; width: 13px; height: 13px;"> Add "To. M/s,"
+                        </label>
+                    </div>
+                    
+                    <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Page Setup</div>
+                </div>
+            </div>
+
+
+            <!-- Page Workspace Area -->
+            <div style="flex: 1; overflow-y: auto; padding: 30px 20px; display: flex; justify-content: center; align-items: flex-start; background: #cbd5e1;">
+                <!-- A4 Sheet Paper Card -->
+                <div id="editor-a4-sheet" style="width: 100%; max-width: 794px; min-height: 1123px; background: #ffffff; border: 1px solid #94a3b8; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 50px 40px; box-sizing: border-box; display: block; position: relative; transition: all 0.2s;">
+                    <!-- Company Header Preview inside Editor -->
+                    <div id="editor-company-header" style="text-align: center; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 25px; display: none; font-family: 'Montserrat', sans-serif;">
+                        <h1 id="editor-header-text" style="font-size: 20pt; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">COMPANY NAME</h1>
+                    </div>
+                    
+                    <!-- Prefix indicator -->
+                    <div id="editor-prefix-indicator" style="font-weight: 600; margin-bottom: 8px; display: none;">To. M/s,</div>
+                    
+                    <!-- Word-style Text Input Area -->
+                    <div id="editor-textarea" contenteditable="true" placeholder="Type your letter content or address details here..." style="width: 100%; border: none; outline: none; background: transparent; padding: 0; margin: 0; font-size: 18pt; line-height: 1.5; font-family: 'Outfit', sans-serif; box-sizing: border-box; white-space: normal; word-break: normal; overflow-wrap: break-word; min-height: 900px; display: block;" autocomplete="off"></div>
+                </div>
             </div>
         </div>
     </div>
