@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeCategoryFilter = "All";
     let selectedIds = [];
     let editingId = null;
+    let editingOriginalName = null;
     let searchFocusIndex = -1;
     let pendingConfirmCallback = null;
     let duplicateAlertTimeout = null;
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAllBtn = document.getElementById('select-all-btn');
     const unselectAllBtn = document.getElementById('unselect-all-btn');
     const bulkPrintBtn = document.getElementById('bulk-print-btn');
+    const bulkPdfBtn = document.getElementById('bulk-pdf-btn');
     const categoryList = document.getElementById('category-list');
 
     // Settings Modal & Panes
@@ -375,17 +377,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let logoHtml = '';
         if (logoImg) {
             logoHtml = `
-                <div style="display: flex; align-items: center; justify-content: center; width: 175px; flex-shrink: 0; height: auto; box-sizing: border-box; margin-left: 15px; margin-right: 15px; align-self: center; margin-top: 8px;">
-                    <img src="${logoImg}" style="width: 100%; max-height: 75px; object-fit: contain;" />
+                <div style="display: flex; align-items: center; justify-content: center; width: 115px; flex-shrink: 0; height: auto; box-sizing: border-box; margin-left: 15px; margin-right: 15px; align-self: center; margin-top: 8px;">
+                    <img src="${logoImg}" style="width: 100%; max-height: 50px; object-fit: contain;" />
                 </div>
             `;
         } else {
             logoHtml = `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #000; padding: 4px 8px; width: 85px; text-align: center; flex-shrink: 0; height: fit-content; box-sizing: border-box; align-self: center; margin-left: 15px; margin-top: 8px;">
-                    <span style="font-size: 7px; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 800; line-height: 1;">${logoTop}</span>
-                    <span style="font-size: 18px; font-weight: 900; letter-spacing: -1px; border-bottom: 2.2px solid #000; border-top: 2.2px solid #000; padding: 1px 0; margin: 2px 0; width: 100%; line-height: 1.1;">${logoMid}</span>
-                    <span style="font-size: 7px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; line-height: 1;">${logoBot}</span>
-                </div>
+                <div style="width: 115px; flex-shrink: 0; margin-left: 15px; margin-right: 15px;"></div>
             `;
         }
 
@@ -920,11 +918,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (editingId) {
-            const index = companyAddresses.findIndex(a => a.id === editingId);
-            companyAddresses[index] = { id: editingId, name, address, category };
+            const nameChanged = (editingOriginalName && editingOriginalName.trim().toLowerCase() !== name.toLowerCase());
+            
+            if (nameChanged) {
+                // Save As: Create as a new document
+                companyAddresses.push({ id: Date.now(), name, address, category });
+                showNotification('Saved as a new document!', 'success', 'Save As');
+            } else {
+                // Save: Overwrite existing document
+                const index = companyAddresses.findIndex(a => a.id === editingId);
+                if (index !== -1) {
+                    companyAddresses[index] = { id: editingId, name, address, category };
+                }
+                showNotification('Document updated successfully!', 'success', 'Saved');
+            }
             editingId = null;
+            editingOriginalName = null;
         } else {
             companyAddresses.push({ id: Date.now(), name, address, category });
+            showNotification('Document saved successfully!', 'success', 'Saved');
         }
 
         // Sort alphabetically
@@ -933,7 +945,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveToServer();
         renderAddresses();
         modalOverlay.classList.add('hidden');
-        showNotification('Document saved successfully!', 'success', 'Saved');
     });
 
     addressList.addEventListener('click', (e) => {
@@ -952,6 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const addr = companyAddresses.find(a => String(a.id) === rawId);
             if (addr) {
                 editingId = addr.id;
+                editingOriginalName = addr.name;
                 inputName.value = addr.name;
                 if (editorTextarea) editorTextarea.innerHTML = addr.address || '';
                 if (inputCategory) inputCategory.value = addr.category || '';
@@ -1358,10 +1370,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const toPrint = selectedIds.map(id => companyAddresses.find(a => a.id === id)).filter(Boolean);
-        generatePrintOutput(toPrint);
+        generatePrintOutput(toPrint, false);
     });
 
-    const generatePrintOutput = (data) => {
+    if (bulkPdfBtn) {
+        bulkPdfBtn.addEventListener('click', () => {
+            if (selectedIds.length === 0) {
+                showNotification('Please select at least one contact to save as PDF.', 'warning', 'No selection');
+                return;
+            }
+            const toPrint = selectedIds.map(id => companyAddresses.find(a => a.id === id)).filter(Boolean);
+            generatePrintOutput(toPrint, true);
+        });
+    }
+
+    const generatePrintOutput = (data, isPDF = false) => {
         const root = document.documentElement;
 
         // Clean up old print styles
@@ -1517,6 +1540,43 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             printContainer.appendChild(page);
         });
+
+        if (isPDF) {
+            showNotification('Converting document to PDF...', 'info', 'Generating PDF');
+            const opt = {
+                margin: [0, 0, 0, 0],
+                filename: `${COMPANY}_LetterPad_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            printContainer.style.position = 'fixed';
+            printContainer.style.left = '-9999px';
+            printContainer.style.top = '0';
+            printContainer.style.display = 'block';
+            printContainer.style.zIndex = '99999';
+
+            html2pdf().set(opt).from(printContainer).save().then(() => {
+                printContainer.innerHTML = '';
+                printContainer.style.position = '';
+                printContainer.style.left = '';
+                printContainer.style.top = '';
+                printContainer.style.display = '';
+                printContainer.style.zIndex = '';
+                showNotification('PDF downloaded successfully.', 'success', 'PDF Saved');
+            }).catch(err => {
+                console.error('PDF generation failed:', err);
+                showNotification('Failed to generate PDF. Please try again.', 'error', 'Error');
+            });
+            return;
+        }
 
         // Trigger native print dialog
         const originalTitle = document.title;

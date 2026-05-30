@@ -6,6 +6,7 @@
     <title>Letter Pad Suite - Envelope Pro</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -50,6 +51,7 @@
                 </div>
                 <div class="header-actions">
                     <button id="bulk-print-btn" class="btn primary" style="background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.255);">🖨️ PRINT LETTER PAD</button>
+                    <button id="bulk-pdf-btn" class="btn primary" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);">📄 SAVE AS PDF</button>
                     <button id="select-all-btn" class="btn tertiary">Select All</button>
                     <button id="unselect-all-btn" class="btn tertiary">Deselect All</button>
                 </div>
@@ -175,13 +177,12 @@
                         <h4 style="margin: 0; font-size: 0.85rem; color: var(--text-primary); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Milton Style Customizer</h4>
                         
                         <!-- Left Logo Text or Image -->
-                        <div style="display: none; flex-direction: column; gap: 4px;">
-                            <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Left Logo Options</label>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="hidden" id="setting-milton-logo-top" value="Quality is our motto">
+                            <input type="hidden" id="setting-milton-logo-mid" value="MILTON">
+                            <input type="hidden" id="setting-milton-logo-bot" value="Garments">
+                            <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Upload Left Logo Image:</label>
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <input type="text" id="setting-milton-logo-top" placeholder="Logo Top Small Text (e.g. Quality is our motto)" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
-                                <input type="text" id="setting-milton-logo-mid" placeholder="Logo Main Text (e.g. MILTON)" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
-                                <input type="text" id="setting-milton-logo-bot" placeholder="Logo Bottom Text (e.g. Garments)" style="padding: 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); outline: none;">
-                                <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px;">OR Upload Left Logo Image:</div>
                                 <input type="file" id="setting-milton-logo-file" accept="image/*" style="font-size: 0.75rem;">
                                 <div id="setting-milton-logo-preview" style="display: none; align-items: center; gap: 8px;">
                                     <span style="font-size: 0.7rem; color: #16a34a; font-weight: 600;">✓ Logo image loaded</span>
