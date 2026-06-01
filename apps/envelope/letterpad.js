@@ -374,8 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const centerAddr2 = settings.miltonCenterAddress2 || "KANGAYAM ROAD, TIRUPUR - 641 604.";
         const centerContact = settings.miltonCenterContact || "E-mail: miltongarmentsprivatelimited@gmail.com &nbsp;&middot;&nbsp; Web: www.miltongarments.com";
         
-        const phone1 = settings.miltonRightPhone1 || "0421-2428545";
-        const phone2 = settings.miltonRightPhone2 || "0421-2429439";
+        const phone1 = settings.miltonRightPhone1 !== undefined ? settings.miltonRightPhone1 : "0421-2428545";
+        const phone2 = settings.miltonRightPhone2 !== undefined ? settings.miltonRightPhone2 : "0421-2429439";
         const whatsapp = settings.miltonRightWhatsapp || "99526 07134";
         const gstin = settings.miltonRightGstin || "33AAQCM3608R1ZU";
 
