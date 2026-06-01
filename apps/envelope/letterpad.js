@@ -357,11 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
         printHeaderCheckbox.addEventListener('change', toggleMiltonCustomFields);
     }
 
-    const getMiltonHeaderHTML = (settings, isPrint = false) => {
+    const getMiltonHeaderHTML = (settings, isPrint = false, letterLogoImg = undefined) => {
         const logoTop = settings.miltonLogoTop || "Quality is our motto";
         const logoMid = settings.miltonLogoMid || "MILTON";
         const logoBot = settings.miltonLogoBot || "Garments";
-        const logoImg = settings.miltonLogoImg || null;
+        const logoImg = letterLogoImg !== undefined ? letterLogoImg : (settings.miltonLogoImg || null);
         
         const centerName = settings.miltonCenterName || "MILTON GARMENTS PRIVATE LIMITED";
         const centerSubtitle = settings.miltonCenterSubtitle || "Manufacturers Fancy Hosiery";
@@ -922,20 +922,38 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (nameChanged) {
                 // Save As: Create as a new document
-                companyAddresses.push({ id: Date.now(), name, address, category });
+                companyAddresses.push({ 
+                    id: Date.now(), 
+                    name, 
+                    address, 
+                    category, 
+                    logoImg: companySettings.miltonLogoImg || null 
+                });
                 showNotification('Saved as a new document!', 'success', 'Save As');
             } else {
                 // Save: Overwrite existing document
                 const index = companyAddresses.findIndex(a => a.id === editingId);
                 if (index !== -1) {
-                    companyAddresses[index] = { id: editingId, name, address, category };
+                    companyAddresses[index] = { 
+                        id: editingId, 
+                        name, 
+                        address, 
+                        category, 
+                        logoImg: companySettings.miltonLogoImg || null 
+                    };
                 }
                 showNotification('Document updated successfully!', 'success', 'Saved');
             }
             editingId = null;
             editingOriginalName = null;
         } else {
-            companyAddresses.push({ id: Date.now(), name, address, category });
+            companyAddresses.push({ 
+                id: Date.now(), 
+                name, 
+                address, 
+                category, 
+                logoImg: companySettings.miltonLogoImg || null 
+            });
             showNotification('Document saved successfully!', 'success', 'Saved');
         }
 
@@ -1505,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (companySettings.printHeader) {
                 const style = 'milton';
                 if (style === 'milton') {
-                    headerHtml = getMiltonHeaderHTML(companySettings, true);
+                    headerHtml = getMiltonHeaderHTML(companySettings, true, item.logoImg);
                     
                     const currentDate = editorDateVal ? editorDateVal.textContent : '';
                     dateHtml = `
