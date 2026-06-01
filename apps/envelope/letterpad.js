@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorDateVal = document.getElementById('editor-date-val');
     const editorPrefixIndicator = document.getElementById('editor-prefix-indicator');
     const editorA4Sheet = document.getElementById('editor-a4-sheet');
+    const editorWatermark = document.getElementById('editor-watermark');
 
     // Ribbon Toolbar elements
     const editorFontFamily = document.getElementById('editor-font-family');
@@ -465,6 +466,27 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div style="border-bottom: 2px dotted #000000; margin-top: 8px; width: 100%;"></div>
         `;
+    };
+
+    const getWatermarkHTML = (settings) => {
+        const logoImg = settings.miltonLogoImg || settings.headerImage || null;
+        if (logoImg) {
+            return `<img src="${logoImg}" alt="Watermark" />`;
+        } else {
+            return `
+                <svg viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 3h12" />
+                  <path d="M6 21h12" />
+                  <path d="M8 3v18" />
+                  <path d="M16 3v18" />
+                  <line x1="8" y1="7" x2="16" y2="7" />
+                  <line x1="8" y1="11" x2="16" y2="11" />
+                  <line x1="8" y1="15" x2="16" y2="15" />
+                  <line x1="4" y1="20" x2="20" y2="4" />
+                  <circle cx="18" cy="6" r="1.2" fill="#84cc16" />
+                </svg>
+            `;
+        }
     };
 
     const applySettingsToInputs = () => {
@@ -902,6 +924,11 @@ document.addEventListener('DOMContentLoaded', () => {
             editorPrefixIndicator.style.display = 'block';
         } else {
             editorPrefixIndicator.style.display = 'none';
+        }
+
+        // Apply Watermark Logo
+        if (editorWatermark) {
+            editorWatermark.innerHTML = getWatermarkHTML(companySettings);
         }
     };
 
@@ -1566,6 +1593,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             page.innerHTML = `
+                <div class="letterpad-watermark">${getWatermarkHTML(companySettings)}</div>
                 ${headerHtml}
                 ${dateHtml}
                 <div class="letterpad-body">
