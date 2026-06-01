@@ -824,16 +824,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return searchTerms.every(term => cleanCombinedText.includes(term));
         });
 
-        // 2. Sort: Selected first, then Alphabetical (A-Z)
+        // 2. Sort: Alphabetical (A-Z)
         filtered.sort((a, b) => {
-            const aSel = selectedIds.includes(a.id);
-            const bSel = selectedIds.includes(b.id);
-            
-            // Priority 1: Selection Status
-            if (aSel && !bSel) return -1;
-            if (!aSel && bSel) return 1;
-            
-            // Priority 2: Alphabetical Name
             return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
         });
 

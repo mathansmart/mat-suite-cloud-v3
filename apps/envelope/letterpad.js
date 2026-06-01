@@ -726,12 +726,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return searchTerms.every(term => cleanCombinedText.includes(term));
         });
 
-        // Sort: Selected first, then A-Z
+        // Sort: A-Z
         filtered.sort((a, b) => {
-            const aSel = selectedIds.includes(a.id);
-            const bSel = selectedIds.includes(b.id);
-            if (aSel && !bSel) return -1;
-            if (!aSel && bSel) return 1;
             return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
         });
 
