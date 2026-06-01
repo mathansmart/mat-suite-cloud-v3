@@ -1517,8 +1517,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAddresses(searchInput.value);
     });
 
-    saveSettingsBtn.addEventListener('click', saveSettings);
-    reloadBtn.addEventListener('click', () => location.reload());
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', saveSettings);
+    }
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => location.reload());
+    }
 
     if (openSettingsBtn) {
         openSettingsBtn.addEventListener('click', () => {
