@@ -396,12 +396,19 @@ document.addEventListener('DOMContentLoaded', () => {
             ? 'border-bottom: none; padding-bottom: 0; position: static; margin-bottom: 10px; width: 100%; text-align: left; font-family: \'Outfit\', \'Segoe UI\', sans-serif; color: #000; box-sizing: border-box;'
             : 'width: 100%; font-family: \'Outfit\', \'Segoe UI\', sans-serif; color: #000; box-sizing: border-box; text-align: left;';
 
-        const phonePart = phone2 ? `
-            <div>Phone : ${phone1}</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" : ${phone2}</div>
-        ` : `
-            <div>Phone : ${phone1}</div>
-        `;
+        const p1 = (phone1 || '').trim();
+        const p2 = (phone2 || '').trim();
+        let phonePart = '';
+        if (p1 && p2) {
+            phonePart = `
+                <div>Phone : ${p1}</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" : ${p2}</div>
+            `;
+        } else if (p1) {
+            phonePart = `<div>Phone : ${p1}</div>`;
+        } else if (p2) {
+            phonePart = `<div>Phone : ${p2}</div>`;
+        }
 
         const whatsappPart = whatsapp ? `
             <div style="margin-top: 1px; display: flex; align-items: center; gap: 3px; justify-content: flex-end;">
