@@ -1579,6 +1579,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
+            printContainer.classList.remove('print-only');
             printContainer.style.position = 'fixed';
             printContainer.style.left = '-9999px';
             printContainer.style.top = '0';
@@ -1587,6 +1588,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             html2pdf().set(opt).from(printContainer).save().then(() => {
                 printContainer.innerHTML = '';
+                printContainer.classList.add('print-only');
                 printContainer.style.position = '';
                 printContainer.style.left = '';
                 printContainer.style.top = '';
@@ -1594,6 +1596,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 printContainer.style.zIndex = '';
                 showNotification('PDF downloaded successfully.', 'success', 'PDF Saved');
             }).catch(err => {
+                printContainer.classList.add('print-only');
+                printContainer.innerHTML = '';
+                printContainer.style.position = '';
+                printContainer.style.left = '';
+                printContainer.style.top = '';
+                printContainer.style.display = '';
+                printContainer.style.zIndex = '';
                 console.error('PDF generation failed:', err);
                 showNotification('Failed to generate PDF. Please try again.', 'error', 'Error');
             });
