@@ -1072,6 +1072,42 @@ select, input[type="range"], input[type="number"] {
     border-color: #fff !important;
 }
 
+/* Watermark layout rules for on-screen editor and printed layout */
+.letterpad-watermark {
+    position: absolute !important;
+    top: 55% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 60% !important;
+    max-width: 320px !important;
+    opacity: 0.055 !important; /* Extremely faded watermark, matching Milton reference image */
+    pointer-events: none !important;
+    user-select: none !important;
+    z-index: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.letterpad-watermark img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 250px !important;
+    object-fit: contain !important;
+}
+
+.letterpad-watermark svg {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 250px !important;
+}
+
+/* Ensure editor text area is relative and stacked above the watermark background */
+#editor-textarea {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
 
 
 
