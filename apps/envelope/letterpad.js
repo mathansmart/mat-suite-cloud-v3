@@ -61,7 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.title = `${COMPANY} - Letter Pad Suite`;
     
     const backBtn = document.getElementById('back-to-addressbook-btn');
-    if (backBtn) backBtn.href = `index.html${PROFILE_QUERY}`;
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = `index.html${PROFILE_QUERY}`;
+        });
+    }
 
     const addressList = document.getElementById('address-list');
     const searchInput = document.getElementById('search-input');
