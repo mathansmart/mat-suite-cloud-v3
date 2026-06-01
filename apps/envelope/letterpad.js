@@ -1556,7 +1556,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${dateHtml}
                 <div class="letterpad-body">
                     ${companySettings.addPrefix ? '<div class="letterpad-to-prefix">To. M/s,</div>' : ''}
-                    <div class="letterpad-name-line">${item.name}</div>
                     <div style="white-space: pre-wrap; word-break: normal; overflow-wrap: break-word; width: 100%;">${item.address}</div>
                     ${item.phone ? `<div style="margin-top: 5px; font-weight: 600;">PH: ${item.phone}</div>` : ''}
                 </div>
