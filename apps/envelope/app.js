@@ -354,7 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 lineHeight: parseFloat(a5LineHeightSlider.value) || 1.2,
                 fontWeight: a5FontWeightSelect.value
             },
-            letterPadCompanies: activeSettings.letterPadCompanies || []
+            letterPadCompanies: activeSettings.letterPadCompanies || [],
+            letterPadData: activeSettings.letterPadData || {}
         };
 
         // 1. Instantly update memory and hide settings modal to prevent any UI delay or saving lag
@@ -394,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             applySettingsToInputs();
             renderManageCompaniesList();
+            renderLetterpadCompanies();
         } catch (err) {
             console.warn('Failed to load settings from server.');
         }

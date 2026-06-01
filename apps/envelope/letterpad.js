@@ -855,19 +855,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     editorMiltonHeader.style.display = 'block';
                     editorMiltonHeader.innerHTML = getMiltonHeaderHTML(companySettings, false);
                 }
-                if (editorDateLine) editorDateLine.style.display = 'flex';
-                
-                // Set default current date if not set or placeholder is present
-                if (editorDateVal && (editorDateVal.textContent.trim() === '' || editorDateVal.textContent.includes('Date'))) {
-                    const today = new Date();
-                    const dd = String(today.getDate()).padStart(2, '0');
-                    const mm = String(today.getMonth() + 1).padStart(2, '0');
-                    const yyyy = today.getFullYear();
-                    editorDateVal.textContent = `${dd}.${mm}.${yyyy}`;
-                }
             } else {
                 if (editorMiltonHeader) editorMiltonHeader.style.display = 'none';
-                if (editorDateLine) editorDateLine.style.display = 'none';
                 
                 if (companySettings.useCustomHeader && companySettings.headerImage) {
                     if (editorHeaderText) editorHeaderText.style.display = 'none';
@@ -886,7 +875,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             editorCompanyHeader.style.display = 'none';
             if (editorMiltonHeader) editorMiltonHeader.style.display = 'none';
-            if (editorDateLine) editorDateLine.style.display = 'none';
+        }
+
+        // Date Line should always be displayed on the A4 page layout
+        if (editorDateLine) editorDateLine.style.display = 'flex';
+        
+        // Set default current date if not set or placeholder is present
+        if (editorDateVal && (editorDateVal.textContent.trim() === '' || editorDateVal.textContent.includes('Date') || editorDateVal.textContent.includes('[Date]'))) {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            editorDateVal.textContent = `${dd}.${mm}.${yyyy}`;
         }
 
         // Apply Prefix Display
@@ -1531,18 +1531,10 @@ document.addEventListener('DOMContentLoaded', () => {
             page.className = 'letterpad-page';
 
             let headerHtml = '';
-            let dateHtml = '';
             if (companySettings.printHeader) {
                 const style = 'milton';
                 if (style === 'milton') {
                     headerHtml = getMiltonHeaderHTML(companySettings, true, item.logoImg);
-                    
-                    const currentDate = editorDateVal ? editorDateVal.textContent : '';
-                    dateHtml = `
-                        <div style="display: flex; justify-content: flex-end; font-size: 11pt; font-weight: 700; margin-top: 8px; margin-bottom: 12px; font-family: 'Outfit', sans-serif; width: 100%;">
-                            Date : &nbsp;<span style="border-bottom: 1px dotted #000; min-width: 100px; display: inline-block; text-align: center;">${currentDate}</span>
-                        </div>
-                    `;
                 } else if (companySettings.useCustomHeader && companySettings.headerImage) {
                     headerHtml = `
                         <div class="letterpad-header" style="border-bottom: none; padding-bottom: 0; display: flex; justify-content: center; align-items: center;">
@@ -1557,6 +1549,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             }
+
+            const currentDate = editorDateVal ? editorDateVal.textContent : '';
+            const dateHtml = `
+                <div style="display: flex; justify-content: flex-end; font-size: 11pt; font-weight: 700; margin-top: 8px; margin-bottom: 12px; font-family: 'Outfit', sans-serif; width: 100%;">
+                    Date : &nbsp;<span style="border-bottom: 1px dotted #000; min-width: 100px; display: inline-block; text-align: center;">${currentDate}</span>
+                </div>
+            `;
 
             page.innerHTML = `
                 ${headerHtml}
@@ -1587,7 +1586,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             printContainer.classList.remove('print-only');
-            printContainer.style.position = 'fixed';
+            printContainer.style.position = 'absolute';
             printContainer.style.left = '0';
             printContainer.style.top = '0';
             printContainer.style.width = '210mm';
