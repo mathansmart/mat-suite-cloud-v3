@@ -24,12 +24,18 @@
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo-section">
-                <h2 style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px;">
-                    <span style="font-size: 1.8rem;">📝</span>
+            <div class="logo-section" style="display: flex; flex-direction: column; align-items: center;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 5px;">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" fill="none" />
+                    <line x1="8" y1="10" x2="16" y2="10" />
+                    <line x1="8" y1="14" x2="16" y2="14" />
+                    <line x1="8" y1="18" x2="13" y2="18" />
+                </svg>
+                <h2 style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; margin-bottom: 5px;">
                     <span style="font-size: 1.1rem; letter-spacing: 1px; font-weight: 800;">Letter Pad<span>SUITE</span></span>
                 </h2>
-                <div id="selected-company-badge" style="background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.5px; margin-top: 10px; text-transform: uppercase; text-align: center; box-shadow: 0 4px 10px rgba(234,88,12,0.25); max-width: 100%; word-break: break-all;"></div>
+                <div id="selected-company-badge" style="background: linear-gradient(135deg, #a3e635, #65a30d); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.5px; margin-top: 5px; text-transform: uppercase; text-align: center; box-shadow: 0 4px 10px rgba(101,163,13,0.25); max-width: 100%; word-break: break-all;"></div>
             </div>
             
             <a href="#" id="back-to-addressbook-btn" style="display: flex; align-items: center; justify-content: center; background: #e11d48; color: #fff; font-weight: 600; padding: 8px 10px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; border: 1.5px solid #be123c; gap: 5px;">
@@ -38,7 +44,7 @@
 
 
 
-            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.2);">＋ New Address / Letter</button>
+            <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.7rem 1rem; background: linear-gradient(135deg, #a3e635, #65a30d); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(101,163,13,0.2);">＋ New Address / Letter</button>
             
             <button id="open-settings-btn" class="btn secondary" style="justify-content: center; padding: 8px; font-size: 0.8rem; width: 100%;">⚙️ Letter Pad Settings</button>
         </aside>
@@ -50,7 +56,7 @@
                     <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="off">
                 </div>
                 <div class="header-actions">
-                    <button id="bulk-print-btn" class="btn primary" style="background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.255);">🖨️ PRINT LETTER PAD</button>
+                    <button id="bulk-print-btn" class="btn primary" style="background: linear-gradient(135deg, #a3e635, #65a30d); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(101,163,13,0.255);">🖨️ PRINT LETTER PAD</button>
                     <button id="select-all-btn" class="btn tertiary">Select All</button>
                     <button id="unselect-all-btn" class="btn tertiary">Deselect All</button>
                 </div>
@@ -248,7 +254,7 @@
                 </div>
             </div>
 
-            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center; background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(234,88,12,0.2);">💾 SAVE SETTINGS</button>
+            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center; background: linear-gradient(135deg, #a3e635, #65a30d); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(101,163,13,0.2);">💾 SAVE SETTINGS</button>
         </div>
     </div>
 
@@ -258,7 +264,12 @@
             <!-- Toolbar Header -->
             <div style="padding: 15px 25px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">📝</span>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1" fill="none" />
+                        <line x1="8" y1="10" x2="16" y2="10" />
+                        <line x1="8" y1="14" x2="16" y2="14" />
+                    </svg>
                     <h2 id="modal-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">New Document</h2>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 250px; justify-content: flex-end;">
@@ -271,7 +282,7 @@
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <button id="cancel-btn" class="btn ghost" style="padding: 8px 15px; font-size: 0.85rem;">Cancel</button>
-                    <button id="save-address-btn" class="btn primary" style="background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; font-weight: 700; padding: 8px 20px; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(234,88,12,0.25);">💾 Save Letter</button>
+                    <button id="save-address-btn" class="btn primary" style="background: linear-gradient(135deg, #a3e635, #65a30d); border: none; font-weight: 700; padding: 8px 20px; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(101,163,13,0.25);">💾 Save Letter</button>
                 </div>
             </div>
 
