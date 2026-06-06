@@ -380,6 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const whatsapp = settings.miltonRightWhatsapp || "99526 07134";
         const gstin = settings.miltonRightGstin || "33AAQCM3608R1ZU";
 
+        const brandColor = PROFILE === '2' ? '#1E1558' : '#84cc16';
+        const bannerBgColor = PROFILE === '2' ? '#1E1558' : '#1f2937';
+
         let logoHtml = '';
         if (logoImg) {
             logoHtml = `
@@ -390,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             logoHtml = `
                 <div style="display: flex; align-items: center; justify-content: center; width: 115px; flex-shrink: 0; height: auto; box-sizing: border-box; margin-left: 15px; margin-right: 15px; align-self: center; margin-top: 8px;">
-                    <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="${brandColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M6 3h12" />
                       <path d="M6 21h12" />
                       <path d="M8 3v18" />
@@ -399,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       <line x1="8" y1="11" x2="16" y2="11" />
                       <line x1="8" y1="15" x2="16" y2="15" />
                       <line x1="4" y1="20" x2="20" y2="4" />
-                      <circle cx="18" cy="6" r="1.2" fill="#84cc16" />
+                      <circle cx="18" cy="6" r="1.2" fill="${brandColor}" />
                     </svg>
                 </div>
             `;
@@ -441,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <!-- Center Details -->
                 <div style="flex: 1; text-align: center; padding: 0 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <div style="background: #1f2937; color: #ffffff; padding: 5px 12px; font-weight: 900; font-size: 13pt; border-radius: 2px; letter-spacing: 1px; display: inline-block; text-transform: uppercase; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; text-shadow: none;">
+                    <div style="background: ${bannerBgColor}; color: #ffffff; padding: 5px 12px; font-weight: 900; font-size: 13pt; border-radius: 2px; letter-spacing: 1px; display: inline-block; text-transform: uppercase; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; text-shadow: none;">
                         ${centerName}
                     </div>
                     ${centerSubtitle ? `
@@ -473,8 +476,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (logoImg) {
             return `<img src="${logoImg}" alt="Watermark" />`;
         } else {
+            const brandColor = PROFILE === '2' ? '#1E1558' : '#84cc16';
             return `
-                <svg viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="${brandColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M6 3h12" />
                   <path d="M6 21h12" />
                   <path d="M8 3v18" />
@@ -483,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <line x1="8" y1="11" x2="16" y2="11" />
                   <line x1="8" y1="15" x2="16" y2="15" />
                   <line x1="4" y1="20" x2="20" y2="4" />
-                  <circle cx="18" cy="6" r="1.2" fill="#84cc16" />
+                  <circle cx="18" cy="6" r="1.2" fill="${brandColor}" />
                 </svg>
             `;
         }
