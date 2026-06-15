@@ -1,391 +1,1371 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  FABRIC STOCK MANAGER - FIGMA EDITION
+  Premium Dashboard with Sidebar Navigation
+-->
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAT WORK SPACE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --accent: #0284c7;
-            --accent-glow: rgba(2, 132, 199, 0.15);
-            --text: #0f172a;
-            --muted: #475569;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milton Garments | Stock Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --sidebar: #1e293b;
+      --sidebar-hover: #334155;
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #f1f5f9;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --success: #10b981;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+      --shadow-md: 0 10px 30px rgba(0,0,0,0.04);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-main: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-main); overflow: hidden; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
+    .app { display: flex; height: 100vh; width: 100vw; }
 
-        .split-container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-        }
+    /* Sidebar */
+    aside {
+      width: 280px;
+      background: var(--sidebar);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      box-shadow: 10px 0 40px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
 
-        .left-panel {
-            flex: 1.2;
-            background: url('fabric_rolls_bg.webp') no-repeat center center;
-            background-size: cover;
-            position: relative;
-            overflow: hidden;
-        }
+    .sb-header { padding: 32px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .sb-logo-circle { width: 36px; height: 36px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 20px; box-shadow: 0 0 20px var(--primary-glow); }
+    .sb-brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
+    .sb-brand span { color: var(--primary); }
 
-        /* Subtle gradient overlay to tie image to the UI theme */
-        .left-panel::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to left, rgba(248, 250, 252, 0) 40%, rgba(248, 250, 252, 1) 100%);
-            pointer-events: none;
-            z-index: 2;
-        }
+    .sb-nav { flex: 1; padding: 24px 16px; overflow-y: auto; }
+    .nav-grp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; margin: 24px 0 12px 12px; }
+    .sb-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+    .sb-item:hover { background: var(--sidebar-hover); color: #fff; }
+    .sb-item.active { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+    .sb-icon { font-size: 18px; opacity: 0.8; }
+    
+    /* Main Content */
+    main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 
-        #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+    header {
+      background: var(--surface);
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+    }
+    .pg-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); }
+    .header-actions { display: flex; align-items: center; gap: 20px; }
+    .conn-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+    .status-dot.on { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
 
-        .right-panel {
-            width: 500px;
-            background: linear-gradient(135deg, #ffffff, #f1f5f9);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 40px;
-            z-index: 10;
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
-        }
+    .content-area { flex: 1; overflow-y: auto; padding: 40px; scroll-behavior: smooth; }
 
-        .header {
-            text-align: left;
-            margin-bottom: 20px;
-        }
+    /* Sections */
+    .section { display: none; max-width: 1200px; margin: 0 auto; }
+    .section.active { display: block; animation: slideUp 0.4s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .workspace-logo {
-            max-height: 240px;
-            width: auto;
-            object-fit: contain;
-            display: block;
-        }
+    /* Figma Style Cards */
+    .f-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .f-card:hover { box-shadow: 0 15px 45px rgba(0,0,0,0.06); }
+    .f-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .f-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 
-        .grid {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            margin: auto 0;
-        }
+    /* Stats */
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow-sm); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .sc-blue { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+    .sc-green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .sc-red { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 800; line-height: 1.2; }
+    .stat-lbl { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .card {
-            width: 100%;
-            height: 180px;
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            padding: 24px;
-            gap: 20px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-        }
+    /* Tables */
+    .t-wrap { width: 100%; border-collapse: collapse; }
+    .t-wrap th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); }
+    .t-wrap td { padding: 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    .t-row:hover { background: #fafafa; }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(45deg, transparent, rgba(2, 132, 199, 0.05), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s;
-        }
+    /* Buttons */
+    .f-btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      text-transform: capitalize;
+    }
+    .f-btn-p { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+    .f-btn-p:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3); }
+    .f-btn-s { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .f-btn-s:hover { border-color: var(--primary); color: var(--primary); }
+    .f-btn-d { background: var(--danger); color: #fff; }
 
-        .card:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: var(--accent);
-            box-shadow: 0 15px 30px rgba(2, 132, 199, 0.08), 0 0 20px var(--accent-glow);
-        }
+    /* Filters & Inputs */
+    .f-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; outline: none; transition: border 0.2s; }
+    .f-input:focus { border-color: var(--primary); ring: 2px solid var(--primary-glow); }
+    .search-input-wrap { position: relative; max-width: 400px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+    .search-input { padding-left: 36px; }
 
-        .card:hover::before {
-            transform: translateX(100%);
-        }
+    /* Inventory Blocks */
+    .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
+    .p-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .p-card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .p-sz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 8px; padding: 16px; }
+    .sz-brick { 
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; display: flex; flex-direction: column; align-items: center; transition: all 0.2s;
+    }
+    .sz-brick:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .sz-v { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 18px; }
+    .sz-l { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
 
-        .icon {
-            font-size: 55px;
-            transition: transform 0.4s;
-            flex-shrink: 0;
-        }
+    /* Modals */
+    .m-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+    .m-overlay.open { display: flex; }
+    .m-box { background: #fff; border-radius: var(--radius-lg); width: 440px; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: mIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes mIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card:hover .icon {
-            transform: scale(1.1);
-        }
+    /* Toasts */
+    #toast { position: fixed; bottom: 40px; right: 40px; background: #1e293b; color: #fff; padding: 16px 24px; border-radius: var(--radius-md); font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); visibility: hidden; opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 1000; }
+    #toast.show { visibility: visible; opacity: 1; transform: translateY(0); }
 
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            flex: 1;
-        }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+    /* Search Dropdown */
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-top: 4px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      z-index: 300;
+      max-height: 250px;
+      overflow-y: auto;
+      display: none;
+    }
+    .search-results.active { display: block; }
+    .search-res-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .search-res-item:last-child { border-bottom: none; }
+    .search-res-item:hover, .search-res-item.active { background: var(--bg); color: var(--primary); font-weight: 600; }
+    
+    .jump-highlight {
+      animation: jump-glow 2s forwards;
+    }
+    @keyframes jump-glow {
+      0% { background: var(--primary-glow); }
+      100% { background: transparent; }
+    }
 
-        .card-desc {
-            color: var(--muted);
-            font-size: 0.85rem;
-            line-height: 1.4;
-            margin-bottom: 12px;
-        }
+  </style>
 
-        .btn-link {
-            padding: 6px 14px;
-            border-radius: 8px;
-            background: rgba(2, 132, 199, 0.08);
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 0.8rem;
-            border: 1px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .card:hover .btn-link {
-            background: var(--accent);
-            color: #ffffff;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            padding-top: 15px;
-            font-size: 0.7rem;
-            color: var(--muted);
-            opacity: 0.7;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #22c55e;
-            box-shadow: 0 0 6px #22c55e;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.3);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .modal {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 28px;
-            padding: 40px;
-            text-align: center;
-            transform: translateY(0) scale(1);
-            transition: all 0.3s;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
-            color: var(--text);
-        }
-        .modal-overlay.hidden .modal {
-            transform: translateY(20px) scale(0.95);
-        }
-        .profile-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 40px;
-            border-radius: 18px;
-            text-decoration: none;
-            color: var(--text);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.3s;
-            background: rgba(0, 0, 0, 0.02);
-            min-width: 180px;
-        }
-        .profile-btn:hover {
-            transform: translateY(-5px);
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .milton-btn:hover {
-            border-color: #38bdf8;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.15);
-        }
-        .vester-btn:hover {
-            border-color: #e11d48;
-            box-shadow: 0 10px 20px rgba(225, 29, 72, 0.15);
-        }
-        .profile-btn h3 { margin: 15px 0 5px; font-size: 1.2rem; }
-        .profile-btn p { font-size: 0.8rem; color: var(--muted); }
-
-        /* Responsive Layout */
-        @media (max-width: 992px) {
-            .split-container {
-                flex-direction: column;
-            }
-            .left-panel {
-                flex: 1;
-                min-height: 40vh;
-            }
-            .right-panel {
-                width: 100%;
-                flex: 1.5;
-                min-height: 60vh;
-                border-left: none;
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
-                padding: 30px;
-            }
-            .grid {
-                margin: 20px 0;
-            }
-        }
-    </style>
+<style>
+/* Premium Stock Preview Styling */
+#section-preview {
+  font-family: 'Inter', sans-serif;
+}
+#section-preview h2 {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+#section-preview .table-wrap {
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  margin-top: 24px !important;
+  margin-bottom: 32px !important;
+}
+#section-preview .table-header {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  padding: 16px 24px;
+  border-bottom: none;
+}
+#section-preview .table-header-title {
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+#section-preview table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#section-preview thead th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 14px 16px;
+  border-bottom: 2px solid #cbd5e1;
+  text-transform: uppercase;
+}
+#section-preview tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+#section-preview tbody tr:hover {
+  background-color: #f8fafc !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+#section-preview td {
+  padding: 14px 16px;
+  color: #334155;
+  font-size: 13.5px;
+}
+#section-preview td b {
+  color: #1e293b;
+  font-weight: 600;
+}
+#section-preview thead th:first-child,
+#section-preview tbody td:first-child {
+  padding-left: 24px;
+}
+#section-preview thead th:last-child,
+#section-preview tbody td:last-child {
+  padding-right: 24px;
+}
+#section-preview td.size-cell {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+#section-preview td.total-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+  background: #f8fafc;
+}
+#section-preview th.total-hdr {
+  text-align: center;
+  background: #f8fafc !important;
+}
+</style>
 </head>
+
 <body>
-    <div class="split-container">
-        <!-- Right Panel: Workspace tools stacked one by one -->
-        <div class="right-panel">
-            <div class="header">
-                <img src="mat_workspace_logo_wing_transparent.png" alt="MAT Workspace" class="workspace-logo" />
-            </div>
 
-            <div class="grid">
-                <div class="card" id="card-envelope">
-                    <div class="card-content">
-                        <div class="card-title">Envelope Pro</div>
-                        <div class="card-desc">Advanced envelope printing and contact management system.</div>
-                        <div class="btn-link">LAUNCH APP</div>
-                    </div>
-                    <div class="icon">✉️</div>
-                </div>
-
-                <a href="/stock/" class="card" id="card-stock">
-                    <div class="card-content">
-                        <div class="card-title">Stock Manager</div>
-                        <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
-                        <div class="btn-link">LAUNCH APP</div>
-                    </div>
-                    <div class="icon">📦</div>
-                </a>
-            </div>
-
-            <div class="footer">
-                <div class="status">
-                    <div class="status-dot"></div>
-                    <span>System Online</span>
-                </div>
-                <div>v2.1.0 (Cloud)</div>
-            </div>
-        </div>
-
-        <!-- Left Panel: Full image view -->
-        <div class="left-panel">
-        </div>
+  <div class="m-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="m-box">
+      <h3 id="modal-title" style="margin-bottom:24px; font-family:var(--font-display); font-size:20px;">Modal Title</h3>
+      <div id="modal-content"></div>
+      <div style="margin-top:32px; display:flex; gap:12px; justify-content:flex-end;">
+        <button class="f-btn f-btn-s" onclick="closeModal()">Cancel</button>
+        <button class="f-btn f-btn-p" id="modal-btn" onclick="submitModal()">Save Changes</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Profile Selection Modal -->
-    <div id="profile-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <h2 style="margin-bottom: 30px; font-family: 'Playfair Display', serif; font-size: 2rem;">Select Address Book</h2>
-            <div style="display: flex; gap: 20px; justify-content: center;">
-                <a href="/envelope/?profile=1" class="profile-btn milton-btn">
-                    <span style="font-size: 2.5rem;">🏢</span>
-                    <h3>MILTON</h3>
-                </a>
-                <a href="/envelope/?profile=2" class="profile-btn vester-btn">
-                    <span style="font-size: 2.5rem;">🏭</span>
-                    <h3>VESTER</h3>
-                </a>
-            </div>
-            <button id="close-modal" style="margin-top: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--muted); color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s;">Cancel</button>
+  <div id="toast"><span id="toast-icon">✨</span> <span id="toast-msg">Updated!</span></div>
+
+  <div class="app">
+    <aside>
+      <div class="sb-header">
+        <div class="sb-logo-circle">M</div>
+        <div class="sb-brand">MILTON <span>STOCK</span></div>
+      </div>
+      <div class="sb-nav">
+        <div class="nav-grp-label">Main Menu</div>
+        <div class="sb-item active" data-nav="dashboard" onclick="nav('dashboard')"><span class="sb-icon">📊</span> Dashboard</div>
+        <div class="sb-item" data-nav="preview" onclick="nav('preview')"><span class="sb-icon">📋</span> Preview</div>
+        <div class="sb-item" data-nav="inventory" onclick="nav('inventory')"><span class="sb-icon">📦</span> Stock Inventory</div>
+        <div class="sb-item" data-nav="stock-in" onclick="nav('stock-in')"><span class="sb-icon">📥</span> Stock Inward</div>
+        <div class="sb-item" data-nav="stock-out" onclick="nav('stock-out')"><span class="sb-icon">📤</span> Stock Outward</div>
+        <div class="sb-item" data-nav="alerts" onclick="nav('alerts')"><span class="sb-icon">🚨</span> Alerts</div>
+        
+        <div class="nav-grp-label">Reports & Tools</div>
+        <div class="sb-item" data-nav="transactions" onclick="nav('transactions')"><span class="sb-icon">📜</span> Records</div>
+        <div class="sb-item" data-nav="reports" onclick="nav('reports')"><span class="sb-icon">📈</span> Reports</div>
+        <div class="sb-item" data-nav="bulk" onclick="nav('bulk')"><span class="sb-icon">📁</span> Excel Bulk</div>
+        <div class="sb-item" data-nav="settings" onclick="nav('settings')"><span class="sb-icon">⚙️</span> Configuration</div>
+      </div>
+      <div style="padding:24px; border-top:1px solid rgba(255,255,255,0.05);">
+        <div class="sb-item" onclick="window.location.href='/'" style="background:rgba(255,255,255,0.05);"><span class="sb-icon">🏠</span> Back to Home</div>
+        <div class="sb-item" onclick="showServerInfo()" style="margin-top:8px; color:var(--primary); font-weight:700;"><span class="sb-icon">🔗</span> Share App</div>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <div class="pg-title" id="page-title">Dashboard Overview</div>
+        <div class="header-actions">
+          <div class="conn-status">
+            <div id="status-dot" class="status-dot"></div>
+            <span id="status-text">Connecting...</span>
+          </div>
+          <div style="width:32px; height:32px; background:var(--bg); border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--primary);">A</div>
         </div>
-    </div>
+      </header>
 
-    <script>
-        const cardEnvelope = document.getElementById('card-envelope');
-        const profileModal = document.getElementById('profile-modal');
-        const closeModal = document.getElementById('close-modal');
+      <div class="content-area">
+        
+        <!-- PREVIEW -->
+        <div class="section fade-up" id="section-preview">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin: 0;">Stock Preview</h2>
+            <button class="btn btn-excel" onclick="exportPreviewToExcel()" style="background:#1d6f42; color:#fff; display:inline-flex; align-items:center; gap:8px;">
+               <span style="font-size:16px;">📊</span> Export Excel
+            </button>
+          </div>
+          
+          <div style="margin-bottom:24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div style="min-width:200px; display:flex; align-items:center; gap:8px;">
+              <label for="preview-sc-filter" style="font-weight:700; color:var(--text-main); font-size:14px;">Category:</label> <select id="preview-sc-filter" class="f-input" onchange="renderPreview()" style="min-width:180px;"></select>
+            </div>
+          </div>
 
-        cardEnvelope.addEventListener('click', (e) => {
-            e.preventDefault();
-            profileModal.classList.remove('hidden');
-        });
+          <div id="preview-content"></div>
+        </div>
 
-        closeModal.addEventListener('click', () => {
-            profileModal.classList.add('hidden');
-        });
+        <!-- DASHBOARD -->
+        <div class="section active" id="section-dashboard">
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-icon sc-blue">📦</div>
+              <div><div class="stat-lbl">Total Products</div><div class="stat-val" id="s-prod">0</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon sc-green">🗃️</div>
+              <div><div class="stat-lbl">On-Hand Boxes</div><div class="stat-val" id="s-box">0</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon sc-red">🚨</div>
+              <div><div class="stat-lbl">Low Stock Alerts</div><div class="stat-val" id="s-low">0</div></div>
+            </div>
+          </div>
 
-        closeModal.addEventListener('mouseover', () => closeModal.style.color = 'var(--text)');
-        closeModal.addEventListener('mouseout', () => closeModal.style.color = 'var(--muted)');
+          <div class="f-card">
+            <div class="f-header">
+              <div class="f-title">Quick Search & Filter</div>
+              <button class="f-btn f-btn-p" onclick="smartExport()" style="background:#1d6f42;">Export Excel</button>
+            </div>
+            <div style="display:flex; gap:16px;">
+              <div class="search-input-wrap" style="flex:1;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="dash-search" class="f-input search-input" placeholder="Find product..." oninput="renderDashboard(); showDashSearch(this.value);" onkeydown="handleDashSearchKey(event)" autocomplete="off">
+                <div id="dash-search-results" class="search-results"></div>
+              </div>
+              <div style="width:200px;">
+                <select id="dash-cat-filter" class="f-input" onchange="renderDashboard()">
+                  <option value="">All Categories</option>
+                </select>
+              </div>
+              <button class="f-btn f-btn-s" onclick="clearDashFilter()">Reset</button>
+            </div>
+          </div>
 
-        profileModal.addEventListener('click', (e) => {
-            if (e.target === profileModal) profileModal.classList.add('hidden');
-        });
+          <div id="dash-cat-tables"></div>
+        </div>
 
-        async function checkStatus() {
-            const statusDot = document.querySelector('.status-dot');
-            const statusText = document.querySelector('.status span');
-            try {
-                const res = await fetch('/api/envelope/status');
-                const data = await res.json();
-                if (data.status === 'online') {
-                    statusDot.style.background = '#22c55e';
-                    statusDot.style.boxShadow = '0 0 10px #22c55e';
-                    statusText.textContent = `System Online`;
-                }
-            } catch (e) {
-                statusDot.style.background = '#ef4444';
-                statusDot.style.boxShadow = '0 0 10px #ef4444';
-                statusText.textContent = `System Offline / Searching...`;
-            }
+        <!-- INVENTORY -->
+        <div class="section" id="section-inventory">
+          <div class="f-header">
+            <div class="pg-title">Product Inventory</div>
+            <button class="f-btn f-btn-p" onclick="openAddProduct()">+ New Product</button>
+          </div>
+          <div id="inv-tabs" style="display:flex; gap:8px; margin-bottom:24px; overflow-x:auto; padding-bottom:8px;"></div>
+          <div id="inv-content" class="inv-grid"></div>
+        </div>
+
+        <!-- STOCK IN -->
+        <div class="section" id="section-stock-in">
+          <div class="f-card">
+            <div class="f-title">📥 Stock Entry Form</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:20px;">
+              <div><label class="stat-lbl">Entry Date</label><input type="text" id="si-date" class="f-input" placeholder="DD-MM-YYYY"></div>
+              <div><label class="stat-lbl">Category</label><select id="si-cat-filter" class="f-input" onchange="renderSiDropdown()"></select></div>
+              <div><label class="stat-lbl">Search Product</label><input type="text" id="si-search" class="f-input" placeholder="Type here..." oninput="renderSiDropdown()"></div>
+            </div>
+            <div id="si-drop" style="background:#fff; border:1px solid var(--border); border-radius:8px; margin-top:4px; max-height:200px; overflow-y:auto; display:none; padding:8px;"></div>
+            <div id="si-table-area" style="margin-top:24px;"></div>
+            <div style="margin-top:24px; display:flex; justify-content:space-between; align-items:center;">
+               <div id="si-sum" style="font-weight:700; color:var(--text-muted);">0 items selected</div>
+               <button class="f-btn f-btn-p" onclick="saveStockIn()">Confirm Receive</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STOCK OUT -->
+        <div class="section" id="section-stock-out">
+          <div class="f-card">
+            <div class="f-title" style="color:var(--warn);">📤 Delivery Order Entry</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:20px;">
+              <div><label class="stat-lbl">Delivery Date</label><input type="text" id="so-date" class="f-input" placeholder="DD-MM-YYYY"></div>
+              <div><label class="stat-lbl">Category</label><select id="so-cat-filter" class="f-input" onchange="renderSoDropdown()"></select></div>
+              <div><label class="stat-lbl">Search Product</label><input type="text" id="so-search" class="f-input" placeholder="Type here..." oninput="renderSoDropdown()"></div>
+            </div>
+            <div id="so-drop" style="background:#fff; border:1px solid var(--border); border-radius:8px; margin-top:4px; max-height:200px; overflow-y:auto; display:none; padding:8px;"></div>
+            <div id="so-table-area" style="margin-top:24px;"></div>
+            <div style="margin-top:24px; display:flex; justify-content:space-between; align-items:center;">
+               <div id="so-sum" style="font-weight:700; color:var(--text-muted);">0 items selected</div>
+               <button class="f-btn f-btn-p" onclick="saveStockOut()" style="background:var(--warn);">Confirm Delivery</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERTS -->
+        <div class="section" id="section-alerts">
+          <div class="pg-title" style="margin-bottom:24px; color:var(--danger);">Inventory Alerts</div>
+          <div id="alert-list" class="inv-grid"></div>
+        </div>
+
+        <!-- RECORDS -->
+        <div class="section" id="section-transactions">
+          <div class="f-card">
+            <div class="f-header">
+               <div class="f-title">Transaction History</div>
+               <div id="txn-month-sel" style="width:140px;"><label class="stat-lbl">View Month</label><input type="text" id="txn-month-input" class="f-input" placeholder="MM-YYYY" oninput="setTxnMonth(this.value)"></div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; margin-bottom:20px; padding:16px; background:var(--bg); border-radius:var(--radius-md);">
+               <div style="flex:1; min-width:140px;"><label class="stat-lbl">From Date</label><input type="text" id="txn-start" class="f-input" placeholder="DD-MM-YYYY" oninput="renderTxns()"></div>
+               <div style="flex:1; min-width:140px;"><label class="stat-lbl">To Date</label><input type="text" id="txn-end" class="f-input" placeholder="DD-MM-YYYY" oninput="renderTxns()"></div>
+               <button class="f-btn f-btn-s" onclick="clearRange()" style="color:var(--danger)">Clear Range</button>
+            </div>
+            <div style="display:flex; gap:16px; margin-bottom:20px;">
+               <button class="f-btn f-btn-p" id="txn-t-in" onclick="setTxnType('IN')">Received</button>
+               <button class="f-btn f-btn-s" id="txn-t-out" onclick="setTxnType('OUT')">Delivered</button>
+            </div>
+            <div id="txn-table-wrap"></div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="section" id="section-reports">
+          <div class="stat-grid">
+            <div class="stat-card"><div><div class="stat-lbl">Lifetime Received</div><div class="stat-val" id="rpt-in">0</div></div></div>
+            <div class="stat-card"><div><div class="stat-lbl">Lifetime Delivered</div><div class="stat-val" id="rpt-out">0</div></div></div>
+            <div class="stat-card"><div><div class="stat-lbl">Stock Turnover</div><div class="stat-val" id="rpt-turn">0%</div></div></div>
+          </div>
+          <div id="rpt-visuals" class="inv-grid"></div>
+        </div>
+
+        <!-- BULK -->
+        <div class="section" id="section-bulk">
+          <div class="f-card" style="text-align:center; padding:60px 40px;">
+            <div style="font-size:60px; margin-bottom:24px;">📄</div>
+            <h2 style="font-family:var(--font-display); margin-bottom:12px;">Excel Bulk Processing</h2>
+            <p style="color:var(--text-muted); max-width:500px; margin:0 auto 32px;">Quickly subtract stock by uploading an Excel sheet. Columns required: Particulars, Size, Quantity.</p>
+            <label class="f-btn f-btn-p" style="padding:16px 32px; background:#1d6f42;">
+              📗 Upload Excel (.xlsx)
+              <input type="file" style="display:none;" onchange="handleBulkExcel(this)">
+            </label>
+            <div id="bulk-history" style="margin-top:48px;"></div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="section" id="section-settings">
+          <div class="inv-grid">
+            <div class="f-card">
+              <div class="f-header"><div class="f-title">Global Configs</div></div>
+              <div style="margin-top:16px;">
+                <label class="stat-lbl">Alert Threshold (Boxes)</label>
+                <input type="number" id="s-min" class="f-input" style="margin-top:8px;">
+                <button class="f-btn f-btn-p" onclick="saveSettings()" style="margin-top:20px; width:100%;">Save Settings</button>
+              </div>
+            </div>
+            <div class="f-card" style="grid-column: span 2;">
+               <div class="f-header">
+                  <div class="f-title">Categories & Sizes <span id="cat-count-badge" style="font-size:12px; opacity:0.5; margin-left:8px;"></span></div>
+                  <button class="f-btn f-btn-p" onclick="openAddCat()">+ Add Category</button>
+               </div>
+               <div id="cat-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:20px; min-height:100px;"></div>
+               
+               <div style="margin-top:40px; padding-top:20px; border-top:1px dashed #eee; font-size:11px; color:#aaa;">
+                  <div style="display:flex; justify-content:space-between;">
+                     <span>System ID: <b id="sys-pid">—</b></span>
+                     <span>DB Source: <b id="sys-db">—</b></span>
+                     <span id="sys-time">Sync: —</span>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    /*
+      Figma-Style Optimized Stock Manager
+      Business Logic Preserved, Layout Reimagined
+    */
+    
+    let S = { categories: [], defMin: 5 }; 
+    let P = []; 
+    let T = []; 
+    let USERS = [];
+    let curU = 'admin';
+
+    // UI State
+    let siPids = []; let siData = {};
+    let soPids = []; let soData = {};
+    let curMonth = new Date().toISOString().slice(0, 7);
+    let txnType = 'IN';
+    let invCat = null;
+
+    // -- INIT --
+    async function initApp() {
+       try {
+          const r = await fetch('/api/stock/data?v=' + Date.now());
+          if (r.ok) {
+             const d = await r.json();
+             
+             // Setup S with server data overrides
+             let rawSettings = d.settings || {};
+             S = { categories: [], defMin: 5 };
+             Object.assign(S, rawSettings);
+             
+             // Migration if empty
+             if (!S.categories || S.categories.length === 0) {
+                S.categories = [];
+                ['cat1', 'cat2', 'cat3'].forEach(k => {
+                   if (S[k] && typeof S[k] === 'string') {
+                      const szs = (k === 'cat1' ? [45,50,55,60,65,70,75,80,85,90] : k === 'cat2' ? [75,80,85,90,95,100,110] : ["S","M","L","XL","XXL","3XL"]);
+                      S.categories.push({ id: k, n: S[k], sizes: szs });
+                      delete S[k];
+                   }
+                });
+             }
+
+             // Ensure valid array
+             if (!Array.isArray(S.categories)) S.categories = [];
+             S.categories.forEach((c, i) => {
+                if(!c.id) c.id = 'cat_'+i;
+                if(!c.n && c.name) c.n = c.name;
+                if(!Array.isArray(c.sizes)) c.sizes = [];
+             });
+
+             P = d.products || [];
+             T = d.transactions || [];
+             USERS = d.users || [];
+             updateStatus(true);
+          } else {
+             throw new Error('Server status: ' + r.status);
+          }
+       } catch(e) { 
+          console.error('Init Error:', e); 
+          updateStatus(false);
+       }
+       finally { 
+          try { updateCatOpts(); } catch(e) {}
+          const today = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+          if (document.getElementById('si-date')) document.getElementById('si-date').value = today;
+          if (document.getElementById('so-date')) document.getElementById('so-date').value = today;
+          const curM = new Date().toISOString().slice(5, 7) + '-' + new Date().getFullYear();
+          if (document.getElementById('txn-month-input')) document.getElementById('txn-month-input').value = curM;
+          nav('dashboard'); 
+       }
+    }
+
+    function parseTypedDate(str, returnNullOnEmpty = false) {
+       if (!str) return returnNullOnEmpty ? null : new Date().toISOString().slice(0, 10);
+       // Handle DD-MM-YYYY or DD/MM/YYYY
+       let parts = str.split(/[-/]/);
+       if (parts.length === 3) {
+          if (parts[0].length === 4) return parts.join('-'); // Already YYYY-MM-DD
+          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+       }
+       return returnNullOnEmpty ? null : new Date().toISOString().slice(0, 10);
+    }
+
+    function parseTypedMonth(str) {
+       if (!str) return new Date().toISOString().slice(0, 7);
+       let parts = str.split(/[-/]/);
+       if (parts.length === 2) {
+          // Handle MM-YYYY or YYYY-MM
+          if (parts[0].length === 4) return parts.join('-'); 
+          return `${parts[1]}-${parts[0].padStart(2, '0')}`;
+       }
+       return str; // Fallback
+    }
+    
+    async function persist() {
+       try {
+          const res = await fetch('/api/stock/data', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ settings: S, products: P, transactions: T, users: USERS }) 
+          });
+          if (!res.ok) throw new Error('Save failed');
+          showToast('✅ Saved to Computer', '💾');
+          return true;
+       } catch (err) {
+          console.error(err);
+          alert('⚠️ ERROR: Data could not be saved to the server. Your change will be reverted on refresh.');
+          return false;
+       }
+    }
+
+    function showToast(msg, icon='✨') {
+       const t = document.getElementById('toast');
+       document.getElementById('toast-msg').textContent = msg;
+       document.getElementById('toast-icon').textContent = icon;
+       t.classList.add('show');
+       setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // -- NAVIGATION --
+    async function nav(id) {
+       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+       document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+       
+       const s = document.getElementById('section-'+id);
+       if (s) s.classList.add('active');
+       
+       const btn = document.querySelector(`.sb-item[data-nav="${id}"]`);
+       if (btn) btn.classList.add('active');
+       
+       const titleEl = document.getElementById('page-title');
+       if (titleEl) titleEl.textContent = id.replace(/-/g, ' ').toUpperCase();
+       
+       const m = { dashboard:renderDashboard, preview:renderPreview, inventory:renderInventory, alerts:renderAlerts, transactions:renderTxns, reports:renderReports, settings:loadSettings, bulk:renderBulkHistory };
+       try { 
+          if (m[id]) {
+             // For settings and inventory, we can optionally refresh, but trust initApp for speed
+             m[id](); 
+          }
+       } catch(e) { console.error('Render Error', e); }
+    }
+
+    function getMergedProducts(allProducts, scName) {
+   const allMergedMap = new Map();
+   allProducts.forEach(p => {
+      let coreName = p.n.replace(/^big\s*-*\s*/i, '').trim();
+      let key = coreName.toLowerCase();
+      
+      if (!allMergedMap.has(key)) {
+         allMergedMap.set(key, {
+            id: p.id,
+            n: coreName,
+            ci: p.ci,
+            sourceCategoryIds: new Set([String(p.ci)]),
+            sourceSubCategories: new Set([p.sc || 'General']),
+            s: { ...p.s },
+            m: p.m,
+            sc: p.sc
+         });
+      } else {
+         const existing = allMergedMap.get(key);
+         existing.sourceCategoryIds.add(String(p.ci));
+         existing.sourceSubCategories.add(p.sc || 'General');
+         if (p.s) {
+            Object.entries(p.s).forEach(([sz, qty]) => {
+               existing.s[sz] = (existing.s[sz] || 0) + qty;
+            });
+         }
+         existing.m = Math.max(existing.m, p.m);
+      }
+   });
+   
+   let mergedList = Array.from(allMergedMap.values());
+   if (scName) {
+      mergedList = mergedList.filter(mp => mp.sourceSubCategories.has(scName));
+   }
+   return mergedList;
+}
+
+function exportPreviewToExcel() {
+   if (typeof XLSX === 'undefined') return;
+   const date = new Date().toISOString().slice(0, 10);
+   const wb = XLSX.utils.book_new();
+   
+   const scFilterValue = document.getElementById('preview-sc-filter')?.value || '';
+   const selectedProducts = getMergedProducts(P, scFilterValue);
+   if (selectedProducts.length === 0) {
+      alert('No products to export.');
+      return;
+   }
+
+   const groups = {};
+   selectedProducts.forEach(p => {
+      const sc = p.sc || 'General';
+      if (!groups[sc]) groups[sc] = [];
+      groups[sc].push(p);
+   });
+
+   const scOrder = S.subCategories || [];
+   const groupedScNames = Object.keys(groups).sort((a, b) => {
+      const aIdx = scOrder.indexOf(a);
+      const bIdx = scOrder.indexOf(b);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return a.localeCompare(b);
+   });
+
+   const aoa = [];
+
+   groupedScNames.forEach((scName, gIdx) => {
+      if (gIdx > 0) {
+         aoa.push([]); // blank spacer row
+      }
+      aoa.push(['Category: ' + scName]); // Section heading
+
+      const scProducts = groups[scName];
+      
+      const categoryIds = new Set();
+      scProducts.forEach(p => {
+         if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(ci => categoryIds.add(String(ci)));
+         } else {
+            categoryIds.add(String(p.ci));
+         }
+      });
+      const sizesSet = new Set();
+      categoryIds.forEach(ci => {
+         const category = S.categories.find(c => String(c.id) === String(ci));
+         if (category && category.sizes) {
+            category.sizes.forEach(sz => sizesSet.add(sz));
+         }
+      });
+      if (sizesSet.size === 0) {
+         scProducts.forEach(p => {
+            if (p.s) Object.keys(p.s).forEach(sz => sizesSet.add(sz));
+         });
+      }
+      const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL'];
+      const scSortedSizes = Array.from(sizesSet).sort((a, b) => {
+         const aNum = Number(a);
+         const bNum = Number(b);
+         if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+         const aIdx = sizeOrder.indexOf(a.toUpperCase());
+         const bIdx = sizeOrder.indexOf(b.toUpperCase());
+         if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         return a.localeCompare(b);
+      });
+
+      const headers = ['Product', ...scSortedSizes, 'Total Stock'];
+      aoa.push(headers);
+
+      scProducts.forEach(p => {
+         const row = [p.n];
+         scSortedSizes.forEach(sz => {
+            const qty = p.s ? p.s[sz] : undefined;
+            row.push(qty === undefined ? '' : qty);
+         });
+         const sum = Object.values(p.s || {}).reduce((a, b) => a + b, 0);
+         row.push(sum);
+         aoa.push(row);
+      });
+   });
+
+   const ws = XLSX.utils.aoa_to_sheet(aoa);
+   ws['!cols'] = [{ wch: 25 }];
+   
+   XLSX.utils.book_append_sheet(wb, ws, 'Preview Stock');
+   XLSX.writeFile(wb, 'Preview_Stock_' + date + '.xlsx');
+}
+
+     function renderPreview() {
+   const cont = document.getElementById('preview-content');
+   if (!cont) return;
+
+   const scFilterValue = document.getElementById('preview-sc-filter')?.value || '';
+   const selectedProducts = getMergedProducts(P, scFilterValue);
+
+   if (selectedProducts.length === 0) {
+      cont.innerHTML = '<div class="empty-state" style="padding: 40px; text-align: center; border: 1.5px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-top: 20px;"><div style="font-size: 32px; margin-bottom: 12px;">🔍</div><div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">No Products Found</div><div style="font-size: 13px; color: var(--text-muted);">No products are available in this category.</div></div>';
+      return;
+   }
+
+   const groups = {};
+   selectedProducts.forEach(p => {
+      const sc = p.sc || 'General';
+      if (!groups[sc]) groups[sc] = [];
+      groups[sc].push(p);
+   });
+
+   const scOrder = S.subCategories || [];
+   const groupedScNames = Object.keys(groups).sort((a, b) => {
+      const aIdx = scOrder.indexOf(a);
+      const bIdx = scOrder.indexOf(b);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return a.localeCompare(b);
+   });
+
+   let html = '';
+   groupedScNames.forEach(scName => {
+      const scProducts = groups[scName];
+      if (!scProducts || scProducts.length === 0) return;
+
+      const categoryIds = new Set();
+      scProducts.forEach(p => {
+         if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(ci => categoryIds.add(String(ci)));
+         } else {
+            categoryIds.add(String(p.ci));
+         }
+      });
+      const sizesSet = new Set();
+      categoryIds.forEach(ci => {
+         const category = S.categories.find(c => String(c.id) === String(ci));
+         if (category && category.sizes) {
+            category.sizes.forEach(sz => sizesSet.add(sz));
+         }
+      });
+      if (sizesSet.size === 0) {
+         scProducts.forEach(p => {
+            if (p.s) Object.keys(p.s).forEach(sz => sizesSet.add(sz));
+         });
+      }
+      const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL'];
+      const scSortedSizes = Array.from(sizesSet).sort((a, b) => {
+         const aNum = Number(a);
+         const bNum = Number(b);
+         if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+         const aIdx = sizeOrder.indexOf(a.toUpperCase());
+         const bIdx = sizeOrder.indexOf(b.toUpperCase());
+         if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         return a.localeCompare(b);
+      });
+
+      const tableRows = scProducts.map(p => {
+         const sum = Object.values(p.s || {}).reduce((a, b) => a + b, 0);
+         const sizeCellsHtml = scSortedSizes.map(sz => {
+            const qty = p.s ? p.s[sz] : undefined;
+            if (qty === undefined) return '<td class="size-cell"></td>';
+            const isOut = qty <= 0;
+            const isLow = !isOut && qty <= p.m;
+            const color = isOut ? 'var(--danger)' : isLow ? 'var(--warn)' : 'var(--success)';
+            const weight = qty > 0 ? '700' : 'normal';
+            return '<td class="size-cell" style="font-weight:' + weight + '; color:' + color + ';">' + qty + '</td>';
+         }).join('');
+
+         return '<tr class="t-row">' +
+            '<td><b>' + p.n + '</b></td>' +
+            sizeCellsHtml +
+            '<td class="total-cell">' + sum + '</td>' +
+            '</tr>';
+      }).join('');
+
+      const sizeHeadersHtml = scSortedSizes.map(sz => '<th style="text-align:center; min-width:45px;">' + sz + '</th>').join('');
+
+      html += '<div class="table-wrap" style="margin: 20px 0 30px 0; width: 100%;">' +
+         '<div class="table-header"><div class="table-header-title">Category: ' + scName + '</div></div>' +
+         '<div style="max-height: 600px; overflow-y: auto;">' +
+         '<table>' +
+         '<thead><tr><th>Product</th>' + sizeHeadersHtml + '<th class="total-hdr">Total Stock</th></tr></thead>' +
+         '<tbody>' + (tableRows || '<tr><td colspan="' + (2 + scSortedSizes.length) + '" style="text-align:center;">No products</td></tr>') + '</tbody>' +
+         '</table></div></div>';
+   });
+
+   cont.innerHTML = html;
+}
+function renderDashboard() {
+       const totP = P.length;
+       const totB = P.reduce((a,p) => a + Object.values(p.s).reduce((v,x)=>v+x,0), 0);
+       const lowCount = P.flatMap(p => Object.entries(p.s).filter(([sz,q]) => q <= p.m)).length;
+       
+       document.getElementById('s-prod').textContent = totP;
+       document.getElementById('s-box').textContent = totB;
+       document.getElementById('s-low').textContent = lowCount;
+       
+       const q = document.getElementById('dash-search').value.toLowerCase();
+       const catId = document.getElementById('dash-cat-filter').value;
+       const cont = document.getElementById('dash-cat-tables');
+       
+       let html = '';
+       if (!S.categories || !S.categories.length) {
+          cont.innerHTML = '<div class="empty-state">No categories defined. Please go to Settings.</div>';
+          return;
+       }
+
+       S.categories.forEach(cat => {
+          if (catId && cat.id != catId) return;
+          let prods = P.filter(p => p.ci == cat.id);
+          if (q) prods = prods.filter(p => p.n.toLowerCase().includes(q));
+          if (!prods.length) return;
+          
+          const ths = (cat.sizes || []).map(s => `<th>${s}</th>`).join('');
+          const rows = prods.map(p => {
+             const tds = (cat.sizes || []).map(s => {
+                const v = p.s[s]||0;
+                const c = v <= 0 ? 'var(--danger)' : v <= p.m ? 'var(--warn)' : 'var(--success)';
+                return `<td style="font-family:'JetBrains Mono'; color:${c}"><b>${v}</b></td>`;
+             }).join('');
+             return `<tr class="t-row" id="dash-row-${p.id}"><td><b>${p.n}</b></td>${tds}<td><b>${Object.values(p.s).reduce((a,b)=>a+b,0)}</b></td></tr>`;
+          }).join('');
+          
+          html += `<div class="f-card"><div class="f-title" style="margin-bottom:12px">${cat.n}</div><table class="t-wrap"><thead><tr><th>Product</th>${ths}<th>Sum</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+       });
+       cont.innerHTML = html || '<div class="empty-state">No products found.</div>';
+    }
+
+    let searchIdx = -1;
+    let searchRes = [];
+
+    function showDashSearch(q) {
+       const drop = document.getElementById('dash-search-results');
+       if (!q) { drop.classList.remove('active'); return; }
+       searchRes = P.filter(p => p.n.toLowerCase().includes(q.toLowerCase())).slice(0, 10);
+       if (!searchRes.length) { drop.classList.remove('active'); return; }
+       
+       searchIdx = -1;
+       const html = searchRes.map((p, i) => `<div class="search-res-item" data-idx="${i}" onclick="jumpToProduct('${p.id}')"><span>${p.n}</span> <span style="font-size:10px; opacity:0.5">${S.categories.find(c=>c.id==p.ci)?.n}</span></div>`).join('');
+       drop.innerHTML = html;
+       drop.classList.add('active');
+    }
+
+    function handleDashSearchKey(e) {
+       const items = document.querySelectorAll('.search-res-item');
+       if (!items.length) return;
+
+       if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          searchIdx = (searchIdx + 1) % items.length;
+          updateSearchSelect(items);
+       } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          searchIdx = (searchIdx - 1 + items.length) % items.length;
+          updateSearchSelect(items);
+       } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (searchIdx > -1) {
+             const pid = searchRes[searchIdx].id;
+             jumpToProduct(pid);
+          }
+       } else if (e.key === 'Escape') {
+          document.getElementById('dash-search-results').classList.remove('active');
+       }
+    }
+
+    function updateSearchSelect(items) {
+       items.forEach((it, i) => it.classList.toggle('active', i === searchIdx));
+       if (searchIdx > -1) items[searchIdx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function jumpToProduct(pid) {
+       const row = document.getElementById(`dash-row-${pid}`);
+       if (row) {
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          row.classList.add('jump-highlight');
+          setTimeout(() => row.classList.remove('jump-highlight'), 2000);
+          document.getElementById('dash-search-results').classList.remove('active');
+          document.getElementById('dash-search').value = P.find(p=>p.id==pid).n;
+       }
+    }
+
+    // Close search results on click outside
+     document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-input-wrap')) {
+           document.getElementById('dash-search-results').classList.remove('active');
         }
-        checkStatus();
-        setInterval(checkStatus, 5000);
+     });
 
-        // MAT Logo Canvas Animation disabled as requested (only static image is used)
-    </script>
+    // -- INVENTORY --
+    function renderInventory() {
+       if (!invCat && S.categories.length) invCat = S.categories[0].id;
+       const tabs = document.getElementById('inv-tabs');
+       tabs.innerHTML = S.categories.map(c => `<button class="f-btn ${c.id==invCat?'f-btn-p':'f-btn-s'}" onclick="invCat='${c.id}';renderInventory()">${c.n}</button>`).join('');
+       
+       const items = P.filter(p => p.ci == invCat);
+       const cont = document.getElementById('inv-content');
+       cont.innerHTML = items.map(p => {
+          const bricks = Object.entries(p.s).map(([sz, q]) => {
+             const c = q <= 0 ? 'rgba(239, 68, 68, 0.1)' : q <= p.m ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+             const tc = q <= 0 ? 'var(--danger)' : q <= p.m ? 'var(--warn)' : 'var(--success)';
+             return `<div class="sz-brick" style="background:${c}"><div class="sz-l">${sz}</div><div class="sz-v" style="color:${tc}">${q}</div></div>`;
+          }).join('');
+          return `<div class="p-card"><div class="p-card-head"><b>${p.n}</b><div style="display:flex; gap:8px;"><button class="f-btn f-btn-s" style="padding:4px 8px;" onclick="openEditProduct('${p.id}')">Edit</button><button class="f-btn f-btn-s" style="padding:4px 8px; color:var(--danger);" onclick="deleteProd('${p.id}')">✕</button></div></div><div class="p-sz-grid">${bricks}</div><div style="padding:0 20px 16px; font-size:11px; color:var(--text-muted)">Alert below: ${p.m} boxes</div></div>`;
+       }).join('');
+    }
+
+    // -- STOCK IN --
+    function renderSiDropdown() {
+       const q = document.getElementById('si-search').value.toLowerCase();
+       const cid = document.getElementById('si-cat-filter').value;
+       const drop = document.getElementById('si-drop');
+       if (!q && !cid) { drop.style.display='none'; return; }
+       let res = P.filter(p => (!cid || p.ci == cid) && p.n.toLowerCase().includes(q));
+       drop.style.display='block';
+       drop.innerHTML = res.map(p => `<div style="padding:8px; cursor:pointer; border-radius:4px;" class="t-row" onclick="toggleSiPid('${p.id}')">${p.n} ${siPids.includes(p.id)?'✅':''}</div>`).join('');
+    }
+    function toggleSiPid(id) {
+       if (siPids.includes(id)) { siPids = siPids.filter(x => x!=id); delete siData[id]; }
+       else { siPids.push(id); const p = P.find(x => x.id == id); siData[id] = { sizes:{}, sup:'', inv:'' }; Object.keys(p.s).forEach(s => siData[id].sizes[s]=0); }
+       renderSiTable(); renderSiDropdown();
+    }
+    function renderSiTable() {
+       const wrap = document.getElementById('si-table-area');
+       if (!siPids.length) { wrap.innerHTML = ''; document.getElementById('si-sum').textContent='0 items'; return; }
+       let html = '';
+       siPids.forEach(id => {
+          const p = P.find(x => x.id == id);
+          const fields = Object.keys(p.s).map(s => `<div style="flex:1;"><div class="stat-lbl">${s}</div><input type="number" class="f-input" style="padding:6px; text-align:center" oninput="siData['${id}'].sizes['${s}']=parseInt(this.value)||0; updateSiSum();"></div>`).join('');
+          html += `<div style="background:var(--bg); padding:16px; border-radius:var(--radius-md); margin-bottom:12px;"><b>${p.n}</b><div style="display:flex; gap:10px; margin-top:8px;">${fields}</div><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;"><input class="f-input" placeholder="Supplier" oninput="siData['${id}'].sup=this.value"><input class="f-input" placeholder="Ref/Inv" oninput="siData['${id}'].inv=this.value"></div></div>`;
+       });
+       wrap.innerHTML = html; updateSiSum();
+    }
+    function updateSiSum() { let t=0; siPids.forEach(id => t += Object.values(siData[id].sizes).reduce((a,b)=>a+b,0)); document.getElementById('si-sum').textContent = `${siPids.length} products · ${t} boxes`; }
+    async function saveStockIn() {
+       if (!siPids.length) return;
+       const d = parseTypedDate(document.getElementById('si-date').value);
+       siPids.forEach(id => {
+          const p = P.find(x => x.id == id);
+          Object.entries(siData[id].sizes).forEach(([sz, q]) => { if(!q) return; p.s[sz]=(p.s[sz]||0)+q; T.push({ id:'T'+Date.now()+Math.random(), d:d+'T00:00', pid:id, pn:p.n, ci:p.ci, sz, tp:'IN', q, pa:siData[id].sup, rf:siData[id].inv }); });
+       });
+       await persist(); siPids=[]; siData={}; renderSiTable(); showToast('Stock Received', '📦');
+    }
+
+    // -- STOCK OUT --
+    function renderSoDropdown() {
+       const q = document.getElementById('so-search').value.toLowerCase();
+       const cid = document.getElementById('so-cat-filter').value;
+       const drop = document.getElementById('so-drop');
+       if (!q && !cid) { drop.style.display='none'; return; }
+       let res = P.filter(p => (!cid || p.ci == cid) && p.n.toLowerCase().includes(q));
+       drop.style.display='block';
+       drop.innerHTML = res.map(p => `<div style="padding:8px; cursor:pointer; border-radius:4px;" class="t-row" onclick="toggleSoPid('${p.id}')">${p.n} ${soPids.includes(p.id)?'✅':''}</div>`).join('');
+    }
+    function toggleSoPid(id) {
+       if (soPids.includes(id)) { soPids = soPids.filter(x => x!=id); delete soData[id]; }
+       else { soPids.push(id); const p = P.find(x => x.id == id); soData[id] = { sizes:{}, party:'', rf:'' }; Object.keys(p.s).forEach(s => soData[id].sizes[s]=0); }
+       renderSoTable(); renderSoDropdown();
+    }
+    function renderSoTable() {
+       const wrap = document.getElementById('so-table-area');
+       if (!soPids.length) { wrap.innerHTML = ''; document.getElementById('so-sum').textContent='0 items'; return; }
+       let html = '';
+       soPids.forEach(id => {
+          const p = P.find(x => x.id == id);
+          const fields = Object.keys(p.s).map(s => `<div style="flex:1;"><div class="stat-lbl">${s} (${p.s[s]||0})</div><input type="number" class="f-input" style="padding:6px; text-align:center" oninput="soData['${id}'].sizes['${s}']=parseInt(this.value)||0; updateSoSum();"></div>`).join('');
+          html += `<div style="background:var(--bg); padding:16px; border-radius:var(--radius-md); margin-bottom:12px;"><b>${p.n}</b><div style="display:flex; gap:10px; margin-top:8px;">${fields}</div><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;"><input class="f-input" placeholder="Customer/Party" oninput="soData['${id}'].party=this.value"><input class="f-input" placeholder="Reference Do" oninput="soData['${id}'].rf=this.value"></div></div>`;
+       });
+       wrap.innerHTML = html; updateSoSum();
+    }
+    function updateSoSum() { let t=0; soPids.forEach(id => t += Object.values(soData[id].sizes).reduce((a,b)=>a+b,0)); document.getElementById('so-sum').textContent = `${soPids.length} products · ${t} boxes`; }
+    async function saveStockOut() {
+       if (!soPids.length) return;
+       const d = parseTypedDate(document.getElementById('so-date').value);
+       soPids.forEach(id => {
+          const p = P.find(x => x.id == id);
+          Object.entries(soData[id].sizes).forEach(([sz, q]) => { if(!q) return; p.s[sz]=(p.s[sz]||0)-q; T.push({ id:'T'+Date.now()+Math.random(), d:d+'T00:00', pid:id, pn:p.n, ci:p.ci, sz, tp:'OUT', q, pa:soData[id].party, rf:soData[id].rf }); });
+       });
+       await persist(); soPids=[]; soData={}; renderSoTable(); showToast('Stock Delivered', '📤');
+    }
+
+    // -- ALERTS --
+    function renderAlerts() {
+       const low = P.flatMap(p => Object.entries(p.s).filter(([sz,q]) => q <= p.m).map(([sz,q]) => ({ p, sz, q })));
+       const cont = document.getElementById('alert-list');
+       if (!low.length) { cont.innerHTML = '<div class="f-card" style="grid-column: span 3; color:var(--success); text-align:center;">All levels healthy!</div>'; return; }
+       cont.innerHTML = low.map(x => `<div class="f-card" style="border-left:4px solid var(--danger);"><div class="stat-lbl">${x.p.n}</div><div style="font-size:20px; font-weight:800; margin-top:4px;">Size ${x.sz}: <span style="color:var(--danger)">${x.q}</span> boxes</div></div>`).join('');
+    }
+
+    // -- TRANSACTIONS --
+    function renderTxns() {
+        const mRaw = document.getElementById('txn-month-input').value;
+        curMonth = parseTypedMonth(mRaw);
+       
+       document.getElementById('txn-t-in').className = txnType=='IN'?'f-btn f-btn-p':'f-btn f-btn-s';
+       document.getElementById('txn-t-out').className = txnType=='OUT'?'f-btn f-btn-p':'f-btn f-btn-s';
+       
+       // Handle Date Range
+       const sdRaw = document.getElementById('txn-start').value;
+       const edRaw = document.getElementById('txn-end').value;
+       const sd = parseTypedDate(sdRaw, true);
+       const ed = parseTypedDate(edRaw, true);
+       
+       let list = [];
+       if (sd || ed) {
+          list = T.filter(t => {
+             const td = t.d.slice(0,10);
+             const matchType = t.tp == txnType;
+             const matchStart = sd ? td >= sd : true;
+             const matchEnd = ed ? td <= ed : true;
+             return matchType && matchStart && matchEnd;
+          });
+       } else {
+          list = T.filter(t => t.tp == txnType && t.d.startsWith(curMonth));
+       }
+       
+       list = list.reverse();
+       if (!list.length) { document.getElementById('txn-table-wrap').innerHTML = '<div class="empty-state">No records for this selection.</div>'; return; }
+       
+       const rows = list.map(t => `<tr><td>${t.d.slice(0,10)}</td><td><b>${t.pn}</b></td><td>${t.sz}</td><td style="color:${t.tp=='IN'?'var(--success)':'var(--warn)'}"><b>${t.q}</b></td><td>${t.pa||'—'}</td><td>${t.rf||'—'}</td><td><button class="f-btn f-btn-s" style="padding:4px 8px; color:var(--danger)" onclick="delTxn('${t.id}')">✕</button></td></tr>`).join('');
+       document.getElementById('txn-table-wrap').innerHTML = `<table class="t-wrap"><thead><tr><th>Date</th><th>Product</th><th>Size</th><th>Qty</th><th>${txnType=='IN'?'From':'To'}</th><th>Ref</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+    function setTxnMonth(m) {
+       document.getElementById('txn-start').value = '';
+       document.getElementById('txn-end').value = '';
+       renderTxns();
+    }
+    function clearRange() {
+       document.getElementById('txn-start').value = '';
+       document.getElementById('txn-end').value = '';
+       renderTxns();
+    }
+    function setTxnType(t) { txnType = t; renderTxns(); }
+    async function delTxn(id) {
+       if (!confirm('Revert transaction?')) return;
+       const t = T.find(x => x.id == id); const p = P.find(x => x.id == t.pid);
+       if(p) { if(t.tp=='IN') p.s[t.sz]-=t.q; else p.s[t.sz]+=t.q; }
+       T = T.filter(x => x.id != id); await persist(); renderTxns(); showToast('Reversed');
+    }
+
+    // -- REPORTS --
+    function renderReports() {
+       const tIn = T.filter(t=>t.tp=='IN').reduce((a,b)=>a+b.q,0);
+       const tOut = T.filter(t=>t.tp=='OUT').reduce((a,b)=>a+b.q,0);
+       document.getElementById('rpt-in').textContent = tIn;
+       document.getElementById('rpt-out').textContent = tOut;
+       document.getElementById('rpt-turn').textContent = tIn ? ((tOut/tIn)*100).toFixed(1)+'%' : '0%';
+       
+       const cont = document.getElementById('rpt-visuals');
+       cont.innerHTML = S.categories.map(c => {
+          const prods = P.filter(p => p.ci == c.id);
+          const max = Math.max(...c.sizes.map(s => prods.reduce((a,p)=>a+(p.s[s]||0),0)), 1);
+          const lines = c.sizes.map(s => {
+             const v = prods.reduce((a,p)=>a+(p.s[s]||0),0);
+             return `<div style="margin-bottom:8px;"><div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700;"><span>Size ${s}</span><span>${v}</span></div><div style="height:6px; background:var(--bg); border-radius:3px; overflow:hidden; margin-top:4px;"><div style="height:100%; background:var(--primary); width:${(v/max*100)}%"></div></div></div>`;
+          }).join('');
+          return `<div class="f-card"><div class="f-title" style="margin-bottom:16px;">${c.n} Distribution</div>${lines}</div>`;
+       }).join('');
+    }
+
+    // -- CONFIG --
+    function loadSettings() {
+       try {
+          if (document.getElementById('s-min')) document.getElementById('s-min').value = S.defMin;
+          const clist = document.getElementById('cat-list');
+          const badge = document.getElementById('cat-count-badge');
+          
+          const count = S.categories?.length || 0;
+          if (badge) badge.textContent = `(${count} Total)`;
+          
+          if (!clist) return;
+          if (!S.categories || !Array.isArray(S.categories)) { S.categories = []; }
+          
+          if (S.categories.length === 0) {
+             clist.innerHTML = '<div style="grid-column: span 2; padding:20px; text-align:center; color:var(--text-muted);">No categories found. Click "+ Add Category" to begin.</div>';
+             return;
+          }
+          
+          clist.innerHTML = S.categories.map(c => {
+             const szText = Array.isArray(c.sizes) ? c.sizes.join(', ') : '';
+             return `<div class="f-card" style="padding:16px; margin:0; border-left:4px solid var(--primary);"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><b>${c.n}</b><div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${szText}</div></div><div style="display:flex; gap:8px;"><button class="f-btn f-btn-s" style="padding:4px 8px;" onclick="openEditCat('${c.id}')">Edit</button><button class="f-btn f-btn-s" style="padding:4px 8px; color:var(--danger);" onclick="deleteCat('${c.id}')">✕</button></div></div></div>`;
+          }).join('');
+
+          // Update Diagnostics
+          fetch('/api/system-status').then(r=>r.json()).then(d=>{
+             document.getElementById('sys-pid').textContent = d.pid;
+             document.getElementById('sys-db').textContent = d.dbPath.split('\\').pop();
+             document.getElementById('sys-time').textContent = 'Sync: ' + new Date().toLocaleTimeString();
+          }).catch(e=>{});
+       } catch(ext) {
+          console.error(ext);
+          alert('Rendering Error: ' + ext.message);
+       }
+    }
+    async function saveSettings() { S.defMin = parseInt(document.getElementById('s-min').value)||5; await persist(); showToast('Saved'); }
+    async function deleteCat(id) { 
+       if(P.some(p=>p.ci==id)) return alert('Category not empty'); 
+       if(confirm('Delete?')) { 
+          S.categories = S.categories.filter(x=>x.id!=id); 
+          await persist(); 
+          loadSettings(); 
+          updateCatOpts(); 
+       } 
+    }
+    function openAddCat() {
+       curModal = 'cat';
+       document.getElementById('modal-title').textContent = 'New Category';
+       document.getElementById('modal-content').innerHTML = `<div style="margin-bottom:16px;"><label class="stat-lbl">Name</label><input id="mc-n" class="f-input"></div><div><label class="stat-lbl">Sizes (Comma separated)</label><input id="mc-s" class="f-input" placeholder="S, M, L, XL"></div>`;
+       document.getElementById('modal-overlay').classList.add('open');
+    }
+    let editCatId = null;
+    function openEditCat(id) {
+       const c = S.categories.find(x => x.id == id);
+       editCatId = id; curModal = 'edit-cat';
+       document.getElementById('modal-title').textContent = 'Modify Category';
+       document.getElementById('modal-content').innerHTML = `<div style="margin-bottom:16px;"><label class="stat-lbl">Category Name</label><input id="mc-n" class="f-input" value="${c.n}"></div><div><label class="stat-lbl">Sizes (Comma separated)</label><input id="mc-s" class="f-input" value="${c.sizes.join(', ')}"></div>`;
+       document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    // -- CRUD --
+    function openAddProduct() {
+       curModal = 'add'; editPid = null;
+       document.getElementById('modal-title').textContent = 'Create Product';
+       document.getElementById('modal-content').innerHTML = `<div style="margin-bottom:16px;"><label class="stat-lbl">Product Name</label><input id="mp-n" class="f-input"></div><div style="margin-bottom:16px;"><label class="stat-lbl">Category</label><select id="mp-c" class="f-input"></select></div><div><label class="stat-lbl">Alert Threshold</label><input id="mp-m" type="number" class="f-input" value="${S.defMin}"></div>`;
+       updateCatOpts(); document.getElementById('modal-overlay').classList.add('open');
+    }
+    function openEditProduct(id) {
+       const p = P.find(x => x.id == id); editPid = id; curModal = 'edit';
+       document.getElementById('modal-title').textContent = 'Edit Product';
+       document.getElementById('modal-content').innerHTML = `<div style="margin-bottom:16px;"><label class="stat-lbl">Product Name</label><input id="mp-n" class="f-input" value="${p.n}"></div><div><label class="stat-lbl">Alert Threshold</label><input id="mp-m" type="number" class="f-input" value="${p.m}"></div>`;
+       document.getElementById('modal-overlay').classList.add('open');
+    }
+    async function submitModal() {
+       let ok = false;
+       if(curModal=='cat') { 
+         const n = document.getElementById('mc-n').value; const s = document.getElementById('mc-s').value.split(',').map(x=>x.trim().toUpperCase()).filter(x=>x);
+         if(n && s.length) { 
+           const oldCats = [...S.categories]; 
+           S.categories.push({ id:'cat'+Date.now(), n, sizes:s }); 
+           ok = await persist(); 
+           if (!ok) { S.categories = oldCats; } // Rollback
+           updateCatOpts(); loadSettings(); 
+         }
+         else { alert('Category Name and Sizes are required!'); return; }
+       } else if(curModal=='edit-cat') {
+         const c = S.categories.find(x => x.id == editCatId);
+         const oldN = c.n; const oldS = [...c.sizes];
+         c.n = document.getElementById('mc-n').value;
+         c.sizes = document.getElementById('mc-s').value.split(',').map(x=>x.trim().toUpperCase()).filter(x=>x);
+         ok = await persist();
+         if (!ok) { c.n = oldN; c.sizes = oldS; }
+         updateCatOpts(); loadSettings();
+       } else if(curModal=='add') {
+         const n = document.getElementById('mp-n').value; const ci = document.getElementById('mp-c').value; const m = parseInt(document.getElementById('mp-m').value)||S.defMin;
+         if(n && ci) { 
+           const oldProds = [...P];
+           const s={}; szs(ci).forEach(x=>s[x]=0); 
+           P.push({ id:'P'+Date.now(), n, ci, s, m }); 
+           ok = await persist(); 
+           if (!ok) { P = oldProds; } // Rollback
+           renderInventory(); 
+         }
+         else { alert('Product Name and Category are required!'); return; }
+       } else if(curModal=='edit') {
+         const p = P.find(x => x.id == editPid); const oldN = p.n; const oldM = p.m;
+         p.n = document.getElementById('mp-n').value; p.m = parseInt(document.getElementById('mp-m').value)||S.defMin;
+         ok = await persist(); 
+         if (!ok) { p.n = oldN; p.m = oldM; } // Rollback
+         renderInventory();
+       } else if(curModal=='info') {
+         closeModal(); return;
+       }
+       if (ok) {
+          closeModal(); 
+          showToast(curModal=='cat'?'Category Added':curModal=='add'?'Product Created':'Product Updated', '✅');
+       }
+    }
+    async function deleteProd(id) { if(confirm('Delete?')) { P=P.filter(x=>x.id!=id); T=T.filter(t=>t.pid!=id); await persist(); renderInventory(); showToast('Removed'); } }
+
+    // -- UTILS --
+    function updateCatOpts() {
+       const opts = S.categories.map(c => `<option value="${c.id}">${c.n}</option>`).join('');
+        ['dash-cat-filter', 'si-cat-filter', 'so-cat-filter', 'mp-c', 'preview-cat-filter'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = id.includes('filter') ? '<option value="">All Categories</option>'+opts : opts; });
+        ['preview-sc-filter'].forEach(id => {
+           const drop = document.getElementById(id);
+           if (drop && S.subCategories) {
+              const scOpts = '<option value="">All Categories</option>' + S.subCategories.map(sc => `<option value="${sc}">${sc}</option>`).join('');
+              if (drop.innerHTML !== scOpts) drop.innerHTML = scOpts;
+           }
+        });
+    }
+    function szs(id) { return S.categories.find(x=>x.id==id)?.sizes || []; }
+    function closeModal() { 
+       document.getElementById('modal-overlay').classList.remove('open'); 
+       document.getElementById('modal-btn').style.display = 'inline-flex';
+       document.getElementById('modal-btn').textContent = 'Save Changes';
+    }
+    function updateStatus(on) { const d = document.getElementById('status-dot'); d.className = on ? 'status-dot on' : 'status-dot'; document.getElementById('status-text').textContent = on ? 'Connected' : 'Offline'; }
+
+    async function showServerInfo() {
+       try {
+          const res = await fetch('/api/server-info');
+          if (res.ok) {
+             const data = await res.json();
+             const url = `http://${data.ip}:${data.port}/stock`;
+             curModal = 'info';
+             document.getElementById('modal-title').textContent = '🔗 Network Share (Stock Manager)';
+             document.getElementById('modal-content').innerHTML = `
+                <div style="text-align: center; padding: 10px 0;">
+                   <p style="color: var(--text-muted); margin-bottom: 20px;">Access this app from any phone or PC on your Wi-Fi by visiting:</p>
+                   <div style="background: var(--bg); border: 2px dashed var(--primary); padding: 20px; border-radius: var(--radius-lg); font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--primary); cursor: text; user-select: all;">
+                      ${url}
+                   </div>
+                   <p style="font-size: 13px; color: var(--warn); margin-top: 20px;">⚠️ IMPORTANT: Keep this computer running to access the app.</p>
+                </div>
+             `;
+             document.getElementById('modal-btn').style.display = 'none';
+             document.getElementById('modal-overlay').classList.add('open');
+          }
+       } catch (err) {
+          showToast('Failed to get server info', '❌');
+       }
+    }
+
+    initApp();
+  </script>
 </body>
 </html>
