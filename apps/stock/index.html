@@ -1377,6 +1377,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
   </style>
 
+
 <style>
 /* Premium Stock Preview Styling */
 #section-preview {
@@ -1386,6 +1387,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
   font-family: 'Outfit', 'Inter', sans-serif;
   color: var(--text-main);
   letter-spacing: -0.5px;
+  font-size: 24px;
 }
 #section-preview .table-wrap {
   border: none;
@@ -1404,7 +1406,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 #section-preview .table-header-title {
   color: #ffffff !important;
   font-family: 'Outfit', sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -1415,7 +1417,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 #section-preview thead th {
   background: #f8fafc !important;
   color: #475569 !important;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1px;
   padding: 14px 16px;
@@ -1434,7 +1436,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 #section-preview td {
   padding: 14px 16px;
   color: #334155;
-  font-size: 13.5px;
+  font-size: 15.5px;
 }
 #section-preview td b {
   color: #1e293b;
@@ -1451,11 +1453,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 #section-preview td.size-cell {
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
+  font-size: 15.5px;
 }
 #section-preview td.total-cell {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 800;
   color: #0f172a;
   text-align: center;
@@ -2689,9 +2691,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
     function getMergedProducts(allProducts, scName) {
    const allMergedMap = new Map();
+   const cleanKey = (str) => {
+      return str.toLowerCase()
+        .replace(/[-–—/()]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+   };
    allProducts.forEach(p => {
       let coreName = p.n.replace(/^big\s*-*\s*/i, '').trim();
-      let key = coreName.toLowerCase();
+      let key = cleanKey(coreName);
       
       if (!allMergedMap.has(key)) {
          allMergedMap.set(key, {
