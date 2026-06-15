@@ -25,6 +25,8 @@
       --violet: #8b5cf6;
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --radius: 12px;
+      --warn: #f59e0b;
+      --accent3: #6366f1;
     }
 
     * {
@@ -1361,7 +1363,109 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       color: var(--accent) !important;
       font-weight: 900 !important;
     }
+    
+    .preview-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (min-width: 992px) {
+      .preview-split {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
   </style>
+
+<style>
+/* Premium Stock Preview Styling */
+#section-preview {
+  font-family: 'Inter', sans-serif;
+}
+#section-preview h2 {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+#section-preview .table-wrap {
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  margin-top: 24px !important;
+  margin-bottom: 32px !important;
+}
+#section-preview .table-header {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  padding: 16px 24px;
+  border-bottom: none;
+}
+#section-preview .table-header-title {
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+#section-preview table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#section-preview thead th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 14px 16px;
+  border-bottom: 2px solid #cbd5e1;
+  text-transform: uppercase;
+}
+#section-preview tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+#section-preview tbody tr:hover {
+  background-color: #f8fafc !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+#section-preview td {
+  padding: 14px 16px;
+  color: #334155;
+  font-size: 13.5px;
+}
+#section-preview td b {
+  color: #1e293b;
+  font-weight: 600;
+}
+#section-preview thead th:first-child,
+#section-preview tbody td:first-child {
+  padding-left: 24px;
+}
+#section-preview thead th:last-child,
+#section-preview tbody td:last-child {
+  padding-right: 24px;
+}
+#section-preview td.size-cell {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+#section-preview td.total-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+  background: #f8fafc;
+}
+#section-preview th.total-hdr {
+  text-align: center;
+  background: #f8fafc !important;
+}
+</style>
 </head>
 
 <body>
@@ -1386,6 +1490,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       <div class="top-nav">
         <div class="nav-item" onclick="location.href='/'" title="Home"><span class="nav-icon">🏠</span><div class="nav-label">Home</div></div>
         <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon">⊞</span><div class="nav-label">Dashboard</div></div>
+        <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon">📋</span><div class="nav-label">Preview</div></div>
         <div class="nav-item" onclick="nav('inventory')" title="Inventory"><span class="nav-icon">▦</span><div class="nav-label">Inventory</div></div>
         <div class="nav-item" onclick="nav('stock-in')" title="Stock In"><span class="nav-icon">↓</span><div class="nav-label">Stock In</div></div>
         <div class="nav-item" onclick="nav('stock-out')" title="Stock Out"><span class="nav-icon">↑</span><div class="nav-label">Stock Out</div></div>
@@ -1437,7 +1542,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <div style="flex:1;min-width:200px;">
               <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <select id="dash-sc-filter" class="form-select" onchange="renderDashboard()">
-                  <option value="">All Sub Categories</option>
+                  <option value="">All Categories</option>
                 </select>
                 <select id="dash-cat-filter" class="form-select" onchange="renderDashboard()">
                   <option value="">All Categories</option>
@@ -1459,6 +1564,23 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             </button>
           </div>
           <div id="dash-cat-tables"></div>
+        </div>
+
+        <!-- PREVIEW -->
+        <div class="section fade-up" id="section-preview">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin: 0;">Stock Preview</h2>
+            <button class="btn btn-excel" onclick="exportPreviewToExcel()" style="background:#1d6f42; color:#fff; display:inline-flex; align-items:center; gap:8px;">
+               <span style="font-size:16px;">📊</span> Export Excel
+            </button>
+          </div>
+          <div style="margin-bottom:24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div style="min-width:200px; display:flex; align-items:center; gap:8px;">
+              <label for="preview-sc-filter" style="font-weight:700; color:var(--text-main); font-size:14px;">Category:</label> <select id="preview-sc-filter" class="form-select" onchange="renderPreview()" style="min-width:180px;"></select>
+            </div>
+          </div>
+
+          <div id="preview-content"></div>
         </div>
 
         <!-- INVENTORY -->
@@ -2461,7 +2583,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
     function tick() { const s = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });['clock', 'clock2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = s }) }
     tick();
-    const PT = { dashboard: 'Dashboard', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Alerts', transactions: 'Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings' };
+    const PT = { dashboard: 'Dashboard', preview: 'Preview', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Alerts', transactions: 'Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings' };
     function nav(id) {
       if (isViewer && id !== 'dashboard') {
         showCenterToast('Access Denied: View-only Mode');
@@ -2490,7 +2612,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const mainContent = document.querySelector('.content');
       if (mainContent) mainContent.scrollTop = 0;
 
-      const fn = { dashboard: renderDashboard, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), settings: loadSettings };
+      const fn = { dashboard: renderDashboard, preview: renderPreview, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), settings: loadSettings };
       if (fn[id]) fn[id](); updateBadge();
       
       // Save current page to local storage
@@ -2565,7 +2687,233 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       renderDashboard();
     }
 
-    function renderDashboard() {
+    function getMergedProducts(allProducts, scName) {
+   const allMergedMap = new Map();
+   allProducts.forEach(p => {
+      let coreName = p.n.replace(/^big\s*-*\s*/i, '').trim();
+      let key = coreName.toLowerCase();
+      
+      if (!allMergedMap.has(key)) {
+         allMergedMap.set(key, {
+            id: p.id,
+            n: coreName,
+            ci: p.ci,
+            sourceCategoryIds: new Set([String(p.ci)]),
+            sourceSubCategories: new Set([p.sc || 'General']),
+            s: { ...p.s },
+            m: p.m,
+            sc: p.sc
+         });
+      } else {
+         const existing = allMergedMap.get(key);
+         existing.sourceCategoryIds.add(String(p.ci));
+         existing.sourceSubCategories.add(p.sc || 'General');
+         if (p.s) {
+            Object.entries(p.s).forEach(([sz, qty]) => {
+               existing.s[sz] = (existing.s[sz] || 0) + qty;
+            });
+         }
+         existing.m = Math.max(existing.m, p.m);
+      }
+   });
+   
+   let mergedList = Array.from(allMergedMap.values());
+   if (scName) {
+      mergedList = mergedList.filter(mp => mp.sourceSubCategories.has(scName));
+   }
+   return mergedList;
+}
+
+function exportPreviewToExcel() {
+   if (typeof XLSX === 'undefined') return;
+   const date = new Date().toISOString().slice(0, 10);
+   const wb = XLSX.utils.book_new();
+   
+   const scFilterValue = document.getElementById('preview-sc-filter')?.value || '';
+   const selectedProducts = getMergedProducts(P, scFilterValue);
+   if (selectedProducts.length === 0) {
+      alert('No products to export.');
+      return;
+   }
+
+   const groups = {};
+   selectedProducts.forEach(p => {
+      const sc = p.sc || 'General';
+      if (!groups[sc]) groups[sc] = [];
+      groups[sc].push(p);
+   });
+
+   const scOrder = S.subCategories || [];
+   const groupedScNames = Object.keys(groups).sort((a, b) => {
+      const aIdx = scOrder.indexOf(a);
+      const bIdx = scOrder.indexOf(b);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return a.localeCompare(b);
+   });
+
+   const aoa = [];
+
+   groupedScNames.forEach((scName, gIdx) => {
+      if (gIdx > 0) {
+         aoa.push([]); // blank spacer row
+      }
+      aoa.push(['Category: ' + scName]); // Section heading
+
+      const scProducts = groups[scName];
+      
+      const categoryIds = new Set();
+      scProducts.forEach(p => {
+         if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(ci => categoryIds.add(String(ci)));
+         } else {
+            categoryIds.add(String(p.ci));
+         }
+      });
+      const sizesSet = new Set();
+      categoryIds.forEach(ci => {
+         const category = S.categories.find(c => String(c.id) === String(ci));
+         if (category && category.sizes) {
+            category.sizes.forEach(sz => sizesSet.add(sz));
+         }
+      });
+      if (sizesSet.size === 0) {
+         scProducts.forEach(p => {
+            if (p.s) Object.keys(p.s).forEach(sz => sizesSet.add(sz));
+         });
+      }
+      const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL'];
+      const scSortedSizes = Array.from(sizesSet).sort((a, b) => {
+         const aNum = Number(a);
+         const bNum = Number(b);
+         if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+         const aIdx = sizeOrder.indexOf(a.toUpperCase());
+         const bIdx = sizeOrder.indexOf(b.toUpperCase());
+         if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         return a.localeCompare(b);
+      });
+
+      const headers = ['Product', ...scSortedSizes, 'Total Stock'];
+      aoa.push(headers);
+
+      scProducts.forEach(p => {
+         const row = [p.n];
+         scSortedSizes.forEach(sz => {
+            const qty = p.s ? p.s[sz] : undefined;
+            row.push(qty === undefined ? '' : qty);
+         });
+         const sum = Object.values(p.s || {}).reduce((a, b) => a + b, 0);
+         row.push(sum);
+         aoa.push(row);
+      });
+   });
+
+   const ws = XLSX.utils.aoa_to_sheet(aoa);
+   ws['!cols'] = [{ wch: 25 }];
+   
+   XLSX.utils.book_append_sheet(wb, ws, 'Preview Stock');
+   XLSX.writeFile(wb, 'Preview_Stock_' + date + '.xlsx');
+}
+
+     function renderPreview() {
+   const cont = document.getElementById('preview-content');
+   if (!cont) return;
+
+   const scFilterValue = document.getElementById('preview-sc-filter')?.value || '';
+   const selectedProducts = getMergedProducts(P, scFilterValue);
+
+   if (selectedProducts.length === 0) {
+      cont.innerHTML = '<div class="empty-state" style="padding: 40px; text-align: center; border: 1.5px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-top: 20px;"><div style="font-size: 32px; margin-bottom: 12px;">🔍</div><div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">No Products Found</div><div style="font-size: 13px; color: var(--text-muted);">No products are available in this category.</div></div>';
+      return;
+   }
+
+   const groups = {};
+   selectedProducts.forEach(p => {
+      const sc = p.sc || 'General';
+      if (!groups[sc]) groups[sc] = [];
+      groups[sc].push(p);
+   });
+
+   const scOrder = S.subCategories || [];
+   const groupedScNames = Object.keys(groups).sort((a, b) => {
+      const aIdx = scOrder.indexOf(a);
+      const bIdx = scOrder.indexOf(b);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return a.localeCompare(b);
+   });
+
+   let html = '';
+   groupedScNames.forEach(scName => {
+      const scProducts = groups[scName];
+      if (!scProducts || scProducts.length === 0) return;
+
+      const categoryIds = new Set();
+      scProducts.forEach(p => {
+         if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(ci => categoryIds.add(String(ci)));
+         } else {
+            categoryIds.add(String(p.ci));
+         }
+      });
+      const sizesSet = new Set();
+      categoryIds.forEach(ci => {
+         const category = S.categories.find(c => String(c.id) === String(ci));
+         if (category && category.sizes) {
+            category.sizes.forEach(sz => sizesSet.add(sz));
+         }
+      });
+      if (sizesSet.size === 0) {
+         scProducts.forEach(p => {
+            if (p.s) Object.keys(p.s).forEach(sz => sizesSet.add(sz));
+         });
+      }
+      const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL'];
+      const scSortedSizes = Array.from(sizesSet).sort((a, b) => {
+         const aNum = Number(a);
+         const bNum = Number(b);
+         if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+         const aIdx = sizeOrder.indexOf(a.toUpperCase());
+         const bIdx = sizeOrder.indexOf(b.toUpperCase());
+         if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         return a.localeCompare(b);
+      });
+
+      const tableRows = scProducts.map(p => {
+         const sum = Object.values(p.s || {}).reduce((a, b) => a + b, 0);
+         const sizeCellsHtml = scSortedSizes.map(sz => {
+            const qty = p.s ? p.s[sz] : undefined;
+            if (qty === undefined) return '<td class="size-cell"></td>';
+            const isOut = qty <= 0;
+            const isLow = !isOut && qty <= p.m;
+            const color = isOut ? 'var(--danger)' : isLow ? 'var(--warn)' : 'var(--success)';
+            const weight = qty > 0 ? '700' : 'normal';
+            return '<td class="size-cell" style="font-weight:' + weight + '; color:' + color + ';">' + qty + '</td>';
+         }).join('');
+
+         return '<tr class="t-row">' +
+            '<td><b>' + p.n + '</b></td>' +
+            sizeCellsHtml +
+            '<td class="total-cell">' + sum + '</td>' +
+            '</tr>';
+      }).join('');
+
+      const sizeHeadersHtml = scSortedSizes.map(sz => '<th style="text-align:center; min-width:45px;">' + sz + '</th>').join('');
+
+      html += '<div class="table-wrap" style="margin: 20px 0 30px 0; width: 100%;">' +
+         '<div class="table-header"><div class="table-header-title">Category: ' + scName + '</div></div>' +
+         '<div style="max-height: 600px; overflow-y: auto;">' +
+         '<table>' +
+         '<thead><tr><th>Product</th>' + sizeHeadersHtml + '<th class="total-hdr">Total Stock</th></tr></thead>' +
+         '<tbody>' + (tableRows || '<tr><td colspan="' + (2 + scSortedSizes.length) + '" style="text-align:center;">No products</td></tr>') + '</tbody>' +
+         '</table></div></div>';
+   });
+
+   cont.innerHTML = html;
+}
+function renderDashboard() {
       const tb = P.reduce((a, p) => a + Object.values(p.s).reduce((x, y) => x + y, 0), 0);
       document.getElementById('s-prod').textContent = P.length;
       document.getElementById('s-box').textContent = tb;
@@ -2904,11 +3252,13 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         }
       });
       
-      const scDrop = document.getElementById('dash-sc-filter');
-      if (scDrop && S.subCategories) {
-        const scOpts = '<option value="">All Sub Categories</option>' + S.subCategories.map(sc => `<option value="${sc}">${sc}</option>`).join('');
-        if (scDrop.innerHTML !== scOpts) scDrop.innerHTML = scOpts;
-      }
+      ['dash-sc-filter', 'preview-sc-filter'].forEach(id => {
+        const drop = document.getElementById(id);
+        if (drop && S.subCategories) {
+          const scOpts = '<option value="">All Categories</option>' + S.subCategories.map(sc => `<option value="${sc}">${sc}</option>`).join('');
+          if (drop.innerHTML !== scOpts) drop.innerHTML = scOpts;
+        }
+      });
     }
     function refreshProductSel(tp) {
       const ci = parseInt(document.getElementById(tp === 'in' ? 'si-cat' : 'so-cat').value);
@@ -5661,6 +6011,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         if (!data.length) { showAlert('Export', `No ${isIn ? 'In' : 'Out'} transactions found for ${curTxnMonth}!`); return; }
         XLSX.utils.book_append_sheet(wb, buildExcelSheet(txnsToProds(data)), isIn ? 'Stock In' : 'Stock Out');
         XLSX.writeFile(wb, `Transactions_${isIn ? 'In' : 'Out'}_${curTxnMonth}_${date}.xlsx`);
+      } else if (id === 'preview') {
+        exportPreviewToExcel();
       } else {
         XLSX.utils.book_append_sheet(wb, buildExcelSheet(currentProds()), 'Stock');
         XLSX.writeFile(wb, `Stock_${date}.xlsx`);
