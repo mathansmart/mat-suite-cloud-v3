@@ -3355,7 +3355,17 @@ function renderDashboard() {
             return;
           }
           
-          const sz = szs(ci);
+          let szSet = new Set(szs(ci));
+          cp.forEach(p => { if (p.s) Object.keys(p.s).forEach(k => szSet.add(k)); });
+          const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL'];
+          const sz = Array.from(szSet).sort((a, b) => {
+             const aNum = Number(a); const bNum = Number(b);
+             if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+             const aIdx = sizeOrder.indexOf(a.toUpperCase());
+             const bIdx = sizeOrder.indexOf(b.toUpperCase());
+             if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+             return a.localeCompare(b);
+          });
           const grandTot = cp.reduce((a, p) => a + Object.values(p.s).reduce((x, y) => x + y, 0), 0);
           const thSizes = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:12px;">${s}</th>`).join('');
           const prodRows = cp.map(p => {
