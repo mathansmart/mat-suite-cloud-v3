@@ -242,5 +242,22 @@ app.get('/api/server-info', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`✅ Cloud Unified Server running on port ${PORT}`);
+    console.log(`🟢 Cloud Unified Server running on port ${PORT}`);
+    
+    // Keep-alive for free tier (e.g. Render)
+    const RENDER_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || 'https://mat-suite-cloud-v3.onrender.com';
+    if (RENDER_URL) {
+        setInterval(() => {
+            const https = require('https');
+            const http = require('http');
+            const client = RENDER_URL.startsWith('https') ? https : http;
+            
+            client.get(RENDER_URL + '/api/server-info', (res) => {
+                console.log(`[Keep-Alive] Ping successful: ${res.statusCode}`);
+            }).on('error', (e) => {
+                console.error(`[Keep-Alive] Ping failed: ${e.message}`);
+            });
+        }, 13 * 60 * 1000); // Ping every 13 minutes (Render sleeps after 15m)
+        console.log(`Started keep-alive ping for ${RENDER_URL} every 13 minutes to prevent sleep.`);
+    }
 });
