@@ -1580,7 +1580,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <div style="display:flex; align-items:center; gap:10px;">
           <div>
             <div class="logo-title" style="display:flex; align-items:center; gap:8px;">
-              MILTON 
+              VESTER 
               <span id="conn-status" title="Connecting..." style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; box-shadow:0 0 4px rgba(0,0,0,0.2);"></span>
             </div>
             <div class="logo-sub">Stock Manager</div>
@@ -1999,10 +1999,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             </div>
 
             <div class="table-wrap" style="padding:20px;margin-bottom:20px;">
-              <div class="form-group" style="margin-bottom:15px;">
-                <label class="form-label">Company Name (Dashboard)</label>
-                <input class="form-input" type="text" id="s-company" placeholder="e.g. Milton Garments" style="max-width:350px; font-weight:700; border-color:var(--accent);">
-              </div>
 
               <div class="form-group"><label class="form-label" id="lbl-min-stock">Default Min Stock per Size
                   (Boxes)</label><input class="form-input mono" type="number" id="s-min" value="5" min="1" style="max-width:200px;"></div>
@@ -2410,7 +2406,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       ],
       subCategories: ['T-SHIRT', 'SHIRT', 'GENERAL'],
       defMin: 5,
-      company: 'Milton Garments',
+      company: 'Vester',
       recycleBin: []
     };
     let gsm3_p = [], gsm3_t = [], gsm3_users = [];
@@ -3247,7 +3243,7 @@ function renderDashboard() {
       if (elTotUniqueProds) elTotUniqueProds.textContent = getMergedProducts(P, '').length;
       if (elTotLow) elTotLow.textContent = getLow().length;
       const compEl = document.getElementById('dash-company-name');
-      if (compEl) compEl.textContent = S.company || 'Milton Garments';
+      if (compEl) compEl.textContent = 'Vester';
       updateBadge();
 
       const searchEl = document.getElementById('dash-search');
@@ -5699,7 +5695,6 @@ function renderDashboard() {
     }
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
-      const c = document.getElementById('s-company'); if (c) c.value = S.company || 'Milton Garments';
       renderUsersTable();
       renderSettingsCategories();
       renderSettingsSubCategories();
@@ -5857,7 +5852,6 @@ function renderDashboard() {
     }
     function saveSettings() {
       const m = document.getElementById('s-min'); if (m) S.defMin = parseInt(m.value) || 5;
-      const c = document.getElementById('s-company'); if (c) S.company = c.value.trim() || 'Milton Garments';
       persist(); 
       showCenterToast('Settings saved!');
       renderDashboard(); // Update company name on dash immediately
