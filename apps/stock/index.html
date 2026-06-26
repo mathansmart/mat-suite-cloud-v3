@@ -5,18 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Garment Stock Manager</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f8fafc;
+      --bg: #F7F7F7;
       --surface: #ffffff;
-      --header-bg: #1e293b;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
+      --header-bg: #092C4C;
+      --text-main: #212B36;
+      --text-muted: #646B72;
       --border: #e2e8f0;
-      --accent: #f59e0b; /* Amber */
-      --primary: #6366f1; /* Indigo */
+      --accent: #FE9F43;
+      --primary: #FE9F43;
       --success: #10b981; /* Emerald */
       --danger: #ef4444; /* Rose */
       --info: #0ea5e9; /* Sky blue */
@@ -38,29 +39,65 @@
     body {
       background: var(--bg);
       color: var(--text-main);
-      font-family: 'Inter', 'Barlow Condensed', sans-serif;
+      font-family: 'Nunito', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
     .app {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       height: 100vh;
       overflow: hidden;
-      background: var(--header-bg); /* Dark reveal for rounded corners */
+      background: var(--bg);
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      box-shadow: 1px 0 15px rgba(0,0,0,0.04);
+      z-index: 100;
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar .logo {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .header {
-      background: var(--header-bg);
+      background: var(--surface);
       padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       height: 70px;
       flex-shrink: 0;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+      z-index: 90;
+      border-bottom: 1px solid var(--border);
     }
 
     .header-left {
@@ -69,15 +106,10 @@
       gap: 30px;
     }
 
-    .logo {
-      display: flex;
-      flex-direction: column;
-    }
-
     .logo-title {
       font-size: 18px;
       font-weight: 800;
-      color: #fff;
+      color: var(--text-main);
       letter-spacing: 2px;
       text-transform: uppercase;
       font-family: 'Outfit', sans-serif;
@@ -85,60 +117,134 @@
 
     .logo-sub {
       font-size: 9px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       letter-spacing: 1px;
       margin-top: -2px;
-    }
-
-    .top-nav {
-      display: flex;
-      gap: 5px;
-      align-items: center;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      height: 44px;
-      width: 44px;
-      border-radius: 50%;
+      justify-content: flex-start;
+      height: 48px;
+      width: 100%;
+      border-radius: 8px;
       cursor: pointer;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-muted);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
+      padding: 0 16px;
     }
 
     .nav-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
+      background: #f1f5f9;
+      color: var(--text-main);
     }
 
     .nav-item.active {
-      background: var(--surface);
-      color: var(--header-bg);
-      box-shadow: var(--shadow);
+      background: rgba(254, 159, 67, 0.1);
+      color: var(--primary);
     }
 
     .nav-icon {
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .nav-label {
-      display: none; /* Hide labels in icons-only top nav */
+      display: block;
+      font-size: 14.5px;
+      font-weight: 600;
+      margin-left: 12px;
     }
 
     .nav-badge {
       position: absolute;
-      top: -2px;
-      right: -2px;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 12px;
       background: var(--danger);
       color: #fff;
       border-radius: 10px;
-      padding: 1px 5px;
-      font-size: 9px;
+      padding: 2px 6px;
+      font-size: 10px;
       font-weight: 700;
-      border: 2px solid var(--header-bg);
+    }
+
+    .submenu {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding-left: 45px;
+      margin-top: -2px;
+      margin-bottom: 4px;
+    }
+    .submenu.open {
+      display: flex;
+    }
+    .submenu-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .submenu-item:hover {
+      color: var(--text-main);
+      background: #f1f5f9;
+    }
+    .submenu-item.active {
+      color: var(--primary);
+      background: rgba(254, 159, 67, 0.1);
+    }
+    .submenu-arrow {
+      margin-left: auto;
+      transition: transform 0.2s;
+      font-size: 14px;
+    }
+    .nav-item.has-submenu.open .submenu-arrow {
+      transform: rotate(180deg);
+    }
+
+    .set-acc {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .set-acc-head {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14.5px;
+      color: var(--text-main);
+    }
+    .set-acc-head:hover {
+      background: rgba(0,0,0,0.02);
+    }
+    .set-acc-body {
+      display: none;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+    .set-acc.open .set-acc-body {
+      display: block;
+    }
+    .set-acc.open .set-acc-head {
+      background: rgba(0,0,0,0.02);
+    }
+    .acc-icon {
+      transition: transform 0.2s;
+    }
+    .set-acc.open .acc-icon {
+      transform: rotate(180deg);
     }
 
     /* Animations & Micro-interactions */
@@ -176,10 +282,6 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--surface);
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      margin: 0 10px; /* Reveal rounding against dark app bg */
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
     }
 
     .topbar {
@@ -187,13 +289,13 @@
     }
 
     .page-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      font-family: 'Outfit', sans-serif;
-      margin-left: 20px;
-      padding-left: 20px;
-      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: 'Nunito', sans-serif;
+      margin: 0;
+      padding: 0;
+      border: none;
     }
 
     .topbar-right {
@@ -730,10 +832,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       padding-left: 40px !important;
       padding-right: 40px !important;
       height: 48px;
-      border-radius: 14px !important;
-      background: rgba(255, 255, 255, 0.8) !important;
+      border-radius: 8px !important;
+      background: #fff !important;
       backdrop-filter: blur(10px);
-      border: 1.5px solid var(--border) !important;
+      border: 1px solid var(--border) !important;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
       font-size: 14px !important;
       font-weight: 600 !important;
@@ -1473,107 +1575,186 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 <body>
 
   <div class="app">
-    <header class="header">
-      <div class="header-left">
-        <div class="logo">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <!-- Logo Removed -->
-            <div>
-              <div class="logo-title" style="display:flex; align-items:center; gap:8px;">
-                FABRIC 
-                <span id="conn-status" title="Connecting..." style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; box-shadow:0 0 4px rgba(0,0,0,0.2);"></span>
-              </div>
-              <div class="logo-sub">Stock Manager</div>
+    <div class="sidebar">
+      <div class="logo">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div>
+            <div class="logo-title" style="display:flex; align-items:center; gap:8px;">
+              MILTON 
+              <span id="conn-status" title="Connecting..." style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; box-shadow:0 0 4px rgba(0,0,0,0.2);"></span>
             </div>
+            <div class="logo-sub">Stock Manager</div>
           </div>
         </div>
+      </div>
+      
+      <div class="sidebar-nav">
+        <div class="nav-item" onclick="location.href='/'" title="Home"><span class="nav-icon"><i class="ti ti-home"></i></span><div class="nav-label">Home</div></div>
+        <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span><div class="nav-label">Dashboard</div></div>
+        <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon"><i class="ti ti-eye"></i></span><div class="nav-label">Preview</div></div>
+        <div class="nav-item" onclick="nav('inventory')" title="Inventory"><span class="nav-icon"><i class="ti ti-box"></i></span><div class="nav-label">Inventory</div></div>
+        
+        <div class="nav-item has-submenu" onclick="toggleSubmenu('stock-submenu')" id="nav-group-stock">
+          <span class="nav-icon"><i class="ti ti-package"></i></span>
+          <div class="nav-label">Stock</div>
+          <i class="ti ti-chevron-down submenu-arrow"></i>
+        </div>
+        <div class="submenu" id="stock-submenu">
+          <div class="submenu-item" onclick="nav('stock-in')" id="sub-stock-in">Stock In</div>
+          <div class="submenu-item" onclick="nav('stock-out')" id="sub-stock-out">Stock Out</div>
+        </div>
+        
+        <div class="nav-item" onclick="nav('alerts')" title="Alerts"><span class="nav-icon"><i class="ti ti-alert-triangle"></i></span><div class="nav-label">Alerts</div><span class="nav-badge" id="alert-badge" style="display:none"></span></div>
+        <div class="nav-item" onclick="nav('reports')" title="Reports"><span class="nav-icon"><i class="ti ti-chart-bar"></i></span><div class="nav-label">Reports</div></div>
+        
+        <div style="margin: 15px 0; border-top: 1px solid var(--border);"></div>
+
+        <div class="nav-item" id="nav-item-bulk" onclick="nav('bulk')" title="Bulk Stock Out"><span class="nav-icon"><i class="ti ti-folder"></i></span><div class="nav-label">Bulk</div></div>
+        <div class="nav-item" id="nav-item-settings" onclick="nav('settings')" title="Settings"><span class="nav-icon"><i class="ti ti-settings"></i></span><div class="nav-label">Settings</div></div>
+      </div>
+    </div>
+
+    <div class="main-wrapper">
+      <header class="header">
         <div class="page-title" id="page-title">Dashboard</div>
-      </div>
-      <div class="top-nav">
-        <div class="nav-item" onclick="location.href='/'" title="Home"><span class="nav-icon">🏠</span><div class="nav-label">Home</div></div>
-        <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon">⊞</span><div class="nav-label">Dashboard</div></div>
-        <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon">📋</span><div class="nav-label">Preview</div></div>
-        <div class="nav-item" onclick="nav('inventory')" title="Inventory"><span class="nav-icon">▦</span><div class="nav-label">Inventory</div></div>
-        <div class="nav-item" onclick="nav('stock-in')" title="Stock In"><span class="nav-icon">↓</span><div class="nav-label">Stock In</div></div>
-        <div class="nav-item" onclick="nav('stock-out')" title="Stock Out"><span class="nav-icon">↑</span><div class="nav-label">Stock Out</div></div>
-        <div class="nav-item" onclick="nav('alerts')" title="Alerts"><span class="nav-icon">⚠</span><div class="nav-label">Alerts</div><span class="nav-badge" id="alert-badge" style="display:none"></span></div>
-        <div class="nav-item" onclick="nav('reports')" title="Reports"><span class="nav-icon">📊</span><div class="nav-label">Reports</div></div>
+      </header>
 
-        <div class="nav-item" id="nav-item-bulk" onclick="nav('bulk')" title="Bulk Stock Out"><span class="nav-icon">📁</span><div class="nav-label">Bulk</div></div>
-        <div class="nav-item" id="nav-item-settings" onclick="nav('settings')" title="Settings"><span class="nav-icon">⚙</span><div class="nav-label">Settings</div></div>
-        <div class="nav-item" onclick="showServerInfo()" title="Share / Connect"><span class="nav-icon">🔗</span></div>
-      </div>
-    </header>
-
-    <div class="main">
-      <div class="content">
+      <div class="main">
+        <div class="content">
 
         <!-- DASHBOARD -->
         <div class="section active fade-up" id="section-dashboard">
-          <div style="display:flex; align-items:center; margin-bottom:25px; padding:10px 0;">
-             <!-- Logo Removed -->
-             <div>
-                <h2 id="dash-company-name" style="font-family:'Outfit', sans-serif; font-size:24px; font-weight:800; color:#ef4444; margin:0;">Milton Garments</h2>
-               <p style="font-size:13px; color:var(--muted); margin:0;">Here's what's happening in your stock today.</p>
+
+          <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 25px;">
+            <!-- Box 1: Total Stock In -->
+            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 12px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);">
+               <div style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                  <i class="ti ti-package-import"></i>
+               </div>
+               <div style="overflow: hidden;">
+                  <div style="font-size: 13px; font-weight: 600; opacity: 0.9; margin-bottom: 5px;">Total Stock In</div>
+                  <div style="font-size: 24px; font-weight: 800; font-family: 'JetBrains Mono', monospace;" id="dash-tot-in">0</div>
+               </div>
+            </div>
+
+            <!-- Box 2: Total Stock Out -->
+            <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.3);">
+               <div style="background: rgba(255,255,255,0.1); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                  <i class="ti ti-package-export"></i>
+               </div>
+               <div style="overflow: hidden;">
+                  <div style="font-size: 13px; font-weight: 600; opacity: 0.9; margin-bottom: 5px;">Total Stock Out</div>
+                  <div style="font-size: 24px; font-weight: 800; font-family: 'JetBrains Mono', monospace;" id="dash-tot-out">0</div>
+               </div>
+            </div>
+
+            <!-- Box 3: Top Incoming Product -->
+            <div style="background: linear-gradient(135deg, #10b981, #059669); border-radius: 12px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);">
+               <div style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                  <i class="ti ti-trending-up"></i>
+               </div>
+               <div style="overflow: hidden; width: 100%;">
+                  <div style="font-size: 13px; font-weight: 600; opacity: 0.9; margin-bottom: 5px;">Top Incoming</div>
+                  <div style="font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" id="dash-top-in">N/A</div>
+               </div>
+            </div>
+
+            <!-- Box 4: Top Selling Product -->
+            <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; padding: 20px; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);">
+               <div style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                  <i class="ti ti-award"></i>
+               </div>
+               <div style="overflow: hidden; width: 100%;">
+                  <div style="font-size: 13px; font-weight: 600; opacity: 0.9; margin-bottom: 5px;">Top Selling</div>
+                  <div style="font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" id="dash-top-out">N/A</div>
+               </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 25px; align-items: flex-start; flex-wrap: wrap;">
+             <!-- Left Side Main Content -->
+             <div style="flex: 1; min-width: 0;">
+                <div style="margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:200px;">
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                      <select id="dash-sc-filter" class="form-select" onchange="renderDashboard()">
+                        <option value="">All Categories</option>
+                      </select>
+                      <select id="dash-cat-filter" class="form-select" onchange="renderDashboard()">
+                        <option value="">All Categories</option>
+                      </select>
+                    </div>
+                    <div class="search-wrapper">
+                      <div class="search-icon-left"><i class="ti ti-search" style="font-size: 20px;"></i></div>
+                      <input type="text" id="dash-search" class="premium-search" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
+                      <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()">✕</button>
+                      <div id="dash-search-drop" class="premium-dropdown"></div>
+                    </div>
+                    <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
+                  </div>
+                  <button class="btn btn-ghost" onclick="clearDashFilter()" style="margin-top:42px;">Clear Filter</button>
+                  <button class="btn btn-excel" onclick="smartExport()" style="margin-top:42px; background:#1d6f42;">
+                    <span style="font-size:16px;">📊</span> Export Excel
+                  </button>
+                </div>
+                <div id="dash-cat-tables"></div>
+             </div>
+             
+             <!-- Right Side Sidebar -->
+             <div style="width: 300px; flex-shrink: 0;">
+                <!-- Overall Information Card -->
+                <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                   <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px;">
+                      <div style="background: rgba(59, 130, 246, 0.1); color: var(--primary); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                         <i class="ti ti-info-circle" style="font-size: 16px;"></i>
+                      </div>
+                      <span style="font-size: 16px; font-weight: 700; color: var(--text-main);">Overall Information</span>
+                   </div>
+                   <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                      <!-- Suppliers Card -->
+                      <div style="border: 1.5px solid var(--border-light); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='var(--surface)'" onclick="showSuppliersModal()">
+                         <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59,130,246,0.1); display: flex; align-items: center; justify-content: center;">
+                               <i class="ti ti-truck-delivery" style="font-size: 24px; color: var(--primary);"></i>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Suppliers</div>
+                         </div>
+                         <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-main);" id="dash-tot-suppliers">0</div>
+                      </div>
+                      
+                      <!-- Products Card -->
+                      <div style="border: 1.5px solid var(--border-light); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='var(--surface)'" onclick="showUniqueProductsModal()">
+                         <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(245,158,11,0.1); display: flex; align-items: center; justify-content: center;">
+                               <i class="ti ti-shirt" style="font-size: 24px; color: #f59e0b;"></i>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Unique Products</div>
+                         </div>
+                         <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-main);" id="dash-tot-unique-prods">0</div>
+                      </div>
+
+                      <!-- Low Stock Card -->
+                      <div style="border: 1.5px solid var(--border-light); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; background: var(--surface);">
+                         <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center;">
+                               <i class="ti ti-alert-triangle" style="font-size: 24px; color: var(--danger);"></i>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Low Stock</div>
+                         </div>
+                         <div style="font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-main);" id="dash-tot-low">0</div>
+                      </div>
+                   </div>
+                </div>
              </div>
           </div>
-          <div class="stat-grid">
-            <div class="stat-card c2">
-              <div class="stat-icon-wrap">📦</div>
-              <div class="stat-info">
-                <div class="stat-label">Total Products</div>
-                <div class="stat-value" id="s-prod">0</div>
-              </div>
-            </div>
-            <div class="stat-card c3">
-              <div class="stat-icon-wrap">🗃️</div>
-              <div class="stat-info">
-                <div class="stat-label">Total Boxes</div>
-                <div class="stat-value" id="s-box">0</div>
-              </div>
-            </div>
-            <div class="stat-card c1">
-              <div class="stat-icon-wrap">⚠</div>
-              <div class="stat-info">
-                <div class="stat-label">Low Stock</div>
-                <div class="stat-value" id="s-low">0</div>
-              </div>
-            </div>
-          </div>
-          <div style="margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
-            <div style="flex:1;min-width:200px;">
-              <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <select id="dash-sc-filter" class="form-select" onchange="renderDashboard()">
-                  <option value="">All Categories</option>
-                </select>
-                <select id="dash-cat-filter" class="form-select" onchange="renderDashboard()">
-                  <option value="">All Categories</option>
-                </select>
-              </div>
-              <div class="search-wrapper">
-                <div class="search-icon-left">🔍</div>
-                <input type="text" id="dash-search" class="premium-search" placeholder="Search and select products..."
-                  autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()"
-                  onkeydown="dropKeyNav(event,'dash-search-drop')">
-                <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()">✕</button>
-                <div id="dash-search-drop" class="premium-dropdown"></div>
-              </div>
-              <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
-            </div>
-            <button class="btn btn-ghost" onclick="clearDashFilter()" style="margin-top:42px;">Clear Filter</button>
-            <button class="btn btn-excel" onclick="smartExport()" style="margin-top:42px; background:#1d6f42;">
-              <span style="font-size:16px;">📊</span> Export Excel
-            </button>
-          </div>
-          <div id="dash-cat-tables"></div>
         </div>
 
         <!-- PREVIEW -->
         <div class="section fade-up" id="section-preview">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin: 0;">Stock Preview</h2>
-            <button class="btn btn-excel" onclick="exportPreviewToExcel()" style="background:#1d6f42; color:#fff; display:inline-flex; align-items:center; gap:8px;">
-               <span style="font-size:16px;">📊</span> Export Excel
+            <button class="btn btn-excel" onclick="exportPreviewToExcel()" style="background:#1d6f42; color:#fff; display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; padding:0; border-radius:8px;" title="Export Excel">
+               <span style="font-size:18px;">📊</span>
             </button>
           </div>
           <div style="margin-bottom:24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
@@ -1591,7 +1772,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <div class="cat-tabs" style="display:none;"></div>
             <div style="flex:1; margin-right:15px;">
               <div class="search-wrapper">
-                <div class="search-icon-left">🔍</div>
+                <div class="search-icon-left"><i class="ti ti-search" style="font-size: 20px;"></i></div>
                 <input type="text" id="inv-search" placeholder="Search product or category in inventory..." class="premium-search" 
                        autocomplete="off" oninput="renderInventory()">
                 <button class="search-clear-btn" id="inv-search-clear" onclick="clearInvSearch()">✕</button>
@@ -1607,7 +1788,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           <div class="stock-form-page">
             <div class="sec-title" id="si-form-title" style="margin-bottom:14px;">Stock In — Entry</div>
             <div
-              style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid var(--border);">
+              style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid var(--border);">
               <div class="form-group"><label class="form-label" id="si-date-lbl">Date</label><input class="form-input"
                   type="text" id="si-date" placeholder="DD-MM-YYYY" autocomplete="off"></div>
               <div class="form-group"><label class="form-label" id="si-cat-lbl">Category</label>
@@ -1615,9 +1796,14 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                   <option value="">All Categories</option>
                 </select>
               </div>
+              <div class="form-group"><label class="form-label">Supplier (Optional)</label>
+                <select class="form-select" id="si-supplier" autocomplete="off">
+                  <option value="">No Supplier / General</option>
+                </select>
+              </div>
               <div class="form-group"><label class="form-label">Search & Select Products</label>
                 <div class="search-wrapper">
-                  <div class="search-icon-left">🔍</div>
+                  <div class="search-icon-left"><i class="ti ti-search" style="font-size: 20px;"></i></div>
                   <input type="text" id="si-search" placeholder="Type product name..." class="premium-search"
                     autocomplete="off" oninput="renderSiSearchDropdown()" onfocus="renderSiSearchDropdown()"
                     onkeydown="dropKeyNav(event,'si-search-drop')">
@@ -1718,32 +1904,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           <!-- INVENTORY REPORT -->
           <div id="rpt-inventory">
             <div class="stat-grid">
-              <div class="stat-card c2">
-                <div class="stat-icon-wrap">↓</div>
-                <div class="stat-info">
-                  <div class="stat-label">Total In (Boxes)</div>
-                  <div class="stat-value" id="r-in">0</div>
-                </div>
-              </div>
-              <div class="stat-card c4">
-                <div class="stat-icon-wrap">↑</div>
-                <div class="stat-info">
-                  <div class="stat-label">Total Out (Boxes)</div>
-                  <div class="stat-value" id="r-out">0</div>
-                </div>
-              </div>
               <div class="stat-card c3">
                 <div class="stat-icon-wrap">📦</div>
                 <div class="stat-info">
                   <div class="stat-label">Current Stock</div>
                   <div class="stat-value" id="r-cur">0</div>
-                </div>
-              </div>
-              <div class="stat-card c1">
-                <div class="stat-icon-wrap">⚠</div>
-                <div class="stat-info">
-                  <div class="stat-label">Low Stock</div>
-                  <div class="stat-value" id="r-low2">0</div>
                 </div>
               </div>
             </div>
@@ -1817,22 +1982,23 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
         <!-- SETTINGS -->
         <div class="section" id="section-settings">
-          <div class="table-wrap" style="padding:20px;margin-bottom:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-              <div class="sec-title" style="margin:0;">Product Categories & Sizes</div>
-              <button class="btn btn-primary" onclick="openAddCategory()">+ Add Category</button>
-            </div>
-            <div id="settings-categories-list"></div>
-
-            <div style="margin-top:24px; padding-top:24px; border-top:1.5px solid var(--border); margin-bottom:24px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <div class="sec-title" style="margin:0; font-size:16px;">Sub Categories</div>
-                <button class="btn btn-ghost btn-sm" onclick="openAddSubCategory()">+ Add Sub Category</button>
+          <div id="settings-view-main">
+            <div class="table-wrap" style="padding:10px 20px;margin-bottom:20px;">
+              <div onclick="nav('categories')" style="padding:15px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-folders" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Product Categories</span>
+                <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
               </div>
-              <div id="settings-sub-categories-list" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+              <div onclick="nav('subcategories')" style="padding:15px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-tags" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Sub Categories</span>
+                <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
+              </div>
+              <div onclick="nav('suppliers')" style="padding:15px 0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-truck" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Suppliers</span>
+                <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
+              </div>
             </div>
 
-            <div style="margin-top:20px;padding-top:20px;border-top:1.5px solid var(--border);">
+            <div class="table-wrap" style="padding:20px;margin-bottom:20px;">
               <div class="form-group" style="margin-bottom:15px;">
                 <label class="form-label">Company Name (Dashboard)</label>
                 <input class="form-input" type="text" id="s-company" placeholder="e.g. Milton Garments" style="max-width:350px; font-weight:700; border-color:var(--accent);">
@@ -1868,7 +2034,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               <div style="flex:1; min-width:200px;">
                 <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px; letter-spacing:0.5px;">Viewer URL</div>
                 <input type="text" id="settings-viewer-url" class="form-input" readonly style="background:#fff; margin-bottom:8px; font-family:'JetBrains Mono',monospace; font-size:12px;">
-                <button class="btn btn-primary btn-sm" onclick="copyViewerUrl()">Copy Link</button>
+                <div style="display:flex; gap:10px;">
+                  <button class="btn btn-primary btn-sm" onclick="copyViewerUrl()">Copy Viewer Link</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showServerInfo()" style="border:1px solid var(--border);"><i class="ti ti-link"></i> Admin Access Info</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1883,12 +2052,51 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               MATHAN
             </div>
           </div>
+        </div> <!-- /#section-settings -->
+
+        <!-- CATEGORIES -->
+        <div class="section" id="section-categories">
+          <div style="padding:10px;">
+            <div style="display:flex; align-items:center; margin-bottom:24px;">
+              <button class="btn btn-ghost" onclick="nav('settings')" style="margin-right:15px; padding:8px; border:1px solid var(--border);"><i class="ti ti-arrow-left"></i> Back to Settings</button>
+              <div style="margin-left:auto;">
+                <button class="btn btn-primary" onclick="openAddCategory()"><i class="ti ti-plus"></i> Add Category</button>
+              </div>
+            </div>
+            <div id="settings-categories-list"></div>
+          </div>
+        </div>
+
+        <!-- SUBCATEGORIES -->
+        <div class="section" id="section-subcategories">
+          <div style="padding:10px;">
+            <div style="display:flex; align-items:center; margin-bottom:24px;">
+              <button class="btn btn-ghost" onclick="nav('settings')" style="margin-right:15px; padding:8px; border:1px solid var(--border);"><i class="ti ti-arrow-left"></i> Back to Settings</button>
+              <div style="margin-left:auto;">
+                <button class="btn btn-primary" onclick="openAddSubCategory()"><i class="ti ti-plus"></i> Add Sub Category</button>
+              </div>
+            </div>
+            <div id="settings-sub-categories-list" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- SUPPLIERS -->
+        <div class="section" id="section-suppliers">
+          <div style="padding:10px;">
+            <div style="display:flex; align-items:center; margin-bottom:24px;">
+              <button class="btn btn-ghost" onclick="nav('settings')" style="margin-right:15px; padding:8px; border:1px solid var(--border);"><i class="ti ti-arrow-left"></i> Back to Settings</button>
+              <div style="margin-left:auto;">
+                <button class="btn btn-primary" onclick="openAddSupplier()"><i class="ti ti-plus"></i> Add Supplier</button>
+              </div>
+            </div>
+            <div id="settings-suppliers-list" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+          </div>
         </div>
 
       </div>
     </div>
   </div>
-
+  
   <!-- MODAL -->
   <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal">
@@ -1950,6 +2158,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
   </div>
   <div id="lbl-logout-title" style="display:none;"></div>
   <script>
+
     let toastTimer;
     function d2i(d) {
       if (!d || typeof d !== 'string') return '';
@@ -2540,7 +2749,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const txSearch = document.querySelector('#section-transactions input'); if (txSearch) txSearch.placeholder = t('txn_search');
       // Reports stat labels
       const rsl = document.querySelectorAll('#section-reports .stat-label');
-      const rslKeys = ['rpt_in', 'rpt_out', 'rpt_cur', 'rpt_low'];
+      const rslKeys = ['rpt_cur'];
       rsl.forEach((el, i) => { if (rslKeys[i]) el.textContent = t(rslKeys[i]); });
       const rptTitle = document.querySelector('#section-reports .sec-title'); if (rptTitle) rptTitle.textContent = t('rpt_size_title');
       // Settings
@@ -2585,7 +2794,18 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
     function tick() { const s = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });['clock', 'clock2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = s }) }
     tick();
-    const PT = { dashboard: 'Dashboard', preview: 'Preview', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Alerts', transactions: 'Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings' };
+    const PT = { dashboard: 'Dashboard', preview: 'App Preview', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Low Stock Alerts', transactions: 'Stock Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings', categories: 'Product Categories', subcategories: 'Sub Categories', suppliers: 'Suppliers' };
+    
+    function toggleSubmenu(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.toggle('open');
+        const parent = el.previousElementSibling;
+        if (parent) parent.classList.toggle('open');
+      }
+    }
+    
+
     function nav(id) {
       if (isViewer && id !== 'dashboard') {
         showCenterToast('Access Denied: View-only Mode');
@@ -2600,6 +2820,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         s.classList.remove('fade-up');
       });
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.submenu-item').forEach(n => n.classList.remove('active'));
       const activeSec = document.getElementById('section-' + id);
       if (activeSec) {
         activeSec.classList.add('active');
@@ -2607,15 +2828,35 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         void activeSec.offsetWidth; 
         activeSec.classList.add('fade-up');
       }
-      document.querySelectorAll('.nav-item').forEach(n => { if (n.getAttribute('onclick')?.includes(`nav('${id}')`)) n.classList.add('active') });
+      document.querySelectorAll('.nav-item, .submenu-item').forEach(n => { 
+        if (n.getAttribute('onclick')?.includes(`nav('${id}')`)) {
+          n.classList.add('active');
+          if (n.classList.contains('submenu-item')) {
+            const submenu = n.closest('.submenu');
+            if (submenu) {
+              submenu.classList.add('open');
+              const parent = submenu.previousElementSibling;
+              if (parent) {
+                parent.classList.add('active');
+                parent.classList.add('open');
+              }
+            }
+          }
+        }
+      });
       const titleEl = document.getElementById('page-title');
       if (titleEl) titleEl.textContent = PT[id] || id;
       
       const mainContent = document.querySelector('.content');
       if (mainContent) mainContent.scrollTop = 0;
 
-      const fn = { dashboard: renderDashboard, preview: renderPreview, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), settings: loadSettings };
-      if (fn[id]) fn[id](); updateBadge();
+      const fn = { dashboard: renderDashboard, preview: renderPreview, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), categories: renderSettingsCategories, subcategories: renderSettingsSubCategories, suppliers: renderSettingsSuppliers };
+      if (id === 'settings') {
+        loadSettings();
+      } else if (fn[id]) {
+        fn[id]();
+      }
+      updateBadge();
       
       // Save current page to local storage
       localStorage.setItem('gsm3_last_nav', id);
@@ -2832,7 +3073,12 @@ function exportPreviewToExcel() {
    const selectedProducts = getMergedProducts(P, scFilterValue);
 
    if (selectedProducts.length === 0) {
-      cont.innerHTML = '<div class="empty-state" style="padding: 40px; text-align: center; border: 1.5px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-top: 20px;"><div style="font-size: 32px; margin-bottom: 12px;">🔍</div><div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">No Products Found</div><div style="font-size: 13px; color: var(--text-muted);">No products are available in this category.</div></div>';
+      cont.innerHTML = `
+      <div class="empty-state" style="padding: 40px; text-align: center; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface); margin-top: 20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+         <i class="ti ti-box-off" style="font-size: 48px; color: var(--text-muted); margin-bottom: 15px; opacity: 0.6;"></i>
+         <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 5px;">No Products Found</div>
+         <div style="font-size: 13px; color: var(--text-muted);">No products are available for the selected category.</div>
+      </div>`;
       return;
    }
 
@@ -2893,38 +3139,113 @@ function exportPreviewToExcel() {
          const sum = Object.values(p.s || {}).reduce((a, b) => a + b, 0);
          const sizeCellsHtml = scSortedSizes.map(sz => {
             const qty = p.s ? p.s[sz] : undefined;
-            if (qty === undefined) return '<td class="size-cell"></td>';
+            if (qty === undefined) return `<td style="padding:10px; text-align:center; color:#ccc;">—</td>`;
             const isOut = qty <= 0;
             const isLow = !isOut && qty <= p.m;
-            const color = isOut ? 'var(--danger)' : isLow ? 'var(--warn)' : 'var(--success)';
-            const weight = qty > 0 ? '700' : 'normal';
-            return '<td class="size-cell" style="font-weight:' + weight + '; color:' + color + ';">' + qty + '</td>';
+            let bgColor = 'transparent';
+            let color = 'var(--text-main)';
+            let fontWeight = '500';
+            
+            if (isOut) {
+               color = 'var(--danger)';
+               fontWeight = '700';
+            } else if (isLow) {
+               color = 'var(--warn)';
+               fontWeight = '700';
+            } else {
+               color = 'var(--success)';
+               fontWeight = '700';
+               bgColor = 'rgba(16, 185, 129, 0.05)';
+            }
+            
+            return `<td style="padding:10px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:${fontWeight}; color:${color}; background:${bgColor}; border-left: 1px solid var(--border-light);">${qty}</td>`;
          }).join('');
 
-         return '<tr class="t-row">' +
-            '<td><b>' + p.n + '</b></td>' +
-            sizeCellsHtml +
-            '<td class="total-cell">' + sum + '</td>' +
-            '</tr>';
+         return `<tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: default;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+            <td style="padding:12px 15px; font-weight:600; font-size:14px; color:var(--text-main); white-space:nowrap; border-right:2px solid var(--border);">
+               <div style="display:flex; align-items:center; gap:8px;">
+                  <i class="ti ti-shirt" style="color:var(--primary); font-size:16px;"></i> ${p.n}
+               </div>
+            </td>
+            ${sizeCellsHtml}
+            <td style="padding:10px 15px; text-align:center; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--accent); font-size:14px; background:var(--surface2); border-left:2px solid var(--border);">${sum}</td>
+            </tr>`;
       }).join('');
 
-      const sizeHeadersHtml = scSortedSizes.map(sz => '<th style="text-align:center; min-width:45px;">' + sz + '</th>').join('');
+      const sizeHeadersHtml = scSortedSizes.map(sz => `<th style="padding:12px 8px; text-align:center; font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; min-width:45px; border-left: 1px solid var(--border-light);">${sz}</th>`).join('');
 
-      html += '<div class="table-wrap" style="margin: 20px 0 30px 0; width: 100%;">' +
-         '<div class="table-header"><div class="table-header-title">Category: ' + scName + '</div></div>' +
-         '<div style="max-height: 600px; overflow-y: auto;">' +
-         '<table>' +
-         '<thead><tr><th>Product</th>' + sizeHeadersHtml + '<th class="total-hdr">Total Stock</th></tr></thead>' +
-         '<tbody>' + (tableRows || '<tr><td colspan="' + (2 + scSortedSizes.length) + '" style="text-align:center;">No products</td></tr>') + '</tbody>' +
-         '</table></div></div>';
+      html += `
+      <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:10px; margin-bottom: 25px; box-shadow:0 4px 12px rgba(0,0,0,0.03); overflow:hidden;">
+         <div style="background:linear-gradient(90deg, var(--surface2) 0%, var(--surface) 100%); padding:12px 16px; border-bottom:1.5px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-weight:700; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+               <i class="ti ti-category" style="color:var(--accent); font-size:18px;"></i>
+               ${scName}
+            </div>
+            <div style="font-size:12px; font-weight:600; color:var(--text-muted); background:var(--background); padding:4px 10px; border-radius:20px; border:1px solid var(--border);">
+               ${scProducts.length} Product${scProducts.length !== 1 ? 's' : ''}
+            </div>
+         </div>
+         <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+               <thead style="background:var(--surface);">
+                  <tr>
+                     <th style="padding:12px 15px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; min-width:180px; border-right:2px solid var(--border);">Product</th>
+                     ${sizeHeadersHtml}
+                     <th style="padding:12px 15px; text-align:center; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; border-left:2px solid var(--border);">Total</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  ${tableRows || `<tr><td colspan="${2 + scSortedSizes.length}" style="text-align:center; padding:20px; color:var(--text-muted);">No products</td></tr>`}
+               </tbody>
+            </table>
+         </div>
+      </div>`;
    });
 
    cont.innerHTML = html;
 }
 function renderDashboard() {
       const tb = P.reduce((a, p) => a + Object.values(p.s).reduce((x, y) => x + y, 0), 0);
-      document.getElementById('s-prod').textContent = P.length;
-      document.getElementById('s-box').textContent = tb;
+      let totIn = 0, totOut = 0;
+      const inMap = {}, outMap = {};
+      
+      T.forEach(t => {
+         const q = Number(t.q) || 0;
+         if (t.tp === 'IN') {
+            totIn += q;
+            inMap[t.pn] = (inMap[t.pn] || 0) + q;
+         } else if (t.tp === 'OUT') {
+            totOut += q;
+            outMap[t.pn] = (outMap[t.pn] || 0) + q;
+         }
+      });
+
+      let topInName = 'N/A', topInQty = 0;
+      Object.keys(inMap).forEach(pn => {
+         if (inMap[pn] > topInQty) { topInQty = inMap[pn]; topInName = pn; }
+      });
+      let topOutName = 'N/A', topOutQty = 0;
+      Object.keys(outMap).forEach(pn => {
+         if (outMap[pn] > topOutQty) { topOutQty = outMap[pn]; topOutName = pn; }
+      });
+
+      const elTotIn = document.getElementById('dash-tot-in');
+      const elTotOut = document.getElementById('dash-tot-out');
+      const elTopIn = document.getElementById('dash-top-in');
+      const elTopOut = document.getElementById('dash-top-out');
+      
+      const elTotSuppliers = document.getElementById('dash-tot-suppliers');
+      const elTotUniqueProds = document.getElementById('dash-tot-unique-prods');
+      const elTotLow = document.getElementById('dash-tot-low');
+      
+      if (elTotIn) elTotIn.textContent = totIn;
+      if (elTotOut) elTotOut.textContent = totOut;
+      if (elTopIn) elTopIn.textContent = topInQty > 0 ? topInName : 'N/A';
+      if (elTopOut) elTopOut.textContent = topOutQty > 0 ? topOutName : 'N/A';
+
+      if (elTotSuppliers) elTotSuppliers.textContent = S.suppliers ? S.suppliers.length : 0;
+      if (elTotUniqueProds) elTotUniqueProds.textContent = getMergedProducts(P, '').length;
+      if (elTotLow) elTotLow.textContent = getLow().length;
       const compEl = document.getElementById('dash-company-name');
       if (compEl) compEl.textContent = S.company || 'Milton Garments';
       updateBadge();
@@ -3382,16 +3703,11 @@ function renderDashboard() {
         ${tds}
         <td style="text-align:center;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:14px;background:var(--surface2);" class="si-row-total">${rowTot}</td>
         <td style="padding:3px 5px;border-left:2px solid var(--border);">
-          <input type="text" value="${d.supplier || ''}" placeholder="Supplier name"
-            data-pid="${p.id}" class="si-sup-input"
-            style="width:100%;min-width:110px;background:#fff;border:1.5px solid var(--border);border-radius:3px;padding:5px 7px;font-size:13px;">
-        </td>
-        <td style="padding:3px 5px;">
           <input type="text" value="${d.invoice || ''}" placeholder="Invoice No"
             data-pid="${p.id}" class="si-inv-input"
             style="width:100%;min-width:100px;background:#fff;border:1.5px solid var(--border);border-radius:3px;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:12px;">
         </td>
-        <td style="padding:3px 8px;border-left:1.5px solid var(--border);text-align:center;">
+        <td style="padding:3px 8px;text-align:center;">
           <button class="btn btn-danger btn-sm" onclick="selectSiProduct('${p.id}')" title="Remove this product">✕</button>
         </td>
       </tr>`;
@@ -3403,9 +3719,8 @@ function renderDashboard() {
           <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;min-width:130px;border-right:1.5px solid var(--border);">Product</th>
           ${thSz}
           <th style="text-align:center;padding:8px 5px;font-size:10px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;">Total</th>
-          <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-left:1.5px solid var(--border);min-width:120px;">Supplier</th>
-          <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;min-width:110px;">Invoice No</th>
-          <th style="width:40px;border-left:1.5px solid var(--border);"></th>
+          <th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-left:1.5px solid var(--border);min-width:110px;">Invoice No</th>
+          <th style="width:40px;"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -3470,9 +3785,6 @@ function renderDashboard() {
           updateSiSum();
         });
       });
-      wrap.querySelectorAll('.si-sup-input').forEach(el => {
-        el.addEventListener('input', function () { siTableData[this.dataset.pid].supplier = this.value; });
-      });
       wrap.querySelectorAll('.si-inv-input').forEach(el => {
         el.addEventListener('input', function () { siTableData[this.dataset.pid].invoice = this.value; });
       });
@@ -3499,6 +3811,15 @@ function renderDashboard() {
       const dateDisp = document.getElementById('si-date').value || todayD();
       const date = d2i(dateDisp);
       const now = new Date().toTimeString().slice(0, 8);
+      
+      const supEl = document.getElementById('si-supplier');
+      const globalSupplierId = supEl ? supEl.value : '';
+      let globalSupplierName = '';
+      if (globalSupplierId && S.suppliers) {
+        const sObj = S.suppliers.find(s => String(s.id) === String(globalSupplierId));
+        if (sObj) globalSupplierName = sObj.n;
+      }
+
       let saved = 0;
       siAddedPids.forEach(pid => {
         const p = P.find(x => x.id === pid);
@@ -3508,7 +3829,7 @@ function renderDashboard() {
           p.s[sz] = (p.s[sz] || 0) + qty;
           T.push({
             id: 'T' + Date.now() + Math.random(), d: date + 'T' + now, pid: p.id, pn: p.n, ci: p.ci,
-            sz, tp: 'IN', q: qty, pa: d.supplier || '', rf: d.invoice || ''
+            sz, tp: 'IN', q: qty, pa: globalSupplierName, rf: d.invoice || ''
           });
           saved++;
         });
@@ -4430,6 +4751,10 @@ function renderDashboard() {
       const d = document.getElementById('si-date'); if (d && !d.value) d.value = todayD();
       const s = document.getElementById('si-search'); if (s) s.value = '';
       const dr = document.getElementById('si-search-drop'); if (dr) dr.style.display = 'none';
+      const supEl = document.getElementById('si-supplier');
+      if (supEl) {
+        supEl.innerHTML = '<option value="">No Supplier / General</option>' + (S.suppliers || []).map(sup => `<option value="${sup.id}">${sup.n}</option>`).join('');
+      }
       renderSiTable(); renderSiHistory();
     }
     function initSO() {
@@ -4463,8 +4788,15 @@ function renderDashboard() {
       const list = document.getElementById('alert-list');
       if (!items.length) { 
         list.innerHTML = searchVal 
-          ? '<div class="empty-state">No matching alerts found.</div>' 
-          : '<div class="empty-state">✅ All sizes have healthy stock!</div>'; 
+          ? `<div class="empty-state" style="padding: 40px; text-align: center; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface); margin-top: 20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+               <i class="ti ti-search" style="font-size: 48px; color: var(--text-muted); margin-bottom: 15px; opacity: 0.6;"></i>
+               <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 5px;">No matching alerts found</div>
+            </div>`
+          : `<div class="empty-state" style="padding: 40px; text-align: center; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface); margin-top: 20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+               <i class="ti ti-shield-check" style="font-size: 48px; color: var(--success); margin-bottom: 15px;"></i>
+               <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 5px;">All sizes have healthy stock!</div>
+               <div style="font-size: 13px; color: var(--text-muted);">You're completely good to go. No items are running low.</div>
+            </div>`; 
         return; 
       }
 
@@ -4472,47 +4804,63 @@ function renderDashboard() {
       S.categories.forEach(catObj => {
         const ci = catObj.id;
         // get products that have at least one low/out size in this category
-        const catItems = items.filter(x => x.p.ci === ci);
+        const catItems = items.filter(x => String(x.p.ci) === String(ci));
         if (!catItems.length) return;
 
         const sz = szs(ci);
         // unique products in this category with alerts
         const alertProds = [...new Map(catItems.map(x => [x.p.id, x.p])).values()];
 
-        const thSz = sz.map(s => `<th style="text-align:center;min-width:50px;font-size:12px;padding:8px 4px;">${s}</th>`).join('');
+        const thSz = sz.map(s => `<th style="padding:12px 8px; text-align:center; font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; min-width:50px; border-left: 1px solid var(--border-light);">${s}</th>`).join('');
 
         const rows = alertProds.map(p => {
           const tds = sz.map(s => {
             const st = p.s[s] || 0;
             const io = st <= 0, il = !io && st <= p.m;
             if (!io && !il) {
-              // ok - show grey
-              return `<td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;color:#ccc;padding:8px 4px;">${st}</td>`;
+              return `<td style="padding:10px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--text-muted); border-left: 1px solid var(--border-light);">${st}</td>`;
             }
             const color = io ? 'var(--danger)' : 'var(--warn)';
-            const bg = io ? 'rgba(204,40,40,0.08)' : 'rgba(212,136,10,0.08)';
-            return `<td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;color:${color};background:${bg};padding:8px 4px;">
-          ${st}${io ? '<div style="font-size:9px;letter-spacing:1px;font-weight:700;">OUT</div>' : '<div style="font-size:9px;letter-spacing:1px;font-weight:700;">LOW</div>'}
-        </td>`;
+            const bg = io ? 'rgba(239, 68, 68, 0.08)' : 'rgba(245, 158, 11, 0.08)';
+            const icon = io ? '<i class="ti ti-alert-circle" style="font-size:14px; margin-right:4px;"></i>' : '<i class="ti ti-alert-triangle" style="font-size:14px; margin-right:4px;"></i>';
+            return `<td style="padding:8px 4px; text-align:center; border-left: 1px solid var(--border-light); background:${bg};">
+              <div style="font-family:'JetBrains Mono',monospace; font-weight:800; font-size:14px; color:${color}; margin-bottom:2px;">${st}</div>
+              <div style="font-size:9px; letter-spacing:1px; font-weight:700; color:${color}; display:flex; align-items:center; justify-content:center;">${icon}${io ? 'OUT' : 'LOW'}</div>
+            </td>`;
           }).join('');
-          return `<tr>
-        <td style="font-weight:700;font-size:13px;white-space:nowrap;padding:8px 12px;border-right:2px solid var(--border);">${p.n}</td>
+          return `<tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+        <td style="padding:12px 15px; font-weight:600; font-size:14px; color:var(--text-main); white-space:nowrap; border-right:2px solid var(--border);">
+           <div style="display:flex; align-items:center; gap:8px;">
+              <i class="ti ti-shirt" style="color:var(--primary); font-size:16px;"></i> ${p.n}
+           </div>
+        </td>
         ${tds}
       </tr>`;
         }).join('');
 
-        html += `<div style="margin-bottom:20px;">
-      <div class="sec-title">${cn(ci)} <span style="font-size:11px;color:var(--danger);font-weight:700;">${catItems.length} alert${catItems.length > 1 ? 's' : ''}</span></div>
-      <div class="table-wrap">
-        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">
-          <thead><tr style="background:var(--surface2);">
-            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;min-width:130px;border-right:2px solid var(--border);">Product</th>
-            ${thSz}
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
-      </div>
-    </div>`;
+        html += `
+        <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:10px; margin-bottom: 25px; box-shadow:0 4px 12px rgba(0,0,0,0.03); overflow:hidden;">
+           <div style="background:linear-gradient(90deg, var(--surface2) 0%, var(--surface) 100%); padding:12px 16px; border-bottom:1.5px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-weight:700; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                 <i class="ti ti-category" style="color:var(--accent); font-size:18px;"></i>
+                 ${cn(ci)}
+              </div>
+              <div style="font-size:12px; font-weight:700; color:var(--danger); background:rgba(239, 68, 68, 0.1); padding:4px 10px; border-radius:20px; border:1px solid rgba(239, 68, 68, 0.2); display:flex; align-items:center; gap:4px;">
+                 <i class="ti ti-bell-ringing"></i> ${catItems.length} alert${catItems.length > 1 ? 's' : ''}
+              </div>
+           </div>
+           <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse;">
+                 <thead style="background:var(--surface);">
+                    <tr>
+                       <th style="padding:12px 15px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; min-width:180px; border-right:2px solid var(--border);">Product</th>
+                       ${thSz}
+                    </tr>
+                 </thead>
+                 <tbody>${rows}</tbody>
+              </table>
+           </div>
+        </div>`;
       });
       list.innerHTML = html;
     }
@@ -4536,7 +4884,7 @@ function renderDashboard() {
       const groups = {};
       list.forEach(t => {
         const key = t.d.slice(0, 10) + '|' + t.ci;
-        if (!groups[key]) groups[key] = { date: t.d.slice(0, 10), ci: t.ci, txns: [] };
+        if (!groups[key]) groups[key] = { date: t.d.slice(0, 10), ci: t.ci, pa: t.pa, txns: [] };
         groups[key].txns.push(t);
       });
       return Object.values(groups).reverse().map(g => {
@@ -4565,11 +4913,13 @@ function renderDashboard() {
           return `<td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;background:var(--surface2);border-top:2px solid var(--border);color:var(--accent);padding:6px 3px;">${v || '—'}</td>`;
         }).join('');
         const grandTot = prods.reduce((a, p) => a + sz.reduce((x, s) => x + (p[String(s)] || 0), 0), 0);
+        const supplierBadge = g.pa ? `<span class="badge" style="background:var(--surface2);color:var(--text-main);border:1px solid var(--border);"><i class="ti ti-truck" style="margin-right:4px;"></i>${g.pa}</span>` : '';
         return `<div class="table-wrap" style="margin-bottom:14px;">
       <div class="table-header">
         <div style="display:flex;gap:10px;align-items:center;">
-          <div class="table-header-title" style="font-size:13px;">${g.date}</div>
+          <div class="table-header-title" style="font-size:13px;">${i2d(g.date)}</div>
           <span class="badge bg-blue">${cn(g.ci)}</span>
+          ${supplierBadge}
         </div>
         <div style="font-size:11px;color:${color};font-family:'JetBrains Mono',monospace;font-weight:700;">${grandTot} boxes</div>
       </div>
@@ -5265,10 +5615,9 @@ function renderDashboard() {
     }
 
     function renderReportsInventory() {
-      const ti = T.filter(t => t.tp === 'IN').reduce((a, t) => a + t.q, 0);
-      const to = T.filter(t => t.tp === 'OUT').reduce((a, t) => a + t.q, 0);
       const cur = P.reduce((a, p) => a + Object.values(p.s).reduce((x, y) => x + y, 0), 0);
-      ['r-in', 'r-out', 'r-cur'].forEach((id, i) => document.getElementById(id).textContent = [ti, to, cur][i]);
+      const rCurEl = document.getElementById('r-cur');
+      if (rCurEl) rCurEl.textContent = cur;
       updateBadge();
       const charts = document.getElementById('report-charts');
       charts.innerHTML = S.categories.map((catObj, i) => {
@@ -5354,6 +5703,7 @@ function renderDashboard() {
       renderUsersTable();
       renderSettingsCategories();
       renderSettingsSubCategories();
+      renderSettingsSuppliers();
       renderRecycleBin();
       checkAdmin();
 
@@ -5512,6 +5862,16 @@ function renderDashboard() {
       showCenterToast('Settings saved!');
       renderDashboard(); // Update company name on dash immediately
     }
+    function toggleSetAcc(id) {
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('open');
+    }
+
+    if (typeof S.min === 'undefined') S.min = 5;
+    if (!S.cats) S.cats = [{ id: 1, n: 'T-SHIRT' }, { id: 2, n: 'SHIRT' }];
+    if (!S.subCats) S.subCats = ['GENERAL'];
+    if (!S.suppliers) S.suppliers = [];
+
     function renderSettingsCategories() {
       const wrap = document.getElementById('settings-categories-list');
       if (!wrap) return;
@@ -5519,14 +5879,14 @@ function renderDashboard() {
         const blockingProds = P.filter(p => String(p.ci) === String(c.id));
         const isDeletable = blockingProds.length === 0;
         return `
-        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
           <div>
-            <div style="font-size:14px;font-weight:700;margin-bottom:6px;">${c.n}</div>
-            <div style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);">${c.sizes.join(', ')}</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:6px;color:#1e293b;"><i class="ti ti-folder" style="margin-right:8px; color:var(--accent);"></i> ${c.n}</div>
+            <div style="font-size:12px;font-family:'JetBrains Mono',monospace;color:#64748b;"><strong>Sizes:</strong> ${c.sizes.join(', ')}</div>
           </div>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-ghost btn-sm" onclick="openAddCategory('${c.id}')">✎ Edit</button>
-            <button class="btn ${isDeletable ? 'btn-danger' : 'btn-ghost'} btn-sm" onclick="deleteCategory('${c.id}')" title="${isDeletable ? 'Delete' : 'Cannot delete: Products exist'}">✕ Trash</button>
+            <button class="btn btn-ghost btn-sm" onclick="openAddCategory('${c.id}')" style="color:#3b82f6;"><i class="ti ti-edit"></i> Edit</button>
+            <button class="btn ${isDeletable ? 'btn-danger' : 'btn-ghost'} btn-sm" onclick="deleteCategory('${c.id}')" title="${isDeletable ? 'Delete' : 'Cannot delete: Products exist'}"><i class="ti ti-trash"></i> Delete</button>
           </div>
         </div>`;
       }).join('');
@@ -5537,15 +5897,17 @@ function renderDashboard() {
       if (!wrap) return;
       if (!S.subCategories) S.subCategories = ['T-SHIRT', 'SHIRT', 'GENERAL'];
       wrap.innerHTML = S.subCategories.map(sc => `
-        <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:6px 14px; display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700; color:var(--text);">
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:6px 14px; display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700; color:#1e293b; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
           ${sc}
           <div style="display:flex; gap:6px;">
-            <span style="cursor:pointer; color:var(--accent); font-size:12px;" onclick="openEditSubCategory('${sc}')" title="Edit">✎</span>
-            <span style="cursor:pointer; color:var(--danger); font-size:14px;" onclick="deleteSubCategory('${sc}')" title="Delete">✕</span>
+            <span style="cursor:pointer; color:#3b82f6; font-size:16px;" onclick="openEditSubCategory('${sc}')" title="Edit"><i class="ti ti-edit"></i></span>
+            <span style="cursor:pointer; color:var(--danger); font-size:16px;" onclick="deleteSubCategory('${sc}')" title="Delete"><i class="ti ti-trash"></i></span>
           </div>
         </div>
       `).join('') || '<div style="font-size:12px; color:var(--muted);">No sub categories added.</div>';
     }
+
+
 
     function openEditSubCategory(oldSc) {
       curModal = 'editSubCat';
@@ -5629,6 +5991,109 @@ function renderDashboard() {
         showCenterToast(`Sub Category "${sc}" moved to Recycle Bin!`);
       });
     }
+
+    function renderSettingsSuppliers() {
+      const wrap = document.getElementById('settings-suppliers-list');
+      if (!wrap) return;
+      if (!S.suppliers || S.suppliers.length === 0) {
+        wrap.innerHTML = '<div class="empty-state">No Suppliers added.</div>';
+        return;
+      }
+      wrap.innerHTML = S.suppliers.map(sup => `
+        <div style="background:#fff; border:1px solid var(--border); padding:15px; border-radius:8px; width:100%; max-width:350px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+          <div>
+            <div style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:4px;">${sup.n}</div>
+            <div style="font-size:13px; color:var(--text-muted);"><i class="ti ti-phone" style="font-size:12px; margin-right:4px;"></i> ${sup.p || 'N/A'}</div>
+          </div>
+          <div>
+            <button class="btn btn-ghost btn-sm" onclick="editSupplier('${sup.id}')" style="padding:6px; color:var(--primary);"><i class="ti ti-edit"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteSupplier('${sup.id}')" style="padding:6px; color:var(--accent);"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openAddSupplier() {
+      curModal = 'addSupplier';
+      window._oldSup = null;
+      document.getElementById('modal-title').textContent = '+ Add Supplier';
+      document.getElementById('modal-btn').textContent = 'Add';
+      document.getElementById('modal-btn').className = 'btn btn-primary';
+      document.getElementById('modal-content').innerHTML = `
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Supplier Name</label>
+          <input class="form-input" id="msup-n" placeholder="e.g. ABC Textiles" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number</label>
+          <input class="form-input" id="msup-p" placeholder="e.g. 9876543210" autocomplete="off">
+        </div>
+      `;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.getElementById('modal-btn').onclick = submitSupplierModal;
+    }
+
+    function editSupplier(id) {
+      const sup = S.suppliers.find(s => String(s.id) === String(id));
+      if(!sup) return;
+      curModal = 'editSupplier';
+      window._oldSup = sup.id;
+      document.getElementById('modal-title').textContent = 'Edit Supplier';
+      document.getElementById('modal-btn').textContent = 'Save';
+      document.getElementById('modal-btn').className = 'btn btn-primary';
+      document.getElementById('modal-content').innerHTML = `
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Supplier Name</label>
+          <input class="form-input" id="msup-n" value="${sup.n}" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number</label>
+          <input class="form-input" id="msup-p" value="${sup.p}" autocomplete="off">
+        </div>
+      `;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.getElementById('modal-btn').onclick = submitSupplierModal;
+    }
+
+    function submitSupplierModal() {
+      const name = document.getElementById('msup-n').value.trim();
+      const phone = document.getElementById('msup-p').value.trim();
+      if (!name) { showAlert('Supplier', 'Please enter supplier name.'); return; }
+      
+      if (curModal === 'addSupplier') {
+        const id = 'sup_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        S.suppliers.push({ id, n: name, p: phone });
+        showCenterToast('Supplier Added!');
+      } else if (curModal === 'editSupplier') {
+        const sup = S.suppliers.find(s => String(s.id) === String(window._oldSup));
+        if (sup) {
+          sup.n = name;
+          sup.p = phone;
+          showCenterToast('Supplier Updated!');
+        }
+      }
+      persist();
+      renderSettingsSuppliers();
+      closeModal();
+    }
+
+    function deleteSupplier(id) {
+      const sup = S.suppliers.find(s => String(s.id) === String(id));
+      if(!sup) return;
+      showConfirm('Delete Supplier', `Are you sure you want to delete "${sup.n}"?`, () => {
+        S.recycleBin.push({
+          id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+          type: 'supplier',
+          data: sup,
+          deletedAt: new Date().toISOString()
+        });
+        S.suppliers = S.suppliers.filter(s => String(s.id) !== String(id));
+        persist();
+        renderSettingsSuppliers();
+        showCenterToast(`Supplier "${sup.n}" moved to Recycle Bin!`);
+      });
+    }
+
 
     function deleteCategory(id) {
       const prods = P.filter(p => String(p.ci) === String(id));
@@ -6566,6 +7031,71 @@ function renderDashboard() {
 
     initApp();
 
+    function showSuppliersModal() {
+      const suppliers = S.suppliers || [];
+      document.getElementById('modal-title').textContent = 'Suppliers List (' + suppliers.length + ')';
+      
+      let html = '<div style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;padding-right:5px;">';
+      if (suppliers.length === 0) {
+        html += '<div style="color:var(--text-muted);text-align:center;padding:20px;">No suppliers found.</div>';
+      } else {
+        const sortedSuppliers = [...suppliers].sort((a,b)=>a.n.localeCompare(b.n));
+        sortedSuppliers.forEach((s, idx) => {
+          const phoneStr = s.p ? `<div style="font-size:13px; color:var(--text-muted);"><i class="ti ti-phone" style="font-size:12px;"></i> ${s.p}</div>` : '';
+          html += `<div style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; gap:12px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(59,130,246,0.1);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:bold;">${idx+1}</div>
+            <div style="flex:1;">
+               <div style="font-weight:600;color:var(--text-main);font-size:15px;">${s.n}</div>
+               ${phoneStr}
+            </div>
+          </div>`;
+        });
+      }
+      html += '</div>';
+      
+      document.getElementById('modal-content').innerHTML = html;
+      document.getElementById('modal-btn').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function showUniqueProductsModal() {
+      const categoryNames = [...new Set(S.categories.map(c => c.name))];
+      let allMerged = [];
+      categoryNames.forEach(cn => {
+        allMerged = allMerged.concat(getMergedProducts(P, cn));
+      });
+      
+      document.getElementById('modal-title').textContent = 'Unique Products List (' + allMerged.length + ')';
+      
+      let html = '<div style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;padding-right:5px;">';
+      if (allMerged.length === 0) {
+        html += '<div style="color:var(--text-muted);text-align:center;padding:20px;">No products found.</div>';
+      } else {
+        const sortedMerged = [...allMerged].sort((a,b) => {
+          const totA = Object.values(a.s).reduce((sum, val)=>sum+val, 0);
+          const totB = Object.values(b.s).reduce((sum, val)=>sum+val, 0);
+          return totB - totA;
+        });
+
+        sortedMerged.forEach((p, idx) => {
+          const total = Object.values(p.s).reduce((sum, val)=>sum+val, 0);
+          html += `<div style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,0.1);color:#f59e0b;display:flex;align-items:center;justify-content:center;font-weight:bold;">${idx+1}</div>
+              <div style="font-weight:600;color:var(--text-main);font-size:15px;text-transform:capitalize;">${p.n}</div>
+            </div>
+            <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--text-main); font-size:18px;">
+              ${total} <span style="font-size:12px; font-weight:600; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
+            </div>
+          </div>`;
+        });
+      }
+      html += '</div>';
+      
+      document.getElementById('modal-content').innerHTML = html;
+      document.getElementById('modal-btn').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
   </script>
 </body>
 
