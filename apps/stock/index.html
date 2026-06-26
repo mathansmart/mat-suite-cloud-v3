@@ -1671,37 +1671,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             </div>
           </div>
 
-          <div style="display: flex; gap: 25px; align-items: flex-start; flex-wrap: wrap;">
-             <!-- Left Side Main Content -->
-             <div style="flex: 1; min-width: 0;">
-                <div style="margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
-                  <div style="flex:1;min-width:200px;">
-                    <div style="display:flex; gap:10px; margin-bottom:10px;">
-                      <select id="dash-sc-filter" class="form-select" onchange="renderDashboard()">
-                        <option value="">All Categories</option>
-                      </select>
-                      <select id="dash-cat-filter" class="form-select" onchange="renderDashboard()">
-                        <option value="">All Categories</option>
-                      </select>
-                    </div>
-                    <div class="search-wrapper">
-                      <div class="search-icon-left"><i class="ti ti-search" style="font-size: 20px;"></i></div>
-                      <input type="text" id="dash-search" class="premium-search" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
-                      <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()">✕</button>
-                      <div id="dash-search-drop" class="premium-dropdown"></div>
-                    </div>
-                    <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
-                  </div>
-                  <button class="btn btn-ghost" onclick="clearDashFilter()" style="margin-top:42px;">Clear Filter</button>
-                  <button class="btn btn-excel" onclick="smartExport()" style="margin-top:42px; background:#1d6f42;">
-                    <span style="font-size:16px;">📊</span> Export Excel
-                  </button>
-                </div>
-                <div id="dash-cat-tables"></div>
-             </div>
-             
-             <!-- Right Side Sidebar -->
-             <div style="width: 300px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start;">
+          <div style="display: block;">
+             <!-- Right Side Sidebar (Floated) -->
+             <div style="float: right; width: 300px; margin-left: 25px; margin-bottom: 25px;">
                 <!-- Overall Information Card -->
                 <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                    <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px;">
@@ -1746,6 +1718,38 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                    </div>
                 </div>
              </div>
+             <!-- Left Side Main Content -->
+             <div style="min-width: 0;">
+
+                <div style="margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:200px;">
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                      <select id="dash-sc-filter" class="form-select" onchange="renderDashboard()">
+                        <option value="">All Categories</option>
+                      </select>
+                      <select id="dash-cat-filter" class="form-select" onchange="renderDashboard()">
+                        <option value="">All Categories</option>
+                      </select>
+                    </div>
+                    <div class="search-wrapper">
+                      <div class="search-icon-left"><i class="ti ti-search" style="font-size: 20px;"></i></div>
+                      <input type="text" id="dash-search" class="premium-search" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
+                      <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()">✕</button>
+                      <div id="dash-search-drop" class="premium-dropdown"></div>
+                    </div>
+                    <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
+                  </div>
+                  <button class="btn btn-ghost" onclick="clearDashFilter()" style="margin-top:42px;">Clear Filter</button>
+                  <button class="btn btn-excel" onclick="smartExport()" style="margin-top:42px; background:#1d6f42;">
+                    <span style="font-size:16px;">📊</span> Export Excel
+                  </button>
+                </div>
+                <div id="dash-cat-tables"></div>
+             </div>
+             
+             
+             </div>
+             <div style="clear: both;"></div>
           </div>
         </div>
 
