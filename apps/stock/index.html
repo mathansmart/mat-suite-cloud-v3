@@ -3304,9 +3304,9 @@ function renderDashboard() {
       }
 
       const subCatMap = {};
-      P.forEach(p => {
+      const mergedDashP = getMergedProducts(P, scVal);
+      mergedDashP.forEach(p => {
         const sc = (p.sc || 'General').trim().toUpperCase();
-        if (scVal !== '' && sc !== scVal.trim().toUpperCase()) return;
         if (!subCatMap[sc]) subCatMap[sc] = [];
         subCatMap[sc].push(p);
       });
