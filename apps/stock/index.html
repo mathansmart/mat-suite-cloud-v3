@@ -5362,6 +5362,22 @@ function renderDashboard() {
           document.getElementById('pa-low-prod-qty').textContent = low.q + ' Boxes';
        }
 
+       // Sub-Category Aggregation
+       const scSales = {};
+       outTxns.forEach(t => {
+          const p = P.find(x => x.id === t.pid);
+          const scName = (p && p.sc) ? p.sc : 'Uncategorized';
+          scSales[scName] = (scSales[scName] || 0) + (Number(t.q) || 0);
+       });
+       const sortedSc = Object.keys(scSales).map(sc => ({ sc, q: scSales[sc] })).sort((a,b) => b.q - a.q);
+       if (sortedSc.length > 0) {
+          document.getElementById('pa-top-sc').textContent = sortedSc[0].sc;
+          document.getElementById('pa-top-sc-qty').textContent = sortedSc[0].q + ' Boxes';
+          const lowSc = sortedSc[sortedSc.length - 1];
+          document.getElementById('pa-low-sc').textContent = lowSc.sc;
+          document.getElementById('pa-low-sc-qty').textContent = lowSc.q + ' Boxes';
+       }
+
        // 2. Monthly Sales Aggregation
        const monthSales = {};
        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
