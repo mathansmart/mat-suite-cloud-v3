@@ -7053,13 +7053,27 @@ function renderDashboard() {
         html += '<div style="color:var(--text-muted);text-align:center;padding:20px;">No suppliers found.</div>';
       } else {
         const sortedSuppliers = [...suppliers].sort((a,b)=>a.n.localeCompare(b.n));
+        
+        // Calculate totals from transactions
+        const supTotals = {};
+        T.forEach(t => {
+           if (t.tp === 'IN' && t.pa) {
+              supTotals[t.pa] = (supTotals[t.pa] || 0) + (Number(t.q) || 0);
+           }
+        });
+
         sortedSuppliers.forEach((s, idx) => {
           const phoneStr = s.p ? `<div style="font-size:13px; color:var(--text-muted);"><i class="ti ti-phone" style="font-size:12px;"></i> ${s.p}</div>` : '';
+          const totBoxes = supTotals[s.n] || 0;
+          
           html += `<div style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; gap:12px;">
             <div style="width:36px;height:36px;border-radius:50%;background:rgba(59,130,246,0.1);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:bold;">${idx+1}</div>
             <div style="flex:1;">
                <div style="font-weight:600;color:var(--text-main);font-size:15px;">${s.n}</div>
                ${phoneStr}
+            </div>
+            <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--primary); font-size:16px;">
+               ${totBoxes} <span style="font-size:11px; font-weight:700; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
             </div>
           </div>`;
         });
@@ -7084,23 +7098,33 @@ function renderDashboard() {
       if (allMerged.length === 0) {
         html += '<div style="color:var(--text-muted);text-align:center;padding:20px;">No products found.</div>';
       } else {
-        const sortedMerged = [...allMerged].sort((a,b) => {
-          const totA = Object.values(a.s).reduce((sum, val)=>sum+val, 0);
-          const totB = Object.values(b.s).reduce((sum, val)=>sum+val, 0);
-          return totB - totA;
+        const grouped = {};
+        allMerged.forEach(p => {
+           const sc = p.sc || 'GENERAL';
+           if(!grouped[sc]) grouped[sc] = [];
+           grouped[sc].push(p);
         });
 
-        sortedMerged.forEach((p, idx) => {
-          const total = Object.values(p.s || {}).reduce((sum, val)=>sum+val, 0);
-          html += `<div style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,0.1);color:#f59e0b;display:flex;align-items:center;justify-content:center;font-weight:bold;">${idx+1}</div>
-              <div style="font-weight:600;color:var(--text-main);font-size:15px;text-transform:capitalize;">${p.n}</div>
-            </div>
-            <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--text-main); font-size:18px;">
-              ${total} <span style="font-size:12px; font-weight:600; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
-            </div>
-          </div>`;
+        Object.keys(grouped).sort().forEach(sc => {
+           html += `<div style="font-weight:800; font-size:15px; color:var(--text-main); margin-top:10px; padding-bottom:5px; border-bottom:1.5px solid var(--border-light); letter-spacing:1px; text-transform:uppercase;">${sc} <span style="font-size:12px; font-weight:700; color:var(--text-muted);">(${grouped[sc].length} Products)</span></div>`;
+           
+           const sortedMerged = grouped[sc].sort((a,b) => {
+             const totA = Object.values(a.s).reduce((sum, val)=>sum+val, 0);
+             const totB = Object.values(b.s).reduce((sum, val)=>sum+val, 0);
+             return totB - totA;
+           });
+
+           sortedMerged.forEach((p, idx) => {
+             const total = Object.values(p.s || {}).reduce((sum, val)=>sum+val, 0);
+             html += `<div style="padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom: 2px;">
+               <div style="display:flex; align-items:center; gap:12px;">
+                 <div style="font-weight:600;color:var(--text-main);font-size:14px;text-transform:capitalize;">${idx+1}. ${p.n}</div>
+               </div>
+               <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--text-main); font-size:16px;">
+                 ${total} <span style="font-size:11px; font-weight:700; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
+               </div>
+             </div>`;
+           });
         });
       }
       html += '</div>';
