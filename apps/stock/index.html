@@ -1479,7 +1479,30 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         grid-template-columns: 2fr 1fr;
       }
     }
-  </style>
+  
+  .trend-filter-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-right: 1px solid var(--border-light);
+  }
+  .trend-filter-btn:last-child {
+    border-right: none;
+  }
+  .trend-filter-btn:hover {
+    background: rgba(59,130,246,0.1);
+  }
+  .trend-filter-btn.active {
+    background: #f59e0b; /* Orange like screenshot */
+    color: #fff;
+    font-weight: 700;
+  }
+</style>
 
 
 <style>
@@ -2003,7 +2026,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                  </div>
                  <!-- Smooth Line Area Chart -->
                  <div style="flex:2; min-width:300px; background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border); box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                    <div style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:15px; text-align:center;">Monthly Sales Trend</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                       <div style="font-size:14px; font-weight:700; color:var(--text-main);">Sales Trend</div>
+                       <div style="display:flex; background:var(--bg-color); border-radius:6px; overflow:hidden; border:1px solid var(--border-light);">
+                          <button class="trend-filter-btn" data-range="1D">1D</button>
+                          <button class="trend-filter-btn" data-range="1W">1W</button>
+                          <button class="trend-filter-btn" data-range="1M">1M</button>
+                          <button class="trend-filter-btn active" data-range="1Y">1Y</button>
+                       </div>
+                    </div>
                     <div style="position:relative; height:250px; width:100%;">
                        <canvas id="paChartLine"></canvas>
                     </div>
@@ -5391,36 +5422,142 @@ function renderDashboard() {
           }
        });
 
-       // 4. Render Smooth Area Chart (Monthly Trend)
-       // Sort keys chronologically for line chart
-       const chronoMonths = Object.keys(monthSales).sort((a,b) => {
-          const dA = new Date(a); const dB = new Date(b); return dA - dB;
+       
+       // Setup filter buttons if not already setup
+       if (!window.paFiltersSetup) {
+          window.paFiltersSetup = true;
+          document.querySelectorAll('.trend-filter-btn').forEach(btn => {
+             btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.trend-filter-btn').forEach(b => b.classList.remove('active'));
+                const target = e.currentTarget;
+                target.classList.add('active');
+                renderSalesTrendChart(target.getAttribute('data-range'));
+             });
+          });
+       }
+
+       // Render initial line chart
+       renderSalesTrendChart('1Y');
+    }
+
+    function parseTxnDate(dStr) {
+       dStr = String(dStr);
+       let y, m, d, h=0;
+       if (dStr.includes('-')) {
+          y = parseInt(dStr.split('-')[0], 10);
+          m = parseInt(dStr.split('-')[1], 10);
+          const rest = dStr.split('-')[2];
+          d = parseInt(rest.substring(0, 2), 10);
+          if (rest.includes('T')) h = parseInt(rest.split('T')[1].substring(0, 2), 10);
+       } else {
+          y = parseInt(dStr.substring(0, 4), 10);
+          m = parseInt(dStr.substring(4, 6), 10);
+          d = parseInt(dStr.substring(6, 8), 10);
+          if (dStr.length > 8 && dStr.includes('T')) {
+             h = parseInt(dStr.split('T')[1].substring(0, 2), 10);
+          }
+       }
+       if(isNaN(m)) m=1; if(isNaN(d)) d=1; if(isNaN(y)) y=new Date().getFullYear();
+       return new Date(y, m-1, d, h);
+    }
+
+    function renderSalesTrendChart(range) {
+       const outTxns = T.filter(t => t.tp === 'OUT');
+       const now = new Date();
+       const groupedData = {};
+
+       outTxns.forEach(t => {
+          const tDate = parseTxnDate(t.d);
+          const diffDays = (now - tDate) / (1000 * 60 * 60 * 24);
+          let key = null;
+
+          if (range === '1D') {
+             // Show today by hour
+             if (diffDays <= 1 && tDate.getDate() === now.getDate()) {
+                const ampm = tDate.getHours() >= 12 ? 'PM' : 'AM';
+                let hr = tDate.getHours() % 12;
+                hr = hr ? hr : 12;
+                key = hr + ' ' + ampm;
+             }
+          } else if (range === '1W') {
+             // Show last 7 days (Days of week)
+             if (diffDays <= 7) {
+                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                key = days[tDate.getDay()];
+             }
+          } else if (range === '1M') {
+             // Show last 30 days grouped by week
+             if (diffDays <= 30) {
+                // Approximate week of month (1 to 4/5)
+                const weekNum = Math.ceil(tDate.getDate() / 7);
+                key = 'Week ' + Math.min(weekNum, 4); 
+             }
+          } else if (range === '1Y') {
+             // Show last 365 days grouped by month
+             if (diffDays <= 365) {
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                key = monthNames[tDate.getMonth()] + ' ' + tDate.getFullYear();
+             }
+          }
+
+          if (key) {
+             groupedData[key] = (groupedData[key] || 0) + (Number(t.q) || 0);
+          }
        });
-       const lineLabels = chronoMonths;
-       const lineData = chronoMonths.map(m => monthSales[m]);
+
+       // Create labels in proper order based on range
+       let labels = [];
+       if (range === '1D') {
+           for(let i=8; i<=20; i++) { // 8 AM to 8 PM
+               const ampm = i >= 12 ? 'PM' : 'AM';
+               let hr = i % 12; hr = hr ? hr : 12;
+               labels.push(hr + ' ' + ampm);
+           }
+       } else if (range === '1W') {
+           const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+           const todayIdx = now.getDay();
+           for(let i=6; i>=0; i--) {
+               let dIdx = todayIdx - i;
+               if(dIdx < 0) dIdx += 7;
+               labels.push(days[dIdx]);
+           }
+       } else if (range === '1M') {
+           labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+       } else if (range === '1Y') {
+           const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+           const currentMonth = now.getMonth();
+           const currentYear = now.getFullYear();
+           for(let i=11; i>=0; i--) {
+               let m = currentMonth - i;
+               let y = currentYear;
+               if (m < 0) { m += 12; y -= 1; }
+               labels.push(monthNames[m] + ' ' + y);
+           }
+       }
+
+       const data = labels.map(lbl => groupedData[lbl] || 0);
 
        if (paLineChart) paLineChart.destroy();
        const ctxLine = document.getElementById('paChartLine').getContext('2d');
        
-       // Create Gradient
        const gradient = ctxLine.createLinearGradient(0, 0, 0, 250);
-       gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
-       gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+       gradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)'); // Orange gradient like screenshot
+       gradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
 
        paLineChart = new Chart(ctxLine, {
           type: 'line',
           data: {
-             labels: lineLabels,
+             labels: labels,
              datasets: [{
                 label: 'Sales (Boxes)',
-                data: lineData,
+                data: data,
                 fill: true,
                 backgroundColor: gradient,
-                borderColor: '#3b82f6',
+                borderColor: '#f59e0b', // Orange color
                 borderWidth: 3,
-                tension: 0.4, // Smooth curve
+                tension: 0.4,
                 pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#3b82f6',
+                pointBorderColor: '#f59e0b',
                 pointBorderWidth: 2,
                 pointRadius: 4,
                 pointHoverRadius: 6
@@ -5429,9 +5566,7 @@ function renderDashboard() {
           options: {
              responsive: true,
              maintainAspectRatio: false,
-             plugins: {
-                legend: { display: false }
-             },
+             plugins: { legend: { display: false } },
              scales: {
                 x: { grid: { display: false } },
                 y: { grid: { borderDash: [5, 5], color: '#e2e8f0' }, beginAtZero: true }
