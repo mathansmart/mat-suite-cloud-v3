@@ -2434,6 +2434,26 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const seenIds = new Set();
       let changed = false;
 
+      // Fix LMXL typo
+      S.categories.forEach(c => {
+        if (c.sizes && c.sizes.includes('LMXL')) {
+          c.sizes = c.sizes.filter(s => s !== 'LMXL');
+          changed = true;
+        }
+      });
+      P.forEach(p => {
+        if (p.s && p.s['LMXL'] !== undefined) {
+          delete p.s['LMXL'];
+          changed = true;
+        }
+      });
+      T.forEach(t => {
+        if (t.sz === 'LMXL') {
+          t.sz = 'L'; // fallback, though it shouldn't have stock
+          changed = true;
+        }
+      });
+
       // 1. Repair Categories
       S.categories.forEach((c, idx) => {
         const idStr = c.id !== null && c.id !== undefined ? String(c.id) : '';
@@ -3040,6 +3060,8 @@ function exportPreviewToExcel() {
          const aIdx = sizeOrder.indexOf(a.toUpperCase());
          const bIdx = sizeOrder.indexOf(b.toUpperCase());
          if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         if (aIdx !== -1) return -1;
+         if (bIdx !== -1) return 1;
          return a.localeCompare(b);
       });
 
@@ -3132,6 +3154,8 @@ function exportPreviewToExcel() {
          const aIdx = sizeOrder.indexOf(a.toUpperCase());
          const bIdx = sizeOrder.indexOf(b.toUpperCase());
          if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         if (aIdx !== -1) return -1;
+         if (bIdx !== -1) return 1;
          return a.localeCompare(b);
       });
 
