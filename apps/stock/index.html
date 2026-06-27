@@ -1929,15 +1929,66 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                  <i class="ti ti-chart-pie" style="color:var(--primary); font-size:22px;"></i> Product Sales Overview
               </div>
               
-              <!-- Smart AI-Style Insights Summary -->
-              <div style="background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); padding: 25px 30px; border-radius: 16px; border-left: 6px solid var(--primary); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; gap: 25px; align-items: center;">
-                 <div style="flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%; background: rgba(59,130,246,0.1); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(59,130,246,0.1);">
-                    <i class="ti ti-bulb" style="font-size: 32px; color: var(--primary);"></i>
-                 </div>
-                 <div style="font-size: 15px; color: var(--text-main); font-weight: 500; line-height: 1.8;">
-                    Based on your recent transactions, your top selling product is <strong style="color:var(--primary); font-size:17px; font-weight:800;" id="pa-top-prod">-</strong> with <strong style="color:var(--text-main);" id="pa-top-prod-qty">-</strong>. 
-                    The most average performer is <strong style="color:#f59e0b; font-size:16px;" id="pa-med-prod">-</strong> (<span id="pa-med-prod-qty">-</span>), while <strong style="color:#ef4444; font-size:16px;" id="pa-low-prod">-</strong> has the lowest sales (<span id="pa-low-prod-qty">-</span>). 
-                    Your peak sales period occurred in <strong style="color:#10b981; font-size:17px; font-weight:800;" id="pa-best-month">-</strong> (<span id="pa-best-month-qty">-</span>).
+              <!-- Performance Highlights List -->
+              <div style="margin-bottom: 25px;">
+                 <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                    
+                    <!-- Top Product -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border-light); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                       <div style="display: flex; align-items: center; gap: 15px;">
+                          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center;">
+                             <i class="ti ti-crown" style="font-size: 24px; color: #10b981;"></i>
+                          </div>
+                          <div>
+                             <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 2px;">Top Selling Product</div>
+                             <div style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="pa-top-prod">-</div>
+                          </div>
+                       </div>
+                       <div style="font-size: 18px; font-weight: 800; color: #10b981; font-family: 'JetBrains Mono', monospace;" id="pa-top-prod-qty">-</div>
+                    </div>
+
+                    <!-- Medium Product -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border-light); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                       <div style="display: flex; align-items: center; gap: 15px;">
+                          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(245,158,11,0.1); display: flex; align-items: center; justify-content: center;">
+                             <i class="ti ti-minus" style="font-size: 24px; color: #f59e0b;"></i>
+                          </div>
+                          <div>
+                             <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 2px;">Average Performer</div>
+                             <div style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="pa-med-prod">-</div>
+                          </div>
+                       </div>
+                       <div style="font-size: 18px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;" id="pa-med-prod-qty">-</div>
+                    </div>
+
+                    <!-- Low Product -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border-light); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                       <div style="display: flex; align-items: center; gap: 15px;">
+                          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center;">
+                             <i class="ti ti-alert-triangle" style="font-size: 24px; color: #ef4444;"></i>
+                          </div>
+                          <div>
+                             <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 2px;">Lowest Selling Product</div>
+                             <div style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="pa-low-prod">-</div>
+                          </div>
+                       </div>
+                       <div style="font-size: 18px; font-weight: 800; color: #ef4444; font-family: 'JetBrains Mono', monospace;" id="pa-low-prod-qty">-</div>
+                    </div>
+
+                    <!-- Best Month -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                       <div style="display: flex; align-items: center; gap: 15px;">
+                          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59,130,246,0.1); display: flex; align-items: center; justify-content: center;">
+                             <i class="ti ti-calendar-star" style="font-size: 24px; color: #3b82f6;"></i>
+                          </div>
+                          <div>
+                             <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 2px;">Peak Sales Month</div>
+                             <div style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="pa-best-month">-</div>
+                          </div>
+                       </div>
+                       <div style="font-size: 18px; font-weight: 800; color: #3b82f6; font-family: 'JetBrains Mono', monospace;" id="pa-best-month-qty">-</div>
+                    </div>
+
                  </div>
               </div>
 
@@ -5285,9 +5336,16 @@ function renderDashboard() {
        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
        
        outTxns.forEach(t => {
-          // Format: YYYYMMDDTHHMMSS
-          const m = parseInt(t.d.substring(4, 6), 10);
-          const y = t.d.substring(0, 4);
+          let m, y;
+          const dStr = String(t.d);
+          if (dStr.includes('-')) {
+             y = dStr.split('-')[0];
+             m = parseInt(dStr.split('-')[1], 10);
+          } else {
+             y = dStr.substring(0, 4);
+             m = parseInt(dStr.substring(4, 6), 10);
+          }
+          if (isNaN(m) || m < 1 || m > 12) m = 1; // fallback
           const key = monthNames[m-1] + ' ' + y;
           monthSales[key] = (monthSales[key] || 0) + (Number(t.q) || 0);
        });
