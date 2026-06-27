@@ -1929,39 +1929,15 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                  <i class="ti ti-chart-pie" style="color:var(--primary); font-size:22px;"></i> Product Sales Overview
               </div>
               
-              <!-- Metric Cards -->
-              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:25px;">
-                 <!-- Highest Sale -->
-                 <div style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(16,185,129,0.2);">
-                    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; opacity:0.9; margin-bottom:5px; display:flex; align-items:center; gap:5px;">
-                       <i class="ti ti-trending-up"></i> Top Selling Product
-                    </div>
-                    <div id="pa-top-prod" style="font-size:16px; font-weight:800; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">-</div>
-                    <div id="pa-top-prod-qty" style="font-size:13px; font-weight:600; opacity:0.9;">0 Boxes</div>
+              <!-- Smart AI-Style Insights Summary -->
+              <div style="background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); padding: 25px 30px; border-radius: 16px; border-left: 6px solid var(--primary); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; gap: 25px; align-items: center;">
+                 <div style="flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%; background: rgba(59,130,246,0.1); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(59,130,246,0.1);">
+                    <i class="ti ti-bulb" style="font-size: 32px; color: var(--primary);"></i>
                  </div>
-                 <!-- Medium Sale -->
-                 <div style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(245,158,11,0.2);">
-                    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; opacity:0.9; margin-bottom:5px; display:flex; align-items:center; gap:5px;">
-                       <i class="ti ti-minus"></i> Medium Sales Avg
-                    </div>
-                    <div id="pa-med-prod" style="font-size:16px; font-weight:800; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">-</div>
-                    <div id="pa-med-prod-qty" style="font-size:13px; font-weight:600; opacity:0.9;">0 Boxes</div>
-                 </div>
-                 <!-- Lowest Sale -->
-                 <div style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(239,68,68,0.2);">
-                    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; opacity:0.9; margin-bottom:5px; display:flex; align-items:center; gap:5px;">
-                       <i class="ti ti-trending-down"></i> Lowest Selling Product
-                    </div>
-                    <div id="pa-low-prod" style="font-size:16px; font-weight:800; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">-</div>
-                    <div id="pa-low-prod-qty" style="font-size:13px; font-weight:600; opacity:0.9;">0 Boxes</div>
-                 </div>
-                 <!-- Best Month -->
-                 <div style="background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(59,130,246,0.2);">
-                    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; opacity:0.9; margin-bottom:5px; display:flex; align-items:center; gap:5px;">
-                       <i class="ti ti-calendar-star"></i> Best Month
-                    </div>
-                    <div id="pa-best-month" style="font-size:16px; font-weight:800; margin-bottom:2px;">-</div>
-                    <div id="pa-best-month-qty" style="font-size:13px; font-weight:600; opacity:0.9;">0 Boxes</div>
+                 <div style="font-size: 15px; color: var(--text-main); font-weight: 500; line-height: 1.8;">
+                    Based on your recent transactions, your top selling product is <strong style="color:var(--primary); font-size:17px; font-weight:800;" id="pa-top-prod">-</strong> with <strong style="color:var(--text-main);" id="pa-top-prod-qty">-</strong>. 
+                    The most average performer is <strong style="color:#f59e0b; font-size:16px;" id="pa-med-prod">-</strong> (<span id="pa-med-prod-qty">-</span>), while <strong style="color:#ef4444; font-size:16px;" id="pa-low-prod">-</strong> has the lowest sales (<span id="pa-low-prod-qty">-</span>). 
+                    Your peak sales period occurred in <strong style="color:#10b981; font-size:17px; font-weight:800;" id="pa-best-month">-</strong> (<span id="pa-best-month-qty">-</span>).
                  </div>
               </div>
 
