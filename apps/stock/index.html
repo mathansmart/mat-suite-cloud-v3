@@ -3164,7 +3164,7 @@ function exportPreviewToExcel() {
          return `<tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: default;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
             <td style="padding:12px 15px; font-weight:600; font-size:14px; color:var(--text-main); white-space:nowrap; border-right:2px solid var(--border);">
                <div style="display:flex; align-items:center; gap:8px;">
-                  <i class="ti ti-shirt" style="color:var(--primary); font-size:16px;"></i> ${p.n}
+                  ${p.n}
                </div>
             </td>
             ${sizeCellsHtml}
@@ -3368,7 +3368,7 @@ function renderDashboard() {
           return `<tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: default;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
              <td class="dash-prod-name" onclick="showProductInfo('${p.id}')" style="padding:12px 15px; font-weight:800;font-size:14px;color:var(--text-main);white-space:nowrap;border-right:2px solid var(--border);">
                <div style="display:flex; align-items:center; gap:8px;">
-                  <i class="ti ti-shirt" style="color:var(--primary); font-size:16px;"></i> ${name}
+                  ${name}
                </div>
              </td>${tds}
              <td style="padding:10px 15px; text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;color:var(--accent);background:var(--surface2);border-left:2px solid var(--border);">${rowTot}</td>
@@ -4846,7 +4846,7 @@ function renderDashboard() {
           return `<tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
         <td style="padding:12px 15px; font-weight:600; font-size:14px; color:var(--text-main); white-space:nowrap; border-right:2px solid var(--border);">
            <div style="display:flex; align-items:center; gap:8px;">
-              <i class="ti ti-shirt" style="color:var(--primary); font-size:16px;"></i> ${p.n}
+              ${p.n}
            </div>
         </td>
         ${tds}
