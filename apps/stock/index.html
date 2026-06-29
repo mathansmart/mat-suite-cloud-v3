@@ -6739,6 +6739,8 @@ function renderDashboard() {
       });
     }
     function closeModal() { 
+      const mBtn = document.getElementById('modal-btn');
+      if (mBtn) mBtn.style.display = ''; 
       document.getElementById('modal-overlay').classList.remove('open');
       const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
       if (cancelBtn) cancelBtn.style.display = '';
