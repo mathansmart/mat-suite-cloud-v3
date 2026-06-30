@@ -6493,7 +6493,6 @@ function renderDashboard() {
     }
 
     function submitSupplierModal() {
-      alert("TRACE: submitSupplierModal called!");
       try {
         const name = document.getElementById('msup-n').value.trim();
         
@@ -6502,17 +6501,16 @@ function renderDashboard() {
         if (curModal === 'addSupplier') {
           const id = 'sup_' + Date.now() + '_' + Math.floor(Math.random()*1000);
           S.suppliers.push({ id, n: name });
-          showCenterToast('Supplier Added!');
         } else if (curModal === 'editSupplier') {
           const sup = S.suppliers.find(s => String(s.id) === String(window._oldSup));
           if (sup) {
             sup.n = name;
-            showCenterToast('Supplier Updated!');
           }
         }
         persist();
         renderSettingsSuppliers();
         closeModal();
+        alert("Success! Supplier '" + name + "' added. Check the list below.");
       } catch (e) {
         alert("Error in submitSupplierModal: " + e.message + "\n" + e.stack);
       }
