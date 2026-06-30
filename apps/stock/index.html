@@ -6456,6 +6456,7 @@ function renderDashboard() {
     }
 
     function openAddSupplier() {
+      alert("TRACE: openAddSupplier called!");
       curModal = 'addSupplier';
       window._oldSup = null;
       document.getElementById('modal-title').textContent = '+ Add Supplier';
@@ -6492,25 +6493,29 @@ function renderDashboard() {
     }
 
     function submitSupplierModal() {
-      const name = document.getElementById('msup-n').value.trim();
-      
-      if (!name) { showAlert('Supplier', 'Please enter supplier name.'); return; }
-      
-      if (curModal === 'addSupplier') {
-        const id = 'sup_' + Date.now() + '_' + Math.floor(Math.random()*1000);
-        S.suppliers.push({ id, n: name });
-        showCenterToast('Supplier Added!');
-      } else if (curModal === 'editSupplier') {
-        const sup = S.suppliers.find(s => String(s.id) === String(window._oldSup));
-        if (sup) {
-          sup.n = name;
-          
-          showCenterToast('Supplier Updated!');
+      alert("TRACE: submitSupplierModal called!");
+      try {
+        const name = document.getElementById('msup-n').value.trim();
+        
+        if (!name) { showAlert('Supplier', 'Please enter supplier name.'); return; }
+        
+        if (curModal === 'addSupplier') {
+          const id = 'sup_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+          S.suppliers.push({ id, n: name });
+          showCenterToast('Supplier Added!');
+        } else if (curModal === 'editSupplier') {
+          const sup = S.suppliers.find(s => String(s.id) === String(window._oldSup));
+          if (sup) {
+            sup.n = name;
+            showCenterToast('Supplier Updated!');
+          }
         }
+        persist();
+        renderSettingsSuppliers();
+        closeModal();
+      } catch (e) {
+        alert("Error in submitSupplierModal: " + e.message + "\n" + e.stack);
       }
-      persist();
-      renderSettingsSuppliers();
-      closeModal();
     }
 
     function deleteSupplier(id) {
@@ -6684,6 +6689,7 @@ function renderDashboard() {
       document.getElementById('modal-overlay').classList.add('open')
     }
     function submitModal() {
+      alert("TRACE: submitModal called!");
       const name = document.getElementById('mp-n').value.trim(); 
       const sc = document.getElementById('mp-sc').value.trim();
       const errEl = document.getElementById('mp-err');
