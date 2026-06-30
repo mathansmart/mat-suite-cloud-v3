@@ -6501,18 +6501,19 @@ function renderDashboard() {
         if (curModal === 'addSupplier') {
           const id = 'sup_' + Date.now() + '_' + Math.floor(Math.random()*1000);
           S.suppliers.push({ id, n: name });
+          showCenterToast('Supplier Added!');
         } else if (curModal === 'editSupplier') {
           const sup = S.suppliers.find(s => String(s.id) === String(window._oldSup));
           if (sup) {
             sup.n = name;
+            showCenterToast('Supplier Updated!');
           }
         }
         persist();
         renderSettingsSuppliers();
         closeModal();
-        alert("Success! Supplier '" + name + "' added. Check the list below.");
       } catch (e) {
-        alert("Error in submitSupplierModal: " + e.message + "\n" + e.stack);
+        console.error("Error in submitSupplierModal:", e);
       }
     }
 
@@ -7416,6 +7417,9 @@ function renderDashboard() {
             persist();  // Sync to server
         }
         S.recycleBin = S.recycleBin || [];
+        S.suppliers = S.suppliers || [];
+        S.cats = S.cats || [{ id: 1, n: 'T-SHIRT' }, { id: 2, n: 'SHIRT' }];
+        S.subCats = S.subCats || ['GENERAL'];
         const nowTime = Date.now();
         const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
         const startLen = S.recycleBin.length;
