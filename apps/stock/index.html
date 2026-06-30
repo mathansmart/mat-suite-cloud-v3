@@ -6456,7 +6456,6 @@ function renderDashboard() {
     }
 
     function openAddSupplier() {
-      alert("TRACE: openAddSupplier called!");
       curModal = 'addSupplier';
       window._oldSup = null;
       document.getElementById('modal-title').textContent = '+ Add Supplier';
@@ -6688,7 +6687,6 @@ function renderDashboard() {
       document.getElementById('modal-overlay').classList.add('open')
     }
     function submitModal() {
-      alert("TRACE: submitModal called!");
       const name = document.getElementById('mp-n').value.trim(); 
       const sc = document.getElementById('mp-sc').value.trim();
       const errEl = document.getElementById('mp-err');
