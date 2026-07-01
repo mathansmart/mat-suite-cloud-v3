@@ -1824,9 +1824,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                   <option value="">All Categories</option>
                 </select>
               </div>
-              <div class="form-group"><label class="form-label">Supplier (Optional)</label>
+              <div class="form-group"><label class="form-label">Supplier <span style="color:var(--accent);">*</span></label>
                 <select class="form-select" id="si-supplier" autocomplete="off">
-                  <option value="">No Supplier / General</option>
+                  <option value="" disabled selected>-- Select Supplier --</option>
                 </select>
               </div>
               <div class="form-group"><label class="form-label">Search & Select Products</label>
@@ -3829,6 +3829,16 @@ function renderDashboard() {
     }
 
     function selectSiProduct(pid) {
+      if (!siAddedPids.includes(pid)) {
+        const supEl = document.getElementById('si-supplier');
+        if (supEl && !supEl.value) {
+          showAlert('Stock In', 'Please select a Supplier first before adding products.');
+          const dr = document.getElementById('si-search-drop');
+          if (dr) dr.style.display = 'none';
+          document.getElementById('si-search').value = '';
+          return;
+        }
+      }
       if (siAddedPids.includes(pid)) {
         // deselect
         siAddedPids = siAddedPids.filter(x => x !== pid);
@@ -4937,7 +4947,7 @@ function renderDashboard() {
       const dr = document.getElementById('si-search-drop'); if (dr) dr.style.display = 'none';
       const supEl = document.getElementById('si-supplier');
       if (supEl) {
-        supEl.innerHTML = '<option value="">No Supplier / General</option>' + (S.suppliers || []).map(sup => `<option value="${sup.id}">${sup.n}</option>`).join('');
+        supEl.innerHTML = '<option value="" disabled selected>-- Select Supplier --</option>' + (S.suppliers || []).map(sup => `<option value="${sup.id}">${sup.n}</option>`).join('');
       }
       renderSiTable(); renderSiHistory();
     }
