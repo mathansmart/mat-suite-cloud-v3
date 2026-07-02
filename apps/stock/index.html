@@ -4896,7 +4896,7 @@ function renderDashboard() {
       let filtered;
       const q = siHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'IN' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else if (curSiRangeStart && curSiRangeEnd) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd && (!curSiRangeProducts || curSiRangeProducts.includes(t.pid)));
       } else if (curSiFilterDate) {
@@ -4933,7 +4933,7 @@ function renderDashboard() {
       let filtered;
       const q = soHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else if (curSoRangeStart && curSoRangeEnd) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd && (!curSoRangeProducts || curSoRangeProducts.includes(t.pid)));
       } else if (curSoFilterDate) {
@@ -5156,8 +5156,8 @@ function renderDashboard() {
       const q = txnHistorySearch.trim().toLowerCase();
       let filteredIn, filteredOut;
       if (q) {
-        filteredIn = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
-        filteredOut = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filteredIn = T.filter(t => t.tp === 'IN' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filteredOut = T.filter(t => t.tp === 'OUT' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else {
         filteredIn = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
         filteredOut = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
@@ -5289,7 +5289,7 @@ function renderDashboard() {
       const catVal = document.getElementById('rsi-cat').value;
       let txns = T.filter(t => t.tp === 'IN');
       if (rsiSelectedPids.length) txns = txns.filter(t => rsiSelectedPids.includes(t.pid));
-      else if (catVal !== '') txns = txns.filter(t => t.ci === catVal);
+      else if (catVal !== '') txns = txns.filter(t => t.ci.toString() === catVal);
       if (from) txns = txns.filter(t => t.d.slice(0, 10) >= from);
       if (to) txns = txns.filter(t => t.d.slice(0, 10) <= to);
       lastRsiTxns = txns;
@@ -5324,7 +5324,7 @@ function renderDashboard() {
       const catVal = document.getElementById('rso-cat').value;
       let txns = T.filter(t => t.tp === 'OUT');
       if (rsoSelectedPids.length) txns = txns.filter(t => rsoSelectedPids.includes(t.pid));
-      else if (catVal !== '') txns = txns.filter(t => t.ci === catVal);
+      else if (catVal !== '') txns = txns.filter(t => t.ci.toString() === catVal);
       if (from) txns = txns.filter(t => t.d.slice(0, 10) >= from);
       if (to) txns = txns.filter(t => t.d.slice(0, 10) <= to);
       lastRsoTxns = txns;
