@@ -4764,11 +4764,11 @@ function renderDashboard() {
       if (onSelect === 'renderSiHistory') {
         curSiRangeStart = rs.start; curSiRangeEnd = rs.end;
         curSiFilterDate = null; curSiMonth = rs.start.slice(0,7);
-        renderSiHistory(curSiMonth,'');
+        renderSiHistory();
       } else {
         curSoRangeStart = rs.start; curSoRangeEnd = rs.end;
         curSoFilterDate = null; curSoMonth = rs.start.slice(0,7);
-        renderSoHistory(curSoMonth,'');
+        renderSoHistory();
       }
       closeCalPicker(containerId);
     }
