@@ -4307,7 +4307,7 @@ function renderDashboard() {
         // group by product
         const prodMap = {};
         g.txns.forEach(t => {
-          const key = t.pid + '|' + (t.d.length > 10 ? t.d : (t.d + '-' + Math.random()));
+          const key = t.pid + '|' + ((t.d && t.d.length > 10) ? t.d : ((t.d || '') + '-' + Math.random()));
           if (!prodMap[key]) prodMap[key] = { pn: t.pn, pid: t.pid, sizes: {}, pa: '-', rf: '-' };
           if (t.pa && t.pa.trim()) prodMap[key].pa = t.pa.trim();
           if (t.rf && t.rf.trim()) prodMap[key].rf = t.rf.trim();
