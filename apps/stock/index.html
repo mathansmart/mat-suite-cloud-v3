@@ -7283,7 +7283,7 @@ function renderDashboard() {
       dot.title = online ? 'Server Online' : 'Server Offline';
     }
 
-    let curBulkMonth = todayStr().slice(0, 7);
+    let curBulkMonth = 'ALL';
     function renderBulkHistory(monthDisp) {
       if (monthDisp) {
         if (monthDisp === 'ALL') {
