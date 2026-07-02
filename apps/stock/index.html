@@ -7157,25 +7157,33 @@ function renderDashboard() {
           let errors = [];
           let currentPName = '';
           const bulkId = 'B' + Date.now();
-          const summary = {}; // Track success per product
 
           let bulkInputDate = document.getElementById('bulk-txn-date').value || todayD();
           let isoInputDate = d2i(bulkInputDate);
           let txnDate = (isoInputDate ? isoInputDate : new Date().toISOString().slice(0, 10)) + 'T00:00:00';
 
-          // 1. Find Header Indices Dynamically
           let idxA = 0, idxB = 1, idxC = 2; // Defaults
           const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           
+          let isMatrixFormat = false;
+          let matrixHeaders = [];
+
           for (let i = 0; i < Math.min(rows.length, 10); i++) {
             const r = rows[i]; if (!r) continue;
-            const pIdx = r.findIndex(c => norm(c).includes('particular'));
+            const pIdx = r.findIndex(c => norm(c).includes('particular') || norm(c).includes('product'));
             const sIdx = r.findIndex(c => norm(c) === 'size');
             const qIdx = r.findIndex(c => norm(c).includes('qty') || norm(c).includes('quant'));
+            
+            if (pIdx !== -1 && sIdx === -1 && qIdx === -1) {
+              isMatrixFormat = true;
+              matrixHeaders = r.map(c => String(c || '').trim());
+              idxA = pIdx;
+              break;
+            }
             if (pIdx !== -1) idxA = pIdx;
             if (sIdx !== -1) idxB = sIdx;
             if (qIdx !== -1) idxC = qIdx;
-            if (pIdx !== -1 || sIdx !== -1) break; // Found headers
+            if (pIdx !== -1 || sIdx !== -1) break; 
           }
 
           for (let i = 0; i < rows.length; i++) {
@@ -7183,66 +7191,73 @@ function renderDashboard() {
             if (!row || row.length === 0) continue;
             
             const colA = String(row[idxA] || '').trim();
-            const colB = String(row[idxB] || '').trim();
-            const colC = String(row[idxC] || '').trim();
-
             const normExcelName = norm(colA);
-            const normExcelSize = norm(colB);
 
-            // Update product if Column A has anything that looks like a name and isn't a header
-            if (colA && normExcelName !== 'particulars' && normExcelName !== 'name') {
-              currentPName = colA;
-            }
-
-            if (currentPName && colB && colC) {
-              const pQty = parseInt(colC.replace(/[^0-9-]/g, '')) || 0;
-              if (pQty <= 0) continue;
-
-              const excelNormName = norm(currentPName);
-              const candidates = P.filter(p => norm(p.n) === excelNormName);
+            if (isMatrixFormat) {
+              if (!colA || normExcelName === 'productname' || colA.startsWith('---') || normExcelName === 'total') continue;
               
+              const candidates = P.filter(p => norm(p.n) === normExcelName);
               if (!candidates.length) {
-                errors.push(`Row ${i+1}: Product "${currentPName}" not found.`);
+                errors.push(`Row ${i+1}: Product "${colA}" not found.`);
                 continue;
               }
-
-              let product = candidates.find(p => 
-                Object.keys(p.s || {}).some(k => norm(k) === normExcelSize)
-              ) || candidates[0];
-
-              const sizeKey = Object.keys(product.s).find(k => norm(k) === normExcelSize);
-              if (!sizeKey) {
-                errors.push(`Row ${i+1}: Size "${colB}" not found for "${product.n}".`);
-                continue;
-              }
-
-              // Subtract
-              product.s[sizeKey] -= pQty;
-
-              T.push({
-                id: 'T' + Date.now() + i,
-                tp: 'OUT',
-                pid: product.id,
-                pn: product.n,
-                ci: product.ci,
-                sz: sizeKey,
-                q: pQty,
-                d: txnDate,
-                rf: file.name,
-                bid: bulkId,
-                u: curU
-              });
+              const product = candidates[0];
               
-              processed++;
-              summary[product.n] = (summary[product.n] || 0) + 1;
+              for (let c = idxA + 1; c < matrixHeaders.length; c++) {
+                 const szHeader = matrixHeaders[c];
+                 if (!szHeader || norm(szHeader) === 'total') continue;
+                 
+                 const pQty = parseInt(String(row[c] || '').replace(/[^0-9-]/g, '')) || 0;
+                 if (pQty <= 0) continue;
+                 
+                 const sizeKey = Object.keys(product.s).find(k => norm(k) === norm(szHeader));
+                 if (!sizeKey) {
+                    errors.push(`Row ${i+1}: Size "${szHeader}" not found for "${product.n}".`);
+                    continue;
+                 }
+                 
+                 product.s[sizeKey] -= pQty;
+                 T.push({ id: 'T' + Date.now() + '_' + i + '_' + c, tp: 'OUT', pid: product.id, pn: product.n, ci: product.ci, sz: sizeKey, q: pQty, d: txnDate, rf: file.name, bid: bulkId, u: curU });
+                 processed++;
+              }
+            } else {
+              const colB = String(row[idxB] || '').trim();
+              const colC = String(row[idxC] || '').trim();
+              const normExcelSize = norm(colB);
+
+              if (colA && normExcelName !== 'particulars' && normExcelName !== 'name') currentPName = colA;
+
+              if (currentPName && colB && colC) {
+                const pQty = parseInt(colC.replace(/[^0-9-]/g, '')) || 0;
+                if (pQty <= 0) continue;
+
+                const excelNormName = norm(currentPName);
+                const candidates = P.filter(p => norm(p.n) === excelNormName);
+                if (!candidates.length) {
+                  errors.push(`Row ${i+1}: Product "${currentPName}" not found.`);
+                  continue;
+                }
+
+                let product = candidates.find(p => Object.keys(p.s || {}).some(k => norm(k) === normExcelSize)) || candidates[0];
+                const sizeKey = Object.keys(product.s).find(k => norm(k) === normExcelSize);
+                if (!sizeKey) {
+                  errors.push(`Row ${i+1}: Size "${colB}" not found for "${product.n}".`);
+                  continue;
+                }
+
+                product.s[sizeKey] -= pQty;
+                T.push({ id: 'T' + Date.now() + i, tp: 'OUT', pid: product.id, pn: product.n, ci: product.ci, sz: sizeKey, q: pQty, d: txnDate, rf: file.name, bid: bulkId, u: curU });
+                processed++;
+              }
             }
           }
 
           if (processed > 0) {
             await persist();
-            renderDashboard(); renderInventory(); renderBulkHistory();
+            const txnMonth = getMonthFromDateStr(txnDate);
+            renderDashboard(); renderInventory(); renderBulkHistory(txnMonth);
           } else if (errors.length === 0) {
-            showAlert('Bulk Upload', "No data found to process. Please check your Excel format.");
+            showAlert('Bulk Upload', "No valid data found to process. Please check your Excel format.");
           }
 
           if (errors.length > 0) {
