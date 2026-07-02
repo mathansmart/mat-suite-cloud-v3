@@ -4307,12 +4307,13 @@ function renderDashboard() {
         // group by product
         const prodMap = {};
         g.txns.forEach(t => {
-          if (!prodMap[t.pn]) prodMap[t.pn] = { pn: t.pn, pid: t.pid, sizes: {}, pa: '-', rf: '-' };
-          if (t.pa && t.pa.trim()) prodMap[t.pn].pa = t.pa.trim();
-          if (t.rf && t.rf.trim()) prodMap[t.pn].rf = t.rf.trim();
-          if (!prodMap[t.pn].sizes[t.sz]) prodMap[t.pn].sizes[t.sz] = { qty: 0, ids: [] };
-          prodMap[t.pn].sizes[t.sz].qty += t.q;
-          prodMap[t.pn].sizes[t.sz].ids.push(t.id);
+          const key = t.pid + '|' + (t.d.length > 10 ? t.d : (t.d + '-' + Math.random()));
+          if (!prodMap[key]) prodMap[key] = { pn: t.pn, pid: t.pid, sizes: {}, pa: '-', rf: '-' };
+          if (t.pa && t.pa.trim()) prodMap[key].pa = t.pa.trim();
+          if (t.rf && t.rf.trim()) prodMap[key].rf = t.rf.trim();
+          if (!prodMap[key].sizes[t.sz]) prodMap[key].sizes[t.sz] = { qty: 0, ids: [] };
+          prodMap[key].sizes[t.sz].qty += t.q;
+          prodMap[key].sizes[t.sz].ids.push(t.id);
         });
         const prodList = Object.values(prodMap);
         const thSz = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;padding:8px 3px;">${s}</th>`).join('');
@@ -4496,9 +4497,12 @@ function renderDashboard() {
 
     function deleteTxnEntry(btn) {
       const { pid, date, tp: txnType, ci } = btn.dataset;
+      const sizeData = JSON.parse(btn.getAttribute('data-sizes') || '{}');
+      const allIds = [];
+      Object.values(sizeData).forEach(cell => { if (cell.ids) allIds.push(...cell.ids); });
+      
       showConfirm(`Delete ${txnType}`, `Are you sure you want to delete this ${txnType} entry from ${date}?`, () => {
-        // find all txns for this product on this date with this type
-        const toDelete = T.filter(t => t.pid === pid && t.d.slice(0, 10) === date && t.tp === txnType && String(t.ci) === String(ci));
+        const toDelete = T.filter(t => allIds.includes(t.id));
         if (!toDelete.length) { alert('Entry not found!'); return; }
         S.recycleBin.push({
           id: 'recycle_' + Date.now() + '_' + Math.floor(Math.random()*1000),
