@@ -4887,7 +4887,7 @@ function renderDashboard() {
       let filtered;
       const q = siHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'IN' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'IN' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
       } else if (curSiRangeStart && curSiRangeEnd) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd && (!curSiRangeProducts || curSiRangeProducts.includes(t.pid)));
       } else if (curSiFilterDate) {
@@ -4924,7 +4924,7 @@ function renderDashboard() {
       let filtered;
       const q = soHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
       } else if (curSoRangeStart && curSoRangeEnd) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd && (!curSoRangeProducts || curSoRangeProducts.includes(t.pid)));
       } else if (curSoFilterDate) {
@@ -5147,8 +5147,8 @@ function renderDashboard() {
       const q = txnHistorySearch.trim().toLowerCase();
       let filteredIn, filteredOut;
       if (q) {
-        filteredIn = T.filter(t => t.tp === 'IN' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
-        filteredOut = T.filter(t => t.tp === 'OUT' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filteredIn = T.filter(t => t.tp === 'IN' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filteredOut = T.filter(t => t.tp === 'OUT' && ((t.pn || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
       } else {
         filteredIn = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
         filteredOut = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
