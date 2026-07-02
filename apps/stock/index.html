@@ -7286,7 +7286,9 @@ function renderDashboard() {
     let curBulkMonth = todayStr().slice(0, 7);
     function renderBulkHistory(monthDisp) {
       if (monthDisp) {
-        if (monthDisp.includes('-') && monthDisp.split('-')[0].length === 4) {
+        if (monthDisp === 'ALL') {
+          curBulkMonth = 'ALL';
+        } else if (monthDisp.includes('-') && monthDisp.split('-')[0].length === 4) {
           curBulkMonth = monthDisp;
         } else {
           const iso = d2i(monthDisp);
@@ -7296,20 +7298,18 @@ function renderDashboard() {
       const wrap = document.getElementById('bulk-history-wrap');
       if (!wrap) return;
 
-      // Calculate unique months with bulk uploads
       const bulkMonths = new Set();
       bulkMonths.add(todayStr().slice(0, 7)); // Always include current month
       T.forEach(t => {
         if (t.bid && t.d) {
           const m = getMonthFromDateStr(t.d);
-          if (m) {
-            bulkMonths.add(m);
-          }
+          if (m) bulkMonths.add(m);
         }
       });
       const sortedMonths = Array.from(bulkMonths).sort().reverse();
       
-      const monthOptions = sortedMonths.map(m => {
+      let monthOptions = `<option value="ALL" ${curBulkMonth === 'ALL' ? 'selected' : ''}>All Time</option>`;
+      monthOptions += sortedMonths.map(m => {
         const [y, mm] = m.split('-');
         const dateObj = new Date(parseInt(y), parseInt(mm) - 1);
         const label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -7317,9 +7317,14 @@ function renderDashboard() {
         return `<option value="${m}" ${isSelected}>${label}</option>`;
       }).join('');
 
-      const bulkTxns = T.filter(t => t.bid && getMonthFromDateStr(t.d) === curBulkMonth);
-      const [ay, am] = curBulkMonth.split('-');
-      const mName = new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
+      const bulkTxns = curBulkMonth === 'ALL' 
+        ? T.filter(t => t.bid)
+        : T.filter(t => t.bid && getMonthFromDateStr(t.d) === curBulkMonth);
+
+      const mName = curBulkMonth === 'ALL' ? 'All Time' : (function(){
+        const [ay, am] = curBulkMonth.split('-');
+        return new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
+      })();
 
       if (!bulkTxns.length) {
         wrap.innerHTML = `
@@ -7352,7 +7357,9 @@ function renderDashboard() {
         groups[t.bid].total += t.q;
       });
 
-      const rows = Object.values(groups).reverse().map(g => `
+      const sortedGroups = Object.values(groups).sort((a, b) => b.date.localeCompare(a.date) || b.bid.localeCompare(a.bid));
+
+      const rows = sortedGroups.map(g => `
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:12px; font-weight:700; font-size:13px;">${i2d(g.date)}</td>
           <td style="padding:12px; font-size:13px; color:var(--muted);">${g.file}</td>
@@ -7373,9 +7380,9 @@ function renderDashboard() {
             </select>
           </div>
         </div>
-        <div class="table-wrap" style="overflow:hidden;">
+        <div class="table-wrap" style="overflow:hidden; max-height:400px; overflow-y:auto;">
           <table style="width:100%; border-collapse:collapse;">
-            <thead style="background:var(--surface2);">
+            <thead style="background:var(--surface2); position:sticky; top:0; z-index:1;">
               <tr>
                 <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border);">${t('bulk_date')}</th>
                 <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border);">${t('bulk_file')}</th>
