@@ -4789,15 +4789,26 @@ function renderDashboard() {
     }
 function d2i(val) {
   if (!val) return '';
-  const parts = val.split(/[-/]/);
+  const parts = val.trim().replace(/[\/\.]/g, '-').split('-');
   if (parts.length === 3) {
-    let [d, m, y] = parts.map(p => p.padStart(2, '0'));
+    let d = parts[0], m = parts[1], y = parts[2];
+    if (d.length === 4) {
+      y = parts[0]; m = parts[1]; d = parts[2];
+    }
+    d = d.padStart(2, '0');
+    m = m.padStart(2, '0');
     if (y.length === 2) y = (parseInt(y) < 50 ? '20' : '19') + y;
+    y = y.padStart(4, '0');
     return `${y}-${m}-${d}`;
   }
   if (parts.length === 2) {
-    let [m, y] = parts.map(p => p.padStart(2, '0'));
+    let m = parts[0], y = parts[1];
+    if (m.length === 4) {
+      y = parts[0]; m = parts[1];
+    }
+    m = m.padStart(2, '0');
     if (y.length === 2) y = (parseInt(y) < 50 ? '20' : '19') + y;
+    y = y.padStart(4, '0');
     return `${y}-${m}`;
   }
   return val;
@@ -4814,12 +4825,13 @@ function d2i(val) {
 
       cont.innerHTML = `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
-          <div class="form-group" style="margin:0; width:180px; flex-shrink: 0; display:flex; gap:8px;">
+          <div class="form-group" style="margin:0; width:220px; flex-shrink: 0; display:flex; gap:8px;">
             <div class="search-wrapper" style="flex:1;">
-              <div class="search-icon-left" style="top:11px; font-size:14px;">📅</div>
+              <div class="search-icon-left" style="top:11px; font-size:14px; left:10px;">📅</div>
               <input type="text" value="${rawVal}" 
                 placeholder="DD-MM-YYYY"
                 class="premium-search" 
+                style="height:38px; padding-left:32px !important; padding-right:10px !important; font-size:13px; font-weight:700; width: 100% !important;"
                 autocomplete="off"
                 onkeyup="if(event.key==='Enter'){ 
                   const v = this.value.trim().toUpperCase();
@@ -4828,7 +4840,7 @@ function d2i(val) {
                 }"
               >
             </div>
-            <button class="btn btn-primary" style="padding:0 12px; height:38px; border-radius:6px; font-weight:700;" 
+            <button class="btn btn-primary" style="padding:0 12px; height:38px; border-radius:6px; font-weight:700; font-size:12px;" 
               onclick="
                 const input = this.previousElementSibling.querySelector('input');
                 const v = input.value.trim().toUpperCase();
