@@ -4785,6 +4785,8 @@ function renderDashboard() {
         curSoFilterDate = null; curSoMonth = rs.start.slice(0,7);
         renderSoHistory();
       }
+      closeCalPicker(containerId);
+    }
 function d2i(val) {
   if (!val) return '';
   const parts = val.split(/[-/]/);
@@ -4907,13 +4909,9 @@ function d2i(val) {
       if (!el) return;
       if (!document.getElementById('so-month-selector')) el.innerHTML = '<div id="so-month-selector"></div><div id="so-history-content"></div>';
       renderMonthFolders('so-month-selector', curSoMonth, 'renderSoHistory', 'OUT', soHistorySearch, 'renderSoHistorySearch');
-      
-      let filtered;
-      const q = soHistorySearch.trim().toLowerCase();
+      let filtered = [];
       if (q) {
         filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
-      } else if (curSoRangeStart && curSoRangeEnd) {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd && (!curSoRangeProducts || curSoRangeProducts.includes(t.pid)));
       } else if (curSoFilterDate) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) === curSoFilterDate);
       } else {
