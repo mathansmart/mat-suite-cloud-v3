@@ -4552,7 +4552,7 @@ function renderDashboard() {
     let curSiRangeProducts = null, curSoRangeProducts = null;
     let curRangeFilterType = 'IN';
     let todayM = todayStr().slice(0, 7);
-    let curSiMonth = todayM, curSoMonth = todayM, curTxnMonth = todayM, curRptMonth = todayM;
+    let curSiMonth = 'ALL', curSoMonth = 'ALL', curTxnMonth = 'ALL', curRptMonth = 'ALL';
     let siHistorySearch = '', soHistorySearch = '', txnHistorySearch = '';
 
     function fmtDisplay(d) {
@@ -4819,9 +4819,8 @@ function d2i(val) {
       if (!cont) return;
 
       const mName = activeMonth === 'ALL' ? 'All Time' : new Date(activeMonth+'-01').toLocaleString('default',{month:'short',year:'numeric'});
-      const todayM = todayStr().slice(0,7);
       const rawVal = (activeMonth === 'ALL' ? '' : i2d(activeMonth));
-      const hasFilter = activeMonth !== 'ALL' && activeMonth !== todayM;
+      const hasFilter = activeMonth !== 'ALL' || filterDate !== null;
 
       cont.innerHTML = `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
@@ -4854,7 +4853,7 @@ function d2i(val) {
             <i class="ti ti-calendar" style="font-size:16px;margin-right:6px;color:var(--primary);"></i>All Months
           </button>
           
-          <button class="btn btn-ghost" onclick="${onSelect}('${todayM}', '${searchVal||''}')" style="color:var(--danger);font-weight:700;display:${(hasFilter || activeMonth==='ALL' || activeMonth!==todayM)?'flex':'none'}">
+          <button class="btn btn-ghost" onclick="${onSelect}('ALL', '${searchVal||''}')" style="color:var(--danger);font-weight:700;display:${hasFilter ? 'flex' : 'none'}">
             <i class="ti ti-x" style="font-size:16px;"></i>Clear Filter
           </button>
 
