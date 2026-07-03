@@ -3791,6 +3791,14 @@ function renderDashboard() {
     let siAddedPids = [];
     let soAddedPids = [], soData = {};
 
+    function saveDraftSI() {
+      localStorage.setItem('gsm3_si_draft', JSON.stringify({ pids: siAddedPids, data: siTableData, date: document.getElementById('si-date') ? document.getElementById('si-date').value : '', sup: document.getElementById('si-supplier') ? document.getElementById('si-supplier').value : '' }));
+    }
+    function saveDraftSO() {
+      localStorage.setItem('gsm3_so_draft', JSON.stringify({ pids: soAddedPids, data: soData, date: document.getElementById('so-date') ? document.getElementById('so-date').value : '', cust: document.getElementById('so-customer') ? document.getElementById('so-customer').value : '' }));
+    }
+
+
     let siProdPanelOpen = false; // kept for compat
 
     function renderSiSearchDropdown() {
@@ -3840,6 +3848,7 @@ function renderDashboard() {
         siTableData[pid] = { sizes: {}, supplier: '', invoice: '' };
         szs(p.ci).forEach(s => siTableData[pid].sizes[s] = 0);
       }
+      saveDraftSI();
       renderSiSearchDropdown();
       renderSiTable();
     }
@@ -3960,18 +3969,19 @@ function renderDashboard() {
           }
         });
       });
-      wrap.querySelectorAll('.si-qty-input').forEach(el => {
+      wrap.querySelectorAll('.si-input').forEach(el => {
         el.addEventListener('input', function () {
           const pid = this.dataset.pid;
           siTableData[pid].sizes[this.dataset.sz] = parseInt(this.value) || 0;
           const rowTot = Object.values(siTableData[pid].sizes).reduce((a, b) => a + b, 0);
           const rowEl = wrap.querySelector(`tr[data-pid="${pid}"] .si-row-total`);
           if (rowEl) rowEl.textContent = rowTot;
+          saveDraftSI();
           updateSiSum();
         });
       });
       wrap.querySelectorAll('.si-inv-input').forEach(el => {
-        el.addEventListener('input', function () { siTableData[this.dataset.pid].invoice = this.value; });
+        el.addEventListener('input', function () { siTableData[this.dataset.pid].invoice = this.value; saveDraftSI(); });
       });
       updateSiSum();
     }
@@ -3986,6 +3996,7 @@ function renderDashboard() {
 
     function clearSiTable() {
       siTableData = {}; siAddedPids = [];
+      saveDraftSI();
       const s = document.getElementById('si-search'); if (s) s.value = '';
       const dr = document.getElementById('si-search-drop'); if (dr) dr.style.display = 'none';
       renderSiTable();
@@ -4023,6 +4034,7 @@ function renderDashboard() {
       if (saved > 0) {
         showCenterToast(`${saved} entries saved!`);
         siTableData = {}; siAddedPids = [];
+        saveDraftSI();
         renderSiProductList(); renderSiTable(); renderSiHistory(); updateBadge();
       } else { showAlert('Stock In', 'Please enter quantity!'); }
     }
@@ -4070,10 +4082,11 @@ function renderDashboard() {
         delete soData[pid];
       } else {
         soAddedPids.push(pid);
+        soData[pid] = {};
         const p = P.find(x => x.id === pid);
-        soData[pid] = { sizes: {}, supplier: '', invoice: '' };
-        szs(p.ci).forEach(s => soData[pid].sizes[s] = 0);
+        szs(p.ci).forEach(s => soData[pid][s] = 0);
       }
+      saveDraftSO();
       renderSoSearchDropdown();
       renderSoEntries();
     }
@@ -4108,13 +4121,13 @@ function renderDashboard() {
             const cur = (p.s ? p.s[s] : 0) || 0;
             const sc = cur <= 0 ? 'color:var(--danger)' : cur <= p.m ? 'color:var(--warn)' : 'color:var(--accent3)';
             return `<td style="padding:3px 2px;">
-          <input type="number" min="0" value="${d.sizes[s] || ''}" placeholder="0"
+          <input type="number" min="0" value="${d[s] || ''}" placeholder="0"
             data-pid="${p.id}" data-sz="${s}" class="so-qty-input"
             style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:3px;padding:5px 2px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;text-align:center;">
           <div style="font-size:9px;text-align:center;font-family:'JetBrains Mono',monospace;${sc}">Stk:${cur}</div>
         </td>`;
           }).join('');
-          const rowTot = Object.values(d.sizes).reduce((a, b) => a + b, 0);
+          const rowTot = Object.values(d).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
           return `<tr data-pid="${p.id}">
         <td style="font-weight:700;font-size:13px;white-space:nowrap;padding:6px 10px;border-right:1.5px solid var(--border);">${p.n}</td>
         ${tds}
@@ -4200,12 +4213,16 @@ function renderDashboard() {
       });
       cont.querySelectorAll('.so-qty-input').forEach(el => {
         el.addEventListener('input', function () {
-          const pid = this.dataset.pid;
-          if (!soData[pid]) soData[pid] = { sizes: {}, supplier: '', invoice: '' };
-          soData[pid].sizes[this.dataset.sz] = parseInt(this.value) || 0;
-          const rowTot = Object.values(soData[pid].sizes).reduce((a, b) => a + b, 0);
-          const rowEl = cont.querySelector(`tr[data-pid="${pid}"] .so-row-total`);
+          const p = this.dataset.pid, s = this.dataset.sz;
+          soData[p][s] = parseInt(this.value) || 0;
+          const pr = P.find(x => x.id === p);
+          const av = pr.s[s] || 0;
+          if (soData[p][s] > av) this.classList.add('exceed');
+          else this.classList.remove('exceed');
+          const rowTot = Object.values(soData[p]).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+          const rowEl = cont.querySelector(`tr[data-pid="${p}"] .so-row-total`);
           if (rowEl) rowEl.textContent = rowTot;
+          saveDraftSO();
           updateSoSum();
         });
       });
@@ -4965,6 +4982,22 @@ function renderDashboard() {
       if (supEl) {
         supEl.innerHTML = '<option value="" disabled selected>-- Select Supplier --</option>' + (S.suppliers || []).map(sup => `<option value="${sup.id}">${sup.n}</option>`).join('');
       }
+      
+      const draftStr = localStorage.getItem('gsm3_si_draft');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          if (draft.pids) siAddedPids = draft.pids;
+          if (draft.data) siTableData = draft.data;
+          if (draft.date) d.value = draft.date;
+          if (draft.sup && supEl) supEl.value = draft.sup;
+        } catch(e) {}
+      }
+
+      // Add event listeners for direct inputs saving draft
+      if (d) d.addEventListener('change', saveDraftSI);
+      if (supEl) supEl.addEventListener('change', saveDraftSI);
+
       renderSiTable(); renderSiHistory();
     }
     function initSO() {
@@ -4972,6 +5005,22 @@ function renderDashboard() {
       const d = document.getElementById('so-date'); if (d && !d.value) d.value = todayD();
       const s = document.getElementById('so-search'); if (s) s.value = '';
       const dr = document.getElementById('so-search-drop'); if (dr) dr.style.display = 'none';
+      const custEl = document.getElementById('so-customer');
+      
+      const draftStr = localStorage.getItem('gsm3_so_draft');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          if (draft.pids) soAddedPids = draft.pids;
+          if (draft.data) soData = draft.data;
+          if (draft.date && d) d.value = draft.date;
+          if (draft.cust && custEl) custEl.value = draft.cust;
+        } catch(e) {}
+      }
+
+      if (d) d.addEventListener('change', saveDraftSO);
+      if (custEl) custEl.addEventListener('input', saveDraftSO);
+
       renderSoEntries(); renderSoHistory();
     }
     function clearAlertsSearch() {
