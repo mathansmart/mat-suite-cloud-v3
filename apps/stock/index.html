@@ -2314,6 +2314,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         let m = p[0], y = p[1];
         if (m.length === 4) { y = p[0]; m = p[1]; }
         if (!y || !m || isNaN(y) || isNaN(m)) return '';
+        if (y.length === 2) y = '20' + y;
         return y.padStart(4, '0') + '-' + m.padStart(2, '0');
       }
       if (p.length === 3) {
@@ -4784,143 +4785,100 @@ function renderDashboard() {
         curSoFilterDate = null; curSoMonth = rs.start.slice(0,7);
         renderSoHistory();
       }
-      closeCalPicker(containerId);
-    }
-
-    function clearRangeFilter(containerId, onSelect) {
-      if (onSelect === 'renderSiHistory') {
-        curSiRangeStart = null; curSiRangeEnd = null; curSiFilterDate = null;
-        renderSiHistory(curSiMonth,'');
-      } else {
-        curSoRangeStart = null; curSoRangeEnd = null; curSoFilterDate = null;
-        renderSoHistory(curSoMonth,'');
-      }
-      closeCalPicker(containerId);
-    }
+function d2i(val) {
+  if (!val) return '';
+  const parts = val.split(/[-/]/);
+  if (parts.length === 3) {
+    let [d, m, y] = parts.map(p => p.padStart(2, '0'));
+    if (y.length === 2) y = (parseInt(y) < 50 ? '20' : '19') + y;
+    return `${y}-${m}-${d}`;
+  }
+  if (parts.length === 2) {
+    let [m, y] = parts.map(p => p.padStart(2, '0'));
+    if (y.length === 2) y = (parseInt(y) < 50 ? '20' : '19') + y;
+    return `${y}-${m}`;
+  }
+  return val;
+}
 
     function renderMonthFolders(containerId, activeMonth, onSelect, type, searchVal, onSearch) {
       const cont = document.getElementById(containerId);
       if (!cont) return;
 
-      let mName = 'All Time';
-      if (activeMonth !== 'ALL') {
-        const [ay, am] = activeMonth.split('-');
-        mName = new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
-      }
-
-      const rangeStart = (onSelect === 'renderSiHistory') ? curSiRangeStart : (onSelect === 'renderSoHistory' ? curSoRangeStart : null);
-      const rangeEnd   = (onSelect === 'renderSiHistory') ? curSiRangeEnd   : (onSelect === 'renderSoHistory' ? curSoRangeEnd : null);
-      const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : (onSelect === 'renderSoHistory' ? curSoFilterDate : null);
-
-      let filterLabel, hasFilter;
-      if (rangeStart && rangeEnd) {
-        filterLabel = `📅 ${i2d(rangeStart)} → ${i2d(rangeEnd)}`;
-        hasFilter = true;
-      } else if (filterDate) {
-        filterLabel = `📅 ${i2d(filterDate)}`;
-        hasFilter = true;
-      } else {
-        filterLabel = `📅 ${mName}`;
-        hasFilter = false;
-      }
-
-      const rawVal = rangeStart && rangeEnd ? `${i2d(rangeStart)} to ${i2d(rangeEnd)}` : (i2d(filterDate) || (activeMonth === 'ALL' ? 'All Months' : i2d(activeMonth)));
-
-      const _prevFocused = document.activeElement;
-      const _prevSearchVal = _prevFocused && _prevFocused.id && _prevFocused.closest && _prevFocused.closest(`#${containerId}`) ? _prevFocused.value : null;
-      const _prevWasSearch = _prevSearchVal !== null;
+      const mName = activeMonth === 'ALL' ? 'All Time' : new Date(activeMonth+'-01').toLocaleString('default',{month:'short',year:'numeric'});
+      const todayM = todayStr().slice(0,7);
+      const rawVal = (activeMonth === 'ALL' ? '' : i2d(activeMonth));
+      const hasFilter = activeMonth !== 'ALL' && activeMonth !== todayM;
 
       cont.innerHTML = `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
-          <div class="form-group" style="margin:0; width:180px; flex-shrink: 0;">
-            <div class="search-wrapper">
+          <div class="form-group" style="margin:0; width:180px; flex-shrink: 0; display:flex; gap:8px;">
+            <div class="search-wrapper" style="flex:1;">
               <div class="search-icon-left" style="top:11px; font-size:14px;">📅</div>
               <input type="text" value="${rawVal}" 
                 placeholder="DD-MM-YYYY"
                 class="premium-search" 
                 autocomplete="off"
-                style="height:38px; padding-left:34px; font-size:13px; font-weight:700; width: 100% !important;"
-                oninput="if(this.value.length>=7) ${onSelect}(this.value)">
+                onkeyup="if(event.key==='Enter'){ 
+                  const v = this.value.trim().toUpperCase();
+                  if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL', '${searchVal||''}');
+                  else ${onSelect}(this.value, '${searchVal||''}');
+                }"
+              >
             </div>
+            <button class="btn btn-primary" style="padding:0 12px; height:38px; border-radius:6px; font-weight:700;" 
+              onclick="
+                const input = this.previousElementSibling.querySelector('input');
+                const v = input.value.trim().toUpperCase();
+                if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL', '${searchVal||''}');
+                else ${onSelect}(input.value, '${searchVal||''}');
+              ">GO</button>
           </div>
-
-          <button onclick="openCustomRangeModal('${type}')"
-            class="btn btn-primary"
-            style="height:38px; padding:0 16px; border-radius:10px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:var(--shadow-sm); z-index: 5; cursor:pointer;">
-            📅 Range
+          
+          <button class="btn btn-ghost" onclick="${onSelect}('ALL', '${searchVal||''}')" 
+            style="border:1.5px solid var(--border);color:var(--text-color);font-weight:700;letter-spacing:0.5px;">
+            <i class="ti ti-calendar" style="font-size:16px;margin-right:6px;color:var(--primary);"></i>All Months
+          </button>
+          
+          <button class="btn btn-ghost" onclick="${onSelect}('${todayM}', '${searchVal||''}')" style="color:var(--danger);font-weight:700;display:${(hasFilter || activeMonth==='ALL' || activeMonth!==todayM)?'flex':'none'}">
+            <i class="ti ti-x" style="font-size:16px;"></i>Clear Filter
           </button>
 
-          <button onclick="${onSelect}('ALL')"
-            style="height:38px; padding:0 16px; border-radius:10px; border:1.5px solid var(--border); background:${activeMonth === 'ALL' ? 'var(--accent)' : 'var(--surface)'}; color:${activeMonth === 'ALL' ? '#fff' : 'var(--text-main)'}; cursor:pointer; font-size:12px; font-weight:700; z-index:5;">
-            🗓️ All Months
-          </button>
-
-
-          ${hasFilter ? `<button onclick="${onSelect==='renderSiHistory'?'curSiRangeStart=null;curSiRangeEnd=null;curSiFilterDate=null;curSiRangeProducts=null;renderSiHistory':'curSoRangeStart=null;curSoRangeEnd=null;curSoFilterDate=null;curSoRangeProducts=null;renderSoHistory'}('${activeMonth}','')"
-            style="padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:11px;font-weight:700;color:var(--danger); z-index: 5;">
-            ✕ Clear Filter
-          </button>` : ''}
-
-          <div style="margin-left:auto; margin-right:60px;">
-            <div class="search-wrapper" style="width:220px;">
-              <div class="search-icon-left" style="top:11px;">🔍</div>
-              <input type="text" placeholder="Search Product..."
-                id="${containerId}-srch"
-                class="premium-search"
-                autocomplete="off"
-                style="height:38px;font-size:12px;padding-left:34px;"
-                oninput="${onSearch}(this.value)"
-                value="${searchVal || ''}">
+          ${type === 'IN' || type === 'OUT' ? `
+            <div class="search-wrapper" style="margin-left:auto; width:220px;">
+              <div class="search-icon-left"><i class="ti ti-search"></i></div>
+              <input type="text" placeholder="Search Product..." class="premium-search" 
+                value="${searchVal||''}"
+                oninput="${onSearch}(this.value)">
             </div>
-          </div>
-        </div>`;
-
-      // Restore focus to the product search input if it was focused before re-render
-      if (_prevWasSearch) {
-        const newInput = document.getElementById(`${containerId}-srch`);
-        if (newInput) {
-          newInput.focus();
-          const len = newInput.value.length;
-          newInput.setSelectionRange(len, len);
-        }
-      }
+          `:''}
+        </div>
+      `;
     }
 
     function renderSiHistory(monthOrDateDisp, search) {
-      if (monthOrDateDisp === 'ALL') {
-        curSiMonth = 'ALL';
+      if (search !== undefined) siHistorySearch = search.toLowerCase();
+      let q = siHistorySearch;
+
+      if (monthOrDateDisp !== undefined) {
         curSiFilterDate = null;
-        curSiRangeStart = null; curSiRangeEnd = null;
-        curSiRangeProducts = null;
-      } else {
-        const monthOrDate = d2i(monthOrDateDisp);
-        if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-          if (monthOrDate.length === 10) {
-            curSiFilterDate = monthOrDate;
-            curSiMonth = monthOrDate.slice(0, 7);
-            curSiRangeStart = null; curSiRangeEnd = null;
-            curSiRangeProducts = null;
-          } else if (monthOrDate.length === 7) {
-            curSiMonth = monthOrDate;
-            curSiFilterDate = null;
-            curSiRangeStart = null; curSiRangeEnd = null;
-            curSiRangeProducts = null;
-          }
+        if (monthOrDateDisp === 'ALL') {
+          curSiMonth = 'ALL';
+        } else {
+          const monthOrDate = d2i(monthOrDateDisp);
+          if (monthOrDate && monthOrDate.length === 7) curSiMonth = monthOrDate;
+          else if (monthOrDate && monthOrDate.length === 10) curSiFilterDate = monthOrDate;
         }
       }
-      if (search !== undefined) { siHistorySearch = search; if (search) { curSiFilterDate = null; curSiRangeStart = null; curSiRangeEnd = null; curSiRangeProducts = null; } }
       
       const el = document.getElementById('si-history-wrap');
       if (!el) return;
       if (!document.getElementById('si-month-selector')) el.innerHTML = '<div id="si-month-selector"></div><div id="si-history-content"></div>';
       renderMonthFolders('si-month-selector', curSiMonth, 'renderSiHistory', 'IN', siHistorySearch, 'renderSiHistorySearch');
       
-      let filtered;
-      const q = siHistorySearch.trim().toLowerCase();
+      let filtered = [];
       if (q) {
         filtered = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
-      } else if (curSiRangeStart && curSiRangeEnd) {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd && (!curSiRangeProducts || curSiRangeProducts.includes(t.pid)));
       } else if (curSiFilterDate) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) === curSiFilterDate);
       } else {
@@ -4931,28 +4889,19 @@ function renderDashboard() {
     function renderSiHistorySearch(v) { renderSiHistory(null, v); }
 
     function renderSoHistory(monthOrDateDisp, search) {
-      if (monthOrDateDisp === 'ALL') {
-        curSoMonth = 'ALL';
+      if (search !== undefined) soHistorySearch = search.toLowerCase();
+      let q = soHistorySearch;
+
+      if (monthOrDateDisp !== undefined) {
         curSoFilterDate = null;
-        curSoRangeStart = null; curSoRangeEnd = null;
-        curSoRangeProducts = null;
-      } else {
-        const monthOrDate = d2i(monthOrDateDisp);
-        if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-          if (monthOrDate.length === 10) {
-            curSoFilterDate = monthOrDate;
-            curSoMonth = monthOrDate.slice(0, 7);
-            curSoRangeStart = null; curSoRangeEnd = null;
-            curSoRangeProducts = null;
-          } else if (monthOrDate.length === 7) {
-            curSoMonth = monthOrDate;
-            curSoFilterDate = null;
-            curSoRangeStart = null; curSoRangeEnd = null;
-            curSoRangeProducts = null;
-          }
+        if (monthOrDateDisp === 'ALL') {
+          curSoMonth = 'ALL';
+        } else {
+          const monthOrDate = d2i(monthOrDateDisp);
+          if (monthOrDate && monthOrDate.length === 7) curSoMonth = monthOrDate;
+          else if (monthOrDate && monthOrDate.length === 10) curSoFilterDate = monthOrDate;
         }
       }
-      if (search !== undefined) { soHistorySearch = search; if (search) { curSoFilterDate = null; curSoRangeStart = null; curSoRangeEnd = null; curSoRangeProducts = null; } }
       
       const el = document.getElementById('so-history-wrap');
       if (!el) return;
