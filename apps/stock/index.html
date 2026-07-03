@@ -4822,6 +4822,9 @@ function d2i(val) {
       const rawVal = (activeMonth === 'ALL' ? '' : i2d(activeMonth));
       const hasFilter = activeMonth !== 'ALL' || filterDate !== null;
 
+      const _prevFocused = document.activeElement;
+      const _prevWasSearch = _prevFocused && _prevFocused.id === `${containerId}-srch`;
+
       cont.innerHTML = `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
           <div class="form-group" style="margin:0; width:220px; flex-shrink: 0; display:flex; gap:8px;">
@@ -4861,12 +4864,22 @@ function d2i(val) {
             <div class="search-wrapper" style="margin-left:auto; width:220px;">
               <div class="search-icon-left"><i class="ti ti-search"></i></div>
               <input type="text" placeholder="Search Product..." class="premium-search" 
+                id="${containerId}-srch"
                 value="${searchVal||''}"
                 oninput="${onSearch}(this.value)">
             </div>
           `:''}
         </div>
       `;
+
+      if (_prevWasSearch) {
+        const newInput = document.getElementById(`${containerId}-srch`);
+        if (newInput) {
+          newInput.focus();
+          const len = newInput.value.length;
+          newInput.setSelectionRange(len, len);
+        }
+      }
     }
 
     function renderSiHistory(monthOrDateDisp, search) {
@@ -5398,8 +5411,28 @@ function d2i(val) {
     let paLineChart = null;
 
     function renderGlobalProductAnalysis() {
-       const outTxns = T.filter(t => t.tp === 'OUT');
-       if (outTxns.length === 0) return;
+       const currentYear = new Date().getFullYear();
+       const outTxns = T.filter(t => {
+          if (t.tp !== 'OUT' || !t.d) return false;
+          const dStr = String(t.d);
+          const y = dStr.includes('-') ? dStr.split('-')[0] : dStr.substring(0, 4);
+          return parseInt(y, 10) === currentYear;
+       });
+       if (outTxns.length === 0) {
+          document.getElementById('pa-top-prod').textContent = '-';
+          document.getElementById('pa-top-prod-qty').textContent = '-';
+          document.getElementById('pa-med-prod').textContent = '-';
+          document.getElementById('pa-med-prod-qty').textContent = '-';
+          document.getElementById('pa-low-prod').textContent = '-';
+          document.getElementById('pa-low-prod-qty').textContent = '-';
+          document.getElementById('pa-top-sc').textContent = '-';
+          document.getElementById('pa-top-sc-qty').textContent = '0 Boxes';
+          document.getElementById('pa-low-sc').textContent = '-';
+          document.getElementById('pa-low-sc-qty').textContent = '0 Boxes';
+          document.getElementById('pa-best-month').textContent = '-';
+          document.getElementById('pa-best-month-qty').textContent = '-';
+          return;
+       }
 
        // 1. Product Sales Aggregation
        const prodSales = {};
