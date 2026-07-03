@@ -4299,7 +4299,7 @@ function renderDashboard() {
         const prodMap = {};
         g.txns.forEach(t => {
           const key = t.pid + '|' + ((t.d && t.d.length > 10) ? t.d : ((t.d || '') + '-' + Math.random()));
-          if (!prodMap[key]) prodMap[key] = { pn: t.pn, pid: t.pid, sizes: {}, pa: '-', rf: '-' };
+          if (!prodMap[key]) prodMap[key] = { pn: t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || 'Unknown', pid: t.pid, sizes: {}, pa: '-', rf: '-' };
           if (t.pa && t.pa.trim()) prodMap[key].pa = t.pa.trim();
           if (t.rf && t.rf.trim()) prodMap[key].rf = t.rf.trim();
           if (!prodMap[key].sizes[t.sz]) prodMap[key].sizes[t.sz] = { qty: 0, ids: [] };
@@ -4738,6 +4738,12 @@ function renderDashboard() {
       renderRangePicker(containerId);
     }
 
+    function closeCalPicker(containerId) {
+      const pop = document.getElementById('calpop-' + containerId);
+      if (pop) pop.remove();
+      rangeState[containerId] = null;
+    }
+
     function applyRangePreset(containerId, start, end) {
       const rs = rangeState[containerId];
       if (!rs) return;
@@ -4775,22 +4781,19 @@ function renderDashboard() {
       closeCalPicker(containerId);
     }
 
-    function closeCalPicker(containerId) {
-      const pop = document.getElementById('calpop-' + containerId);
-      if (pop) pop.remove();
-      rangeState[containerId] = null;
-    }
-
     function renderMonthFolders(containerId, activeMonth, onSelect, type, searchVal, onSearch) {
       const cont = document.getElementById(containerId);
       if (!cont) return;
 
-      const [ay, am] = activeMonth.split('-');
-      const mName = new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
+      let mName = 'All Time';
+      if (activeMonth !== 'ALL') {
+        const [ay, am] = activeMonth.split('-');
+        mName = new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
+      }
 
-      const rangeStart = (onSelect === 'renderSiHistory') ? curSiRangeStart : curSoRangeStart;
-      const rangeEnd   = (onSelect === 'renderSiHistory') ? curSiRangeEnd   : curSoRangeEnd;
-      const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : curSoFilterDate;
+      const rangeStart = (onSelect === 'renderSiHistory') ? curSiRangeStart : (onSelect === 'renderSoHistory' ? curSoRangeStart : null);
+      const rangeEnd   = (onSelect === 'renderSiHistory') ? curSiRangeEnd   : (onSelect === 'renderSoHistory' ? curSoRangeEnd : null);
+      const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : (onSelect === 'renderSoHistory' ? curSoFilterDate : null);
 
       let filterLabel, hasFilter;
       if (rangeStart && rangeEnd) {
@@ -4804,7 +4807,7 @@ function renderDashboard() {
         hasFilter = false;
       }
 
-      const rawVal = rangeStart && rangeEnd ? `${i2d(rangeStart)} to ${i2d(rangeEnd)}` : (i2d(filterDate) || i2d(activeMonth));
+      const rawVal = rangeStart && rangeEnd ? `${i2d(rangeStart)} to ${i2d(rangeEnd)}` : (i2d(filterDate) || (activeMonth === 'ALL' ? 'All Months' : i2d(activeMonth)));
 
       const _prevFocused = document.activeElement;
       const _prevSearchVal = _prevFocused && _prevFocused.id && _prevFocused.closest && _prevFocused.closest(`#${containerId}`) ? _prevFocused.value : null;
@@ -4830,6 +4833,10 @@ function renderDashboard() {
             📅 Range
           </button>
 
+          <button onclick="${onSelect}('ALL')"
+            style="height:38px; padding:0 16px; border-radius:10px; border:1.5px solid var(--border); background:${activeMonth === 'ALL' ? 'var(--accent)' : 'var(--surface)'}; color:${activeMonth === 'ALL' ? '#fff' : 'var(--text-main)'}; cursor:pointer; font-size:12px; font-weight:700; z-index:5;">
+            🗓️ All Months
+          </button>
 
 
           ${hasFilter ? `<button onclick="${onSelect==='renderSiHistory'?'curSiRangeStart=null;curSiRangeEnd=null;curSiFilterDate=null;curSiRangeProducts=null;renderSiHistory':'curSoRangeStart=null;curSoRangeEnd=null;curSoFilterDate=null;curSoRangeProducts=null;renderSoHistory'}('${activeMonth}','')"
@@ -4865,7 +4872,12 @@ function renderDashboard() {
     function renderSiHistory(monthOrDateDisp, search) {
       const monthOrDate = d2i(monthOrDateDisp);
       if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-        if (monthOrDate.length === 10) {
+        if (monthOrDate === 'ALL') {
+          curSiMonth = 'ALL';
+          curSiFilterDate = null;
+          curSiRangeStart = null; curSiRangeEnd = null;
+          curSiRangeProducts = null;
+        } else if (monthOrDate.length === 10) {
           curSiFilterDate = monthOrDate;
           curSiMonth = monthOrDate.slice(0, 7);
           curSiRangeStart = null; curSiRangeEnd = null;
@@ -4887,13 +4899,13 @@ function renderDashboard() {
       let filtered;
       const q = siHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => p.id === t.pid) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
       } else if (curSiRangeStart && curSiRangeEnd) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd && (!curSiRangeProducts || curSiRangeProducts.includes(t.pid)));
       } else if (curSiFilterDate) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) === curSiFilterDate);
       } else {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curSiMonth);
+        filtered = T.filter(t => t.tp === 'IN' && t.d && (curSiMonth === 'ALL' || getMonthFromDateStr(t.d) === curSiMonth));
       }
       document.getElementById('si-history-content').innerHTML = buildTxnTable(filtered, 'IN');
     }
@@ -4902,7 +4914,12 @@ function renderDashboard() {
     function renderSoHistory(monthOrDateDisp, search) {
       const monthOrDate = d2i(monthOrDateDisp);
       if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-        if (monthOrDate.length === 10) {
+        if (monthOrDate === 'ALL') {
+          curSoMonth = 'ALL';
+          curSoFilterDate = null;
+          curSoRangeStart = null; curSoRangeEnd = null;
+          curSoRangeProducts = null;
+        } else if (monthOrDate.length === 10) {
           curSoFilterDate = monthOrDate;
           curSoMonth = monthOrDate.slice(0, 7);
           curSoRangeStart = null; curSoRangeEnd = null;
@@ -4924,13 +4941,13 @@ function renderDashboard() {
       let filtered;
       const q = soHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => p.id === t.pid) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
       } else if (curSoRangeStart && curSoRangeEnd) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd && (!curSoRangeProducts || curSoRangeProducts.includes(t.pid)));
       } else if (curSoFilterDate) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) === curSoFilterDate);
       } else {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curSoMonth);
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && (curSoMonth === 'ALL' || getMonthFromDateStr(t.d) === curSoMonth));
       }
       document.getElementById('so-history-content').innerHTML = buildTxnTable(filtered, 'OUT');
     }
@@ -5080,8 +5097,9 @@ function renderDashboard() {
         const sz = szs(g.ci);
         const prodMap = {};
         g.txns.forEach(t => {
-          if (!prodMap[t.pn]) { prodMap[t.pn] = { pn: t.pn }; sz.forEach(s => prodMap[t.pn][String(s)] = 0); }
-          prodMap[t.pn][String(t.sz)] = (prodMap[t.pn][String(t.sz)] || 0) + t.q;
+          const finalPn = t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || 'Unknown';
+          if (!prodMap[finalPn]) { prodMap[finalPn] = { pn: finalPn }; sz.forEach(s => prodMap[finalPn][String(s)] = 0); }
+          prodMap[finalPn][String(t.sz)] = (prodMap[finalPn][String(t.sz)] || 0) + t.q;
         });
         const prods = Object.values(prodMap);
         const thSz = sz.map(s => `<th style="text-align:center;min-width:50px;font-size:11px;font-weight:700;color:var(--muted);padding:8px 3px;">${s}</th>`).join('');
@@ -5133,7 +5151,10 @@ function renderDashboard() {
 
     function renderTxns(monthOrDateDisp, search) {
       const monthOrDate = d2i(monthOrDateDisp);
-      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') curTxnMonth = monthOrDate.slice(0, 7);
+      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
+        if (monthOrDate === 'ALL') curTxnMonth = 'ALL';
+        else curTxnMonth = monthOrDate.slice(0, 7);
+      }
       if (search !== undefined) txnHistorySearch = search;
 
       const elTxn = document.getElementById('section-transactions');
@@ -5147,11 +5168,11 @@ function renderDashboard() {
       const q = txnHistorySearch.trim().toLowerCase();
       let filteredIn, filteredOut;
       if (q) {
-        filteredIn = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => p.id === t.pid) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
-        filteredOut = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => p.id === t.pid) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filteredIn = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filteredOut = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
       } else {
-        filteredIn = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
-        filteredOut = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
+        filteredIn = T.filter(t => t.tp === 'IN' && t.d && (curTxnMonth === 'ALL' || getMonthFromDateStr(t.d) === curTxnMonth));
+        filteredOut = T.filter(t => t.tp === 'OUT' && t.d && (curTxnMonth === 'ALL' || getMonthFromDateStr(t.d) === curTxnMonth));
       }
       
       document.getElementById('txn-in-wrap').innerHTML = buildSimpleTxnTable(filteredIn, 'IN');
