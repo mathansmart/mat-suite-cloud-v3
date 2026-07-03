@@ -4870,23 +4870,25 @@ function renderDashboard() {
     }
 
     function renderSiHistory(monthOrDateDisp, search) {
-      const monthOrDate = d2i(monthOrDateDisp);
-      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-        if (monthOrDate === 'ALL') {
-          curSiMonth = 'ALL';
-          curSiFilterDate = null;
-          curSiRangeStart = null; curSiRangeEnd = null;
-          curSiRangeProducts = null;
-        } else if (monthOrDate.length === 10) {
-          curSiFilterDate = monthOrDate;
-          curSiMonth = monthOrDate.slice(0, 7);
-          curSiRangeStart = null; curSiRangeEnd = null;
-          curSiRangeProducts = null;
-        } else if (monthOrDate.length === 7) {
-          curSiMonth = monthOrDate;
-          curSiFilterDate = null;
-          curSiRangeStart = null; curSiRangeEnd = null;
-          curSiRangeProducts = null;
+      if (monthOrDateDisp === 'ALL') {
+        curSiMonth = 'ALL';
+        curSiFilterDate = null;
+        curSiRangeStart = null; curSiRangeEnd = null;
+        curSiRangeProducts = null;
+      } else {
+        const monthOrDate = d2i(monthOrDateDisp);
+        if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
+          if (monthOrDate.length === 10) {
+            curSiFilterDate = monthOrDate;
+            curSiMonth = monthOrDate.slice(0, 7);
+            curSiRangeStart = null; curSiRangeEnd = null;
+            curSiRangeProducts = null;
+          } else if (monthOrDate.length === 7) {
+            curSiMonth = monthOrDate;
+            curSiFilterDate = null;
+            curSiRangeStart = null; curSiRangeEnd = null;
+            curSiRangeProducts = null;
+          }
         }
       }
       if (search !== undefined) { siHistorySearch = search; if (search) { curSiFilterDate = null; curSiRangeStart = null; curSiRangeEnd = null; curSiRangeProducts = null; } }
@@ -4912,23 +4914,25 @@ function renderDashboard() {
     function renderSiHistorySearch(v) { renderSiHistory(null, v); }
 
     function renderSoHistory(monthOrDateDisp, search) {
-      const monthOrDate = d2i(monthOrDateDisp);
-      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-        if (monthOrDate === 'ALL') {
-          curSoMonth = 'ALL';
-          curSoFilterDate = null;
-          curSoRangeStart = null; curSoRangeEnd = null;
-          curSoRangeProducts = null;
-        } else if (monthOrDate.length === 10) {
-          curSoFilterDate = monthOrDate;
-          curSoMonth = monthOrDate.slice(0, 7);
-          curSoRangeStart = null; curSoRangeEnd = null;
-          curSoRangeProducts = null;
-        } else if (monthOrDate.length === 7) {
-          curSoMonth = monthOrDate;
-          curSoFilterDate = null;
-          curSoRangeStart = null; curSoRangeEnd = null;
-          curSoRangeProducts = null;
+      if (monthOrDateDisp === 'ALL') {
+        curSoMonth = 'ALL';
+        curSoFilterDate = null;
+        curSoRangeStart = null; curSoRangeEnd = null;
+        curSoRangeProducts = null;
+      } else {
+        const monthOrDate = d2i(monthOrDateDisp);
+        if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
+          if (monthOrDate.length === 10) {
+            curSoFilterDate = monthOrDate;
+            curSoMonth = monthOrDate.slice(0, 7);
+            curSoRangeStart = null; curSoRangeEnd = null;
+            curSoRangeProducts = null;
+          } else if (monthOrDate.length === 7) {
+            curSoMonth = monthOrDate;
+            curSoFilterDate = null;
+            curSoRangeStart = null; curSoRangeEnd = null;
+            curSoRangeProducts = null;
+          }
         }
       }
       if (search !== undefined) { soHistorySearch = search; if (search) { curSoFilterDate = null; curSoRangeStart = null; curSoRangeEnd = null; curSoRangeProducts = null; } }
@@ -5150,10 +5154,13 @@ function renderDashboard() {
     }
 
     function renderTxns(monthOrDateDisp, search) {
-      const monthOrDate = d2i(monthOrDateDisp);
-      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-        if (monthOrDate === 'ALL') curTxnMonth = 'ALL';
-        else curTxnMonth = monthOrDate.slice(0, 7);
+      if (monthOrDateDisp === 'ALL') {
+        curTxnMonth = 'ALL';
+      } else {
+        const monthOrDate = d2i(monthOrDateDisp);
+        if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
+          curTxnMonth = monthOrDate.slice(0, 7);
+        }
       }
       if (search !== undefined) txnHistorySearch = search;
 
