@@ -1743,6 +1743,18 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                       </div>
                    </div>
                 </div>
+                <!-- Shortage Sub Categories Card -->
+                <div id="dash-shortage-card" style="margin-top: 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: none;">
+                   <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px;">
+                      <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                         <i class="ti ti-alert-triangle" style="font-size: 16px;"></i>
+                      </div>
+                      <span style="font-size: 16px; font-weight: 700; color: var(--text-main);">Shortage Items</span>
+                   </div>
+                   <div id="dash-shortage-list" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto;">
+                      <!-- populated dynamically -->
+                   </div>
+                </div>
              </div>
              <!-- Left Side Main Content -->
              <div style="min-width: 0;">
@@ -3416,6 +3428,57 @@ function renderDashboard() {
       if (elTotSuppliers) elTotSuppliers.textContent = S.suppliers ? S.suppliers.length : 0;
       if (elTotUniqueProds) elTotUniqueProds.textContent = getMergedProducts(P, '').length;
       if (elTotLow) elTotLow.textContent = getLow().length;
+
+      // Populate shortage card
+      const shortageListEl = document.getElementById('dash-shortage-list');
+      const shortageCardEl = document.getElementById('dash-shortage-card');
+      if (shortageListEl && shortageCardEl) {
+         const shortageGroups = {};
+         P.forEach(p => {
+            const sc = (p.sc || 'General').trim().toUpperCase();
+            const shortageSizes = [];
+            szs(p.ci).forEach(sz => {
+               const st = (p.s ? p.s[sz] : 0) || 0;
+               if (st < 0) {
+                  shortageSizes.push({ sz, st });
+               }
+            });
+            if (shortageSizes.length > 0) {
+               if (!shortageGroups[sc]) shortageGroups[sc] = [];
+               shortageGroups[sc].push({ p, shortageSizes });
+            }
+         });
+
+         const scKeys = Object.keys(shortageGroups).sort();
+         if (scKeys.length === 0) {
+            shortageCardEl.style.display = 'none';
+         } else {
+            shortageCardEl.style.display = 'block';
+            let listHtml = '';
+            scKeys.forEach(scName => {
+               const items = shortageGroups[scName];
+               let itemsHtml = items.map(item => {
+                  return item.shortageSizes.map(szObj => {
+                     return `<div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; margin-left: 15px; margin-top:4px;">
+                        <span>• ${item.p.n} (${szObj.sz})</span>
+                        <span style="color:var(--danger); font-weight:700; font-family:'JetBrains Mono',monospace;">${szObj.st}</span>
+                     </div>`;
+                  }).join('');
+               }).join('');
+
+               listHtml += `
+                  <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 10px; margin-bottom: 5px;">
+                     <div style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between;">
+                        <span>📂 ${scName}</span>
+                        <span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700;">${items.length} items</span>
+                     </div>
+                     ${itemsHtml}
+                  </div>
+               `;
+            });
+            shortageListEl.innerHTML = listHtml;
+         }
+      }
       const compEl = document.getElementById('dash-company-name');
       if (compEl) compEl.textContent = 'Vester';
       updateBadge();
