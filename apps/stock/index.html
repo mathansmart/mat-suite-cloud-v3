@@ -3433,49 +3433,26 @@ function renderDashboard() {
       const shortageListEl = document.getElementById('dash-shortage-list');
       const shortageCardEl = document.getElementById('dash-shortage-card');
       if (shortageListEl && shortageCardEl) {
-         const shortageGroups = {};
+         const shortages = [];
          P.forEach(p => {
-            const sc = (p.sc || 'General').trim().toUpperCase();
-            const shortageSizes = [];
             szs(p.ci).forEach(sz => {
                const st = (p.s ? p.s[sz] : 0) || 0;
                if (st < 0) {
-                  shortageSizes.push({ sz, st });
+                  shortages.push({ name: p.n, sz, st });
                }
             });
-            if (shortageSizes.length > 0) {
-               if (!shortageGroups[sc]) shortageGroups[sc] = [];
-               shortageGroups[sc].push({ p, shortageSizes });
-            }
          });
 
-         const scKeys = Object.keys(shortageGroups).sort();
-         if (scKeys.length === 0) {
+         if (shortages.length === 0) {
             shortageCardEl.style.display = 'none';
          } else {
             shortageCardEl.style.display = 'block';
-            let listHtml = '';
-            scKeys.forEach(scName => {
-               const items = shortageGroups[scName];
-               let itemsHtml = items.map(item => {
-                  return item.shortageSizes.map(szObj => {
-                     return `<div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; margin-left: 15px; margin-top:4px;">
-                        <span>• ${item.p.n} (${szObj.sz})</span>
-                        <span style="color:var(--danger); font-weight:700; font-family:'JetBrains Mono',monospace;">${szObj.st}</span>
-                     </div>`;
-                  }).join('');
-               }).join('');
-
-               listHtml += `
-                  <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 10px; margin-bottom: 5px;">
-                     <div style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: space-between;">
-                        <span>📂 ${scName}</span>
-                        <span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700;">${items.length} items</span>
-                     </div>
-                     ${itemsHtml}
-                  </div>
-               `;
-            });
+            let listHtml = shortages.map(item => {
+               return `<div style="font-size:12.5px; color:var(--text-main); display:flex; justify-content:space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); gap: 10px;">
+                  <span style="font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 200px;">${item.name} (${item.sz})</span>
+                  <span style="color:var(--danger); font-weight:700; font-family:'JetBrains Mono',monospace; flex-shrink: 0;">${item.st}</span>
+               </div>`;
+            }).join('');
             shortageListEl.innerHTML = listHtml;
          }
       }
