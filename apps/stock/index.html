@@ -4818,6 +4818,7 @@ function d2i(val) {
       const cont = document.getElementById(containerId);
       if (!cont) return;
 
+      const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : (onSelect === 'renderSoHistory' ? curSoFilterDate : null);
       const mName = activeMonth === 'ALL' ? 'All Time' : new Date(activeMonth+'-01').toLocaleString('default',{month:'short',year:'numeric'});
       const rawVal = (activeMonth === 'ALL' ? '' : i2d(activeMonth));
       const hasFilter = activeMonth !== 'ALL' || filterDate !== null;
@@ -4825,8 +4826,20 @@ function d2i(val) {
       const _prevFocused = document.activeElement;
       const _prevWasSearch = _prevFocused && (_prevFocused.id === `${containerId}-srch` || (_prevFocused.closest && _prevFocused.closest(`#${containerId}`)));
 
+      // Extract unique months from transactions for this type
+      const monthsSet = new Set();
+      monthsSet.add(todayStr().slice(0, 7)); // Always include current month
+      T.forEach(t => {
+        if (t.tp === type && t.d) {
+          const m = getMonthFromDateStr(t.d);
+          if (m) monthsSet.add(m);
+        }
+      });
+      const sortedMonths = Array.from(monthsSet).sort().reverse();
+
       cont.innerHTML = `
-        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
+          <!-- Date search input -->
           <div class="form-group" style="margin:0; width:220px; flex-shrink: 0; display:flex; gap:8px;">
             <div class="search-wrapper" style="flex:1;">
               <div class="search-icon-left" style="top:11px; font-size:14px; left:10px;">📅</div>
@@ -4850,16 +4863,33 @@ function d2i(val) {
                 else ${onSelect}(input.value);
               ">GO</button>
           </div>
-          
-          <button class="btn btn-ghost" onclick="${onSelect}('ALL')" 
-            style="border:1.5px solid var(--border);color:var(--text-color);font-weight:700;letter-spacing:0.5px;">
-            <i class="ti ti-calendar" style="font-size:16px;margin-right:6px;color:var(--primary);"></i>All Months
+
+          <!-- All Months button -->
+          <button class="btn ${activeMonth === 'ALL' ? 'btn-primary' : 'btn-ghost'}" onclick="${onSelect}('ALL')" 
+            style="border:1.5px solid var(--border);font-weight:700;letter-spacing:0.5px;height:38px;padding:0 16px;border-radius:10px;font-size:12px;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-calendar" style="font-size:16px;color:${activeMonth === 'ALL' ? '#fff' : 'var(--primary)'};"></i>All Months
           </button>
-          
-          <button class="btn btn-ghost" onclick="${onSelect}('ALL')" style="color:var(--danger);font-weight:700;display:${hasFilter ? 'flex' : 'none'}">
+
+          <!-- Month buttons list -->
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            ${sortedMonths.map(m => {
+              const [y, mm] = m.split('-');
+              const dateObj = new Date(parseInt(y), parseInt(mm) - 1);
+              const label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+              const active = activeMonth === m;
+              return `<button class="btn ${active ? 'btn-primary' : 'btn-ghost'}" onclick="${onSelect}('${m}')"
+                style="border:1.5px solid var(--border); font-weight:700; border-radius:10px; height:38px; padding:0 16px; font-size:12px; letter-spacing:0.5px;">
+                ${label}
+              </button>`;
+            }).join('')}
+          </div>
+
+          <!-- Clear Filter -->
+          <button class="btn btn-ghost" onclick="${onSelect}('ALL')" style="color:var(--danger);font-weight:700;display:${hasFilter ? 'flex' : 'none'};height:38px;padding:0 16px;border-radius:10px;font-size:12px;align-items:center;gap:6px;">
             <i class="ti ti-x" style="font-size:16px;"></i>Clear Filter
           </button>
 
+          <!-- Product Search Box -->
           ${type === 'IN' || type === 'OUT' ? `
             <div class="search-wrapper" style="margin-left:auto; width:220px; margin-right:24px;">
               <div class="search-icon-left"><i class="ti ti-search"></i></div>
