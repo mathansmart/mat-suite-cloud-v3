@@ -4837,8 +4837,8 @@ function d2i(val) {
                 autocomplete="off"
                 onkeyup="if(event.key==='Enter'){ 
                   const v = this.value.trim().toUpperCase();
-                  if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL', '${searchVal||''}');
-                  else ${onSelect}(this.value, '${searchVal||''}');
+                  if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL');
+                  else ${onSelect}(this.value);
                 }"
               >
             </div>
@@ -4846,22 +4846,22 @@ function d2i(val) {
               onclick="
                 const input = this.previousElementSibling.querySelector('input');
                 const v = input.value.trim().toUpperCase();
-                if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL', '${searchVal||''}');
-                else ${onSelect}(input.value, '${searchVal||''}');
+                if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL');
+                else ${onSelect}(input.value);
               ">GO</button>
           </div>
           
-          <button class="btn btn-ghost" onclick="${onSelect}('ALL', '${searchVal||''}')" 
+          <button class="btn btn-ghost" onclick="${onSelect}('ALL')" 
             style="border:1.5px solid var(--border);color:var(--text-color);font-weight:700;letter-spacing:0.5px;">
             <i class="ti ti-calendar" style="font-size:16px;margin-right:6px;color:var(--primary);"></i>All Months
           </button>
           
-          <button class="btn btn-ghost" onclick="${onSelect}('ALL', '${searchVal||''}')" style="color:var(--danger);font-weight:700;display:${hasFilter ? 'flex' : 'none'}">
+          <button class="btn btn-ghost" onclick="${onSelect}('ALL')" style="color:var(--danger);font-weight:700;display:${hasFilter ? 'flex' : 'none'}">
             <i class="ti ti-x" style="font-size:16px;"></i>Clear Filter
           </button>
 
           ${type === 'IN' || type === 'OUT' ? `
-            <div class="search-wrapper" style="margin-left:auto; width:220px;">
+            <div class="search-wrapper" style="margin-left:auto; width:220px; margin-right:24px;">
               <div class="search-icon-left"><i class="ti ti-search"></i></div>
               <input type="text" placeholder="Search Product..." class="premium-search" 
                 id="${containerId}-srch"
@@ -7537,10 +7537,10 @@ function d2i(val) {
         document.getElementById('so-date').value = todayD();
         document.getElementById('bulk-txn-date').value = todayD();
         
-        curSiMonth = todayStr().slice(0, 7);
-        curSoMonth = todayStr().slice(0, 7);
-        curTxnMonth = todayStr().slice(0, 7);
-        curRptMonth = todayStr().slice(0, 7);
+        curSiMonth = 'ALL';
+        curSoMonth = 'ALL';
+        curTxnMonth = 'ALL';
+        curRptMonth = 'ALL';
 
         repairData(); // Fix any null/duplicate IDs from previous sessions
         
