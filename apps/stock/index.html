@@ -4876,17 +4876,11 @@ function d2i(val) {
               ">GO</button>
           </div>
 
-          <!-- All Months button -->
-          <button class="btn ${activeMonth === 'ALL' ? 'btn-primary' : 'btn-ghost'}" onclick="${onSelect}('ALL')" 
-            style="border:1.5px solid var(--border);font-weight:700;letter-spacing:0.5px;height:38px;padding:0 16px;border-radius:10px;font-size:12px;display:flex;align-items:center;gap:6px;">
-            <i class="ti ti-calendar" style="font-size:16px;color:${activeMonth === 'ALL' ? '#fff' : 'var(--primary)'};"></i>All Months
-          </button>
-
           <!-- Month Dropdown select -->
           <div style="width: 160px; flex-shrink: 0;">
             <select class="form-select" onchange="${onSelect}(this.value)" 
               style="height:38px; font-size:13px; font-weight:700; width:100%; border:1.5px solid var(--border); border-radius:10px; padding-left:12px; background-color:var(--surface); color:var(--text-color); cursor:pointer;">
-              <option value="ALL" ${activeMonth === 'ALL' ? 'selected' : ''}>Select Month</option>
+              <option value="ALL" ${activeMonth === 'ALL' ? 'selected' : ''}>All Months</option>
               ${sortedMonths.map(m => {
                 const parts = m.split('-');
                 let label = m;
