@@ -4819,7 +4819,17 @@ function d2i(val) {
       if (!cont) return;
 
       const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : (onSelect === 'renderSoHistory' ? curSoFilterDate : null);
-      const mName = activeMonth === 'ALL' ? 'All Time' : new Date(activeMonth+'-01').toLocaleString('default',{month:'short',year:'numeric'});
+      
+      let mName = 'All Time';
+      if (activeMonth !== 'ALL') {
+        const dObj = new Date(activeMonth + '-01');
+        if (!isNaN(dObj.getTime())) {
+          mName = dObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+        } else {
+          mName = activeMonth;
+        }
+      }
+
       const rawVal = (activeMonth === 'ALL' ? '' : i2d(activeMonth));
       const hasFilter = activeMonth !== 'ALL' || filterDate !== null;
 
@@ -4829,12 +4839,14 @@ function d2i(val) {
       // Extract unique months from transactions for this type
       const monthsSet = new Set();
       monthsSet.add(todayStr().slice(0, 7)); // Always include current month
-      T.forEach(t => {
-        if (t.tp === type && t.d) {
-          const m = getMonthFromDateStr(t.d);
-          if (m) monthsSet.add(m);
-        }
-      });
+      if (Array.isArray(T)) {
+        T.forEach(t => {
+          if (t.tp === type && t.d) {
+            const m = getMonthFromDateStr(t.d);
+            if (m) monthsSet.add(m);
+          }
+        });
+      }
       const sortedMonths = Array.from(monthsSet).sort().reverse();
 
       cont.innerHTML = `
@@ -4873,9 +4885,18 @@ function d2i(val) {
           <!-- Month buttons list -->
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             ${sortedMonths.map(m => {
-              const [y, mm] = m.split('-');
-              const dateObj = new Date(parseInt(y), parseInt(mm) - 1);
-              const label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+              const parts = m.split('-');
+              let label = m;
+              if (parts.length === 2) {
+                const y = parseInt(parts[0]);
+                const mm = parseInt(parts[1]);
+                if (!isNaN(y) && !isNaN(mm)) {
+                  const dateObj = new Date(y, mm - 1);
+                  if (!isNaN(dateObj.getTime())) {
+                    label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+                  }
+                }
+              }
               const active = activeMonth === m;
               return `<button class="btn ${active ? 'btn-primary' : 'btn-ghost'}" onclick="${onSelect}('${m}')"
                 style="border:1.5px solid var(--border); font-weight:700; border-radius:10px; height:38px; padding:0 16px; font-size:12px; letter-spacing:0.5px;">
