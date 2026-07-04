@@ -4823,7 +4823,7 @@ function d2i(val) {
       const hasFilter = activeMonth !== 'ALL' || filterDate !== null;
 
       const _prevFocused = document.activeElement;
-      const _prevWasSearch = _prevFocused && _prevFocused.id === `${containerId}-srch`;
+      const _prevWasSearch = _prevFocused && (_prevFocused.id === `${containerId}-srch` || (_prevFocused.closest && _prevFocused.closest(`#${containerId}`)));
 
       cont.innerHTML = `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
@@ -4873,12 +4873,14 @@ function d2i(val) {
       `;
 
       if (_prevWasSearch) {
-        const newInput = document.getElementById(`${containerId}-srch`);
-        if (newInput) {
-          newInput.focus();
-          const len = newInput.value.length;
-          newInput.setSelectionRange(len, len);
-        }
+        setTimeout(() => {
+          const newInput = document.getElementById(`${containerId}-srch`);
+          if (newInput) {
+            newInput.focus();
+            const len = newInput.value.length;
+            newInput.setSelectionRange(len, len);
+          }
+        }, 0);
       }
     }
 
