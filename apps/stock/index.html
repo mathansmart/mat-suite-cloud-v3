@@ -3027,7 +3027,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       // Save current page to local storage
       localStorage.setItem('gsm3_last_nav', id);
     }
-    function getLow() { const r = []; P.forEach(p => szs(p.ci).forEach(sz => { const st = (p.s ? p.s[sz] : 0) || 0; if (st < 0) r.push({ p, sz, st }) })); return r }
+    function getLow() { const r = []; P.forEach(p => szs(p.ci).forEach(sz => { const st = (p.s ? p.s[sz] : 0) || 0; if (st <= p.m) r.push({ p, sz, st }) })); return r }
     function updateBadge() {
       const n = getLow().length; const b = document.getElementById('alert-badge');
       b.textContent = n; b.style.display = n > 0 ? '' : 'none';
