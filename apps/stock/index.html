@@ -4882,27 +4882,28 @@ function d2i(val) {
             <i class="ti ti-calendar" style="font-size:16px;color:${activeMonth === 'ALL' ? '#fff' : 'var(--primary)'};"></i>All Months
           </button>
 
-          <!-- Month buttons list -->
-          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            ${sortedMonths.map(m => {
-              const parts = m.split('-');
-              let label = m;
-              if (parts.length === 2) {
-                const y = parseInt(parts[0]);
-                const mm = parseInt(parts[1]);
-                if (!isNaN(y) && !isNaN(mm)) {
-                  const dateObj = new Date(y, mm - 1);
-                  if (!isNaN(dateObj.getTime())) {
-                    label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+          <!-- Month Dropdown select -->
+          <div style="width: 160px; flex-shrink: 0;">
+            <select class="form-select" onchange="${onSelect}(this.value)" 
+              style="height:38px; font-size:13px; font-weight:700; width:100%; border:1.5px solid var(--border); border-radius:10px; padding-left:12px; background-color:var(--surface); color:var(--text-color); cursor:pointer;">
+              <option value="ALL" ${activeMonth === 'ALL' ? 'selected' : ''}>Select Month</option>
+              ${sortedMonths.map(m => {
+                const parts = m.split('-');
+                let label = m;
+                if (parts.length === 2) {
+                  const y = parseInt(parts[0]);
+                  const mm = parseInt(parts[1]);
+                  if (!isNaN(y) && !isNaN(mm)) {
+                    const dateObj = new Date(y, mm - 1);
+                    if (!isNaN(dateObj.getTime())) {
+                      label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
+                    }
                   }
                 }
-              }
-              const active = activeMonth === m;
-              return `<button class="btn ${active ? 'btn-primary' : 'btn-ghost'}" onclick="${onSelect}('${m}')"
-                style="border:1.5px solid var(--border); font-weight:700; border-radius:10px; height:38px; padding:0 16px; font-size:12px; letter-spacing:0.5px;">
-                ${label}
-              </button>`;
-            }).join('')}
+                const isSelected = m === activeMonth ? 'selected' : '';
+                return `<option value="${m}" ${isSelected}>${label}</option>`;
+              }).join('')}
+            </select>
           </div>
 
           <!-- Clear Filter -->
