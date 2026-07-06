@@ -4010,7 +4010,7 @@ function renderDashboard() {
           }
         });
       });
-      wrap.querySelectorAll('.si-input').forEach(el => {
+      wrap.querySelectorAll('.si-qty-input').forEach(el => {
         el.addEventListener('input', function () {
           const pid = this.dataset.pid;
           siTableData[pid].sizes[this.dataset.sz] = parseInt(this.value) || 0;
