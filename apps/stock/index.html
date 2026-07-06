@@ -1618,7 +1618,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <div class="nav-item" onclick="location.href='/'" title="Home"><span class="nav-icon"><i class="ti ti-home"></i></span><div class="nav-label">Home</div></div>
         <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span><div class="nav-label">Dashboard</div></div>
         <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon"><i class="ti ti-eye"></i></span><div class="nav-label">Preview</div></div>
-        <div class="nav-item" onclick="nav('inventory')" title="Inventory"><span class="nav-icon"><i class="ti ti-box"></i></span><div class="nav-label">Inventory</div></div>
         
         <div class="nav-item has-submenu" onclick="toggleSubmenu('stock-submenu')" id="nav-group-stock">
           <span class="nav-icon"><i class="ti ti-package"></i></span>
@@ -1809,6 +1808,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <!-- INVENTORY -->
         <div class="section" id="section-inventory">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <button class="btn btn-ghost" onclick="nav('settings')" style="margin-right:15px; padding:8px; border:1px solid var(--border); font-weight:700; font-size:12px; display:flex; align-items:center; gap:6px;"><i class="ti ti-arrow-left"></i> Back to Settings</button>
             <div class="cat-tabs" style="display:none;"></div>
             <div style="flex:1; margin-right:15px;">
               <div class="search-wrapper">
@@ -2149,6 +2149,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                 <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-folders" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Product Categories</span>
                 <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
               </div>
+              <div onclick="nav('inventory')" style="padding:15px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-plus" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> New Product Add</span>
+                <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
+              </div>
               <div onclick="nav('subcategories')" style="padding:15px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                 <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-tags" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Sub Categories</span>
                 <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
@@ -2167,6 +2171,11 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
               <button class="btn btn-primary" onclick="saveSettings()" id="lbl-save-btn" style="margin-top:20px;">Save Settings</button>
               <span id="s-saved" style="display:none;margin-left:10px;color:var(--accent3);font-weight:700;font-size:13px;">✓ Saved!</span>
+
+              <div style="border-top:1.5px solid var(--border); padding-top:20px; margin-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div style="font-size:13px; font-weight:700; color:var(--text-main);"><i class="ti ti-link" style="color:var(--primary); margin-right:8px; font-size:18px; vertical-align:middle;"></i>Share / Connect via LAN</div>
+                <button class="btn btn-ghost btn-sm" onclick="showServerInfo()" style="border:1.5px solid var(--border); font-weight:700;">Admin Access Info</button>
+              </div>
             </div>
           </div>
 
@@ -2177,26 +2186,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             </div>
             <p style="color:var(--muted); font-size:12px; margin-bottom:15px;">Deleted items are kept here for 30 days before being permanently deleted.</p>
             <div id="settings-recycle-bin-list"></div>
-          </div>
-
-          <div class="table-wrap" style="padding:20px;margin-top:20px;margin-bottom:20px;">
-            <div class="sec-title" style="margin:0; margin-bottom:16px;">Public View-Only Access (QR Code)</div>
-            <p style="color:var(--muted); font-size:12px; margin-bottom:15px;">
-              Share this QR code or link to allow users to view stock balance without edit or delete options.
-            </p>
-            <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; background:var(--surface2); padding:15px; border-radius:8px;">
-              <div id="settings-qr-container" style="background:#fff; padding:8px; border-radius:6px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; width:166px; height:166px;">
-                <!-- Dynamic QR Code will go here -->
-              </div>
-              <div style="flex:1; min-width:200px;">
-                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px; letter-spacing:0.5px;">Viewer URL</div>
-                <input type="text" id="settings-viewer-url" class="form-input" readonly style="background:#fff; margin-bottom:8px; font-family:'JetBrains Mono',monospace; font-size:12px;">
-                <div style="display:flex; gap:10px;">
-                  <button class="btn btn-primary btn-sm" onclick="copyViewerUrl()">Copy Viewer Link</button>
-                  <button class="btn btn-ghost btn-sm" onclick="showServerInfo()" style="border:1px solid var(--border);"><i class="ti ti-link"></i> Admin Access Info</button>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- User Accounts Removed -->
@@ -2706,7 +2695,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     const LANG = {
       en: {
         logo_sub: 'Stock Manager', nav_main: 'Main', nav_stock: 'Stock', nav_more: 'More',
-        nav_dashboard: 'Dashboard', nav_inventory: 'Inventory', nav_stockin: 'Stock In',
+        nav_dashboard: 'Dashboard', nav_inventory: 'New Product Add', nav_stockin: 'Stock In',
         nav_stockout: 'Stock Out', nav_alerts: 'Alerts', nav_transactions: 'Transactions',
         nav_reports: 'Reports', nav_settings: 'Settings',
         export_btn: '⬇ Export Excel',
@@ -2775,7 +2764,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       },
       ta: {
         logo_sub: 'Stock Manager', nav_main: 'Main', nav_stock: 'Stock', nav_more: 'More',
-        nav_dashboard: 'முகப்பு', nav_inventory: 'சரக்கு இருப்பு', nav_stockin: 'உள்வரும் வரவு',
+        nav_dashboard: 'முகப்பு', nav_inventory: 'புதிய தயாரிப்பு சேர்', nav_stockin: 'உள்வரும் வரவு',
         nav_stockout: 'வெளிச்செல்லும் செலவு', nav_alerts: 'எச்சரிக்கைகள்', nav_transactions: 'பரிவர்த்தனைகள்',
         nav_reports: 'அறிக்கைகள்', nav_settings: 'அமைப்புகள்',
         export_btn: '⬇ Export Excel',
@@ -6310,23 +6299,6 @@ function d2i(val) {
       renderSettingsSuppliers();
       renderRecycleBin();
       checkAdmin();
-
-      const viewerUrl = window.location.origin + window.location.pathname + '?mode=view';
-      const qrEl = document.getElementById('settings-qr-container');
-      const urlInput = document.getElementById('settings-viewer-url');
-      if (urlInput) urlInput.value = viewerUrl;
-      if (qrEl) {
-        qrEl.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(viewerUrl)}" style="display:block; width:150px; height:150px; border-radius:4px;" alt="Viewer QR Code">`;
-      }
-    }
-
-    function copyViewerUrl() {
-      const urlInput = document.getElementById('settings-viewer-url');
-      if (urlInput) {
-        navigator.clipboard.writeText(urlInput.value).then(() => {
-          showCenterToast('Viewer link copied to clipboard!');
-        });
-      }
     }
 
     function renderRecycleBin() {
