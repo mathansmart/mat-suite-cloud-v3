@@ -6276,6 +6276,16 @@ function d2i(val) {
 
     let ledgerChartInstance = null;
 
+    let globalLedgerFrom = null;
+    let globalLedgerTo = null;
+
+    const formatDateToDMY = (date) => {
+      const d = String(date.getDate()).padStart(2, '0');
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const y = date.getFullYear();
+      return `${d}-${m}-${y}`;
+    };
+
     function showProductMonthlyLedger(prodName) {
       const tablesWrap = document.getElementById('rpt-inventory-tables');
       if (!tablesWrap) return;
@@ -6302,13 +6312,18 @@ function d2i(val) {
       if (now.getMonth() < 3) {
         startYear = startYear - 1;
       }
-      
-      const startDateTime = new Date(`${startYear}-04-01T00:00:00`).getTime();
-      
+
+      if (!globalLedgerFrom) {
+        globalLedgerFrom = new Date(startYear, 3, 1, 0, 0, 0); // April 1st
+      }
+      if (!globalLedgerTo) {
+        globalLedgerTo = new Date(startYear + 1, 2, 31, 23, 59, 59); // March 31st
+      }
+
       let openingStock = 0;
       prodTxns.forEach(t => {
         const tDate = parseTxnDate(t.d);
-        if (tDate && tDate.getTime() < startDateTime) {
+        if (tDate && tDate.getTime() < globalLedgerFrom.getTime()) {
           if (t.tp === 'IN') openingStock += Number(t.q) || 0;
           if (t.tp === 'OUT') openingStock -= Number(t.q) || 0;
         }
@@ -6335,13 +6350,26 @@ function d2i(val) {
 
       const stats = monthKeys.map(m => {
         const year = startYear + m.yearOffset;
-        const txns = prodTxns.filter(t => {
-          const tDate = parseTxnDate(t.d);
-          return tDate && tDate.getFullYear() === year && tDate.getMonth() === m.mIndex;
-        });
+        const monthStart = new Date(year, m.mIndex, 1, 0, 0, 0);
+        const monthEnd = new Date(year, m.mIndex + 1, 0, 23, 59, 59);
 
-        const inwardsQty = txns.filter(t => t.tp === 'IN').reduce((sum, t) => sum + (Number(t.q) || 0), 0);
-        const outwardsQty = txns.filter(t => t.tp === 'OUT').reduce((sum, t) => sum + (Number(t.q) || 0), 0);
+        const rangeStart = Math.max(monthStart.getTime(), globalLedgerFrom.getTime());
+        const rangeEnd = Math.min(monthEnd.getTime(), globalLedgerTo.getTime());
+
+        let inwardsQty = 0;
+        let outwardsQty = 0;
+
+        if (rangeStart <= rangeEnd) {
+          const txns = prodTxns.filter(t => {
+            const tDate = parseTxnDate(t.d);
+            if (!tDate) return false;
+            const tTime = tDate.getTime();
+            return tTime >= rangeStart && tTime <= rangeEnd;
+          });
+
+          inwardsQty = txns.filter(t => t.tp === 'IN').reduce((sum, t) => sum + (Number(t.q) || 0), 0);
+          outwardsQty = txns.filter(t => t.tp === 'OUT').reduce((sum, t) => sum + (Number(t.q) || 0), 0);
+        }
 
         grandInQty += inwardsQty;
         grandOutQty += outwardsQty;
@@ -6369,8 +6397,8 @@ function d2i(val) {
         return `${absVal.toLocaleString()} ${unit}`;
       };
 
-      const shopName = "VESTER";
-      const dateRangeStr = `1-Apr-${String(startYear).slice(-2)} to 31-Mar-${String(startYear + 1).slice(-2)}`;
+       const shopName = "VESTER";
+      const dateRangeStr = `${formatDateToDMY(globalLedgerFrom)} to ${formatDateToDMY(globalLedgerTo)}`;
 
       const rowsHtml = stats.map(s => {
         return `
@@ -6386,9 +6414,14 @@ function d2i(val) {
       tablesWrap.innerHTML = `
         <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px; margin-top:20px;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-            <button class="btn btn-ghost btn-sm" onclick="renderReportsInventory()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-              <i class="ti ti-arrow-left"></i> Back to List
-            </button>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="renderReportsInventory()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
+                <i class="ti ti-arrow-left"></i> Back to List
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="openChangePeriodModal('${prodName.replace(/'/g, "\\'")}')" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
+                <i class="ti ti-calendar"></i> Change Period
+              </button>
+            </div>
             <div style="text-align:right;">
               <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:1px;">${shopName}</div>
               <div style="font-size:13px; font-weight:700; color:var(--primary); margin-top:4px;">${prodName.toUpperCase()}</div>
@@ -6487,6 +6520,94 @@ function d2i(val) {
         });
       }, 50);
     }
+
+    function openChangePeriodModal(prodName) {
+      curModal = 'changePeriod';
+      
+      const modalOverlay = document.getElementById('modal-overlay');
+      if (!modalOverlay) return;
+
+      document.getElementById('modal-title').textContent = 'Change Period';
+      
+      const btn = document.getElementById('modal-btn');
+      btn.textContent = 'Apply';
+      btn.className = 'btn btn-primary';
+      btn.style.display = '';
+      btn.onclick = () => applyChangePeriod(prodName);
+
+      const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
+      if (cancelBtn) {
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.display = '';
+      }
+
+      const formatDateToISO = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      };
+
+      const fromVal = formatDateToISO(globalLedgerFrom);
+      const toVal = formatDateToISO(globalLedgerTo);
+
+      document.getElementById('modal-content').innerHTML = `
+        <div style="padding: 10px 0;">
+          <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Specify the period for the stock ledger report.</p>
+          <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
+            <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">From</label>
+            <input class="form-input" type="date" id="cp-from" value="${fromVal}" style="max-width:200px;" required>
+          </div>
+          <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
+            <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">To</label>
+            <input class="form-input" type="date" id="cp-to" value="${toVal}" style="max-width:200px;" required>
+          </div>
+          <div id="cp-err" style="color:var(--danger); font-size:11px; font-weight:700; display:none; margin-top:10px;"></div>
+        </div>
+      `;
+
+      modalOverlay.classList.add('open');
+    }
+
+    function applyChangePeriod(prodName) {
+      const fromStr = document.getElementById('cp-from').value;
+      const toStr = document.getElementById('cp-to').value;
+      const errEl = document.getElementById('cp-err');
+
+      if (!fromStr || !toStr) {
+        if (errEl) {
+          errEl.textContent = 'Please select both From and To dates!';
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+
+      const parseISOToDate = (isoStr, isEnd) => {
+        const parts = isoStr.split('-');
+        if (isEnd) {
+          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59);
+        }
+        return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0);
+      };
+
+      const fromDate = parseISOToDate(fromStr, false);
+      const toDate = parseISOToDate(toStr, true);
+
+      if (fromDate > toDate) {
+        if (errEl) {
+          errEl.textContent = 'From date cannot be after To date!';
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+
+      globalLedgerFrom = fromDate;
+      globalLedgerTo = toDate;
+
+      document.getElementById('modal-overlay').classList.remove('open');
+      showProductMonthlyLedger(prodName);
+    }
+
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
       renderUsersTable();
