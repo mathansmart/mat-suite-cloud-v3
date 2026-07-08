@@ -6541,26 +6541,19 @@ function d2i(val) {
         cancelBtn.style.display = '';
       }
 
-      const formatDateToISO = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      };
-
-      const fromVal = formatDateToISO(globalLedgerFrom);
-      const toVal = formatDateToISO(globalLedgerTo);
+      const fromVal = formatDateToDMY(globalLedgerFrom);
+      const toVal = formatDateToDMY(globalLedgerTo);
 
       document.getElementById('modal-content').innerHTML = `
         <div style="padding: 10px 0;">
           <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Specify the period for the stock ledger report.</p>
           <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
             <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">From</label>
-            <input class="form-input" type="date" id="cp-from" value="${fromVal}" style="max-width:200px;" required>
+            <input class="form-input" type="text" id="cp-from" placeholder="DD-MM-YYYY" value="${fromVal}" style="max-width:200px;" autocomplete="off">
           </div>
           <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
             <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">To</label>
-            <input class="form-input" type="date" id="cp-to" value="${toVal}" style="max-width:200px;" required>
+            <input class="form-input" type="text" id="cp-to" placeholder="DD-MM-YYYY" value="${toVal}" style="max-width:200px;" autocomplete="off">
           </div>
           <div id="cp-err" style="color:var(--danger); font-size:11px; font-weight:700; display:none; margin-top:10px;"></div>
         </div>
@@ -6570,13 +6563,24 @@ function d2i(val) {
     }
 
     function applyChangePeriod(prodName) {
-      const fromStr = document.getElementById('cp-from').value;
-      const toStr = document.getElementById('cp-to').value;
+      const fromStr = document.getElementById('cp-from').value.trim();
+      const toStr = document.getElementById('cp-to').value.trim();
       const errEl = document.getElementById('cp-err');
 
       if (!fromStr || !toStr) {
         if (errEl) {
-          errEl.textContent = 'Please select both From and To dates!';
+          errEl.textContent = 'Please enter both From and To dates!';
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+
+      const fromIso = d2i(fromStr);
+      const toIso = d2i(toStr);
+
+      if (!fromIso || !toIso || fromIso.split('-').length !== 3 || toIso.split('-').length !== 3) {
+        if (errEl) {
+          errEl.textContent = 'Invalid date format! Please use DD-MM-YYYY (e.g., 01-07-2026).';
           errEl.style.display = 'block';
         }
         return;
@@ -6590,8 +6594,8 @@ function d2i(val) {
         return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0);
       };
 
-      const fromDate = parseISOToDate(fromStr, false);
-      const toDate = parseISOToDate(toStr, true);
+      const fromDate = parseISOToDate(fromIso, false);
+      const toDate = parseISOToDate(toIso, true);
 
       if (fromDate > toDate) {
         if (errEl) {
