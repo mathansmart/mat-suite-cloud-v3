@@ -6235,9 +6235,11 @@ function d2i(val) {
         return;
       }
 
+      const mergedProds = getMergedProducts(P, '');
+
       tablesWrap.innerHTML = S.categories.map(catObj => {
         const ci = catObj.id;
-        const cp = P.filter(p => p.ci === ci);
+        const cp = mergedProds.filter(p => p.sourceCategoryIds.has(String(ci)));
         if (!cp.length) return '';
         
         const rows = cp.map(p => {
