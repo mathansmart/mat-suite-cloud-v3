@@ -6351,17 +6351,20 @@ function d2i(val) {
       });
 
       const formatQty = (q) => {
-        if (q === 0) return '';
-        if (q < 0) return `(-) ${Math.abs(q).toLocaleString()} PCS`;
-        return `${q.toLocaleString()} PCS`;
+        const absVal = Math.abs(q);
+        const unit = absVal === 1 ? 'Box' : 'Boxes';
+        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
+        return `${absVal.toLocaleString()} ${unit}`;
       };
 
       const formatBal = (q) => {
-        if (q < 0) return `(-) ${Math.abs(q).toLocaleString()} PCS`;
-        return `${q.toLocaleString()} PCS`;
+        const absVal = Math.abs(q);
+        const unit = absVal === 1 ? 'Box' : 'Boxes';
+        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
+        return `${absVal.toLocaleString()} ${unit}`;
       };
 
-      const shopName = "MILTON TEXTILES";
+      const shopName = "VESTER";
       const dateRangeStr = `1-Apr-${String(startYear).slice(-2)} to 31-Mar-${String(startYear + 1).slice(-2)}`;
 
       const rowsHtml = stats.map(s => {
