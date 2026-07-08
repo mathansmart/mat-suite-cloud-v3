@@ -6396,9 +6396,18 @@ function d2i(val) {
       const dateRangeStr = `${formatDateToDMY(globalLedgerFrom)} to ${formatDateToDMY(globalLedgerTo)}`;
 
       const rowsHtml = stats.map(s => {
+        const mKey = monthKeys.find(mk => mk.name === s.name);
+        const mIndex = mKey ? mKey.mIndex : 0;
+        const yearOffset = mKey ? mKey.yearOffset : 0;
+        const targetYear = startYear + yearOffset;
+
         return `
-          <tr style="border-bottom: 1px solid var(--border-light);">
-            <td style="padding:10px 12px; font-weight:600; color:var(--text-main);">${s.name}</td>
+          <tr onclick="showLedgerMonthDetail('${prodName.replace(/'/g, "\\'")}', ${mIndex}, ${targetYear}, '${s.name}')" 
+              style="cursor:pointer; border-bottom: 1px solid var(--border-light); transition: background 0.15s;"
+              onmouseover="this.style.background='var(--surface2)';"
+              onmouseout="this.style.background='transparent';"
+          >
+            <td style="padding:10px 12px; font-weight:600; color:var(--accent3);">${s.name}</td>
             <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; border-left:1px solid var(--border-light);">${formatQty(s.inwardsQty)}</td>
             <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--accent2); border-left:1px solid var(--border-light);">${formatQty(s.outwardsQty)}</td>
             <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${s.closingBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(s.closingBal)}</td>
@@ -6605,6 +6614,171 @@ function d2i(val) {
 
       document.getElementById('modal-overlay').classList.remove('open');
       showProductMonthlyLedger(prodName);
+    }
+
+    function showLedgerMonthDetail(prodName, monthIndex, year, monthName) {
+      const tablesWrap = document.getElementById('rpt-inventory-tables');
+      if (!tablesWrap) return;
+
+      const cleanKey = (str) => {
+        return str.toLowerCase()
+          .replace(/[---/()]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      };
+      const targetKey = cleanKey(prodName);
+
+      const matchingPids = new Set(
+        P.filter(p => {
+          const coreName = p.n ? p.n.replace(/^big\s*-*\s*/i, '').trim() : '';
+          return cleanKey(coreName) === targetKey;
+        }).map(p => String(p.id))
+      );
+
+      const prodTxns = T.filter(t => matchingPids.has(String(t.pid)));
+
+      const txns = prodTxns.filter(t => {
+        const tDate = parseTxnDate(t.d);
+        if (!tDate) return false;
+        const tTime = tDate.getTime();
+        return tTime >= globalLedgerFrom.getTime() && 
+               tTime <= globalLedgerTo.getTime() && 
+               tDate.getFullYear() === year && 
+               tDate.getMonth() === monthIndex;
+      });
+
+      txns.sort((a, b) => {
+        const da = parseTxnDate(a.d)?.getTime() || 0;
+        const db = parseTxnDate(b.d)?.getTime() || 0;
+        return da - db;
+      });
+
+      const monthStart = new Date(year, monthIndex, 1, 0, 0, 0);
+      const startOfOverlap = Math.max(monthStart.getTime(), globalLedgerFrom.getTime());
+
+      let monthOpeningBalance = 0;
+      prodTxns.forEach(t => {
+        const tDate = parseTxnDate(t.d);
+        if (tDate && tDate.getTime() < startOfOverlap) {
+          if (t.tp === 'IN') monthOpeningBalance += Number(t.q) || 0;
+          if (t.tp === 'OUT') monthOpeningBalance -= Number(t.q) || 0;
+        }
+      });
+
+      const formatQty = (q) => {
+        const absVal = Math.abs(q);
+        const unit = absVal === 1 ? 'Box' : 'Boxes';
+        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
+        return `${absVal.toLocaleString()} ${unit}`;
+      };
+
+      const formatBal = (q) => {
+        const absVal = Math.abs(q);
+        const unit = absVal === 1 ? 'Box' : 'Boxes';
+        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
+        return `${absVal.toLocaleString()} ${unit}`;
+      };
+
+      let currentBal = monthOpeningBalance;
+      let totalIn = 0;
+      let totalOut = 0;
+
+      const rowsHtml = txns.length > 0 ? txns.map(t => {
+        const qty = Number(t.q) || 0;
+        let inQtyStr = '';
+        let outQtyStr = '';
+
+        if (t.tp === 'IN') {
+          inQtyStr = formatQty(qty);
+          totalIn += qty;
+          currentBal += qty;
+        } else if (t.tp === 'OUT') {
+          outQtyStr = formatQty(qty);
+          totalOut += qty;
+          currentBal -= qty;
+        }
+
+        const tDate = parseTxnDate(t.d);
+        const dateStr = tDate ? formatDateToDMY(tDate) : '';
+        const partyName = t.pa || '-';
+        const vchType = t.tp === 'IN' ? 'Stock In' : 'Stock Out';
+        const vchNo = t.rf || '-';
+
+        return `
+          <tr style="border-bottom: 1px solid var(--border-light);">
+            <td style="padding:10px 12px; font-weight:600; color:var(--text-main);">${dateStr}</td>
+            <td style="padding:10px 12px; font-weight:600; color:var(--text-main);">${partyName}</td>
+            <td style="padding:10px 12px; text-align:center; font-weight:700; color:${t.tp === 'IN' ? 'var(--primary)' : 'var(--accent2)'};">${vchType}</td>
+            <td style="padding:10px 12px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px;">${vchNo}</td>
+            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; border-left:1px solid var(--border-light);">${inQtyStr}</td>
+            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--accent2); border-left:1px solid var(--border-light);">${outQtyStr}</td>
+            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${currentBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(currentBal)}</td>
+          </tr>
+        `;
+      }).join('') : `
+        <tr style="border-bottom: 1px solid var(--border-light);">
+          <td colspan="4" style="padding:20px; text-align:center; color:var(--muted); font-style:italic;">No transactions in this month</td>
+          <td style="border-left:1px solid var(--border-light);"></td>
+          <td style="border-left:1px solid var(--border-light);"></td>
+          <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; border-left:1px solid var(--border-light);">${formatBal(currentBal)}</td>
+        </tr>
+      `;
+
+      const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59);
+      const effectiveEnd = new Date(Math.min(monthEnd.getTime(), globalLedgerTo.getTime()));
+      const detailRangeStr = `${formatDateToDMY(new Date(startOfOverlap))} to ${formatDateToDMY(effectiveEnd)}`;
+
+      tablesWrap.innerHTML = `
+        <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px; margin-top:20px;">
+          <!-- BUTTONS BAR -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <button class="btn btn-ghost btn-sm" onclick="showProductMonthlyLedger('${prodName.replace(/'/g, "\\'")}')" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
+                <i class="ti ti-arrow-left"></i> Back to Summary
+              </button>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:1px;">VESTER</div>
+              <div style="font-size:13px; font-weight:700; color:var(--accent3); margin-top:4px;">${prodName.toUpperCase()} (${monthName.toUpperCase()})</div>
+              <div style="font-size:11px; font-weight:600; color:var(--muted); margin-top:2px;">${detailRangeStr}</div>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; min-width:700px;">
+              <thead>
+                <tr style="background:var(--surface2); border-bottom:1.5px solid var(--border);">
+                  <th style="text-align:left; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Date</th>
+                  <th style="text-align:left; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Particulars</th>
+                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Vch Type</th>
+                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Vch No.</th>
+                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Stock In</th>
+                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Stock Out</th>
+                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Balance Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid var(--border); background:rgba(0,0,0,0.01);">
+                  <td style="padding:10px 12px; font-style:italic; font-weight:700; color:var(--text-main);">${formatDateToDMY(new Date(startOfOverlap))}</td>
+                  <td style="padding:10px 12px; font-style:italic; font-weight:700; color:var(--text-main);">Opening Balance</td>
+                  <td></td>
+                  <td></td>
+                  <td style="border-left:1px solid var(--border-light);"></td>
+                  <td style="border-left:1px solid var(--border-light);"></td>
+                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${monthOpeningBalance < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(monthOpeningBalance)}</td>
+                </tr>
+                ${rowsHtml}
+                <tr style="background:var(--surface2); border-top:1.5px solid var(--border); font-weight:800; border-bottom:1.5px solid var(--border);">
+                  <td colspan="4" style="padding:12px; font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; text-align:right;">Totals as per 'Default' valuation :</td>
+                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--primary); border-left:1px solid var(--border-light);">${formatQty(totalIn)}</td>
+                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent2); border-left:1px solid var(--border-light);">${formatQty(totalOut)}</td>
+                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:${currentBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(currentBal)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
 
     function loadSettings() { 
