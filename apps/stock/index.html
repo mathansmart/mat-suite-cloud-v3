@@ -6287,10 +6287,15 @@ function d2i(val) {
           .trim();
       };
       const targetKey = cleanKey(prodName);
-      const prodTxns = T.filter(t => {
-        const coreName = t.pn ? t.pn.replace(/^big\s*-*\s*/i, '').trim() : '';
-        return cleanKey(coreName) === targetKey;
-      });
+
+      const matchingPids = new Set(
+        P.filter(p => {
+          const coreName = p.n ? p.n.replace(/^big\s*-*\s*/i, '').trim() : '';
+          return cleanKey(coreName) === targetKey;
+        }).map(p => String(p.id))
+      );
+
+      const prodTxns = T.filter(t => matchingPids.has(String(t.pid)));
 
       const now = new Date();
       let startYear = now.getFullYear();
