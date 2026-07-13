@@ -6854,16 +6854,21 @@ function d2i(val) {
       const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
       const subCats = S.subCategories || ['GENERAL'];
 
-      const filteredProds = P.filter(p => {
+      const mergedList = getMergedProducts(P, '');
+
+      const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
         return p.n.toLowerCase().includes(q);
       });
 
       const html = subCats.map(scName => {
         const cp = filteredProds.filter(p => {
-          const sVal = p.sc ? p.sc.toUpperCase().trim() : '';
-          const scNameVal = scName ? scName.toUpperCase().trim() : '';
-          return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+          const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
+          return scList.some(sSub => {
+            const sVal = sSub ? sSub.toUpperCase().trim() : '';
+            const scNameVal = scName ? scName.toUpperCase().trim() : '';
+            return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+          });
         });
 
         if (!cp.length) return '';
@@ -6871,8 +6876,29 @@ function d2i(val) {
         const rows = cp.map(p => {
           const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
           
-          const categoryObj = S.categories.find(c => String(c.id) === String(p.ci));
-          const sizes = categoryObj ? (categoryObj.sizes || []) : [];
+          const sizesSet = new Set();
+          if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(cId => {
+              const catObj = S.categories.find(c => String(c.id) === String(cId));
+              if (catObj && catObj.sizes) {
+                catObj.sizes.forEach(sz => sizesSet.add(sz));
+              }
+            });
+          } else {
+            const catObj = S.categories.find(c => String(c.id) === String(p.ci));
+            if (catObj && catObj.sizes) {
+              catObj.sizes.forEach(sz => sizesSet.add(sz));
+            }
+          }
+          const sizes = Array.from(sizesSet);
+          sizes.sort((a, b) => {
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return numA - numB;
+            }
+            return String(a).localeCompare(String(b));
+          });
           
           const sizeBreakdown = sizes.map(sz => {
             const qty = (p.s || {})[sz] || 0;
@@ -6915,7 +6941,9 @@ function d2i(val) {
     function copyWhatsAppStockText() {
       const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
       const subCats = S.subCategories || ['GENERAL'];
-      const filteredProds = P.filter(p => {
+      
+      const mergedList = getMergedProducts(P, '');
+      const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
         return p.n.toLowerCase().includes(q);
       });
@@ -6930,9 +6958,12 @@ function d2i(val) {
 
       subCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
-          const sVal = p.sc ? p.sc.toUpperCase().trim() : '';
-          const scNameVal = scName ? scName.toUpperCase().trim() : '';
-          return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+          const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
+          return scList.some(sSub => {
+            const sVal = sSub ? sSub.toUpperCase().trim() : '';
+            const scNameVal = scName ? scName.toUpperCase().trim() : '';
+            return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+          });
         });
 
         if (!cp.length) return;
@@ -6945,8 +6976,29 @@ function d2i(val) {
 
           msg += `▪️ ${p.n.toUpperCase()}: ${totalQty} Boxes\n`;
 
-          const categoryObj = S.categories.find(c => String(c.id) === String(p.ci));
-          const sizes = categoryObj ? (categoryObj.sizes || []) : [];
+          const sizesSet = new Set();
+          if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(cId => {
+              const catObj = S.categories.find(c => String(c.id) === String(cId));
+              if (catObj && catObj.sizes) {
+                catObj.sizes.forEach(sz => sizesSet.add(sz));
+              }
+            });
+          } else {
+            const catObj = S.categories.find(c => String(c.id) === String(p.ci));
+            if (catObj && catObj.sizes) {
+              catObj.sizes.forEach(sz => sizesSet.add(sz));
+            }
+          }
+          const sizes = Array.from(sizesSet);
+          sizes.sort((a, b) => {
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return numA - numB;
+            }
+            return String(a).localeCompare(String(b));
+          });
           
           const sizesText = sizes.map(sz => {
             const qty = (p.s || {})[sz] || 0;
@@ -6970,7 +7022,9 @@ function d2i(val) {
     function printCustomerCatalog() {
       const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
       const subCats = S.subCategories || ['GENERAL'];
-      const filteredProds = P.filter(p => {
+      
+      const mergedList = getMergedProducts(P, '');
+      const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
         return p.n.toLowerCase().includes(q);
       });
@@ -7018,9 +7072,12 @@ function d2i(val) {
 
       subCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
-          const sVal = p.sc ? p.sc.toUpperCase().trim() : '';
-          const scNameVal = scName ? scName.toUpperCase().trim() : '';
-          return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+          const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
+          return scList.some(sSub => {
+            const sVal = sSub ? sSub.toUpperCase().trim() : '';
+            const scNameVal = scName ? scName.toUpperCase().trim() : '';
+            return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+          });
         });
 
         if (!cp.length) return;
@@ -7033,8 +7090,29 @@ function d2i(val) {
         cp.forEach(p => {
           const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
           
-          const categoryObj = S.categories.find(c => String(c.id) === String(p.ci));
-          const sizes = categoryObj ? (categoryObj.sizes || []) : [];
+          const sizesSet = new Set();
+          if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(cId => {
+              const catObj = S.categories.find(c => String(c.id) === String(cId));
+              if (catObj && catObj.sizes) {
+                catObj.sizes.forEach(sz => sizesSet.add(sz));
+              }
+            });
+          } else {
+            const catObj = S.categories.find(c => String(c.id) === String(p.ci));
+            if (catObj && catObj.sizes) {
+              catObj.sizes.forEach(sz => sizesSet.add(sz));
+            }
+          }
+          const sizes = Array.from(sizesSet);
+          sizes.sort((a, b) => {
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return numA - numB;
+            }
+            return String(a).localeCompare(String(b));
+          });
           
           const sizeTags = sizes.map(sz => {
             const qty = (p.s || {})[sz] || 0;
