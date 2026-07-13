@@ -6916,12 +6916,18 @@ function d2i(val) {
             }
             const sizes = Array.from(sizesSet);
             sizes.sort((a, b) => {
+              const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+              const cleanA = String(a).toUpperCase().trim();
+              const cleanB = String(b).toUpperCase().trim();
+              const idxA = sizeOrder.indexOf(cleanA);
+              const idxB = sizeOrder.indexOf(cleanB);
+              if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+              if (idxA !== -1) return -1;
+              if (idxB !== -1) return 1;
               const numA = parseFloat(a);
               const numB = parseFloat(b);
-              if (!isNaN(numA) && !isNaN(numB)) {
-                return numA - numB;
-              }
-              return String(a).localeCompare(String(b));
+              if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+              return cleanA.localeCompare(cleanB);
             });
             
             const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
@@ -7034,12 +7040,18 @@ function d2i(val) {
           }
           const sizes = Array.from(sizesSet);
           sizes.sort((a, b) => {
+            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+            const cleanA = String(a).toUpperCase().trim();
+            const cleanB = String(b).toUpperCase().trim();
+            const idxA = sizeOrder.indexOf(cleanA);
+            const idxB = sizeOrder.indexOf(cleanB);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
             const numA = parseFloat(a);
             const numB = parseFloat(b);
-            if (!isNaN(numA) && !isNaN(numB)) {
-              return numA - numB;
-            }
-            return String(a).localeCompare(String(b));
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return cleanA.localeCompare(cleanB);
           });
           
           const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
@@ -7166,12 +7178,18 @@ function d2i(val) {
           }
           const sizes = Array.from(sizesSet);
           sizes.sort((a, b) => {
+            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+            const cleanA = String(a).toUpperCase().trim();
+            const cleanB = String(b).toUpperCase().trim();
+            const idxA = sizeOrder.indexOf(cleanA);
+            const idxB = sizeOrder.indexOf(cleanB);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
             const numA = parseFloat(a);
             const numB = parseFloat(b);
-            if (!isNaN(numA) && !isNaN(numB)) {
-              return numA - numB;
-            }
-            return String(a).localeCompare(String(b));
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return cleanA.localeCompare(cleanB);
           });
           
           const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
