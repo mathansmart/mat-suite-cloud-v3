@@ -6909,8 +6909,8 @@ function d2i(val) {
               const qty = (p.s || {})[sz] || 0;
               if (qty <= 0) return '';
               return `
-                <span style="font-size:12px; color:var(--text-muted); background:var(--surface2); padding:4px 8px; border-radius:4px; font-weight:600; border:1px solid var(--border);">
-                  ${sz}: <strong>${qty}</strong>
+                <span style="font-size:14px; color:var(--text-main); background:var(--surface2); padding:6px 12px; border-radius:6px; font-weight:700; border:1px solid var(--border);">
+                  ${sz}
                 </span>`;
             }).filter(Boolean).join(' ');
 
@@ -6982,7 +6982,7 @@ function d2i(val) {
           const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
           if (totalQty <= 0) return;
 
-          msg += `▪️ ${p.n.toUpperCase()}: ${totalQty} Boxes\n`;
+          msg += `▪️ ${p.n.toUpperCase()}\n`;
 
           const sizesSet = new Set();
           if (p.sourceCategoryIds) {
@@ -7011,7 +7011,7 @@ function d2i(val) {
           const sizesText = sizes.map(sz => {
             const qty = (p.s || {})[sz] || 0;
             if (qty <= 0) return '';
-            return `${sz}: ${qty}`;
+            return sz;
           }).filter(Boolean).join(' | ');
 
           if (sizesText) {
@@ -7060,8 +7060,8 @@ function d2i(val) {
             .prod-name { font-weight: 700; font-size: 13px; text-transform: uppercase; }
             .badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px; background: #e6fffa; color: #319795; border: 1px solid #b2f5ea; }
             .out-badge { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
-            .sizes { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; color: #4a5568; }
-            .size-tag { background: #f7fafc; padding: 2px 6px; border-radius: 4px; border: 1px solid #edf2f7; }
+            .sizes { display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px; color: #212b36; margin-top: 2px; }
+            .size-tag { background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-weight: 700; }
             @media print {
               body { padding: 0; }
               .card { border: 1px solid #cbd5e0; }
@@ -7129,7 +7129,7 @@ function d2i(val) {
           const sizeTags = sizes.map(sz => {
             const qty = (p.s || {})[sz] || 0;
             if (qty <= 0) return '';
-            return `<span class="size-tag">${sz}: <strong>${qty}</strong></span>`;
+            return `<span class="size-tag">${sz}</span>`;
           }).filter(Boolean).join(' ');
 
           printHtml += `
