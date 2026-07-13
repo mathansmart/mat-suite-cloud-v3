@@ -6871,9 +6871,13 @@ function d2i(val) {
           });
         });
 
-        if (!cp.length) return '';
+        const stockCp = cp.filter(p => {
+          return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
+        });
 
-        const rows = cp.map(p => {
+        if (!stockCp.length) return '';
+
+        const rows = stockCp.map(p => {
           const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
           
           const sizesSet = new Set();
@@ -7080,14 +7084,18 @@ function d2i(val) {
           });
         });
 
-        if (!cp.length) return;
+        const stockCp = cp.filter(p => {
+          return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
+        });
+
+        if (!stockCp.length) return;
 
         printHtml += `
           <div class="sec-title">${scName}</div>
           <div class="grid">
         `;
 
-        cp.forEach(p => {
+        stockCp.forEach(p => {
           const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
           
           const sizesSet = new Set();
