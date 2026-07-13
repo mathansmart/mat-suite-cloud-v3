@@ -1963,10 +1963,17 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           <div id="rpt-customer-share" style="display:none;">
             <!-- Top Controls -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-              <div style="width:300px;">
-                <div class="search-wrapper" style="margin:0;">
-                  <div class="search-icon-left">🔍</div>
-                  <input type="text" id="cs-search" placeholder="Search customer catalog..." class="premium-search" autocomplete="off" oninput="renderCustomerShare()">
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div style="width:300px;">
+                  <div class="search-wrapper" style="margin:0;">
+                    <div class="search-icon-left">🔍</div>
+                    <input type="text" id="cs-search" placeholder="Search customer catalog..." class="premium-search" autocomplete="off" oninput="renderCustomerShare()">
+                  </div>
+                </div>
+                <div>
+                  <select id="cs-sc-filter" class="form-select" style="height:36px; padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:12px; font-weight:700; background:var(--surface); color:var(--text-main);" onchange="renderCustomerShare()">
+                    <option value="">All Sub Categories</option>
+                  </select>
                 </div>
               </div>
               <div style="display:flex; gap:10px;">
@@ -6855,6 +6862,20 @@ function d2i(val) {
         const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
         const subCats = S.subCategories || ['GENERAL'];
 
+        // Populate Sub Category Dropdown Filter dynamically
+        const filterEl = document.getElementById('cs-sc-filter');
+        if (filterEl) {
+          const currentVal = filterEl.value;
+          const optionsHtml = '<option value="">All Sub Categories</option>' + 
+            subCats.map(sc => `<option value="${sc}">${sc}</option>`).join('');
+          if (filterEl.innerHTML !== optionsHtml) {
+            filterEl.innerHTML = optionsHtml;
+            filterEl.value = currentVal;
+          }
+        }
+        const selectedSc = filterEl ? filterEl.value : '';
+        const activeSubCats = selectedSc ? [selectedSc] : subCats;
+
         const mergedList = getMergedProducts(P, '');
 
         const filteredProds = mergedList.filter(p => {
@@ -6862,7 +6883,7 @@ function d2i(val) {
           return p.n.toLowerCase().includes(q);
         });
 
-        const html = subCats.map(scName => {
+        const html = activeSubCats.map(scName => {
           const cp = filteredProds.filter(p => {
             const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
             return scList.some(sSub => {
@@ -6879,8 +6900,6 @@ function d2i(val) {
           if (!stockCp.length) return '';
 
           const rows = stockCp.map(p => {
-            const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
-            
             const sizesSet = new Set();
             if (p.sourceCategoryIds) {
               p.sourceCategoryIds.forEach(cId => {
@@ -6905,17 +6924,28 @@ function d2i(val) {
               return String(a).localeCompare(String(b));
             });
             
-            const sizeBreakdown = sizes.map(sz => {
-              const qty = (p.s || {})[sz] || 0;
-              if (qty <= 0) return '';
+            const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
+            const standardRange = ['45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
+            const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
+
+            let displaySizes = [];
+            if (hasAllStandard) {
+              displaySizes.push('45 TO 90');
+              activeSizes.forEach(sz => {
+                if (!standardRange.includes(sz)) {
+                  displaySizes.push(sz);
+                }
+              });
+            } else {
+              displaySizes = activeSizes;
+            }
+
+            const sizeBreakdown = displaySizes.map(sz => {
               return `
                 <span style="font-size:14px; color:var(--text-main); background:var(--surface2); padding:6px 12px; border-radius:6px; font-weight:700; border:1px solid var(--border);">
                   ${sz}
                 </span>`;
-            }).filter(Boolean).join(' ');
-
-            const totalBadgeColor = totalQty > 0 ? 'background:rgba(16, 185, 129, 0.1); color:var(--success); border:1px solid rgba(16, 185, 129, 0.2);' : 'background:rgba(239, 110, 110, 0.1); color:var(--danger); border:1px solid rgba(239, 110, 110, 0.2);';
-            const totalBadgeText = totalQty > 0 ? `${totalQty.toLocaleString()} Boxes` : 'Out of Stock';
+            }).join(' ');
 
             return `
               <div style="padding:12px 0; border-bottom:1px solid var(--border-light); display:flex; flex-direction:column; gap:6px;">
@@ -6950,6 +6980,10 @@ function d2i(val) {
       const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
       const subCats = S.subCategories || ['GENERAL'];
       
+      const filterEl = document.getElementById('cs-sc-filter');
+      const selectedSc = filterEl ? filterEl.value : '';
+      const activeSubCats = selectedSc ? [selectedSc] : subCats;
+
       const mergedList = getMergedProducts(P, '');
       const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
@@ -6964,7 +6998,7 @@ function d2i(val) {
 
       let msg = `📦 *VESTER - STOCK AVAILABILITY REPORT* 📦\nDate: ${dateStr}\n`;
 
-      subCats.forEach(scName => {
+      activeSubCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
           const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
           return scList.some(sSub => {
@@ -7008,11 +7042,23 @@ function d2i(val) {
             return String(a).localeCompare(String(b));
           });
           
-          const sizesText = sizes.map(sz => {
-            const qty = (p.s || {})[sz] || 0;
-            if (qty <= 0) return '';
-            return sz;
-          }).filter(Boolean).join(' | ');
+          const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
+          const standardRange = ['45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
+          const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
+
+          let displaySizes = [];
+          if (hasAllStandard) {
+            displaySizes.push('45 TO 90');
+            activeSizes.forEach(sz => {
+              if (!standardRange.includes(sz)) {
+                displaySizes.push(sz);
+              }
+            });
+          } else {
+            displaySizes = activeSizes;
+          }
+
+          const sizesText = displaySizes.join(' | ');
 
           if (sizesText) {
             msg += `  (Sizes - ${sizesText})\n`;
@@ -7031,6 +7077,10 @@ function d2i(val) {
       const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
       const subCats = S.subCategories || ['GENERAL'];
       
+      const filterEl = document.getElementById('cs-sc-filter');
+      const selectedSc = filterEl ? filterEl.value : '';
+      const activeSubCats = selectedSc ? [selectedSc] : subCats;
+
       const mergedList = getMergedProducts(P, '');
       const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
@@ -7078,7 +7128,7 @@ function d2i(val) {
           </div>
       `;
 
-      subCats.forEach(scName => {
+      activeSubCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
           const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
           return scList.some(sSub => {
@@ -7100,8 +7150,6 @@ function d2i(val) {
         `;
 
         stockCp.forEach(p => {
-          const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
-          
           const sizesSet = new Set();
           if (p.sourceCategoryIds) {
             p.sourceCategoryIds.forEach(cId => {
@@ -7126,11 +7174,25 @@ function d2i(val) {
             return String(a).localeCompare(String(b));
           });
           
-          const sizeTags = sizes.map(sz => {
-            const qty = (p.s || {})[sz] || 0;
-            if (qty <= 0) return '';
+          const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
+          const standardRange = ['45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
+          const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
+
+          let displaySizes = [];
+          if (hasAllStandard) {
+            displaySizes.push('45 TO 90');
+            activeSizes.forEach(sz => {
+              if (!standardRange.includes(sz)) {
+                displaySizes.push(sz);
+              }
+            });
+          } else {
+            displaySizes = activeSizes;
+          }
+
+          const sizeTags = displaySizes.map(sz => {
             return `<span class="size-tag">${sz}</span>`;
-          }).filter(Boolean).join(' ');
+          }).join(' ');
 
           printHtml += `
             <div style="padding:10px 0; border-bottom:1px solid #edf2f7; display:flex; flex-direction:column; gap:6px; page-break-inside:avoid;">
