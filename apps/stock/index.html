@@ -1618,6 +1618,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <div class="nav-item" onclick="location.href='/'" title="Home"><span class="nav-icon"><i class="ti ti-home"></i></span><div class="nav-label">Home</div></div>
         <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span><div class="nav-label">Dashboard</div></div>
         <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon"><i class="ti ti-eye"></i></span><div class="nav-label">Preview</div></div>
+        <div class="nav-item" onclick="nav('inventory')" title="Inventory"><span class="nav-icon"><i class="ti ti-box"></i></span><div class="nav-label">Inventory</div></div>
         
         <div class="nav-item has-submenu" onclick="toggleSubmenu('stock-submenu')" id="nav-group-stock">
           <span class="nav-icon"><i class="ti ti-package"></i></span>
@@ -1742,18 +1743,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                       </div>
                    </div>
                 </div>
-                <!-- Shortage Sub Categories Card -->
-                <div id="dash-shortage-card" style="margin-top: 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: none;">
-                   <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px;">
-                      <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-                         <i class="ti ti-alert-triangle" style="font-size: 16px;"></i>
-                      </div>
-                      <span style="font-size: 16px; font-weight: 700; color: var(--text-main);">Shortage Items</span>
-                   </div>
-                   <div id="dash-shortage-list" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto;">
-                      <!-- populated dynamically -->
-                   </div>
-                </div>
              </div>
              <!-- Left Side Main Content -->
              <div style="min-width: 0;">
@@ -1808,7 +1797,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <!-- INVENTORY -->
         <div class="section" id="section-inventory">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <button class="btn btn-ghost" onclick="nav('settings')" style="margin-right:15px; padding:8px; border:1px solid var(--border); font-weight:700; font-size:12px; display:flex; align-items:center; gap:6px;"><i class="ti ti-arrow-left"></i> Back to Settings</button>
             <div class="cat-tabs" style="display:none;"></div>
             <div style="flex:1; margin-right:15px;">
               <div class="search-wrapper">
@@ -1836,9 +1824,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                   <option value="">All Categories</option>
                 </select>
               </div>
-              <div class="form-group"><label class="form-label" title="Optional">Supplier (Optional)</label>
+              <div class="form-group"><label class="form-label">Supplier <span style="color:var(--accent);">*</span></label>
                 <select class="form-select" id="si-supplier" autocomplete="off">
-                  <option value="" selected>-- Select Supplier --</option>
+                  <option value="" disabled selected>-- Select Supplier --</option>
                 </select>
               </div>
               <div class="form-group"><label class="form-label">Search & Select Products</label>
@@ -1934,10 +1922,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           <!-- TABS -->
           <div class="premium-tabs">
             <div class="tab-pill active inv" id="rtab-inventory" onclick="switchRptTab('inventory')">
-              📦 Particular
-            </div>
-            <div class="tab-pill" id="rtab-customer-share" onclick="switchRptTab('customer-share')">
-              🔗 Customer Share
+              📦 Inventory Balance
             </div>
             <div class="tab-pill" id="rtab-prod-analysis" onclick="switchRptTab('prod-analysis')">
               📈 Product Analysis
@@ -1946,7 +1931,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
           <!-- INVENTORY REPORT -->
           <div id="rpt-inventory">
-            <div class="stat-grid" style="display:none;">
+            <div class="stat-grid">
               <div class="stat-card c3">
                 <div class="stat-icon-wrap">📦</div>
                 <div class="stat-info">
@@ -1955,39 +1940,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                 </div>
               </div>
             </div>
-            <div class="report-cat-grid" id="report-charts" style="display:none;"></div>
+            <div class="report-cat-grid" id="report-charts"></div>
             <div id="rpt-inventory-tables"></div>
-          </div>
-
-          <!-- CUSTOMER SHARE REPORT -->
-          <div id="rpt-customer-share" style="display:none;">
-            <!-- Top Controls -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <div style="width:300px;">
-                  <div class="search-wrapper" style="margin:0;">
-                    <div class="search-icon-left">🔍</div>
-                    <input type="text" id="cs-search" placeholder="Search customer catalog..." class="premium-search" autocomplete="off" oninput="renderCustomerShare()">
-                  </div>
-                </div>
-                <div>
-                  <select id="cs-sc-filter" class="form-select" style="height:36px; padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:12px; font-weight:700; background:var(--surface); color:var(--text-main);" onchange="renderCustomerShare()">
-                    <option value="">All Sub Categories</option>
-                  </select>
-                </div>
-              </div>
-              <div style="display:flex; gap:10px;">
-                <button class="btn btn-ghost" onclick="copyWhatsAppStockText()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                  <i class="ti ti-brand-whatsapp" style="color:#25D366; font-size:16px;"></i> Copy WhatsApp Text
-                </button>
-                <button class="btn btn-ghost" onclick="printCustomerCatalog()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                  <i class="ti ti-printer" style="font-size:16px;"></i> Print Catalog
-                </button>
-              </div>
-            </div>
-
-            <!-- Customer Stock List -->
-            <div id="cs-stock-list"></div>
           </div>
 
           <!-- PRODUCT WISE REPORT (NEW) -->
@@ -2183,10 +2137,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                 <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-folders" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Product Categories</span>
                 <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
               </div>
-              <div onclick="nav('inventory')" style="padding:15px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-                <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-plus" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> New Product Add</span>
-                <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
-              </div>
               <div onclick="nav('subcategories')" style="padding:15px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                 <span style="font-size:16px; font-weight:700; color:var(--text-main);"><i class="ti ti-tags" style="margin-right:10px; color:var(--primary); font-size:20px; vertical-align:middle;"></i> Sub Categories</span>
                 <i class="ti ti-chevron-right" style="color:var(--muted); font-size:18px;"></i>
@@ -2205,11 +2155,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
 
               <button class="btn btn-primary" onclick="saveSettings()" id="lbl-save-btn" style="margin-top:20px;">Save Settings</button>
               <span id="s-saved" style="display:none;margin-left:10px;color:var(--accent3);font-weight:700;font-size:13px;">✓ Saved!</span>
-
-              <div style="border-top:1.5px solid var(--border); padding-top:20px; margin-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                <div style="font-size:13px; font-weight:700; color:var(--text-main);"><i class="ti ti-link" style="color:var(--primary); margin-right:8px; font-size:18px; vertical-align:middle;"></i>Share / Connect via LAN</div>
-                <button class="btn btn-ghost btn-sm" onclick="showServerInfo()" style="border:1.5px solid var(--border); font-weight:700;">Admin Access Info</button>
-              </div>
             </div>
           </div>
 
@@ -2220,6 +2165,26 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             </div>
             <p style="color:var(--muted); font-size:12px; margin-bottom:15px;">Deleted items are kept here for 30 days before being permanently deleted.</p>
             <div id="settings-recycle-bin-list"></div>
+          </div>
+
+          <div class="table-wrap" style="padding:20px;margin-top:20px;margin-bottom:20px;">
+            <div class="sec-title" style="margin:0; margin-bottom:16px;">Public View-Only Access (QR Code)</div>
+            <p style="color:var(--muted); font-size:12px; margin-bottom:15px;">
+              Share this QR code or link to allow users to view stock balance without edit or delete options.
+            </p>
+            <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; background:var(--surface2); padding:15px; border-radius:8px;">
+              <div id="settings-qr-container" style="background:#fff; padding:8px; border-radius:6px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; width:166px; height:166px;">
+                <!-- Dynamic QR Code will go here -->
+              </div>
+              <div style="flex:1; min-width:200px;">
+                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px; letter-spacing:0.5px;">Viewer URL</div>
+                <input type="text" id="settings-viewer-url" class="form-input" readonly style="background:#fff; margin-bottom:8px; font-family:'JetBrains Mono',monospace; font-size:12px;">
+                <div style="display:flex; gap:10px;">
+                  <button class="btn btn-primary btn-sm" onclick="copyViewerUrl()">Copy Viewer Link</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showServerInfo()" style="border:1px solid var(--border);"><i class="ti ti-link"></i> Admin Access Info</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- User Accounts Removed -->
@@ -2349,7 +2314,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         let m = p[0], y = p[1];
         if (m.length === 4) { y = p[0]; m = p[1]; }
         if (!y || !m || isNaN(y) || isNaN(m)) return '';
-        if (y.length === 2) y = '20' + y;
         return y.padStart(4, '0') + '-' + m.padStart(2, '0');
       }
       if (p.length === 3) {
@@ -2729,7 +2693,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     const LANG = {
       en: {
         logo_sub: 'Stock Manager', nav_main: 'Main', nav_stock: 'Stock', nav_more: 'More',
-        nav_dashboard: 'Dashboard', nav_inventory: 'New Product Add', nav_stockin: 'Stock In',
+        nav_dashboard: 'Dashboard', nav_inventory: 'Inventory', nav_stockin: 'Stock In',
         nav_stockout: 'Stock Out', nav_alerts: 'Alerts', nav_transactions: 'Transactions',
         nav_reports: 'Reports', nav_settings: 'Settings',
         export_btn: '⬇ Export Excel',
@@ -2798,7 +2762,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       },
       ta: {
         logo_sub: 'Stock Manager', nav_main: 'Main', nav_stock: 'Stock', nav_more: 'More',
-        nav_dashboard: 'முகப்பு', nav_inventory: 'புதிய தயாரிப்பு சேர்', nav_stockin: 'உள்வரும் வரவு',
+        nav_dashboard: 'முகப்பு', nav_inventory: 'சரக்கு இருப்பு', nav_stockin: 'உள்வரும் வரவு',
         nav_stockout: 'வெளிச்செல்லும் செலவு', nav_alerts: 'எச்சரிக்கைகள்', nav_transactions: 'பரிவர்த்தனைகள்',
         nav_reports: 'அறிக்கைகள்', nav_settings: 'அமைப்புகள்',
         export_btn: '⬇ Export Excel',
@@ -3451,34 +3415,6 @@ function renderDashboard() {
       if (elTotSuppliers) elTotSuppliers.textContent = S.suppliers ? S.suppliers.length : 0;
       if (elTotUniqueProds) elTotUniqueProds.textContent = getMergedProducts(P, '').length;
       if (elTotLow) elTotLow.textContent = getLow().length;
-
-      // Populate shortage card
-      const shortageListEl = document.getElementById('dash-shortage-list');
-      const shortageCardEl = document.getElementById('dash-shortage-card');
-      if (shortageListEl && shortageCardEl) {
-         const shortages = [];
-         P.forEach(p => {
-            szs(p.ci).forEach(sz => {
-               const st = (p.s ? p.s[sz] : 0) || 0;
-               if (st < 0) {
-                  shortages.push({ name: p.n, sz, st });
-               }
-            });
-         });
-
-         if (shortages.length === 0) {
-            shortageCardEl.style.display = 'none';
-         } else {
-            shortageCardEl.style.display = 'block';
-            let listHtml = shortages.map(item => {
-               return `<div style="font-size:12.5px; color:var(--text-main); display:flex; justify-content:space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); gap: 10px;">
-                  <span style="font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 200px;">${item.name} (${item.sz})</span>
-                  <span style="color:var(--danger); font-weight:700; font-family:'JetBrains Mono',monospace; flex-shrink: 0;">${item.st}</span>
-               </div>`;
-            }).join('');
-            shortageListEl.innerHTML = listHtml;
-         }
-      }
       const compEl = document.getElementById('dash-company-name');
       if (compEl) compEl.textContent = 'Vester';
       updateBadge();
@@ -3855,14 +3791,6 @@ function renderDashboard() {
     let siAddedPids = [];
     let soAddedPids = [], soData = {};
 
-    function saveDraftSI() {
-      localStorage.setItem('gsm3_si_draft', JSON.stringify({ pids: siAddedPids, data: siTableData, date: document.getElementById('si-date') ? document.getElementById('si-date').value : '', sup: document.getElementById('si-supplier') ? document.getElementById('si-supplier').value : '' }));
-    }
-    function saveDraftSO() {
-      localStorage.setItem('gsm3_so_draft', JSON.stringify({ pids: soAddedPids, data: soData, date: document.getElementById('so-date') ? document.getElementById('so-date').value : '', cust: document.getElementById('so-customer') ? document.getElementById('so-customer').value : '' }));
-    }
-
-
     let siProdPanelOpen = false; // kept for compat
 
     function renderSiSearchDropdown() {
@@ -3901,7 +3829,16 @@ function renderDashboard() {
     }
 
     function selectSiProduct(pid) {
-      // Validation removed to allow searching and adding old products without a supplier
+      if (!siAddedPids.includes(pid)) {
+        const supEl = document.getElementById('si-supplier');
+        if (supEl && !supEl.value) {
+          showAlert('Stock In', 'Please select a Supplier first before adding products.');
+          const dr = document.getElementById('si-search-drop');
+          if (dr) dr.style.display = 'none';
+          document.getElementById('si-search').value = '';
+          return;
+        }
+      }
       if (siAddedPids.includes(pid)) {
         // deselect
         siAddedPids = siAddedPids.filter(x => x !== pid);
@@ -3912,7 +3849,6 @@ function renderDashboard() {
         siTableData[pid] = { sizes: {}, supplier: '', invoice: '' };
         szs(p.ci).forEach(s => siTableData[pid].sizes[s] = 0);
       }
-      saveDraftSI();
       renderSiSearchDropdown();
       renderSiTable();
     }
@@ -4040,12 +3976,11 @@ function renderDashboard() {
           const rowTot = Object.values(siTableData[pid].sizes).reduce((a, b) => a + b, 0);
           const rowEl = wrap.querySelector(`tr[data-pid="${pid}"] .si-row-total`);
           if (rowEl) rowEl.textContent = rowTot;
-          saveDraftSI();
           updateSiSum();
         });
       });
       wrap.querySelectorAll('.si-inv-input').forEach(el => {
-        el.addEventListener('input', function () { siTableData[this.dataset.pid].invoice = this.value; saveDraftSI(); });
+        el.addEventListener('input', function () { siTableData[this.dataset.pid].invoice = this.value; });
       });
       updateSiSum();
     }
@@ -4060,7 +3995,6 @@ function renderDashboard() {
 
     function clearSiTable() {
       siTableData = {}; siAddedPids = [];
-      saveDraftSI();
       const s = document.getElementById('si-search'); if (s) s.value = '';
       const dr = document.getElementById('si-search-drop'); if (dr) dr.style.display = 'none';
       renderSiTable();
@@ -4098,7 +4032,6 @@ function renderDashboard() {
       if (saved > 0) {
         showCenterToast(`${saved} entries saved!`);
         siTableData = {}; siAddedPids = [];
-        saveDraftSI();
         renderSiProductList(); renderSiTable(); renderSiHistory(); updateBadge();
       } else { showAlert('Stock In', 'Please enter quantity!'); }
     }
@@ -4146,11 +4079,10 @@ function renderDashboard() {
         delete soData[pid];
       } else {
         soAddedPids.push(pid);
-        soData[pid] = {};
         const p = P.find(x => x.id === pid);
-        szs(p.ci).forEach(s => soData[pid][s] = 0);
+        soData[pid] = { sizes: {}, supplier: '', invoice: '' };
+        szs(p.ci).forEach(s => soData[pid].sizes[s] = 0);
       }
-      saveDraftSO();
       renderSoSearchDropdown();
       renderSoEntries();
     }
@@ -4185,13 +4117,13 @@ function renderDashboard() {
             const cur = (p.s ? p.s[s] : 0) || 0;
             const sc = cur <= 0 ? 'color:var(--danger)' : cur <= p.m ? 'color:var(--warn)' : 'color:var(--accent3)';
             return `<td style="padding:3px 2px;">
-          <input type="number" min="0" value="${d[s] || ''}" placeholder="0"
+          <input type="number" min="0" value="${d.sizes[s] || ''}" placeholder="0"
             data-pid="${p.id}" data-sz="${s}" class="so-qty-input"
             style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:3px;padding:5px 2px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;text-align:center;">
           <div style="font-size:9px;text-align:center;font-family:'JetBrains Mono',monospace;${sc}">Stk:${cur}</div>
         </td>`;
           }).join('');
-          const rowTot = Object.values(d).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+          const rowTot = Object.values(d.sizes).reduce((a, b) => a + b, 0);
           return `<tr data-pid="${p.id}">
         <td style="font-weight:700;font-size:13px;white-space:nowrap;padding:6px 10px;border-right:1.5px solid var(--border);">${p.n}</td>
         ${tds}
@@ -4277,16 +4209,12 @@ function renderDashboard() {
       });
       cont.querySelectorAll('.so-qty-input').forEach(el => {
         el.addEventListener('input', function () {
-          const p = this.dataset.pid, s = this.dataset.sz;
-          soData[p][s] = parseInt(this.value) || 0;
-          const pr = P.find(x => x.id === p);
-          const av = pr.s[s] || 0;
-          if (soData[p][s] > av) this.classList.add('exceed');
-          else this.classList.remove('exceed');
-          const rowTot = Object.values(soData[p]).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
-          const rowEl = cont.querySelector(`tr[data-pid="${p}"] .so-row-total`);
+          const pid = this.dataset.pid;
+          if (!soData[pid]) soData[pid] = { sizes: {}, supplier: '', invoice: '' };
+          soData[pid].sizes[this.dataset.sz] = parseInt(this.value) || 0;
+          const rowTot = Object.values(soData[pid].sizes).reduce((a, b) => a + b, 0);
+          const rowEl = cont.querySelector(`tr[data-pid="${pid}"] .so-row-total`);
           if (rowEl) rowEl.textContent = rowTot;
-          saveDraftSO();
           updateSoSum();
         });
       });
@@ -4380,7 +4308,7 @@ function renderDashboard() {
         const prodMap = {};
         g.txns.forEach(t => {
           const key = t.pid + '|' + ((t.d && t.d.length > 10) ? t.d : ((t.d || '') + '-' + Math.random()));
-          if (!prodMap[key]) prodMap[key] = { pn: t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || 'Unknown', pid: t.pid, sizes: {}, pa: '-', rf: '-' };
+          if (!prodMap[key]) prodMap[key] = { pn: t.pn, pid: t.pid, sizes: {}, pa: '-', rf: '-' };
           if (t.pa && t.pa.trim()) prodMap[key].pa = t.pa.trim();
           if (t.rf && t.rf.trim()) prodMap[key].rf = t.rf.trim();
           if (!prodMap[key].sizes[t.sz]) prodMap[key].sizes[t.sz] = { qty: 0, ids: [] };
@@ -4615,7 +4543,7 @@ function renderDashboard() {
     let curSiRangeProducts = null, curSoRangeProducts = null;
     let curRangeFilterType = 'IN';
     let todayM = todayStr().slice(0, 7);
-    let curSiMonth = 'ALL', curSoMonth = 'ALL', curTxnMonth = 'ALL', curRptMonth = 'ALL';
+    let curSiMonth = todayM, curSoMonth = todayM, curTxnMonth = todayM, curRptMonth = todayM;
     let siHistorySearch = '', soHistorySearch = '', txnHistorySearch = '';
 
     function fmtDisplay(d) {
@@ -4819,12 +4747,6 @@ function renderDashboard() {
       renderRangePicker(containerId);
     }
 
-    function closeCalPicker(containerId) {
-      const pop = document.getElementById('calpop-' + containerId);
-      if (pop) pop.remove();
-      rangeState[containerId] = null;
-    }
-
     function applyRangePreset(containerId, start, end) {
       const rs = rangeState[containerId];
       if (!rs) return;
@@ -4850,207 +4772,174 @@ function renderDashboard() {
       }
       closeCalPicker(containerId);
     }
-function d2i(val) {
-  if (!val) return '';
-  const parts = val.trim().replace(/[\/\.]/g, '-').split('-');
-  if (parts.length === 3) {
-    let d = parts[0], m = parts[1], y = parts[2];
-    if (d.length === 4) {
-      y = parts[0]; m = parts[1]; d = parts[2];
+
+    function clearRangeFilter(containerId, onSelect) {
+      if (onSelect === 'renderSiHistory') {
+        curSiRangeStart = null; curSiRangeEnd = null; curSiFilterDate = null;
+        renderSiHistory(curSiMonth,'');
+      } else {
+        curSoRangeStart = null; curSoRangeEnd = null; curSoFilterDate = null;
+        renderSoHistory(curSoMonth,'');
+      }
+      closeCalPicker(containerId);
     }
-    d = d.padStart(2, '0');
-    m = m.padStart(2, '0');
-    if (y.length === 2) y = (parseInt(y) < 50 ? '20' : '19') + y;
-    y = y.padStart(4, '0');
-    return `${y}-${m}-${d}`;
-  }
-  if (parts.length === 2) {
-    let m = parts[0], y = parts[1];
-    if (m.length === 4) {
-      y = parts[0]; m = parts[1];
+
+    function closeCalPicker(containerId) {
+      const pop = document.getElementById('calpop-' + containerId);
+      if (pop) pop.remove();
+      rangeState[containerId] = null;
     }
-    m = m.padStart(2, '0');
-    if (y.length === 2) y = (parseInt(y) < 50 ? '20' : '19') + y;
-    y = y.padStart(4, '0');
-    return `${y}-${m}`;
-  }
-  return val;
-}
 
     function renderMonthFolders(containerId, activeMonth, onSelect, type, searchVal, onSearch) {
       const cont = document.getElementById(containerId);
       if (!cont) return;
 
-      const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : (onSelect === 'renderSoHistory' ? curSoFilterDate : null);
-      
-      let mName = 'All Time';
-      if (activeMonth !== 'ALL') {
-        const dObj = new Date(activeMonth + '-01');
-        if (!isNaN(dObj.getTime())) {
-          mName = dObj.toLocaleString('default', { month: 'short', year: 'numeric' });
-        } else {
-          mName = activeMonth;
-        }
+      const [ay, am] = activeMonth.split('-');
+      const mName = new Date(parseInt(ay), parseInt(am)-1).toLocaleString('default',{month:'short',year:'numeric'});
+
+      const rangeStart = (onSelect === 'renderSiHistory') ? curSiRangeStart : curSoRangeStart;
+      const rangeEnd   = (onSelect === 'renderSiHistory') ? curSiRangeEnd   : curSoRangeEnd;
+      const filterDate = (onSelect === 'renderSiHistory') ? curSiFilterDate : curSoFilterDate;
+
+      let filterLabel, hasFilter;
+      if (rangeStart && rangeEnd) {
+        filterLabel = `📅 ${i2d(rangeStart)} → ${i2d(rangeEnd)}`;
+        hasFilter = true;
+      } else if (filterDate) {
+        filterLabel = `📅 ${i2d(filterDate)}`;
+        hasFilter = true;
+      } else {
+        filterLabel = `📅 ${mName}`;
+        hasFilter = false;
       }
 
-      const rawVal = (activeMonth === 'ALL' ? '' : i2d(activeMonth));
-      const hasFilter = activeMonth !== 'ALL' || filterDate !== null;
+      const rawVal = rangeStart && rangeEnd ? `${i2d(rangeStart)} to ${i2d(rangeEnd)}` : (i2d(filterDate) || i2d(activeMonth));
 
       const _prevFocused = document.activeElement;
-      const _prevWasSearch = _prevFocused && (_prevFocused.id === `${containerId}-srch` || (_prevFocused.closest && _prevFocused.closest(`#${containerId}`)));
-
-      // Extract unique months from transactions for this type
-      const monthsSet = new Set();
-      monthsSet.add(todayStr().slice(0, 7)); // Always include current month
-      if (Array.isArray(T)) {
-        T.forEach(t => {
-          if (t.tp === type && t.d) {
-            const m = getMonthFromDateStr(t.d);
-            if (m) monthsSet.add(m);
-          }
-        });
-      }
-      const sortedMonths = Array.from(monthsSet).sort().reverse();
+      const _prevSearchVal = _prevFocused && _prevFocused.id && _prevFocused.closest && _prevFocused.closest(`#${containerId}`) ? _prevFocused.value : null;
+      const _prevWasSearch = _prevSearchVal !== null;
 
       cont.innerHTML = `
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
-          <!-- Date search input -->
-          <div class="form-group" style="margin:0; width:220px; flex-shrink: 0; display:flex; gap:8px;">
-            <div class="search-wrapper" style="flex:1;">
-              <div class="search-icon-left" style="top:11px; font-size:14px; left:10px;">📅</div>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1.5px solid var(--border);margin-bottom:16px;position:relative;">
+          <div class="form-group" style="margin:0; width:180px; flex-shrink: 0;">
+            <div class="search-wrapper">
+              <div class="search-icon-left" style="top:11px; font-size:14px;">📅</div>
               <input type="text" value="${rawVal}" 
                 placeholder="DD-MM-YYYY"
                 class="premium-search" 
-                style="height:38px; padding-left:32px !important; padding-right:10px !important; font-size:13px; font-weight:700; width: 100% !important;"
                 autocomplete="off"
-                onkeyup="if(event.key==='Enter'){ 
-                  const v = this.value.trim().toUpperCase();
-                  if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL');
-                  else ${onSelect}(this.value);
-                }"
-              >
+                style="height:38px; padding-left:34px; font-size:13px; font-weight:700; width: 100% !important;"
+                oninput="if(this.value.length>=7) ${onSelect}(this.value)">
             </div>
-            <button class="btn btn-primary" style="padding:0 12px; height:38px; border-radius:6px; font-weight:700; font-size:12px;" 
-              onclick="
-                const input = this.previousElementSibling.querySelector('input');
-                const v = input.value.trim().toUpperCase();
-                if (v==='ALL' || v==='ALL MONTHS') ${onSelect}('ALL');
-                else ${onSelect}(input.value);
-              ">GO</button>
           </div>
 
-          <!-- Month Dropdown select -->
-          <div style="width: 160px; flex-shrink: 0;">
-            <select class="form-select" onchange="${onSelect}(this.value)" 
-              style="height:38px; font-size:13px; font-weight:700; width:100%; border:1.5px solid var(--border); border-radius:10px; padding-left:12px; background-color:var(--surface); color:var(--text-color); cursor:pointer;">
-              <option value="ALL" ${activeMonth === 'ALL' ? 'selected' : ''}>All Months</option>
-              ${sortedMonths.map(m => {
-                const parts = m.split('-');
-                let label = m;
-                if (parts.length === 2) {
-                  const y = parseInt(parts[0]);
-                  const mm = parseInt(parts[1]);
-                  if (!isNaN(y) && !isNaN(mm)) {
-                    const dateObj = new Date(y, mm - 1);
-                    if (!isNaN(dateObj.getTime())) {
-                      label = dateObj.toLocaleString('default', { month: 'short', year: 'numeric' });
-                    }
-                  }
-                }
-                const isSelected = m === activeMonth ? 'selected' : '';
-                return `<option value="${m}" ${isSelected}>${label}</option>`;
-              }).join('')}
-            </select>
-          </div>
-
-          <!-- Clear Filter -->
-          <button class="btn btn-ghost" onclick="${onSelect}('ALL')" style="color:var(--danger);font-weight:700;display:${hasFilter ? 'flex' : 'none'};height:38px;padding:0 16px;border-radius:10px;font-size:12px;align-items:center;gap:6px;">
-            <i class="ti ti-x" style="font-size:16px;"></i>Clear Filter
+          <button onclick="openCustomRangeModal('${type}')"
+            class="btn btn-primary"
+            style="height:38px; padding:0 16px; border-radius:10px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:var(--shadow-sm); z-index: 5; cursor:pointer;">
+            📅 Range
           </button>
 
-          <!-- Product Search Box -->
-          ${type === 'IN' || type === 'OUT' ? `
-            <div class="search-wrapper" style="margin-left:auto; width:220px; margin-right:24px;">
-              <div class="search-icon-left"><i class="ti ti-search"></i></div>
-              <input type="text" placeholder="Search Product..." class="premium-search" 
-                id="${containerId}-srch"
-                value="${searchVal||''}"
-                oninput="${onSearch}(this.value)">
-            </div>
-          `:''}
-        </div>
-      `;
 
+
+          ${hasFilter ? `<button onclick="${onSelect==='renderSiHistory'?'curSiRangeStart=null;curSiRangeEnd=null;curSiFilterDate=null;curSiRangeProducts=null;renderSiHistory':'curSoRangeStart=null;curSoRangeEnd=null;curSoFilterDate=null;curSoRangeProducts=null;renderSoHistory'}('${activeMonth}','')"
+            style="padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:11px;font-weight:700;color:var(--danger); z-index: 5;">
+            ✕ Clear Filter
+          </button>` : ''}
+
+          <div style="margin-left:auto; margin-right:60px;">
+            <div class="search-wrapper" style="width:220px;">
+              <div class="search-icon-left" style="top:11px;">🔍</div>
+              <input type="text" placeholder="Search Product..."
+                id="${containerId}-srch"
+                class="premium-search"
+                autocomplete="off"
+                style="height:38px;font-size:12px;padding-left:34px;"
+                oninput="${onSearch}(this.value)"
+                value="${searchVal || ''}">
+            </div>
+          </div>
+        </div>`;
+
+      // Restore focus to the product search input if it was focused before re-render
       if (_prevWasSearch) {
-        setTimeout(() => {
-          const newInput = document.getElementById(`${containerId}-srch`);
-          if (newInput) {
-            newInput.focus();
-            const len = newInput.value.length;
-            newInput.setSelectionRange(len, len);
-          }
-        }, 0);
+        const newInput = document.getElementById(`${containerId}-srch`);
+        if (newInput) {
+          newInput.focus();
+          const len = newInput.value.length;
+          newInput.setSelectionRange(len, len);
+        }
       }
     }
 
     function renderSiHistory(monthOrDateDisp, search) {
-      if (search !== undefined) siHistorySearch = search.toLowerCase();
-      let q = siHistorySearch;
-
-      if (monthOrDateDisp !== undefined) {
-        curSiFilterDate = null;
-        if (monthOrDateDisp === 'ALL') {
-          curSiMonth = 'ALL';
-        } else {
-          const monthOrDate = d2i(monthOrDateDisp);
-          if (monthOrDate && monthOrDate.length === 7) curSiMonth = monthOrDate;
-          else if (monthOrDate && monthOrDate.length === 10) curSiFilterDate = monthOrDate;
+      const monthOrDate = d2i(monthOrDateDisp);
+      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
+        if (monthOrDate.length === 10) {
+          curSiFilterDate = monthOrDate;
+          curSiMonth = monthOrDate.slice(0, 7);
+          curSiRangeStart = null; curSiRangeEnd = null;
+          curSiRangeProducts = null;
+        } else if (monthOrDate.length === 7) {
+          curSiMonth = monthOrDate;
+          curSiFilterDate = null;
+          curSiRangeStart = null; curSiRangeEnd = null;
+          curSiRangeProducts = null;
         }
       }
+      if (search !== undefined) { siHistorySearch = search; if (search) { curSiFilterDate = null; curSiRangeStart = null; curSiRangeEnd = null; curSiRangeProducts = null; } }
       
       const el = document.getElementById('si-history-wrap');
       if (!el) return;
       if (!document.getElementById('si-month-selector')) el.innerHTML = '<div id="si-month-selector"></div><div id="si-history-content"></div>';
       renderMonthFolders('si-month-selector', curSiMonth, 'renderSiHistory', 'IN', siHistorySearch, 'renderSiHistorySearch');
       
-      let filtered = [];
+      let filtered;
+      const q = siHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+      } else if (curSiRangeStart && curSiRangeEnd) {
+        filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) >= curSiRangeStart && getIsoDateStr(t.d) <= curSiRangeEnd && (!curSiRangeProducts || curSiRangeProducts.includes(t.pid)));
       } else if (curSiFilterDate) {
         filtered = T.filter(t => t.tp === 'IN' && t.d && getIsoDateStr(t.d) === curSiFilterDate);
       } else {
-        filtered = T.filter(t => t.tp === 'IN' && t.d && (curSiMonth === 'ALL' || getMonthFromDateStr(t.d) === curSiMonth));
+        filtered = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curSiMonth);
       }
       document.getElementById('si-history-content').innerHTML = buildTxnTable(filtered, 'IN');
     }
     function renderSiHistorySearch(v) { renderSiHistory(null, v); }
 
     function renderSoHistory(monthOrDateDisp, search) {
-      if (search !== undefined) soHistorySearch = search.toLowerCase();
-      let q = soHistorySearch;
-
-      if (monthOrDateDisp !== undefined) {
-        curSoFilterDate = null;
-        if (monthOrDateDisp === 'ALL') {
-          curSoMonth = 'ALL';
-        } else {
-          const monthOrDate = d2i(monthOrDateDisp);
-          if (monthOrDate && monthOrDate.length === 7) curSoMonth = monthOrDate;
-          else if (monthOrDate && monthOrDate.length === 10) curSoFilterDate = monthOrDate;
+      const monthOrDate = d2i(monthOrDateDisp);
+      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
+        if (monthOrDate.length === 10) {
+          curSoFilterDate = monthOrDate;
+          curSoMonth = monthOrDate.slice(0, 7);
+          curSoRangeStart = null; curSoRangeEnd = null;
+          curSoRangeProducts = null;
+        } else if (monthOrDate.length === 7) {
+          curSoMonth = monthOrDate;
+          curSoFilterDate = null;
+          curSoRangeStart = null; curSoRangeEnd = null;
+          curSoRangeProducts = null;
         }
       }
+      if (search !== undefined) { soHistorySearch = search; if (search) { curSoFilterDate = null; curSoRangeStart = null; curSoRangeEnd = null; curSoRangeProducts = null; } }
       
       const el = document.getElementById('so-history-wrap');
       if (!el) return;
       if (!document.getElementById('so-month-selector')) el.innerHTML = '<div id="so-month-selector"></div><div id="so-history-content"></div>';
       renderMonthFolders('so-month-selector', curSoMonth, 'renderSoHistory', 'OUT', soHistorySearch, 'renderSoHistorySearch');
-      let filtered = [];
+      
+      let filtered;
+      const q = soHistorySearch.trim().toLowerCase();
       if (q) {
-        filtered = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filtered = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+      } else if (curSoRangeStart && curSoRangeEnd) {
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) >= curSoRangeStart && getIsoDateStr(t.d) <= curSoRangeEnd && (!curSoRangeProducts || curSoRangeProducts.includes(t.pid)));
       } else if (curSoFilterDate) {
         filtered = T.filter(t => t.tp === 'OUT' && t.d && getIsoDateStr(t.d) === curSoFilterDate);
       } else {
-        filtered = T.filter(t => t.tp === 'OUT' && t.d && (curSoMonth === 'ALL' || getMonthFromDateStr(t.d) === curSoMonth));
+        filtered = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curSoMonth);
       }
       document.getElementById('so-history-content').innerHTML = buildTxnTable(filtered, 'OUT');
     }
@@ -5064,22 +4953,6 @@ function d2i(val) {
       if (supEl) {
         supEl.innerHTML = '<option value="" disabled selected>-- Select Supplier --</option>' + (S.suppliers || []).map(sup => `<option value="${sup.id}">${sup.n}</option>`).join('');
       }
-      
-      const draftStr = localStorage.getItem('gsm3_si_draft');
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          if (draft.pids) siAddedPids = draft.pids;
-          if (draft.data) siTableData = draft.data;
-          if (draft.date) d.value = draft.date;
-          if (draft.sup && supEl) supEl.value = draft.sup;
-        } catch(e) {}
-      }
-
-      // Add event listeners for direct inputs saving draft
-      if (d) d.addEventListener('change', saveDraftSI);
-      if (supEl) supEl.addEventListener('change', saveDraftSI);
-
       renderSiTable(); renderSiHistory();
     }
     function initSO() {
@@ -5087,22 +4960,6 @@ function d2i(val) {
       const d = document.getElementById('so-date'); if (d && !d.value) d.value = todayD();
       const s = document.getElementById('so-search'); if (s) s.value = '';
       const dr = document.getElementById('so-search-drop'); if (dr) dr.style.display = 'none';
-      const custEl = document.getElementById('so-customer');
-      
-      const draftStr = localStorage.getItem('gsm3_so_draft');
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          if (draft.pids) soAddedPids = draft.pids;
-          if (draft.data) soData = draft.data;
-          if (draft.date && d) d.value = draft.date;
-          if (draft.cust && custEl) custEl.value = draft.cust;
-        } catch(e) {}
-      }
-
-      if (d) d.addEventListener('change', saveDraftSO);
-      if (custEl) custEl.addEventListener('input', saveDraftSO);
-
       renderSoEntries(); renderSoHistory();
     }
     function clearAlertsSearch() {
@@ -5232,9 +5089,8 @@ function d2i(val) {
         const sz = szs(g.ci);
         const prodMap = {};
         g.txns.forEach(t => {
-          const finalPn = t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || 'Unknown';
-          if (!prodMap[finalPn]) { prodMap[finalPn] = { pn: finalPn }; sz.forEach(s => prodMap[finalPn][String(s)] = 0); }
-          prodMap[finalPn][String(t.sz)] = (prodMap[finalPn][String(t.sz)] || 0) + t.q;
+          if (!prodMap[t.pn]) { prodMap[t.pn] = { pn: t.pn }; sz.forEach(s => prodMap[t.pn][String(s)] = 0); }
+          prodMap[t.pn][String(t.sz)] = (prodMap[t.pn][String(t.sz)] || 0) + t.q;
         });
         const prods = Object.values(prodMap);
         const thSz = sz.map(s => `<th style="text-align:center;min-width:50px;font-size:11px;font-weight:700;color:var(--muted);padding:8px 3px;">${s}</th>`).join('');
@@ -5285,14 +5141,8 @@ function d2i(val) {
     }
 
     function renderTxns(monthOrDateDisp, search) {
-      if (monthOrDateDisp === 'ALL') {
-        curTxnMonth = 'ALL';
-      } else {
-        const monthOrDate = d2i(monthOrDateDisp);
-        if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') {
-          curTxnMonth = monthOrDate.slice(0, 7);
-        }
-      }
+      const monthOrDate = d2i(monthOrDateDisp);
+      if (monthOrDate !== undefined && monthOrDate !== null && monthOrDate !== '') curTxnMonth = monthOrDate.slice(0, 7);
       if (search !== undefined) txnHistorySearch = search;
 
       const elTxn = document.getElementById('section-transactions');
@@ -5306,11 +5156,11 @@ function d2i(val) {
       const q = txnHistorySearch.trim().toLowerCase();
       let filteredIn, filteredOut;
       if (q) {
-        filteredIn = T.filter(t => t.tp === 'IN' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
-        filteredOut = T.filter(t => t.tp === 'OUT' && ((t.pn || (P.find(p => String(p.id) === String(t.pid)) || {}).n || '').toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q) || (t.pa || '').toLowerCase().includes(q)));
+        filteredIn = T.filter(t => t.tp === 'IN' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
+        filteredOut = T.filter(t => t.tp === 'OUT' && (t.pn.toLowerCase().includes(q) || cn(t.ci).toLowerCase().includes(q)));
       } else {
-        filteredIn = T.filter(t => t.tp === 'IN' && t.d && (curTxnMonth === 'ALL' || getMonthFromDateStr(t.d) === curTxnMonth));
-        filteredOut = T.filter(t => t.tp === 'OUT' && t.d && (curTxnMonth === 'ALL' || getMonthFromDateStr(t.d) === curTxnMonth));
+        filteredIn = T.filter(t => t.tp === 'IN' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
+        filteredOut = T.filter(t => t.tp === 'OUT' && t.d && getMonthFromDateStr(t.d) === curTxnMonth);
       }
       
       document.getElementById('txn-in-wrap').innerHTML = buildSimpleTxnTable(filteredIn, 'IN');
@@ -5439,7 +5289,7 @@ function d2i(val) {
       const catVal = document.getElementById('rsi-cat').value;
       let txns = T.filter(t => t.tp === 'IN');
       if (rsiSelectedPids.length) txns = txns.filter(t => rsiSelectedPids.includes(t.pid));
-      else if (catVal !== '') txns = txns.filter(t => t.ci.toString() === catVal);
+      else if (catVal !== '') txns = txns.filter(t => t.ci === catVal);
       if (from) txns = txns.filter(t => t.d.slice(0, 10) >= from);
       if (to) txns = txns.filter(t => t.d.slice(0, 10) <= to);
       lastRsiTxns = txns;
@@ -5474,7 +5324,7 @@ function d2i(val) {
       const catVal = document.getElementById('rso-cat').value;
       let txns = T.filter(t => t.tp === 'OUT');
       if (rsoSelectedPids.length) txns = txns.filter(t => rsoSelectedPids.includes(t.pid));
-      else if (catVal !== '') txns = txns.filter(t => t.ci.toString() === catVal);
+      else if (catVal !== '') txns = txns.filter(t => t.ci === catVal);
       if (from) txns = txns.filter(t => t.d.slice(0, 10) >= from);
       if (to) txns = txns.filter(t => t.d.slice(0, 10) <= to);
       lastRsoTxns = txns;
@@ -5502,18 +5352,14 @@ function d2i(val) {
       renderRsoChips();
     }
 
-    function switchRptTab(tab) {
+        function switchRptTab(tab) {
       document.querySelectorAll('.tab-pill').forEach(el => el.classList.remove('active'));
-      const activeTabEl = document.getElementById('rtab-' + tab);
-      if (activeTabEl) activeTabEl.classList.add('active');
-      ['inventory', 'prod-analysis', 'customer-share'].forEach(t => {
-        const el = document.getElementById('rpt-' + t);
-        if (el) el.style.display = (t === tab) ? 'block' : 'none';
+      document.getElementById('rtab-' + tab).classList.add('active');
+      ['inventory', 'prod-analysis'].forEach(t => {
+        document.getElementById('rpt-' + t).style.display = (t === tab) ? 'block' : 'none';
       });
       if (tab === 'prod-analysis') {
          renderGlobalProductAnalysis();
-      } else if (tab === 'customer-share') {
-         renderCustomerShare();
       }
     }
 
@@ -5526,28 +5372,8 @@ function d2i(val) {
     let paLineChart = null;
 
     function renderGlobalProductAnalysis() {
-       const currentYear = new Date().getFullYear();
-       const outTxns = T.filter(t => {
-          if (t.tp !== 'OUT' || !t.d) return false;
-          const dStr = String(t.d);
-          const y = dStr.includes('-') ? dStr.split('-')[0] : dStr.substring(0, 4);
-          return parseInt(y, 10) === currentYear;
-       });
-       if (outTxns.length === 0) {
-          document.getElementById('pa-top-prod').textContent = '-';
-          document.getElementById('pa-top-prod-qty').textContent = '-';
-          document.getElementById('pa-med-prod').textContent = '-';
-          document.getElementById('pa-med-prod-qty').textContent = '-';
-          document.getElementById('pa-low-prod').textContent = '-';
-          document.getElementById('pa-low-prod-qty').textContent = '-';
-          document.getElementById('pa-top-sc').textContent = '-';
-          document.getElementById('pa-top-sc-qty').textContent = '0 Boxes';
-          document.getElementById('pa-low-sc').textContent = '-';
-          document.getElementById('pa-low-sc-qty').textContent = '0 Boxes';
-          document.getElementById('pa-best-month').textContent = '-';
-          document.getElementById('pa-best-month-qty').textContent = '-';
-          return;
-       }
+       const outTxns = T.filter(t => t.tp === 'OUT');
+       if (outTxns.length === 0) return;
 
        // 1. Product Sales Aggregation
        const prodSales = {};
@@ -6273,966 +6099,62 @@ function d2i(val) {
         return;
       }
 
-      const mergedProds = getMergedProducts(P, '');
-
-      const subCats = S.subCategories || ['GENERAL'];
-
-      tablesWrap.innerHTML = subCats.map(scName => {
-        const cp = mergedProds.filter(p => {
-          return Array.from(p.sourceSubCategories || []).some(sub => {
-            const sVal = sub ? sub.toUpperCase().trim() : '';
-            const scNameVal = scName ? scName.toUpperCase().trim() : '';
-            return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
-          });
-        });
+      tablesWrap.innerHTML = S.categories.map(catObj => {
+        const ci = catObj.id;
+        const cp = P.filter(p => p.ci === ci);
         if (!cp.length) return '';
         
+        const sz = catObj.sizes;
+        const grandTot = cp.reduce((a, p) => a + Object.values(p.s || {}).reduce((x, y) => x + y, 0), 0);
+        
+        const thSizes = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:10px;letter-spacing:1px;">${s}</th>`).join('');
+        
         const rows = cp.map(p => {
-          return `
-            <div onclick="showProductMonthlyLedger('${p.n.replace(/'/g, "\\'")}')" 
-                 style="cursor:pointer; padding:10px 14px; font-weight:700; font-size:14px; color:var(--accent3); display:flex; align-items:center; gap:8px; transition: all 0.2s; border-left: 3px solid transparent;"
-                 onmouseover="this.style.color='var(--primary)'; this.style.borderLeftColor='var(--primary)'; this.style.paddingLeft='18px'; this.style.background='var(--surface2)';"
-                 onmouseout="this.style.color='var(--accent3)'; this.style.borderLeftColor='transparent'; this.style.paddingLeft='14px'; this.style.background='transparent';"
-            >
-              <i class="ti ti-chevron-right" style="font-size:12px;"></i> ${p.n}
-            </div>
-          `;
+          const tds = sz.map(s => {
+            const st = (p.s ? p.s[s] : 0) || 0;
+            const io = st <= 0, il = !io && st <= p.m;
+            const color = io ? 'var(--danger)' : il ? 'var(--warn)' : 'var(--accent3)';
+            const bg = io ? 'rgba(204,40,40,0.05)' : il ? 'rgba(212,136,10,0.05)' : '';
+            return `<td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:${color};background:${bg};">${st}</td>`;
+          }).join('');
+          const rowTot = Object.values(p.s || {}).reduce((a, b) => a + b, 0);
+          return `<tr>
+            <td style="font-weight:700;font-size:13px;white-space:nowrap;border-right:1.5px solid var(--border);padding:8px 12px;">${p.n}</td>
+            ${tds}
+            <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:13px;color:var(--accent2);border-left:1.5px solid var(--border);background:var(--surface2);">${rowTot}</td>
+          </tr>`;
+        }).join('');
+
+        const totTds = sz.map(s => {
+          const v = cp.reduce((a, p) => a + ((p.s ? p.s[s] : 0) || 0), 0);
+          return `<td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:13px;background:var(--surface2);border-top:1.5px solid var(--border);color:var(--accent);">${v}</td>`;
         }).join('');
 
         return `
-          <div class="sec-title" style="margin-top:24px;margin-bottom:12px; border-bottom:1.5px solid var(--border); padding-bottom:8px; font-size:13px; letter-spacing:1px;">${scName}</div>
-          <div style="margin-bottom:24px; display:flex; flex-direction:column; gap:4px; max-width:600px; padding-left:4px;">
-            ${rows}
+          <div class="sec-title" style="margin-top:24px;margin-bottom:12px;">${catObj.n} — Size-wise Inventory</div>
+          <div class="table-wrap" style="margin-bottom:20px;">
+            <div style="overflow-x:auto;">
+              <table>
+                <thead>
+                  <tr style="background:var(--surface2);">
+                    <th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;min-width:140px;border-right:1.5px solid var(--border);">Product</th>
+                    ${thSizes}
+                    <th style="text-align:center;padding:10px 12px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-left:1.5px solid var(--border);">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                  <tr style="background:var(--surface2);border-top:1.5px solid var(--border);">
+                    <td style="font-weight:700;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 12px;border-right:1.5px solid var(--border);">TOTAL</td>
+                    ${totTds}
+                    <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;color:var(--accent);border-left:1.5px solid var(--border);">${grandTot}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>`;
       }).join('') || '<div class="empty-state">No products found.</div>';
     }
-
-    let ledgerChartInstance = null;
-
-    let globalLedgerFrom = null;
-    let globalLedgerTo = null;
-
-    const formatDateToDMY = (date) => {
-      const d = String(date.getDate()).padStart(2, '0');
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const y = date.getFullYear();
-      return `${d}-${m}-${y}`;
-    };
-
-    function showProductMonthlyLedger(prodName) {
-      const tablesWrap = document.getElementById('rpt-inventory-tables');
-      if (!tablesWrap) return;
-
-      const cleanKey = (str) => {
-        return str.toLowerCase()
-          .replace(/[---/()]/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-      };
-      const targetKey = cleanKey(prodName);
-
-      const matchingPids = new Set(
-        P.filter(p => {
-          const coreName = p.n ? p.n.replace(/^big\s*-*\s*/i, '').trim() : '';
-          return cleanKey(coreName) === targetKey;
-        }).map(p => String(p.id))
-      );
-
-      const prodTxns = T.filter(t => matchingPids.has(String(t.pid)));
-
-      const now = new Date();
-      let startYear = now.getFullYear();
-      if (now.getMonth() < 3) {
-        startYear = startYear - 1;
-      }
-
-      if (!globalLedgerFrom) {
-        globalLedgerFrom = new Date(startYear, 3, 1, 0, 0, 0); // April 1st
-      }
-      if (!globalLedgerTo) {
-        globalLedgerTo = new Date(startYear + 1, 2, 31, 23, 59, 59); // March 31st
-      }
-
-      let openingStock = 0;
-      prodTxns.forEach(t => {
-        const tDate = parseTxnDate(t.d);
-        if (tDate && tDate.getTime() < globalLedgerFrom.getTime()) {
-          if (t.tp === 'IN') openingStock += Number(t.q) || 0;
-          if (t.tp === 'OUT') openingStock -= Number(t.q) || 0;
-        }
-      });
-
-      const monthKeys = [
-        { name: 'April', mIndex: 3, yearOffset: 0 },
-        { name: 'May', mIndex: 4, yearOffset: 0 },
-        { name: 'June', mIndex: 5, yearOffset: 0 },
-        { name: 'July', mIndex: 6, yearOffset: 0 },
-        { name: 'August', mIndex: 7, yearOffset: 0 },
-        { name: 'September', mIndex: 8, yearOffset: 0 },
-        { name: 'October', mIndex: 9, yearOffset: 0 },
-        { name: 'November', mIndex: 10, yearOffset: 0 },
-        { name: 'December', mIndex: 11, yearOffset: 0 },
-        { name: 'January', mIndex: 0, yearOffset: 1 },
-        { name: 'February', mIndex: 1, yearOffset: 1 },
-        { name: 'March', mIndex: 2, yearOffset: 1 }
-      ];
-
-      let runningBalance = openingStock;
-      let grandInQty = 0;
-      let grandOutQty = 0;
-
-      const stats = monthKeys.map(m => {
-        const year = startYear + m.yearOffset;
-        const monthStart = new Date(year, m.mIndex, 1, 0, 0, 0);
-        const monthEnd = new Date(year, m.mIndex + 1, 0, 23, 59, 59);
-
-        const rangeStart = Math.max(monthStart.getTime(), globalLedgerFrom.getTime());
-        const rangeEnd = Math.min(monthEnd.getTime(), globalLedgerTo.getTime());
-
-        let inwardsQty = 0;
-        let outwardsQty = 0;
-
-        if (rangeStart <= rangeEnd) {
-          const txns = prodTxns.filter(t => {
-            const tDate = parseTxnDate(t.d);
-            if (!tDate) return false;
-            const tTime = tDate.getTime();
-            return tTime >= rangeStart && tTime <= rangeEnd;
-          });
-
-          inwardsQty = txns.filter(t => t.tp === 'IN').reduce((sum, t) => sum + (Number(t.q) || 0), 0);
-          outwardsQty = txns.filter(t => t.tp === 'OUT').reduce((sum, t) => sum + (Number(t.q) || 0), 0);
-        }
-
-        grandInQty += inwardsQty;
-        grandOutQty += outwardsQty;
-        runningBalance = runningBalance + inwardsQty - outwardsQty;
-
-        return {
-          name: m.name,
-          inwardsQty,
-          outwardsQty,
-          closingBal: runningBalance
-        };
-      });
-
-      const formatQty = (q) => {
-        const absVal = Math.abs(q);
-        const unit = absVal === 1 ? 'Box' : 'Boxes';
-        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
-        return `${absVal.toLocaleString()} ${unit}`;
-      };
-
-      const formatBal = (q) => {
-        const absVal = Math.abs(q);
-        const unit = absVal === 1 ? 'Box' : 'Boxes';
-        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
-        return `${absVal.toLocaleString()} ${unit}`;
-      };
-
-       const shopName = "VESTER";
-      const dateRangeStr = `${formatDateToDMY(globalLedgerFrom)} to ${formatDateToDMY(globalLedgerTo)}`;
-
-      const rowsHtml = stats.map(s => {
-        const mKey = monthKeys.find(mk => mk.name === s.name);
-        const mIndex = mKey ? mKey.mIndex : 0;
-        const yearOffset = mKey ? mKey.yearOffset : 0;
-        const targetYear = startYear + yearOffset;
-
-        return `
-          <tr onclick="showLedgerMonthDetail('${prodName.replace(/'/g, "\\'")}', ${mIndex}, ${targetYear}, '${s.name}')" 
-              style="cursor:pointer; border-bottom: 1px solid var(--border-light); transition: background 0.15s;"
-              onmouseover="this.style.background='var(--surface2)';"
-              onmouseout="this.style.background='transparent';"
-          >
-            <td style="padding:10px 12px; font-weight:600; color:var(--accent3);">${s.name}</td>
-            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; border-left:1px solid var(--border-light);">${formatQty(s.inwardsQty)}</td>
-            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--accent2); border-left:1px solid var(--border-light);">${formatQty(s.outwardsQty)}</td>
-            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${s.closingBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(s.closingBal)}</td>
-          </tr>
-        `;
-      }).join('');
-
-      tablesWrap.innerHTML = `
-        <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px; margin-top:20px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-            <div style="display:flex; gap:10px;">
-              <button class="btn btn-ghost btn-sm" onclick="renderReportsInventory()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                <i class="ti ti-arrow-left"></i> Back to List
-              </button>
-              <button class="btn btn-ghost btn-sm" onclick="openChangePeriodModal('${prodName.replace(/'/g, "\\'")}')" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                <i class="ti ti-calendar"></i> Change Period
-              </button>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:1px;">${shopName}</div>
-              <div style="font-size:13px; font-weight:700; color:var(--accent3); margin-top:4px;">${prodName.toUpperCase()}</div>
-              <div style="font-size:11px; font-weight:600; color:var(--muted); margin-top:2px;">${dateRangeStr}</div>
-            </div>
-          </div>
-
-          <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; min-width:500px;">
-              <thead>
-                <tr style="background:var(--surface2); border-bottom:1.5px solid var(--border);">
-                  <th style="text-align:left; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Particulars</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Stock In</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Stock Out</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Balance Stock</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="border-bottom:1px solid var(--border); background:rgba(0,0,0,0.01);">
-                  <td style="padding:10px 12px; font-style:italic; font-weight:700; color:var(--text-main);">Opening Balance</td>
-                  <td style="border-left:1px solid var(--border-light);"></td>
-                  <td style="border-left:1px solid var(--border-light);"></td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${openingStock < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(openingStock)}</td>
-                </tr>
-                ${rowsHtml}
-                <tr style="background:var(--surface2); border-top:1.5px solid var(--border); font-weight:800; border-bottom:1.5px solid var(--border);">
-                  <td style="padding:12px; font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Grand Total</td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--primary); border-left:1px solid var(--border-light);">${formatQty(grandInQty)}</td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent2); border-left:1px solid var(--border-light);">${formatQty(grandOutQty)}</td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:${runningBalance < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(runningBalance)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:20px;">
-            <div style="font-size:12px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:15px;">Monthly Outwards Trend</div>
-            <div style="width:100%; max-height:220px; position:relative;">
-              <canvas id="ledger-chart"></canvas>
-            </div>
-          </div>
-        </div>
-      `;
-
-      setTimeout(() => {
-        const canvasEl = document.getElementById('ledger-chart');
-        if (!canvasEl) return;
-        const ctx = canvasEl.getContext('2d');
-        if (ledgerChartInstance) {
-          ledgerChartInstance.destroy();
-        }
-        
-        const labels = stats.map(s => s.name.substring(0, 3));
-        const dataValues = stats.map(s => s.outwardsQty);
-
-        ledgerChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Outwards Quantity (Boxes)',
-              data: dataValues,
-              backgroundColor: 'rgba(37, 99, 235, 0.8)',
-              borderColor: 'rgba(37, 99, 235, 1)',
-              borderWidth: 1,
-              borderRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: 'rgba(0, 0, 0, 0.05)'
-                },
-                ticks: {
-                  font: {
-                    family: 'JetBrains Mono'
-                  }
-                }
-              },
-              x: {
-                grid: {
-                  display: false
-                }
-              }
-            }
-          }
-        });
-      }, 50);
-    }
-
-    function openChangePeriodModal(prodName) {
-      curModal = 'changePeriod';
-      
-      const modalOverlay = document.getElementById('modal-overlay');
-      if (!modalOverlay) return;
-
-      document.getElementById('modal-title').textContent = 'Change Period';
-      
-      const btn = document.getElementById('modal-btn');
-      btn.textContent = 'Apply';
-      btn.className = 'btn btn-primary';
-      btn.style.display = '';
-      btn.onclick = () => applyChangePeriod(prodName);
-
-      const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
-      if (cancelBtn) {
-        cancelBtn.textContent = 'Cancel';
-        cancelBtn.style.display = '';
-      }
-
-      const fromVal = formatDateToDMY(globalLedgerFrom);
-      const toVal = formatDateToDMY(globalLedgerTo);
-
-      document.getElementById('modal-content').innerHTML = `
-        <div style="padding: 10px 0;">
-          <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Specify the period for the stock ledger report.</p>
-          <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
-            <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">From</label>
-            <input class="form-input" type="text" id="cp-from" placeholder="DD-MM-YYYY" value="${fromVal}" style="max-width:200px;" autocomplete="off">
-          </div>
-          <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
-            <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">To</label>
-            <input class="form-input" type="text" id="cp-to" placeholder="DD-MM-YYYY" value="${toVal}" style="max-width:200px;" autocomplete="off">
-          </div>
-          <div id="cp-err" style="color:var(--danger); font-size:11px; font-weight:700; display:none; margin-top:10px;"></div>
-        </div>
-      `;
-
-      modalOverlay.classList.add('open');
-    }
-
-    function applyChangePeriod(prodName) {
-      const fromStr = document.getElementById('cp-from').value.trim();
-      const toStr = document.getElementById('cp-to').value.trim();
-      const errEl = document.getElementById('cp-err');
-
-      if (!fromStr || !toStr) {
-        if (errEl) {
-          errEl.textContent = 'Please enter both From and To dates!';
-          errEl.style.display = 'block';
-        }
-        return;
-      }
-
-      const fromIso = d2i(fromStr);
-      const toIso = d2i(toStr);
-
-      if (!fromIso || !toIso || fromIso.split('-').length !== 3 || toIso.split('-').length !== 3) {
-        if (errEl) {
-          errEl.textContent = 'Invalid date format! Please use DD-MM-YYYY (e.g., 01-07-2026).';
-          errEl.style.display = 'block';
-        }
-        return;
-      }
-
-      const parseISOToDate = (isoStr, isEnd) => {
-        const parts = isoStr.split('-');
-        if (isEnd) {
-          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59);
-        }
-        return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0);
-      };
-
-      const fromDate = parseISOToDate(fromIso, false);
-      const toDate = parseISOToDate(toIso, true);
-
-      if (fromDate > toDate) {
-        if (errEl) {
-          errEl.textContent = 'From date cannot be after To date!';
-          errEl.style.display = 'block';
-        }
-        return;
-      }
-
-      globalLedgerFrom = fromDate;
-      globalLedgerTo = toDate;
-
-      document.getElementById('modal-overlay').classList.remove('open');
-      showProductMonthlyLedger(prodName);
-    }
-
-    function showLedgerMonthDetail(prodName, monthIndex, year, monthName) {
-      const tablesWrap = document.getElementById('rpt-inventory-tables');
-      if (!tablesWrap) return;
-
-      const cleanKey = (str) => {
-        return str.toLowerCase()
-          .replace(/[---/()]/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-      };
-      const targetKey = cleanKey(prodName);
-
-      const matchingPids = new Set(
-        P.filter(p => {
-          const coreName = p.n ? p.n.replace(/^big\s*-*\s*/i, '').trim() : '';
-          return cleanKey(coreName) === targetKey;
-        }).map(p => String(p.id))
-      );
-
-      const prodTxns = T.filter(t => matchingPids.has(String(t.pid)));
-
-      const txns = prodTxns.filter(t => {
-        const tDate = parseTxnDate(t.d);
-        if (!tDate) return false;
-        const tTime = tDate.getTime();
-        return tTime >= globalLedgerFrom.getTime() && 
-               tTime <= globalLedgerTo.getTime() && 
-               tDate.getFullYear() === year && 
-               tDate.getMonth() === monthIndex;
-      });
-
-      txns.sort((a, b) => {
-        const da = parseTxnDate(a.d)?.getTime() || 0;
-        const db = parseTxnDate(b.d)?.getTime() || 0;
-        return da - db;
-      });
-
-      const monthStart = new Date(year, monthIndex, 1, 0, 0, 0);
-      const startOfOverlap = Math.max(monthStart.getTime(), globalLedgerFrom.getTime());
-
-      let monthOpeningBalance = 0;
-      prodTxns.forEach(t => {
-        const tDate = parseTxnDate(t.d);
-        if (tDate && tDate.getTime() < startOfOverlap) {
-          if (t.tp === 'IN') monthOpeningBalance += Number(t.q) || 0;
-          if (t.tp === 'OUT') monthOpeningBalance -= Number(t.q) || 0;
-        }
-      });
-
-      const formatQty = (q) => {
-        const absVal = Math.abs(q);
-        const unit = absVal === 1 ? 'Box' : 'Boxes';
-        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
-        return `${absVal.toLocaleString()} ${unit}`;
-      };
-
-      const formatBal = (q) => {
-        const absVal = Math.abs(q);
-        const unit = absVal === 1 ? 'Box' : 'Boxes';
-        if (q < 0) return `(-) ${absVal.toLocaleString()} ${unit}`;
-        return `${absVal.toLocaleString()} ${unit}`;
-      };
-
-      const grouped = {};
-      txns.forEach(t => {
-        const tDate = parseTxnDate(t.d);
-        const dateStr = tDate ? formatDateToDMY(tDate) : 'Unknown';
-        if (!grouped[dateStr]) {
-          grouped[dateStr] = {
-            dateStr,
-            dateObj: tDate,
-            inQty: 0,
-            outQty: 0,
-            parties: new Set(),
-            vchNos: new Set(),
-            types: new Set()
-          };
-        }
-        const g = grouped[dateStr];
-        const qty = Number(t.q) || 0;
-        if (t.tp === 'IN') {
-          g.inQty += qty;
-          g.types.add('Stock In');
-        } else if (t.tp === 'OUT') {
-          g.outQty += qty;
-          g.types.add('Stock Out');
-        }
-        if (t.pa && t.pa.trim()) g.parties.add(t.pa.trim());
-        if (t.rf && t.rf.trim()) g.vchNos.add(t.rf.trim());
-      });
-
-      const dailyList = Object.values(grouped);
-      dailyList.sort((a, b) => {
-        const da = a.dateObj ? a.dateObj.getTime() : 0;
-        const db = b.dateObj ? b.dateObj.getTime() : 0;
-        return da - db;
-      });
-
-      let currentBal = monthOpeningBalance;
-      let totalIn = 0;
-      let totalOut = 0;
-
-      const rowsHtml = dailyList.length > 0 ? dailyList.map(g => {
-        totalIn += g.inQty;
-        totalOut += g.outQty;
-        currentBal = currentBal + g.inQty - g.outQty;
-
-        const inQtyStr = g.inQty > 0 ? formatQty(g.inQty) : '';
-        const outQtyStr = g.outQty > 0 ? formatQty(g.outQty) : '';
-
-        const partyName = g.parties.size > 0 ? Array.from(g.parties).join(', ') : '-';
-
-        let vchType = '-';
-        if (g.types.has('Stock In') && g.types.has('Stock Out')) {
-          vchType = 'In / Out';
-        } else if (g.types.has('Stock In')) {
-          vchType = 'Stock In';
-        } else if (g.types.has('Stock Out')) {
-          vchType = 'Stock Out';
-        }
-
-        const vchNo = g.vchNos.size > 0 ? Array.from(g.vchNos).join(', ') : '-';
-
-        return `
-          <tr style="border-bottom: 1px solid var(--border-light);">
-            <td style="padding:10px 12px; font-weight:600; color:var(--text-main);">${g.dateStr}</td>
-            <td style="padding:10px 12px; font-weight:600; color:var(--text-main);">${partyName}</td>
-            <td style="padding:10px 12px; text-align:center; font-weight:700; color:${vchType.includes('In') ? 'var(--primary)' : 'var(--accent2)'};">${vchType}</td>
-            <td style="padding:10px 12px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px;">${vchNo}</td>
-            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; border-left:1px solid var(--border-light);">${inQtyStr}</td>
-            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--accent2); border-left:1px solid var(--border-light);">${outQtyStr}</td>
-            <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${currentBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(currentBal)}</td>
-          </tr>
-        `;
-      }).join('') : `
-        <tr style="border-bottom: 1px solid var(--border-light);">
-          <td colspan="4" style="padding:20px; text-align:center; color:var(--muted); font-style:italic;">No transactions in this month</td>
-          <td style="border-left:1px solid var(--border-light);"></td>
-          <td style="border-left:1px solid var(--border-light);"></td>
-          <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; border-left:1px solid var(--border-light);">${formatBal(currentBal)}</td>
-        </tr>
-      `;
-
-      const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59);
-      const effectiveEnd = new Date(Math.min(monthEnd.getTime(), globalLedgerTo.getTime()));
-      const detailRangeStr = `${formatDateToDMY(new Date(startOfOverlap))} to ${formatDateToDMY(effectiveEnd)}`;
-
-      tablesWrap.innerHTML = `
-        <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px; margin-top:20px;">
-          <!-- BUTTONS BAR -->
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-            <div>
-              <button class="btn btn-ghost btn-sm" onclick="showProductMonthlyLedger('${prodName.replace(/'/g, "\\'")}')" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                <i class="ti ti-arrow-left"></i> Back to Summary
-              </button>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:1px;">VESTER</div>
-              <div style="font-size:13px; font-weight:700; color:var(--accent3); margin-top:4px;">${prodName.toUpperCase()} (${monthName.toUpperCase()})</div>
-              <div style="font-size:11px; font-weight:600; color:var(--muted); margin-top:2px;">${detailRangeStr}</div>
-            </div>
-          </div>
-
-          <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; min-width:700px;">
-              <thead>
-                <tr style="background:var(--surface2); border-bottom:1.5px solid var(--border);">
-                  <th style="text-align:left; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Date</th>
-                  <th style="text-align:left; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Particulars</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Vch Type</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Vch No.</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Stock In</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Stock Out</th>
-                  <th style="text-align:center; padding:12px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-left:1px solid var(--border-light);">Balance Stock</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="border-bottom:1px solid var(--border); background:rgba(0,0,0,0.01);">
-                  <td style="padding:10px 12px; font-style:italic; font-weight:700; color:var(--text-main);">${formatDateToDMY(new Date(startOfOverlap))}</td>
-                  <td style="padding:10px 12px; font-style:italic; font-weight:700; color:var(--text-main);">Opening Balance</td>
-                  <td></td>
-                  <td></td>
-                  <td style="border-left:1px solid var(--border-light);"></td>
-                  <td style="border-left:1px solid var(--border-light);"></td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${monthOpeningBalance < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(monthOpeningBalance)}</td>
-                </tr>
-                ${rowsHtml}
-                <tr style="background:var(--surface2); border-top:1.5px solid var(--border); font-weight:800; border-bottom:1.5px solid var(--border);">
-                  <td colspan="4" style="padding:12px; font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; text-align:right;">Totals as per 'Default' valuation :</td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--primary); border-left:1px solid var(--border-light);">${formatQty(totalIn)}</td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent2); border-left:1px solid var(--border-light);">${formatQty(totalOut)}</td>
-                  <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:${currentBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(currentBal)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderCustomerShare() {
-      const container = document.getElementById('cs-stock-list');
-      if (!container) return;
-
-      try {
-        const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
-        const subCats = S.subCategories || ['GENERAL'];
-
-        // Populate Sub Category Dropdown Filter dynamically
-        const filterEl = document.getElementById('cs-sc-filter');
-        if (filterEl) {
-          const currentVal = filterEl.value;
-          const optionsHtml = '<option value="">All Sub Categories</option>' + 
-            subCats.map(sc => `<option value="${sc}">${sc}</option>`).join('');
-          if (filterEl.innerHTML !== optionsHtml) {
-            filterEl.innerHTML = optionsHtml;
-            filterEl.value = currentVal;
-          }
-        }
-        const selectedSc = filterEl ? filterEl.value : '';
-        const activeSubCats = selectedSc ? [selectedSc] : subCats;
-
-        const mergedList = getMergedProducts(P, '');
-
-        const filteredProds = mergedList.filter(p => {
-          if (!p.n) return false;
-          return p.n.toLowerCase().includes(q);
-        });
-
-        const html = activeSubCats.map(scName => {
-          const cp = filteredProds.filter(p => {
-            const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
-            return scList.some(sSub => {
-              const sVal = sSub ? sSub.toUpperCase().trim() : '';
-              const scNameVal = scName ? scName.toUpperCase().trim() : '';
-              return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
-            });
-          });
-
-          const stockCp = cp.filter(p => {
-            return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
-          });
-
-          if (!stockCp.length) return '';
-
-          const rows = stockCp.map(p => {
-            const sizesSet = new Set();
-            if (p.sourceCategoryIds) {
-              p.sourceCategoryIds.forEach(cId => {
-                const catObj = S.categories.find(c => String(c.id) === String(cId));
-                if (catObj && catObj.sizes) {
-                  catObj.sizes.forEach(sz => sizesSet.add(sz));
-                }
-              });
-            } else {
-              const catObj = S.categories.find(c => String(c.id) === String(p.ci));
-              if (catObj && catObj.sizes) {
-                catObj.sizes.forEach(sz => sizesSet.add(sz));
-              }
-            }
-            const sizes = Array.from(sizesSet);
-            sizes.sort((a, b) => {
-              const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
-              const cleanA = String(a).toUpperCase().trim();
-              const cleanB = String(b).toUpperCase().trim();
-              const idxA = sizeOrder.indexOf(cleanA);
-              const idxB = sizeOrder.indexOf(cleanB);
-              if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-              if (idxA !== -1) return -1;
-              if (idxB !== -1) return 1;
-              const numA = parseFloat(a);
-              const numB = parseFloat(b);
-              if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-              return cleanA.localeCompare(cleanB);
-            });
-            
-            const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
-            const standardRange = ['45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
-            const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
-
-            let displaySizes = [];
-            if (hasAllStandard) {
-              displaySizes.push('45 TO 90');
-              activeSizes.forEach(sz => {
-                if (!standardRange.includes(sz)) {
-                  displaySizes.push(sz);
-                }
-              });
-            } else {
-              displaySizes = activeSizes;
-            }
-
-            const sizeBreakdown = displaySizes.map(sz => {
-              return `
-                <span style="font-size:14px; color:var(--text-main); background:var(--surface2); padding:6px 12px; border-radius:6px; font-weight:700; border:1px solid var(--border);">
-                  ${sz}
-                </span>`;
-            }).join(' ');
-
-            return `
-              <div style="padding:12px 0; border-bottom:1px solid var(--border-light); display:flex; flex-direction:column; gap:6px;">
-                <div style="font-weight:700; color:var(--accent3); font-size:14px; letter-spacing:0.5px;">${p.n.toUpperCase()}</div>
-                ${sizeBreakdown.length > 0 ? `
-                  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:2px;">
-                    ${sizeBreakdown}
-                  </div>
-                ` : ''}
-              </div>
-            `;
-          }).join('');
-
-          return `
-            <div class="sec-title" style="margin-top:24px; margin-bottom:12px; border-bottom:1.5px solid var(--border); padding-bottom:8px; font-size:13px; letter-spacing:1px;">${scName}</div>
-            <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:20px;">
-              ${rows}
-            </div>
-          `;
-        }).join('');
-
-        container.innerHTML = html || '<div class="empty-state">No products found in customer share list.</div>';
-      } catch (err) {
-        container.innerHTML = `<div class="alert alert-danger" style="padding: 20px; background: #fee2e2; color: #991b1b; border-radius: 8px; border: 1px solid #fca5a5;">
-          <strong>Error loading catalog:</strong> ${err.message}<br>
-          <pre style="margin-top: 10px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${err.stack}</pre>
-        </div>`;
-      }
-    }
-
-    function copyWhatsAppStockText() {
-      const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
-      const subCats = S.subCategories || ['GENERAL'];
-      
-      const filterEl = document.getElementById('cs-sc-filter');
-      const selectedSc = filterEl ? filterEl.value : '';
-      const activeSubCats = selectedSc ? [selectedSc] : subCats;
-
-      const mergedList = getMergedProducts(P, '');
-      const filteredProds = mergedList.filter(p => {
-        if (!p.n) return false;
-        return p.n.toLowerCase().includes(q);
-      });
-
-      const today = new Date();
-      const d = String(today.getDate()).padStart(2, '0');
-      const m = String(today.getMonth() + 1).padStart(2, '0');
-      const y = today.getFullYear();
-      const dateStr = `${d}-${m}-${y}`;
-
-      let msg = `📦 *VESTER - STOCK AVAILABILITY REPORT* 📦\nDate: ${dateStr}\n`;
-
-      activeSubCats.forEach(scName => {
-        const cp = filteredProds.filter(p => {
-          const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
-          return scList.some(sSub => {
-            const sVal = sSub ? sSub.toUpperCase().trim() : '';
-            const scNameVal = scName ? scName.toUpperCase().trim() : '';
-            return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
-          });
-        });
-
-        if (!cp.length) return;
-
-        msg += `\n*${scName.toUpperCase()}*\n`;
-
-        cp.forEach(p => {
-          const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
-          if (totalQty <= 0) return;
-
-          msg += `▪️ ${p.n.toUpperCase()}\n`;
-
-          const sizesSet = new Set();
-          if (p.sourceCategoryIds) {
-            p.sourceCategoryIds.forEach(cId => {
-              const catObj = S.categories.find(c => String(c.id) === String(cId));
-              if (catObj && catObj.sizes) {
-                catObj.sizes.forEach(sz => sizesSet.add(sz));
-              }
-            });
-          } else {
-            const catObj = S.categories.find(c => String(c.id) === String(p.ci));
-            if (catObj && catObj.sizes) {
-              catObj.sizes.forEach(sz => sizesSet.add(sz));
-            }
-          }
-          const sizes = Array.from(sizesSet);
-          sizes.sort((a, b) => {
-            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
-            const cleanA = String(a).toUpperCase().trim();
-            const cleanB = String(b).toUpperCase().trim();
-            const idxA = sizeOrder.indexOf(cleanA);
-            const idxB = sizeOrder.indexOf(cleanB);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            const numA = parseFloat(a);
-            const numB = parseFloat(b);
-            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-            return cleanA.localeCompare(cleanB);
-          });
-          
-          const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
-          const standardRange = ['45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
-          const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
-
-          let displaySizes = [];
-          if (hasAllStandard) {
-            displaySizes.push('45 TO 90');
-            activeSizes.forEach(sz => {
-              if (!standardRange.includes(sz)) {
-                displaySizes.push(sz);
-              }
-            });
-          } else {
-            displaySizes = activeSizes;
-          }
-
-          const sizesText = displaySizes.join(' | ');
-
-          if (sizesText) {
-            msg += `  (Sizes - ${sizesText})\n`;
-          }
-        });
-      });
-
-      navigator.clipboard.writeText(msg.trim()).then(() => {
-        showCenterToast('Stock text copied for WhatsApp!');
-      }).catch(err => {
-        alert('Failed to copy text: ' + err);
-      });
-    }
-
-    function printCustomerCatalog() {
-      const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
-      const subCats = S.subCategories || ['GENERAL'];
-      
-      const filterEl = document.getElementById('cs-sc-filter');
-      const selectedSc = filterEl ? filterEl.value : '';
-      const activeSubCats = selectedSc ? [selectedSc] : subCats;
-
-      const mergedList = getMergedProducts(P, '');
-      const filteredProds = mergedList.filter(p => {
-        if (!p.n) return false;
-        return p.n.toLowerCase().includes(q);
-      });
-
-      const today = new Date();
-      const d = String(today.getDate()).padStart(2, '0');
-      const m = String(today.getMonth() + 1).padStart(2, '0');
-      const y = today.getFullYear();
-      const dateStr = `${d}-${m}-${y}`;
-
-      let printHtml = `
-        <html>
-        <head>
-          <title>VESTER Stock Catalog - ${dateStr}</title>
-          <style>
-            @page { size: A4; margin: 12mm 15mm; }
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #212b36; padding: 0; background: #fff; font-size: 13px; }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #092c4c; padding-bottom: 8px; margin-bottom: 15px; }
-            .company { font-size: 22px; font-weight: 800; color: #092c4c; letter-spacing: 1.5px; }
-            .date { font-size: 12px; font-weight: 600; color: #646b72; }
-            .title { font-size: 15px; font-weight: 700; text-transform: uppercase; color: #092c4c; margin: 0; }
-            .sec-title { font-size: 12px; font-weight: 800; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 4px; margin-top: 15px; margin-bottom: 10px; color: #092c4c; letter-spacing: 1px; text-transform: uppercase; }
-            .list-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 30px; }
-            .sizes { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; color: #212b36; margin-top: 2px; }
-            .size-tag { background: #f8fafc; padding: 4px 8px; border-radius: 5px; border: 1px solid #e2e8f0; font-weight: 700; font-size: 12px; }
-            @media print {
-              body { padding: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div>
-              <div class="company">VESTER</div>
-              <div class="title">Stock Availability Catalog</div>
-            </div>
-            <div class="date">Date: ${dateStr}</div>
-          </div>
-      `;
-
-      activeSubCats.forEach(scName => {
-        const cp = filteredProds.filter(p => {
-          const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
-          return scList.some(sSub => {
-            const sVal = sSub ? sSub.toUpperCase().trim() : '';
-            const scNameVal = scName ? scName.toUpperCase().trim() : '';
-            return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
-          });
-        });
-
-        const stockCp = cp.filter(p => {
-          return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
-        });
-
-        if (!stockCp.length) return;
-
-        printHtml += `
-          <div class="sec-title">${scName}</div>
-          <div class="list-container" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-        `;
-
-        stockCp.forEach(p => {
-          const sizesSet = new Set();
-          if (p.sourceCategoryIds) {
-            p.sourceCategoryIds.forEach(cId => {
-              const catObj = S.categories.find(c => String(c.id) === String(cId));
-              if (catObj && catObj.sizes) {
-                catObj.sizes.forEach(sz => sizesSet.add(sz));
-              }
-            });
-          } else {
-            const catObj = S.categories.find(c => String(c.id) === String(p.ci));
-            if (catObj && catObj.sizes) {
-              catObj.sizes.forEach(sz => sizesSet.add(sz));
-            }
-          }
-          const sizes = Array.from(sizesSet);
-          sizes.sort((a, b) => {
-            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
-            const cleanA = String(a).toUpperCase().trim();
-            const cleanB = String(b).toUpperCase().trim();
-            const idxA = sizeOrder.indexOf(cleanA);
-            const idxB = sizeOrder.indexOf(cleanB);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            const numA = parseFloat(a);
-            const numB = parseFloat(b);
-            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-            return cleanA.localeCompare(cleanB);
-          });
-          
-          const activeSizes = sizes.filter(sz => ((p.s || {})[sz] || 0) > 0);
-          const standardRange = ['45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
-          const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
-
-          let displaySizes = [];
-          if (hasAllStandard) {
-            displaySizes.push('45 TO 90');
-            activeSizes.forEach(sz => {
-              if (!standardRange.includes(sz)) {
-                displaySizes.push(sz);
-              }
-            });
-          } else {
-            displaySizes = activeSizes;
-          }
-
-          const sizeTags = displaySizes.map(sz => {
-            return `<span class="size-tag">${sz}</span>`;
-          }).join(' ');
-
-          printHtml += `
-            <div style="padding:10px 0; border-bottom:1px solid #edf2f7; display:flex; flex-direction:column; gap:6px; page-break-inside:avoid;">
-              <div style="font-weight:700; font-size:13px; text-transform:uppercase; color:#092c4c;">${p.n}</div>
-              ${sizeTags.length > 0 ? `<div class="sizes">${sizeTags}</div>` : ''}
-            </div>
-          `;
-        });
-
-        printHtml += `</div>`;
-      });
-
-      printHtml += `
-        </body>
-        </html>
-      `;
-
-      const win = window.open('', '_blank');
-      if (win) {
-        win.document.write(printHtml);
-        win.document.close();
-        setTimeout(() => {
-          win.print();
-        }, 300);
-      }
-    }
-
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
       renderUsersTable();
@@ -7241,6 +6163,23 @@ function d2i(val) {
       renderSettingsSuppliers();
       renderRecycleBin();
       checkAdmin();
+
+      const viewerUrl = window.location.origin + window.location.pathname + '?mode=view';
+      const qrEl = document.getElementById('settings-qr-container');
+      const urlInput = document.getElementById('settings-viewer-url');
+      if (urlInput) urlInput.value = viewerUrl;
+      if (qrEl) {
+        qrEl.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(viewerUrl)}" style="display:block; width:150px; height:150px; border-radius:4px;" alt="Viewer QR Code">`;
+      }
+    }
+
+    function copyViewerUrl() {
+      const urlInput = document.getElementById('settings-viewer-url');
+      if (urlInput) {
+        navigator.clipboard.writeText(urlInput.value).then(() => {
+          showCenterToast('Viewer link copied to clipboard!');
+        });
+      }
     }
 
     function renderRecycleBin() {
@@ -8497,15 +7436,7 @@ function d2i(val) {
           const d = await resp.json();
           if (d.settings) S = d.settings;
           if (d.products) P = d.products;
-          if (d.transactions) {
-            T = d.transactions;
-            T.forEach(t => {
-              if (!t.pn) {
-                const p = P.find(x => String(x.id) === String(t.pid));
-                if (p) t.pn = p.n;
-              }
-            });
-          }
+          if (d.transactions) T = d.transactions;
           if (d.users) USERS = d.users;
           updateStatus(true);
         } else {
@@ -8537,10 +7468,10 @@ function d2i(val) {
         document.getElementById('so-date').value = todayD();
         document.getElementById('bulk-txn-date').value = todayD();
         
-        curSiMonth = 'ALL';
-        curSoMonth = 'ALL';
-        curTxnMonth = 'ALL';
-        curRptMonth = 'ALL';
+        curSiMonth = todayStr().slice(0, 7);
+        curSoMonth = todayStr().slice(0, 7);
+        curTxnMonth = todayStr().slice(0, 7);
+        curRptMonth = todayStr().slice(0, 7);
 
         repairData(); // Fix any null/duplicate IDs from previous sessions
         
