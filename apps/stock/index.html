@@ -4146,9 +4146,9 @@ function renderDashboard() {
         delete soData[pid];
       } else {
         soAddedPids.push(pid);
-        soData[pid] = {};
+        soData[pid] = { sizes: {}, supplier: '', invoice: '' };
         const p = P.find(x => x.id === pid);
-        szs(p.ci).forEach(s => soData[pid][s] = 0);
+        szs(p.ci).forEach(s => soData[pid].sizes[s] = 0);
       }
       saveDraftSO();
       renderSoSearchDropdown();
@@ -4185,13 +4185,13 @@ function renderDashboard() {
             const cur = (p.s ? p.s[s] : 0) || 0;
             const sc = cur <= 0 ? 'color:var(--danger)' : cur <= p.m ? 'color:var(--warn)' : 'color:var(--accent3)';
             return `<td style="padding:3px 2px;">
-          <input type="number" min="0" value="${d[s] || ''}" placeholder="0"
+          <input type="number" min="0" value="${d.sizes[s] || ''}" placeholder="0"
             data-pid="${p.id}" data-sz="${s}" class="so-qty-input"
             style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:3px;padding:5px 2px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;text-align:center;">
           <div style="font-size:9px;text-align:center;font-family:'JetBrains Mono',monospace;${sc}">Stk:${cur}</div>
         </td>`;
           }).join('');
-          const rowTot = Object.values(d).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+          const rowTot = Object.values(d.sizes || {}).reduce((a, b) => a + (Number(b) || 0), 0);
           return `<tr data-pid="${p.id}">
         <td style="font-weight:700;font-size:13px;white-space:nowrap;padding:6px 10px;border-right:1.5px solid var(--border);">${p.n}</td>
         ${tds}
@@ -4278,12 +4278,12 @@ function renderDashboard() {
       cont.querySelectorAll('.so-qty-input').forEach(el => {
         el.addEventListener('input', function () {
           const p = this.dataset.pid, s = this.dataset.sz;
-          soData[p][s] = parseInt(this.value) || 0;
+          soData[p].sizes[s] = parseInt(this.value) || 0;
           const pr = P.find(x => x.id === p);
           const av = pr.s[s] || 0;
-          if (soData[p][s] > av) this.classList.add('exceed');
+          if (soData[p].sizes[s] > av) this.classList.add('exceed');
           else this.classList.remove('exceed');
-          const rowTot = Object.values(soData[p]).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+          const rowTot = Object.values(soData[p].sizes || {}).reduce((a, b) => a + (Number(b) || 0), 0);
           const rowEl = cont.querySelector(`tr[data-pid="${p}"] .so-row-total`);
           if (rowEl) rowEl.textContent = rowTot;
           saveDraftSO();
@@ -4353,7 +4353,7 @@ function renderDashboard() {
         showCenterToast(`${saved} entries saved!`);
         clearSoEntries();
         renderSoHistory(); updateBadge();
-      } else if (!blocked.length) { showAlert('Stock Out', 'Please enter quantity!'); }
+      } else { showAlert('Stock Out', 'Please enter quantity!'); }
     }
 
     // legacy no-ops
