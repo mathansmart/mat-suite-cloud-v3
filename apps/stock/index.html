@@ -1690,6 +1690,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <div class="nav-item" onclick="location.href='/'" title="Home"><span class="nav-icon"><i class="ti ti-home"></i></span><div class="nav-label">Home</div></div>
         <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span><div class="nav-label">Dashboard</div></div>
         <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon"><i class="ti ti-eye"></i></span><div class="nav-label">Preview</div></div>
+        <div class="nav-item" onclick="nav('stock-print')" id="nav-item-stock-print" title="Stock Print"><span class="nav-icon"><i class="ti ti-printer"></i></span><div class="nav-label">Stock Print</div></div>
         
         <div class="nav-item has-submenu" onclick="toggleSubmenu('stock-submenu')" id="nav-group-stock">
           <span class="nav-icon"><i class="ti ti-package"></i></span>
@@ -1877,6 +1878,37 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           <div id="preview-content"></div>
         </div>
 
+        <!-- STOCK PRINT -->
+        <div class="section fade-up" id="section-stock-print">
+          <!-- Top Controls -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <div style="width:300px;">
+                <div class="search-wrapper" style="margin:0;">
+                  <div class="search-icon-left">🔍</div>
+                  <input type="text" id="cs-search" placeholder="Search stock catalog..." class="premium-search" autocomplete="off" oninput="renderCustomerShare()">
+                </div>
+              </div>
+              <div>
+                <select id="cs-sc-filter" class="form-select" style="height:36px; padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:12px; font-weight:700; background:var(--surface); color:var(--text-main);" onchange="renderCustomerShare()">
+                  <option value="">All Sub Categories</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-ghost" onclick="copyWhatsAppStockText()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
+                <i class="ti ti-brand-whatsapp" style="color:#25D366; font-size:16px;"></i> Copy WhatsApp Text
+              </button>
+              <button class="btn btn-ghost" onclick="printCustomerCatalog()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
+                <i class="ti ti-printer" style="font-size:16px;"></i> Print Catalog
+              </button>
+            </div>
+          </div>
+
+          <!-- Customer Stock List -->
+          <div id="cs-stock-list"></div>
+        </div>
+
         <!-- INVENTORY -->
         <div class="section" id="section-inventory">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -2008,9 +2040,6 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <div class="tab-pill active inv" id="rtab-inventory" onclick="switchRptTab('inventory')">
               📦 Particular
             </div>
-            <div class="tab-pill" id="rtab-customer-share" onclick="switchRptTab('customer-share')">
-              🖨️ Stock Print
-            </div>
             <div class="tab-pill" id="rtab-prod-analysis" onclick="switchRptTab('prod-analysis')">
               📈 Product Analysis
             </div>
@@ -2031,36 +2060,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
             <div id="rpt-inventory-tables"></div>
           </div>
 
-          <!-- CUSTOMER SHARE REPORT -->
-          <div id="rpt-customer-share" style="display:none;">
-            <!-- Top Controls -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <div style="width:300px;">
-                  <div class="search-wrapper" style="margin:0;">
-                    <div class="search-icon-left">🔍</div>
-                    <input type="text" id="cs-search" placeholder="Search customer catalog..." class="premium-search" autocomplete="off" oninput="renderCustomerShare()">
-                  </div>
-                </div>
-                <div>
-                  <select id="cs-sc-filter" class="form-select" style="height:36px; padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:12px; font-weight:700; background:var(--surface); color:var(--text-main);" onchange="renderCustomerShare()">
-                    <option value="">All Sub Categories</option>
-                  </select>
-                </div>
-              </div>
-              <div style="display:flex; gap:10px;">
-                <button class="btn btn-ghost" onclick="copyWhatsAppStockText()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                  <i class="ti ti-brand-whatsapp" style="color:#25D366; font-size:16px;"></i> Copy WhatsApp Text
-                </button>
-                <button class="btn btn-ghost" onclick="printCustomerCatalog()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
-                  <i class="ti ti-printer" style="font-size:16px;"></i> Print Catalog
-                </button>
-              </div>
-            </div>
 
-            <!-- Customer Stock List -->
-            <div id="cs-stock-list"></div>
-          </div>
 
           <!-- PRODUCT WISE REPORT (NEW) -->
           <div id="rpt-prod-analysis" style="display:none;">
@@ -3067,7 +3067,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
     function tick() { const s = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });['clock', 'clock2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = s }) }
     tick();
-    const PT = { dashboard: 'Dashboard', preview: 'App Preview', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Low Stock Alerts', transactions: 'Stock Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings', categories: 'Product Categories', subcategories: 'Sub Categories', suppliers: 'Suppliers' };
+    const PT = { dashboard: 'Dashboard', preview: 'App Preview', 'stock-print': 'Stock Print', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Low Stock Alerts', transactions: 'Stock Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings', categories: 'Product Categories', subcategories: 'Sub Categories', suppliers: 'Suppliers' };
     
     function toggleSubmenu(id) {
       const el = document.getElementById(id);
@@ -3123,7 +3123,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
       const mainContent = document.querySelector('.content');
       if (mainContent) mainContent.scrollTop = 0;
 
-      const fn = { dashboard: renderDashboard, preview: renderPreview, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), categories: renderSettingsCategories, subcategories: renderSettingsSubCategories, suppliers: renderSettingsSuppliers };
+      const fn = { dashboard: renderDashboard, preview: renderPreview, 'stock-print': renderCustomerShare, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), categories: renderSettingsCategories, subcategories: renderSettingsSubCategories, suppliers: renderSettingsSuppliers };
       if (id === 'settings') {
         loadSettings();
       } else if (fn[id]) {
