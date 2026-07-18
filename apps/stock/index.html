@@ -1894,6 +1894,12 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
                   <option value="">All Sub Categories</option>
                 </select>
               </div>
+              <div>
+                <select id="cs-mode-filter" class="form-select" style="height:36px; padding:0 12px; border-radius:8px; border:1.5px solid var(--primary); font-size:12px; font-weight:700; background:var(--surface); color:var(--primary);" onchange="renderCustomerShare()">
+                  <option value="customer">💬 Send Stock to Customer</option>
+                  <option value="internal">🖨️ Stock Print (Internal)</option>
+                </select>
+              </div>
             </div>
             <div style="display:flex; gap:10px;">
               <button class="btn btn-ghost" onclick="copyWhatsAppStockText()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
@@ -7008,12 +7014,15 @@ function d2i(val) {
         const y = today.getFullYear();
         const dateStr = `${d}-${m}-${y}`;
 
+        const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
+        const docTitle = csMode === 'internal' ? 'Stock Availability Catalog (Internal)' : 'Stock Availability Catalog';
+
         let previewHtml = `
           <div class="cs-print-preview-wrap">
             <div class="header">
               <div>
                 <div class="company">VESTER</div>
-                <div class="title">Stock Availability Catalog</div>
+                <div class="title">${docTitle}</div>
               </div>
               <div class="date">Date: ${dateStr}</div>
             </div>
@@ -7080,19 +7089,28 @@ function d2i(val) {
             const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
 
             let displaySizes = [];
-            if (hasAllStandard) {
-              displaySizes.push('45 TO 90');
-              activeSizes.forEach(sz => {
-                if (!standardRange.includes(sz)) {
-                  displaySizes.push(sz);
-                }
-              });
-            } else {
+            if (csMode === 'internal') {
               displaySizes = activeSizes;
+            } else {
+              if (hasAllStandard) {
+                displaySizes.push('45 TO 90');
+                activeSizes.forEach(sz => {
+                  if (!standardRange.includes(sz)) {
+                    displaySizes.push(sz);
+                  }
+                });
+              } else {
+                displaySizes = activeSizes;
+              }
             }
 
             const sizeTags = displaySizes.map(sz => {
-              return `<span class="size-tag">${sz}</span>`;
+              if (csMode === 'internal') {
+                const qty = (p.s || {})[sz] || 0;
+                return `<span class="size-tag">${sz} (${qty})</span>`;
+              } else {
+                return `<span class="size-tag">${sz}</span>`;
+              }
             }).join(' ');
 
             previewHtml += `
@@ -7137,7 +7155,9 @@ function d2i(val) {
       const y = today.getFullYear();
       const dateStr = `${d}-${m}-${y}`;
 
-      let msg = `📦 *VESTER - STOCK AVAILABILITY REPORT* 📦\nDate: ${dateStr}\n`;
+      const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
+      const modeLabel = csMode === 'internal' ? 'INTERNAL CATALOG' : 'STOCK AVAILABILITY REPORT';
+      let msg = `📦 *VESTER - ${modeLabel}* 📦\nDate: ${dateStr}\n`;
 
       activeSubCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
@@ -7194,18 +7214,30 @@ function d2i(val) {
           const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
 
           let displaySizes = [];
-          if (hasAllStandard) {
-            displaySizes.push('45 TO 90');
-            activeSizes.forEach(sz => {
-              if (!standardRange.includes(sz)) {
-                displaySizes.push(sz);
-              }
-            });
-          } else {
+          if (csMode === 'internal') {
             displaySizes = activeSizes;
+          } else {
+            if (hasAllStandard) {
+              displaySizes.push('45 TO 90');
+              activeSizes.forEach(sz => {
+                if (!standardRange.includes(sz)) {
+                  displaySizes.push(sz);
+                }
+              });
+            } else {
+              displaySizes = activeSizes;
+            }
           }
 
-          const sizesText = displaySizes.join(' | ');
+          let sizesText = '';
+          if (csMode === 'internal') {
+            sizesText = displaySizes.map(sz => {
+              const qty = (p.s || {})[sz] || 0;
+              return `${sz} (${qty} Box${qty !== 1 ? 'es' : ''})`;
+            }).join(' | ');
+          } else {
+            sizesText = displaySizes.join(' | ');
+          }
 
           if (sizesText) {
             msg += `  (Sizes - ${sizesText})\n`;
@@ -7240,10 +7272,13 @@ function d2i(val) {
       const y = today.getFullYear();
       const dateStr = `${d}-${m}-${y}`;
 
+      const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
+      const docTitle = csMode === 'internal' ? 'Stock Availability Catalog (Internal)' : 'Stock Availability Catalog';
+
       let printHtml = `
         <html>
         <head>
-          <title>VESTER Stock Catalog - ${dateStr}</title>
+          <title>VESTER ${docTitle} - ${dateStr}</title>
           <style>
             @page { size: A4; margin: 12mm 15mm; }
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #212b36; padding: 0; background: #fff; font-size: 13px; }
@@ -7264,7 +7299,7 @@ function d2i(val) {
           <div class="header">
             <div>
               <div class="company">VESTER</div>
-              <div class="title">Stock Availability Catalog</div>
+              <div class="title">${docTitle}</div>
             </div>
             <div class="date">Date: ${dateStr}</div>
           </div>
@@ -7327,19 +7362,28 @@ function d2i(val) {
           const hasAllStandard = standardRange.every(sz => activeSizes.includes(sz));
 
           let displaySizes = [];
-          if (hasAllStandard) {
-            displaySizes.push('45 TO 90');
-            activeSizes.forEach(sz => {
-              if (!standardRange.includes(sz)) {
-                displaySizes.push(sz);
-              }
-            });
-          } else {
+          if (csMode === 'internal') {
             displaySizes = activeSizes;
+          } else {
+            if (hasAllStandard) {
+              displaySizes.push('45 TO 90');
+              activeSizes.forEach(sz => {
+                if (!standardRange.includes(sz)) {
+                  displaySizes.push(sz);
+                }
+              });
+            } else {
+              displaySizes = activeSizes;
+            }
           }
 
           const sizeTags = displaySizes.map(sz => {
-            return `<span class="size-tag">${sz}</span>`;
+            if (csMode === 'internal') {
+              const qty = (p.s || {})[sz] || 0;
+              return `<span class="size-tag">${sz} (${qty})</span>`;
+            } else {
+              return `<span class="size-tag">${sz}</span>`;
+            }
           }).join(' ');
 
           printHtml += `
