@@ -1927,9 +1927,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               </div>
             </div>
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <button class="btn btn-ghost" onclick="selectAllCsProds(true)" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Select All Products">☑️ All</button>
-              <button class="btn btn-ghost" onclick="selectAllCsProds(false)" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Deselect All Products">⬛ None</button>
-              <span style="border-left:1px solid var(--border); height:24px; margin:0 5px; display:inline-block;"></span>
+              <div id="cs-reset-btn-container" style="display:inline-block;"></div>
               <button class="btn btn-ghost" onclick="copyWhatsAppStockText()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
                 <i class="ti ti-brand-whatsapp" style="color:#25D366; font-size:16px;"></i> Copy WhatsApp Text
               </button>
@@ -3176,7 +3174,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     }
     function todayStr() { return new Date().toISOString().slice(0, 10) }
     let dashSelectedPids = [];
-    const csDeselectedPids = new Set();
+    const csSelectedPids = new Set();
     function renderDashChips() {
       const wrap = document.getElementById('dash-chips');
       if (!wrap) return;
@@ -7033,10 +7031,19 @@ function d2i(val) {
 
         const mergedList = getMergedProducts(P, '');
 
+        const hasSelection = csSelectedPids.size > 0;
         const filteredProds = mergedList.filter(p => {
           if (!p.n) return false;
+          if (hasSelection && !csSelectedPids.has(p.id)) return false;
           return p.n.toLowerCase().includes(q);
         });
+
+        const resetContainer = document.getElementById('cs-reset-btn-container');
+        if (resetContainer) {
+          resetContainer.innerHTML = hasSelection
+            ? `<button class="btn btn-ghost" onclick="clearCsSelection()" style="border:1.5px solid var(--primary); color:var(--primary); font-weight:700; height:36px; padding:0 12px; font-size:12px; display:inline-flex; align-items:center; gap:4px; border-radius:8px;">❌ Clear Selection (${csSelectedPids.size})</button>`
+            : '';
+        }
 
         const today = new Date();
         const d = String(today.getDate()).padStart(2, '0');
@@ -7071,7 +7078,6 @@ function d2i(val) {
           });
 
           const stockCp = cp.filter(p => {
-            if (csDeselectedPids.has(p.id)) return false;
             return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
           });
 
@@ -7198,7 +7204,7 @@ function d2i(val) {
       }
       
       drop.innerHTML = prods.map(p => {
-        const sel = !csDeselectedPids.has(p.id);
+        const sel = csSelectedPids.has(p.id);
         return `<div class="drop-item ${sel ? 'selected' : ''}" onclick="toggleCsProdDropdown('${p.id}'); event.stopPropagation();" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-bottom:1px solid var(--border-light);">
           <span style="font-size:13px; font-weight:${sel ? '800' : '600'}; color:${sel ? 'var(--primary)' : 'var(--text)'};">
             ${sel ? '✓ ' : '⬜ '}${p.n}
@@ -7209,44 +7215,22 @@ function d2i(val) {
     }
 
     function toggleCsProdDropdown(pid) {
-      if (csDeselectedPids.has(pid)) {
-        csDeselectedPids.delete(pid);
+      if (csSelectedPids.has(pid)) {
+        csSelectedPids.delete(pid);
       } else {
-        csDeselectedPids.add(pid);
+        csSelectedPids.add(pid);
       }
       renderCsProductDrop();
       renderCustomerShare();
     }
 
-    function selectAllCsProds(select) {
-      const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
-      const filterEl = document.getElementById('cs-sc-filter');
-      const selectedSc = filterEl ? filterEl.value : '';
-      const subCats = S.subCategories || ['GENERAL'];
-      const activeSubCats = selectedSc ? [selectedSc] : subCats;
-      const mergedList = getMergedProducts(P, '');
-      const filteredProds = mergedList.filter(p => {
-        if (!p.n) return false;
-        return p.n.toLowerCase().includes(q);
-      });
-
-      const matchedProds = filteredProds.filter(p => {
-        const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
-        return scList.some(sSub => {
-          const sVal = sSub ? sSub.toUpperCase().trim() : '';
-          return activeSubCats.some(asc => asc.toUpperCase().trim() === sVal || (sVal === 'GENERAL' && asc.toUpperCase().trim() === 'GENERAL') || (sVal === '' && asc.toUpperCase().trim() === 'GENERAL'));
-        });
-      });
-
-      matchedProds.forEach(p => {
-        if (select) {
-          csDeselectedPids.delete(p.id);
-        } else {
-          csDeselectedPids.add(p.id);
-        }
-      });
-
+    function clearCsSelection() {
+      csSelectedPids.clear();
       renderCustomerShare();
+      const drop = document.getElementById('cs-search-drop');
+      if (drop && drop.style.display !== 'none') {
+        renderCsProductDrop();
+      }
     }
 
     function copyWhatsAppStockText() {
@@ -7258,9 +7242,10 @@ function d2i(val) {
       const activeSubCats = selectedSc ? [selectedSc] : subCats;
 
       const mergedList = getMergedProducts(P, '');
+      const hasSelection = csSelectedPids.size > 0;
       const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
-        if (csDeselectedPids.has(p.id)) return false;
+        if (hasSelection && !csSelectedPids.has(p.id)) return false;
         return p.n.toLowerCase().includes(q);
       });
 
@@ -7376,9 +7361,10 @@ function d2i(val) {
       const activeSubCats = selectedSc ? [selectedSc] : subCats;
 
       const mergedList = getMergedProducts(P, '');
+      const hasSelection = csSelectedPids.size > 0;
       const filteredProds = mergedList.filter(p => {
         if (!p.n) return false;
-        if (csDeselectedPids.has(p.id)) return false;
+        if (hasSelection && !csSelectedPids.has(p.id)) return false;
         return p.n.toLowerCase().includes(q);
       });
 
