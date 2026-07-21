@@ -1908,9 +1908,10 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
               <div style="width:300px;">
-                <div class="search-wrapper" style="margin:0;">
+                <div class="search-wrapper" style="margin:0; position:relative;">
                   <div class="search-icon-left">🔍</div>
-                  <input type="text" id="cs-search" placeholder="Search stock catalog..." class="premium-search" autocomplete="off" oninput="renderCustomerShare()">
+                  <input type="text" id="cs-search" placeholder="Search stock catalog..." class="premium-search" autocomplete="off" oninput="renderCsProductDrop()" onclick="renderCsProductDrop()">
+                  <div id="cs-search-drop" class="search-dropdown-menu" style="display:none; position:absolute; top:100%; left:0; width:100%; z-index:1000; max-height:300px; overflow-y:auto; background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:0 10px 15px rgba(0,0,0,0.1);"></div>
                 </div>
               </div>
               <div>
@@ -6316,7 +6317,8 @@ function d2i(val) {
       
       const s3 = document.getElementById('pa-search-input'); const d3 = document.getElementById('pa-search-dropdown');
       if (d3 && s3 && !s3.contains(e.target) && !d3.contains(e.target)) d3.style.display = 'none';
-      
+      const s4 = document.getElementById('cs-search'); const d4 = document.getElementById('cs-search-drop');
+      if (d4 && s4 && !s4.contains(e.target) && !d4.contains(e.target)) d4.style.display = 'none';
       const um = document.getElementById('user-menu'); const userWrap = document.querySelector('.sidebar-user');
       if (um && userWrap && !userWrap.contains(e.target) && um.classList.contains('open')) um.classList.remove('open');
     });
@@ -7069,6 +7071,7 @@ function d2i(val) {
           });
 
           const stockCp = cp.filter(p => {
+            if (csDeselectedPids.has(p.id)) return false;
             return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
           });
 
@@ -7141,14 +7144,10 @@ function d2i(val) {
               }
             }).join(' ');
 
-            const isChecked = !csDeselectedPids.has(p.id);
             previewHtml += `
               <div style="padding:10px 0; border-bottom:1px solid var(--border-light); display:flex; flex-direction:column; gap:6px; page-break-inside:avoid;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <input type="checkbox" class="cs-prod-select" onchange="toggleCsProd('${p.id}', this.checked)" ${isChecked ? 'checked' : ''} style="accent-color:var(--primary); width:16px; height:16px; cursor:pointer;">
-                  <div style="font-weight:700; font-size:13px; text-transform:uppercase; color:#092c4c; cursor:pointer; user-select:none;" onclick="this.previousElementSibling.click()">${p.n}</div>
-                </div>
-                ${sizeTags.length > 0 ? `<div class="sizes" style="margin-left:24px;">${sizeTags}</div>` : ''}
+                <div style="font-weight:700; font-size:13px; text-transform:uppercase; color:#092c4c;">${p.n}</div>
+                ${sizeTags.length > 0 ? `<div class="sizes">${sizeTags}</div>` : ''}
               </div>
             `;
           });
@@ -7167,12 +7166,56 @@ function d2i(val) {
       }
     }
 
-    function toggleCsProd(pid, isChecked) {
-      if (isChecked) {
+    function renderCsProductDrop() {
+      const searchEl = document.getElementById('cs-search');
+      if (!searchEl) return;
+      const q = searchEl.value.toLowerCase().trim();
+      
+      const filterEl = document.getElementById('cs-sc-filter');
+      const selectedSc = filterEl ? filterEl.value : '';
+      const subCats = S.subCategories || ['GENERAL'];
+      const activeSubCats = selectedSc ? [selectedSc] : subCats;
+
+      const mergedList = getMergedProducts(P, '');
+      let prods = mergedList.filter(p => {
+        const totalQty = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
+        if (totalQty <= 0) return false;
+        
+        if (q && !p.n.toLowerCase().includes(q)) return false;
+
+        const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
+        return scList.some(sSub => {
+          const sVal = sSub ? sSub.toUpperCase().trim() : '';
+          return activeSubCats.some(asc => asc.toUpperCase().trim() === sVal || (sVal === 'GENERAL' && asc.toUpperCase().trim() === 'GENERAL') || (sVal === '' && asc.toUpperCase().trim() === 'GENERAL'));
+        });
+      });
+
+      const drop = document.getElementById('cs-search-drop');
+      drop.style.display = 'block';
+      if (!prods.length) { 
+        drop.innerHTML = '<div class="drop-item" style="color:var(--text-muted);cursor:default;padding:8px 12px;">No products found</div>'; 
+        return; 
+      }
+      
+      drop.innerHTML = prods.map(p => {
+        const sel = !csDeselectedPids.has(p.id);
+        return `<div class="drop-item ${sel ? 'selected' : ''}" onclick="toggleCsProdDropdown('${p.id}'); event.stopPropagation();" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-bottom:1px solid var(--border-light);">
+          <span style="font-size:13px; font-weight:${sel ? '800' : '600'}; color:${sel ? 'var(--primary)' : 'var(--text)'};">
+            ${sel ? '✓ ' : '⬜ '}${p.n}
+          </span>
+          ${sel ? '<span style="font-size:9px; color:var(--primary); font-weight:800; letter-spacing:0.5px;">SELECTED</span>' : ''}
+        </div>`;
+      }).join('');
+    }
+
+    function toggleCsProdDropdown(pid) {
+      if (csDeselectedPids.has(pid)) {
         csDeselectedPids.delete(pid);
       } else {
         csDeselectedPids.add(pid);
       }
+      renderCsProductDrop();
+      renderCustomerShare();
     }
 
     function selectAllCsProds(select) {
