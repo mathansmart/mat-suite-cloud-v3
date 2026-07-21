@@ -7176,6 +7176,12 @@ function d2i(val) {
       const searchEl = document.getElementById('cs-search');
       if (!searchEl) return;
       const q = searchEl.value.toLowerCase().trim();
+      const drop = document.getElementById('cs-search-drop');
+      
+      if (!q) {
+        drop.style.display = 'none';
+        return;
+      }
       
       const filterEl = document.getElementById('cs-sc-filter');
       const selectedSc = filterEl ? filterEl.value : '';
@@ -7196,7 +7202,6 @@ function d2i(val) {
         });
       });
 
-      const drop = document.getElementById('cs-search-drop');
       drop.style.display = 'block';
       if (!prods.length) { 
         drop.innerHTML = '<div class="drop-item" style="color:var(--text-muted);cursor:default;padding:8px 12px;">No products found</div>'; 
@@ -7207,7 +7212,7 @@ function d2i(val) {
         const sel = csSelectedPids.has(p.id);
         return `<div class="drop-item ${sel ? 'selected' : ''}" onclick="toggleCsProdDropdown('${p.id}'); event.stopPropagation();" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-bottom:1px solid var(--border-light);">
           <span style="font-size:13px; font-weight:${sel ? '800' : '600'}; color:${sel ? 'var(--primary)' : 'var(--text)'};">
-            ${sel ? '✓ ' : '⬜ '}${p.n}
+            ${sel ? '✓ ' : ''}${p.n}
           </span>
           ${sel ? '<span style="font-size:9px; color:var(--primary); font-weight:800; letter-spacing:0.5px;">SELECTED</span>' : ''}
         </div>`;
