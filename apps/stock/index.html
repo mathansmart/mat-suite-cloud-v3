@@ -1921,7 +1921,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               <div>
                 <select id="cs-mode-filter" class="form-select" style="height:36px; padding:0 12px; border-radius:8px; border:1.5px solid var(--primary); font-size:12px; font-weight:700; background:var(--surface); color:var(--primary);" onchange="renderCustomerShare()">
                   <option value="customer">💬 Send Stock to Customer</option>
-                  <option value="internal">🖨️ Stock Print (Internal)</option>
+                  <option value="internal">🖨️ Stock Print</option>
                 </select>
               </div>
             </div>
@@ -7039,7 +7039,7 @@ function d2i(val) {
         const dateStr = `${d}-${m}-${y}`;
 
         const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
-        const docTitle = csMode === 'internal' ? 'Stock Availability Catalog (Internal)' : 'Stock Availability Catalog';
+        const docTitle = 'Stock Availability Catalog';
 
         let previewHtml = `
           <div class="cs-print-preview-wrap">
@@ -7297,7 +7297,7 @@ function d2i(val) {
       const dateStr = `${d}-${m}-${y}`;
 
       const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
-      const docTitle = csMode === 'internal' ? 'Stock Availability Catalog (Internal)' : 'Stock Availability Catalog';
+      const docTitle = 'Stock Availability Catalog';
 
       let printHtml = `
         <html>
