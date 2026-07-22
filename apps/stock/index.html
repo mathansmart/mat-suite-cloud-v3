@@ -1910,7 +1910,8 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
               <div style="width:300px;">
                 <div class="search-wrapper" style="margin:0; position:relative;">
                   <div class="search-icon-left">🔍</div>
-                  <input type="text" id="cs-search" placeholder="Search stock catalog..." class="premium-search" autocomplete="off" oninput="renderCsProductDrop()" onclick="renderCsProductDrop()">
+                  <input type="text" id="cs-search" placeholder="Search stock catalog..." class="premium-search" autocomplete="off" oninput="renderCsProductDrop(); renderCustomerShare();" onclick="renderCsProductDrop()">
+                  <button class="search-clear-btn" id="cs-search-clear" onclick="clearCsSearch()" style="display:none; right:10px;">×</button>
                   <div id="cs-search-drop" class="search-dropdown-menu" style="display:none; position:absolute; top:100%; left:0; width:100%; z-index:1000; max-height:300px; overflow-y:auto; background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:0 10px 15px rgba(0,0,0,0.1);"></div>
                 </div>
               </div>
@@ -7178,6 +7179,9 @@ function d2i(val) {
       const q = searchEl.value.toLowerCase().trim();
       const drop = document.getElementById('cs-search-drop');
       
+      const clearBtn = document.getElementById('cs-search-clear');
+      if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+      
       if (!q) {
         drop.style.display = 'none';
         return;
@@ -7235,6 +7239,15 @@ function d2i(val) {
       const drop = document.getElementById('cs-search-drop');
       if (drop && drop.style.display !== 'none') {
         renderCsProductDrop();
+      }
+    }
+
+    function clearCsSearch() {
+      const s = document.getElementById('cs-search');
+      if (s) {
+        s.value = '';
+        s.focus();
+        s.dispatchEvent(new Event('input'));
       }
     }
 
