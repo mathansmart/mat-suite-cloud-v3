@@ -1553,9 +1553,9 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
     text-transform: uppercase;
   }
   .cs-print-preview-wrap .list-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
   .cs-print-preview-wrap .sizes {
     display: flex;
@@ -7429,11 +7429,10 @@ function d2i(val) {
               page-break-after: avoid; 
             }
             .list-container { 
-              column-count: 2; 
-              column-gap: 30px; 
+              display: block; 
             }
             .product-print-block {
-              display: inline-block;
+              display: block;
               width: 100%;
               padding: 10px 0;
               border-bottom: 1px solid #edf2f7;
