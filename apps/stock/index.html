@@ -4048,6 +4048,7 @@ function renderDashboard() {
       const catGroups = {};
       siAddedPids.forEach(pid => {
         const p = P.find(x => x.id === pid);
+        if (!p) return;
         if (!catGroups[p.ci]) catGroups[p.ci] = [];
         catGroups[p.ci].push(p);
       });
@@ -4280,6 +4281,7 @@ function renderDashboard() {
       const catGroups = {};
       soAddedPids.forEach(pid => {
         const p = P.find(x => x.id === pid);
+        if (!p) return;
         if (!catGroups[p.ci]) catGroups[p.ci] = [];
         catGroups[p.ci].push(p);
       });
@@ -5178,7 +5180,7 @@ function d2i(val) {
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
-          if (draft.pids) siAddedPids = draft.pids;
+          if (draft.pids) siAddedPids = draft.pids.filter(pid => P.some(x => x.id === pid));
           if (draft.data) siTableData = draft.data;
           if (draft.date) d.value = draft.date;
           if (draft.sup && supEl) supEl.value = draft.sup;
@@ -5202,7 +5204,7 @@ function d2i(val) {
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
-          if (draft.pids) soAddedPids = draft.pids;
+          if (draft.pids) soAddedPids = draft.pids.filter(pid => P.some(x => x.id === pid));
           if (draft.data) soData = draft.data;
           if (draft.date && d) d.value = draft.date;
           if (draft.cust && custEl) custEl.value = draft.cust;
