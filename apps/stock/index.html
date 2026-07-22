@@ -7229,7 +7229,16 @@ function d2i(val) {
       } else {
         csSelectedPids.add(pid);
       }
-      renderCsProductDrop();
+      
+      const searchEl = document.getElementById('cs-search');
+      if (searchEl) searchEl.value = '';
+      
+      const clearBtn = document.getElementById('cs-search-clear');
+      if (clearBtn) clearBtn.style.display = 'none';
+      
+      const drop = document.getElementById('cs-search-drop');
+      if (drop) drop.style.display = 'none';
+      
       renderCustomerShare();
     }
 
