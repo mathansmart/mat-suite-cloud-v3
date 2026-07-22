@@ -54,18 +54,18 @@
 
     .sidebar {
       width: 260px;
-      background: #ffffff;
+      background: linear-gradient(180deg, #092c4c 0%, #061e33 100%);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      box-shadow: 1px 0 15px rgba(0,0,0,0.04);
+      box-shadow: 2px 0 20px rgba(0,0,0,0.15);
       z-index: 100;
-      border-right: 1px solid var(--border);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .sidebar .logo {
       padding: 24px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       margin-bottom: 15px;
       display: flex;
       flex-direction: column;
@@ -110,7 +110,7 @@
     .logo-title {
       font-size: 18px;
       font-weight: 800;
-      color: var(--text-main);
+      color: #ffffff;
       letter-spacing: 2px;
       text-transform: uppercase;
       font-family: 'Outfit', sans-serif;
@@ -118,7 +118,7 @@
 
     .logo-sub {
       font-size: 9px;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.5);
       letter-spacing: 1px;
       margin-top: -2px;
     }
@@ -131,20 +131,23 @@
       width: 100%;
       border-radius: 8px;
       cursor: pointer;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.7);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       padding: 0 16px;
     }
 
     .nav-item:hover {
-      background: #f1f5f9;
-      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
     }
 
     .nav-item.active {
-      background: rgba(254, 159, 67, 0.1);
-      color: var(--primary);
+      background: rgba(255, 255, 255, 0.15) !important;
+      color: #ffffff !important;
+      border-left: 4px solid var(--primary) !important;
+      border-radius: 0 8px 8px 0;
+      padding-left: 12px;
     }
 
     .nav-icon {
@@ -185,19 +188,20 @@
     .submenu-item {
       padding: 8px 12px;
       border-radius: 6px;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.6);
       cursor: pointer;
       font-size: 13.5px;
       font-weight: 600;
       transition: all 0.2s;
     }
     .submenu-item:hover {
-      color: var(--text-main);
-      background: #f1f5f9;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
     }
     .submenu-item.active {
-      color: var(--primary);
-      background: rgba(254, 159, 67, 0.1);
+      color: var(--primary) !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      font-weight: 700;
     }
     .submenu-arrow {
       margin-left: auto;
@@ -569,8 +573,7 @@
       text-decoration: underline !important;
     }
 
-    .nav-item.active { 
-color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--primary); }
+
 
 
 
@@ -1729,7 +1732,7 @@ color: var(--primary); background: rgba(99, 102, 241, 0.1); border-color: var(--
         <div class="nav-item" onclick="nav('alerts')" title="Alerts"><span class="nav-icon"><i class="ti ti-alert-triangle"></i></span><div class="nav-label">Alerts</div><span class="nav-badge" id="alert-badge" style="display:none"></span></div>
         <div class="nav-item" onclick="nav('reports')" title="Reports"><span class="nav-icon"><i class="ti ti-chart-bar"></i></span><div class="nav-label">Reports</div></div>
         
-        <div style="margin: 15px 0; border-top: 1px solid var(--border);"></div>
+        <div style="margin: 15px 0; border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
 
         <div class="nav-item" id="nav-item-bulk" onclick="nav('bulk')" title="Bulk Stock Out"><span class="nav-icon"><i class="ti ti-folder"></i></span><div class="nav-label">Bulk</div></div>
         <div class="nav-item" id="nav-item-settings" onclick="nav('settings')" title="Settings"><span class="nav-icon"><i class="ti ti-settings"></i></span><div class="nav-label">Settings</div></div>
