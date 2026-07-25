@@ -1132,6 +1132,7 @@ select, input[type="range"], input[type="number"] {
 #editor-textarea ul, #editor-textarea ol {
     margin: 8px 0;
     padding-left: 30px;
+    list-style-position: inside;
 }
 
 #editor-textarea li {
