@@ -1611,8 +1611,32 @@ document.addEventListener('DOMContentLoaded', () => {
             document.execCommand('hiliteColor', false, format.backgroundColor);
         }
 
+        if (format.fontSize) {
+            document.execCommand('fontSize', false, '7');
+            const fontElements = editorTextarea.querySelectorAll('font[size="7"]');
+            fontElements.forEach(font => {
+                const span = document.createElement('span');
+                span.style.fontSize = format.fontSize;
+                Array.from(font.attributes).forEach(attr => {
+                    if (attr.name !== 'size') span.setAttribute(attr.name, attr.value);
+                });
+                span.innerHTML = font.innerHTML;
+                font.parentNode.replaceChild(span, font);
+            });
+        }
+
         if (format.fontFamily) {
             document.execCommand('fontName', false, format.fontFamily);
+            const fontElements = editorTextarea.querySelectorAll(`font[face="${format.fontFamily}"]`);
+            fontElements.forEach(font => {
+                const span = document.createElement('span');
+                span.style.fontFamily = format.fontFamily;
+                Array.from(font.attributes).forEach(attr => {
+                    if (attr.name !== 'face') span.setAttribute(attr.name, attr.value);
+                });
+                span.innerHTML = font.innerHTML;
+                font.parentNode.replaceChild(span, font);
+            });
         }
     }
 
