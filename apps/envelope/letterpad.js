@@ -1368,20 +1368,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Keyboard handling for Tab and Shift+Tab to indent/outdent lists
+    // Helper to get active list item
+    function getActiveListItem() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return null;
+        let node = selection.getRangeAt(0).startContainer;
+        while (node && node !== editorTextarea) {
+            if (node.tagName === 'LI') {
+                return node;
+            }
+            node = node.parentNode;
+        }
+        return null;
+    }
+
+    // Keyboard handling for Tab, Shift+Tab, and Backspace to match MS Word list behaviors
     if (editorTextarea) {
         editorTextarea.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
-                const listEl = getActiveListElement();
-                if (listEl) {
-                    e.preventDefault();
-                    if (e.shiftKey) {
-                        document.execCommand('outdent', false, null);
-                    } else {
-                        document.execCommand('indent', false, null);
+                e.preventDefault();
+                const activeList = getActiveListElement();
+                if (e.shiftKey) {
+                    document.execCommand('outdent', false, null);
+                } else {
+                    document.execCommand('indent', false, null);
+                }
+                if (activeList) {
+                    propagateListStyle(activeList);
+                }
+                updateRibbonFromSelection();
+            } else if (e.key === 'Backspace') {
+                const li = getActiveListItem();
+                if (li) {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        // If cursor is at the very beginning of the list item text, outdent/convert to normal paragraph
+                        if (range.collapsed && range.startOffset === 0) {
+                            e.preventDefault();
+                            document.execCommand('outdent', false, null);
+                            updateRibbonFromSelection();
+                        }
                     }
-                    propagateListStyle(getActiveListElement());
-                    updateRibbonFromSelection();
                 }
             }
         });
