@@ -338,6 +338,56 @@
                 <!-- PARAGRAPH SECTION -->
                 <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px; border-right: 1px solid #444; gap: 4px; margin-left: 10px;">
                     <div style="display: flex; align-items: center; gap: 4px;">
+                        <!-- Bullet List Button with Library Dropdown -->
+                        <div class="editor-dropdown-container" style="position: relative; display: inline-block;">
+                            <button id="editor-btn-bullets" title="Bullets" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;" onmousedown="event.preventDefault();">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                            </button>
+                            <!-- Bullet Library Dropdown Content -->
+                            <div id="editor-bullets-library" class="editor-menu-dropdown" style="display: none; position: absolute; top: 100%; left: 0; background: #2b2b2b; border: 1px solid #555; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; padding: 8px; width: 220px;">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: #aaa; margin-bottom: 6px; padding: 0 4px;">Bullet Library</div>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                                    <button class="bullet-option-btn" data-value="none" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">None</button>
+                                    <button class="bullet-option-btn" data-value="disc" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 1.1rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">●</button>
+                                    <button class="bullet-option-btn" data-value="circle" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 1.1rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">○</button>
+                                    <button class="bullet-option-btn" data-value="square" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 1.1rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">■</button>
+                                    <button class="bullet-option-btn" data-value="'➢ '" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 1rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">➢</button>
+                                    <button class="bullet-option-btn" data-value="'✓ '" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 1rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">✓</button>
+                                    <button class="bullet-option-btn" data-value="'❖ '" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 1rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">❖</button>
+                                    <button class="bullet-option-btn" data-value="'▪ '" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.9rem; cursor: pointer; text-align: center; line-height: 1;" onmousedown="event.preventDefault();">▪</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Numbered List Button with Library Dropdown -->
+                        <div class="editor-dropdown-container" style="position: relative; display: inline-block;">
+                            <button id="editor-btn-numbers" title="Numbering" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;" onmousedown="event.preventDefault();">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4H3m1-4h-1"/><path d="M4 10h-2v1h3v-1M4 14h-2v1h3v-1"/></svg>
+                            </button>
+                            <!-- Number Library Dropdown Content -->
+                            <div id="editor-numbers-library" class="editor-menu-dropdown" style="display: none; position: absolute; top: 100%; left: 0; background: #2b2b2b; border: 1px solid #555; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; padding: 8px; width: 220px;">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: #aaa; margin-bottom: 6px; padding: 0 4px;">Numbering Library</div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                                    <button class="number-option-btn" data-value="none" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">None</button>
+                                    <button class="number-option-btn" data-value="decimal" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">1, 2, 3</button>
+                                    <button class="number-option-btn" data-value="lower-alpha" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">a, b, c</button>
+                                    <button class="number-option-btn" data-value="upper-alpha" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">A, B, C</button>
+                                    <button class="number-option-btn" data-value="lower-roman" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">i, ii, iii</button>
+                                    <button class="number-option-btn" data-value="upper-roman" style="background: #3b3b3b; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-align: center;" onmousedown="event.preventDefault();">I, II, III</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indent/Outdent Buttons -->
+                        <button id="editor-btn-outdent" title="Decrease Indent (Shift+Tab)" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;" onmousedown="event.preventDefault();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 12H6M21 18V6"/></svg>
+                        </button>
+                        <button id="editor-btn-indent" title="Increase Indent (Tab)" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;" onmousedown="event.preventDefault();">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 12h12M3 18V6"/></svg>
+                        </button>
+
+                        <span style="border-left: 1px solid #555; height: 18px; margin: 0 4px; display: inline-block;"></span>
+
                         <!-- Align Left -->
                         <button id="editor-align-left" title="Align Left" style="background: transparent; color: #fff; border: 1px solid transparent; width: 28px; height: 26px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none;">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2V3zm0 3h8v1H2V6zm0 3h12v1H2V9zm0 3h8v1H2v-1z"/></svg>

@@ -1234,6 +1234,145 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Bullet/Number list elements
+    const editorBtnBullets = document.getElementById('editor-btn-bullets');
+    const editorBulletsLibrary = document.getElementById('editor-bullets-library');
+    const editorBtnNumbers = document.getElementById('editor-btn-numbers');
+    const editorNumbersLibrary = document.getElementById('editor-numbers-library');
+    const editorBtnIndent = document.getElementById('editor-btn-indent');
+    const editorBtnOutdent = document.getElementById('editor-btn-outdent');
+
+    // Toggle dropdowns
+    if (editorBtnBullets) {
+        editorBtnBullets.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (editorNumbersLibrary) editorNumbersLibrary.style.display = 'none';
+            if (editorBulletsLibrary) {
+                editorBulletsLibrary.style.display = editorBulletsLibrary.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+
+    if (editorBtnNumbers) {
+        editorBtnNumbers.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (editorBulletsLibrary) editorBulletsLibrary.style.display = 'none';
+            if (editorNumbersLibrary) {
+                editorNumbersLibrary.style.display = editorNumbersLibrary.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Close libraries on click outside
+    document.addEventListener('click', (e) => {
+        if (editorBulletsLibrary && !editorBtnBullets.contains(e.target) && !editorBulletsLibrary.contains(e.target)) {
+            editorBulletsLibrary.style.display = 'none';
+        }
+        if (editorNumbersLibrary && !editorBtnNumbers.contains(e.target) && !editorNumbersLibrary.contains(e.target)) {
+            editorNumbersLibrary.style.display = 'none';
+        }
+    });
+
+    // Helper to get active list container
+    function getActiveListElement() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return null;
+        let node = selection.getRangeAt(0).startContainer;
+        while (node && node !== editorTextarea) {
+            if (node.tagName === 'UL' || node.tagName === 'OL') {
+                return node;
+            }
+            node = node.parentNode;
+        }
+        return null;
+    }
+
+    // Set list style type
+    function setListStyle(listType, styleValue) {
+        let listEl = getActiveListElement();
+        if (!listEl) {
+            const cmd = listType === 'ul' ? 'insertUnorderedList' : 'insertOrderedList';
+            document.execCommand(cmd, false, null);
+            listEl = getActiveListElement();
+        }
+        if (listEl) {
+            const expectedTag = listType.toUpperCase();
+            if (listEl.tagName !== expectedTag) {
+                const cmd = listType === 'ul' ? 'insertUnorderedList' : 'insertOrderedList';
+                document.execCommand(cmd, false, null);
+                listEl = getActiveListElement();
+            }
+        }
+        if (listEl) {
+            if (styleValue === 'none') {
+                listEl.style.listStyleType = 'none';
+                listEl.querySelectorAll('li').forEach(li => li.style.listStyleType = 'none');
+            } else {
+                listEl.style.listStyleType = styleValue;
+                listEl.querySelectorAll('li').forEach(li => li.style.listStyleType = styleValue);
+            }
+        }
+        updateRibbonFromSelection();
+    }
+
+    // Bind options click
+    document.querySelectorAll('.bullet-option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const val = btn.dataset.value;
+            setListStyle('ul', val);
+            if (editorBulletsLibrary) editorBulletsLibrary.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('.number-option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const val = btn.dataset.value;
+            setListStyle('ol', val);
+            if (editorNumbersLibrary) editorNumbersLibrary.style.display = 'none';
+        });
+    });
+
+    // Indent / Outdent
+    if (editorBtnIndent) {
+        editorBtnIndent.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('indent', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+
+    if (editorBtnOutdent) {
+        editorBtnOutdent.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand('outdent', false, null);
+            updateRibbonFromSelection();
+        });
+    }
+
+    // Keyboard handling for Tab and Shift+Tab to indent/outdent lists
+    if (editorTextarea) {
+        editorTextarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                const listEl = getActiveListElement();
+                if (listEl) {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        document.execCommand('outdent', false, null);
+                    } else {
+                        document.execCommand('indent', false, null);
+                    }
+                    updateRibbonFromSelection();
+                }
+            }
+        });
+    }
+
     // Ribbon Toggle Button Listeners via document.execCommand
     if (editorBtnBold) {
         editorBtnBold.addEventListener('click', (e) => {

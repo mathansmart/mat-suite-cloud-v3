@@ -1108,6 +1108,33 @@ select, input[type="range"], input[type="number"] {
     z-index: 1 !important;
 }
 
+/* Bullet & Numbering Library Dropdowns styling */
+.editor-menu-dropdown {
+    animation: editorDropdownFade 0.15s ease-out;
+}
 
+@keyframes editorDropdownFade {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
+.bullet-option-btn:hover, .number-option-btn:hover {
+    background-color: #65a30d !important;
+    border-color: #84cc16 !important;
+    transform: scale(1.08);
+}
 
+.bullet-option-btn, .number-option-btn {
+    transition: all 0.15s ease-in-out;
+}
+
+/* List element styling inside editor A4 sheet */
+#editor-textarea ul, #editor-textarea ol {
+    margin: 8px 0 !important;
+    padding-left: 28px !important;
+}
+
+#editor-textarea li {
+    margin-bottom: 6px !important;
+    line-height: 1.5 !important;
+}
