@@ -1338,11 +1338,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Propagate custom list styles to children
+    function propagateListStyle(listEl) {
+        if (!listEl) return;
+        const currentStyle = listEl.style.listStyleType;
+        if (currentStyle) {
+            listEl.querySelectorAll('ul, ol, li').forEach(el => {
+                el.style.listStyleType = currentStyle;
+            });
+        }
+    }
+
     // Indent / Outdent
     if (editorBtnIndent) {
         editorBtnIndent.addEventListener('click', (e) => {
             e.preventDefault();
             document.execCommand('indent', false, null);
+            propagateListStyle(getActiveListElement());
             updateRibbonFromSelection();
         });
     }
@@ -1351,6 +1363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editorBtnOutdent.addEventListener('click', (e) => {
             e.preventDefault();
             document.execCommand('outdent', false, null);
+            propagateListStyle(getActiveListElement());
             updateRibbonFromSelection();
         });
     }
@@ -1367,6 +1380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         document.execCommand('indent', false, null);
                     }
+                    propagateListStyle(getActiveListElement());
                     updateRibbonFromSelection();
                 }
             }

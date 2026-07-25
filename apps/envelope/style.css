@@ -1130,11 +1130,12 @@ select, input[type="range"], input[type="number"] {
 
 /* List element styling inside editor A4 sheet */
 #editor-textarea ul, #editor-textarea ol {
-    margin: 8px 0 !important;
-    padding-left: 28px !important;
+    margin: 8px 0;
+    padding-left: 30px;
 }
 
 #editor-textarea li {
-    margin-bottom: 6px !important;
-    line-height: 1.5 !important;
+    margin-bottom: 6px;
+    line-height: 1.5;
+    padding-left: 4px;
 }
