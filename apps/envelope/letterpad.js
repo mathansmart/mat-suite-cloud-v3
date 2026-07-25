@@ -2350,6 +2350,184 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Change Selection Case Function
+    function changeSelectionCase(caseType) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.isCollapsed) return;
+
+        saveHistory();
+        const range = selection.getRangeAt(0);
+        
+        // Collect all text nodes that intersect the selection range
+        const textNodes = [];
+        const walk = document.createTreeWalker(
+            range.commonAncestorContainer,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: (node) => {
+                    if (range.intersectsNode(node)) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                    return NodeFilter.FILTER_REJECT;
+                }
+            }
+        );
+        
+        let node;
+        while (node = walk.nextNode()) {
+            textNodes.push(node);
+        }
+        
+        textNodes.forEach(textNode => {
+            let startOffset = 0;
+            let endOffset = textNode.length;
+            
+            if (textNode === range.startContainer) startOffset = range.startOffset;
+            if (textNode === range.endContainer) endOffset = range.endOffset;
+            
+            const originalVal = textNode.nodeValue;
+            const targetVal = originalVal.slice(startOffset, endOffset);
+            
+            let transformed = '';
+            if (caseType === 'uppercase') {
+                transformed = targetVal.toUpperCase();
+            } else if (caseType === 'lowercase') {
+                transformed = targetVal.toLowerCase();
+            } else if (caseType === 'sentence') {
+                transformed = targetVal.toLowerCase().replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+            } else if (caseType === 'capitalize') {
+                transformed = targetVal.toLowerCase().replace(/\b([a-z])/g, (m, p1) => p1.toUpperCase());
+            } else if (caseType === 'toggle') {
+                transformed = targetVal.split('').map(c => {
+                    if (c === c.toUpperCase()) return c.toLowerCase();
+                    return c.toUpperCase();
+                }).join('');
+            }
+            
+            textNode.nodeValue = originalVal.slice(0, startOffset) + transformed + originalVal.slice(endOffset);
+        });
+        
+        saveHistory();
+    }
+
+    // Sentence Highlight Function
+    function highlightCurrentSentence(color) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        
+        saveHistory();
+        const range = selection.getRangeAt(0);
+        let node = range.startContainer;
+        if (node.nodeType !== Node.TEXT_NODE) {
+            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+            node = walker.nextNode() || node;
+        }
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.nodeValue;
+            const offset = range.startOffset;
+            
+            let start = 0;
+            for (let i = offset - 1; i >= 0; i--) {
+                if (/[.!?\n]/.test(text[i])) {
+                    start = i + 1;
+                    break;
+                }
+            }
+            
+            let end = text.length;
+            for (let i = offset; i < text.length; i++) {
+                if (/[.!?\n]/.test(text[i])) {
+                    end = i + 1;
+                    break;
+                }
+            }
+            
+            const sentenceRange = document.createRange();
+            sentenceRange.setStart(node, start);
+            sentenceRange.setEnd(node, end);
+            
+            const span = document.createElement('span');
+            span.style.backgroundColor = color;
+            
+            try {
+                sentenceRange.surroundContents(span);
+            } catch (e) {
+                document.execCommand('hiliteColor', false, color);
+            }
+        } else {
+            document.execCommand('hiliteColor', false, color);
+        }
+        saveHistory();
+    }
+
+    // Change Case Listeners
+    const btnCase = document.getElementById('editor-btn-case');
+    const caseDropdown = document.getElementById('editor-case-dropdown');
+    
+    if (btnCase) {
+        btnCase.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (caseDropdown) {
+                caseDropdown.style.display = caseDropdown.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+
+    document.querySelectorAll('.case-option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const val = btn.dataset.value;
+            changeSelectionCase(val);
+            if (caseDropdown) caseDropdown.style.display = 'none';
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (caseDropdown && btnCase && !btnCase.contains(e.target) && !caseDropdown.contains(e.target)) {
+            caseDropdown.style.display = 'none';
+        }
+    });
+
+    // Font (Letter) Color Listener
+    const fontColorPicker = document.getElementById('editor-fontcolor-picker');
+    const fontColorIndicator = document.getElementById('font-color-indicator');
+    if (fontColorPicker) {
+        fontColorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            if (fontColorIndicator) fontColorIndicator.style.background = color;
+            saveHistory();
+            document.execCommand('foreColor', false, color);
+            saveHistory();
+        });
+    }
+
+    // Text Highlight Listener
+    const highlightPicker = document.getElementById('editor-highlight-picker');
+    const highlightIndicator = document.getElementById('highlight-color-indicator');
+    if (highlightPicker) {
+        highlightPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            if (highlightIndicator) highlightIndicator.style.background = color;
+            saveHistory();
+            document.execCommand('hiliteColor', false, color);
+            saveHistory();
+        });
+    }
+
+    // Sentence Highlight Listener
+    const sentColorPicker = document.getElementById('editor-sentcolor-picker');
+    const sentColorIndicator = document.getElementById('sent-color-indicator');
+    if (sentColorPicker) {
+        sentColorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            if (sentColorIndicator) sentColorIndicator.style.background = color;
+            highlightCurrentSentence(color);
+        });
+    }
+
     // --- Startup connection ---
     loadSettings();
 });
