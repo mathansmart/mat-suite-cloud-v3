@@ -1177,8 +1177,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    if (editorFontFamily) editorFontFamily.addEventListener('change', updateFromRibbon);
-    if (editorFontSize) editorFontSize.addEventListener('change', updateFromRibbon);
+    function applyFontSizeToSelection(sizeVal) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+
+        if (selection.isCollapsed) {
+            const span = document.createElement('span');
+            span.style.fontSize = sizeVal;
+            span.innerHTML = '&#8203;';
+            range.insertNode(span);
+            
+            const newRange = document.createRange();
+            newRange.setStart(span.firstChild, 1);
+            newRange.setEnd(span.firstChild, 1);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+        } else {
+            document.execCommand('fontSize', false, '7');
+            const fontElements = editorTextarea.querySelectorAll('font[size="7"]');
+            fontElements.forEach(font => {
+                const span = document.createElement('span');
+                span.style.fontSize = sizeVal;
+                Array.from(font.attributes).forEach(attr => {
+                    if (attr.name !== 'size') span.setAttribute(attr.name, attr.value);
+                });
+                span.innerHTML = font.innerHTML;
+                font.parentNode.replaceChild(span, font);
+            });
+        }
+        companySettings.fontSize = parseInt(sizeVal) || 14;
+        saveToServer();
+    }
+
+    function applyFontFamilyToSelection(familyVal) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+
+        if (selection.isCollapsed) {
+            const span = document.createElement('span');
+            span.style.fontFamily = familyVal;
+            span.innerHTML = '&#8203;';
+            range.insertNode(span);
+            
+            const newRange = document.createRange();
+            newRange.setStart(span.firstChild, 1);
+            newRange.setEnd(span.firstChild, 1);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+        } else {
+            document.execCommand('fontName', false, familyVal);
+            const fontElements = editorTextarea.querySelectorAll(`font[face="${familyVal}"]`);
+            fontElements.forEach(font => {
+                const span = document.createElement('span');
+                span.style.fontFamily = familyVal;
+                Array.from(font.attributes).forEach(attr => {
+                    if (attr.name !== 'face') span.setAttribute(attr.name, attr.value);
+                });
+                span.innerHTML = font.innerHTML;
+                font.parentNode.replaceChild(span, font);
+            });
+        }
+        companySettings.fontFamily = familyVal;
+        saveToServer();
+    }
+
+    if (editorFontFamily) {
+        editorFontFamily.addEventListener('change', () => {
+            applyFontFamilyToSelection(editorFontFamily.value);
+        });
+    }
+    if (editorFontSize) {
+        editorFontSize.addEventListener('change', () => {
+            applyFontSizeToSelection(editorFontSize.value + 'pt');
+        });
+    }
     if (editorLineHeight) editorLineHeight.addEventListener('change', updateFromRibbon);
     if (editorTopMargin) editorTopMargin.addEventListener('input', updateFromRibbon);
     if (editorLeftMargin) editorLeftMargin.addEventListener('input', updateFromRibbon);
@@ -1221,6 +1295,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editorAlignJustify) {
             if (document.queryCommandState('justifyFull')) editorAlignJustify.classList.add('active');
             else editorAlignJustify.classList.remove('active');
+        }
+
+        // Font Family & Size dropdown sync
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            let node = selection.getRangeAt(0).startContainer;
+            if (node.nodeType === Node.TEXT_NODE) node = node.parentNode;
+            if (editorTextarea.contains(node)) {
+                const computed = window.getComputedStyle(node);
+                if (editorFontFamily) {
+                    const family = computed.fontFamily.replace(/['"]/g, '').split(',')[0].trim();
+                    for (let option of editorFontFamily.options) {
+                        if (option.value.toLowerCase() === family.toLowerCase() || option.text.toLowerCase() === family.toLowerCase()) {
+                            editorFontFamily.value = option.value;
+                            break;
+                        }
+                    }
+                }
+                if (editorFontSize) {
+                    const sizePx = parseFloat(computed.fontSize);
+                    const sizePt = Math.round(sizePx * 0.75); // 1pt = 1.333px
+                    // Sync dropdown value if matching
+                    for (let option of editorFontSize.options) {
+                        if (parseInt(option.value) === sizePt) {
+                            editorFontSize.value = option.value;
+                            break;
+                        }
+                    }
+                }
+            }
         }
     };
 
