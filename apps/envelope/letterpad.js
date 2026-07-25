@@ -941,7 +941,10 @@ document.addEventListener('DOMContentLoaded', () => {
         editingId = null;
         modalTitle.textContent = 'Create New Letter';
         inputName.value = '';
-        if (editorTextarea) editorTextarea.innerHTML = '';
+        if (editorTextarea) {
+            editorTextarea.innerHTML = '';
+            resetHistory();
+        }
         
         if (inputCategory) inputCategory.value = activeCategoryFilter !== 'All' ? activeCategoryFilter : '';
         
@@ -1034,7 +1037,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 editingId = addr.id;
                 editingOriginalName = addr.name;
                 inputName.value = addr.name;
-                if (editorTextarea) editorTextarea.innerHTML = addr.address || '';
+                if (editorTextarea) {
+                    editorTextarea.innerHTML = addr.address || '';
+                    resetHistory();
+                }
                 if (inputCategory) inputCategory.value = addr.category || '';
                 
                 modalTitle.textContent = 'Edit Letter';
@@ -1177,7 +1183,132 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Custom Undo/Redo History Manager
+    const undoStack = [];
+    const redoStack = [];
+    const MAX_HISTORY = 100;
+    let lastSavedContent = '';
+
+    function getSelectionState() {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return null;
+        const range = sel.getRangeAt(0);
+        return {
+            startPath: getNodePath(range.startContainer),
+            startOffset: range.startOffset,
+            endPath: getNodePath(range.endContainer),
+            endOffset: range.endOffset
+        };
+    }
+
+    function restoreSelectionState(state) {
+        if (!state) return;
+        try {
+            const range = document.createRange();
+            const startNode = getNodeFromPath(state.startPath);
+            const endNode = getNodeFromPath(state.endPath);
+            
+            if (startNode && endNode) {
+                range.setStart(startNode, Math.min(state.startOffset, startNode.length || startNode.childNodes.length));
+                range.setEnd(endNode, Math.min(state.endOffset, endNode.length || endNode.childNodes.length));
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        } catch (e) {
+            console.warn('Failed to restore selection', e);
+        }
+    }
+
+    function getNodePath(node) {
+        const path = [];
+        let curr = node;
+        while (curr && curr !== editorTextarea) {
+            const parent = curr.parentNode;
+            if (!parent) break;
+            const index = Array.from(parent.childNodes).indexOf(curr);
+            path.unshift(index);
+            curr = parent;
+        }
+        return path;
+    }
+
+    function getNodeFromPath(path) {
+        let curr = editorTextarea;
+        for (let index of path) {
+            if (!curr || !curr.childNodes[index]) return null;
+            curr = curr.childNodes[index];
+        }
+        return curr;
+    }
+
+    function saveHistory() {
+        if (!editorTextarea) return;
+        const currentContent = editorTextarea.innerHTML;
+        if (currentContent === lastSavedContent) return;
+
+        if (undoStack.length >= MAX_HISTORY) {
+            undoStack.shift();
+        }
+        
+        undoStack.push({
+            content: currentContent,
+            selection: getSelectionState()
+        });
+        
+        redoStack.length = 0;
+        lastSavedContent = currentContent;
+    }
+
+    function executeUndo() {
+        if (undoStack.length === 0) return;
+        const currentContent = editorTextarea.innerHTML;
+        redoStack.push({
+            content: currentContent,
+            selection: getSelectionState()
+        });
+
+        const state = undoStack.pop();
+        if (state.content === currentContent && undoStack.length > 0) {
+            const nextState = undoStack.pop();
+            editorTextarea.innerHTML = nextState.content;
+            restoreSelectionState(nextState.selection);
+            lastSavedContent = nextState.content;
+        } else {
+            editorTextarea.innerHTML = state.content;
+            restoreSelectionState(state.selection);
+            lastSavedContent = state.content;
+        }
+        updateRibbonFromSelection();
+    }
+
+    function executeRedo() {
+        if (redoStack.length === 0) return;
+        const state = redoStack.pop();
+        undoStack.push({
+            content: editorTextarea.innerHTML,
+            selection: getSelectionState()
+        });
+        editorTextarea.innerHTML = state.content;
+        restoreSelectionState(state.selection);
+        lastSavedContent = state.content;
+        updateRibbonFromSelection();
+    }
+
+    function resetHistory() {
+        undoStack.length = 0;
+        redoStack.length = 0;
+        if (editorTextarea) {
+            lastSavedContent = editorTextarea.innerHTML;
+            undoStack.push({
+                content: lastSavedContent,
+                selection: null
+            });
+        }
+    }
+
     function applyFontSizeToSelection(sizeVal) {
+        saveHistory();
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
         const range = selection.getRangeAt(0);
@@ -1208,9 +1339,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         companySettings.fontSize = parseInt(sizeVal) || 14;
         saveToServer();
+        saveHistory();
     }
 
     function applyFontFamilyToSelection(familyVal) {
+        saveHistory();
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
         const range = selection.getRangeAt(0);
@@ -1241,6 +1374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         companySettings.fontFamily = familyVal;
         saveToServer();
+        saveHistory();
     }
 
     if (editorFontFamily) {
@@ -1334,6 +1468,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('selectionchange', () => {
             if (document.activeElement === editorTextarea) {
                 updateRibbonFromSelection();
+            }
+        });
+
+        // Typing history auto-save debouncer
+        let typingTimer;
+        editorTextarea.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(saveHistory, 800);
+        });
+
+        // Save history on word boundary / paragraph breaks (Space or Enter)
+        editorTextarea.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                saveHistory();
             }
         });
     }
@@ -1486,11 +1634,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // Keyboard handling for Tab, Shift+Tab, and Backspace to match MS Word list behaviors
+    // Keyboard handling for Tab, Shift+Tab, Backspace, Ctrl+Z, Ctrl+Y to match MS Word behaviors
     if (editorTextarea) {
         editorTextarea.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
+            const keyLower = e.key.toLowerCase();
+            if ((e.ctrlKey || e.metaKey) && keyLower === 'z') {
                 e.preventDefault();
+                if (e.shiftKey) {
+                    executeRedo();
+                } else {
+                    executeUndo();
+                }
+            } else if ((e.ctrlKey || e.metaKey) && keyLower === 'y') {
+                e.preventDefault();
+                executeRedo();
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                saveHistory();
                 const activeList = getActiveListElement();
                 if (e.shiftKey) {
                     document.execCommand('outdent', false, null);
@@ -1501,6 +1661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     propagateListStyle(activeList);
                 }
                 updateRibbonFromSelection();
+                saveHistory();
             } else if (e.key === 'Backspace') {
                 const li = getActiveListItem();
                 if (li) {
@@ -1510,8 +1671,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         // If cursor is at the very beginning of the list item text, outdent/convert to normal paragraph
                         if (range.collapsed && range.startOffset === 0) {
                             e.preventDefault();
+                            saveHistory();
                             document.execCommand('outdent', false, null);
                             updateRibbonFromSelection();
+                            saveHistory();
                         }
                     }
                 }
