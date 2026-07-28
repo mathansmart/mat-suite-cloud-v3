@@ -1307,6 +1307,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Helpers to wrap selection with temporary markers to preserve selection after DOM changes
+    function wrapSelectionWithMarkers() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.isCollapsed) return null;
+        
+        const range = selection.getRangeAt(0);
+        
+        const startMarker = document.createElement('span');
+        startMarker.id = 'sel-start-marker';
+        startMarker.style.display = 'none';
+        
+        const endMarker = document.createElement('span');
+        endMarker.id = 'sel-end-marker';
+        endMarker.style.display = 'none';
+        
+        const endRange = range.cloneRange();
+        endRange.collapse(false);
+        endRange.insertNode(endMarker);
+        
+        const startRange = range.cloneRange();
+        startRange.collapse(true);
+        startRange.insertNode(startMarker);
+        
+        range.setStartAfter(startMarker);
+        range.setEndBefore(endMarker);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        return { startMarker, endMarker };
+    }
+
+    function restoreSelectionFromMarkers() {
+        const selection = window.getSelection();
+        const markerStart = editorTextarea.querySelector('#sel-start-marker');
+        const markerEnd = editorTextarea.querySelector('#sel-end-marker');
+        
+        if (markerStart && markerEnd) {
+            const newRange = document.createRange();
+            newRange.setStartAfter(markerStart);
+            newRange.setEndBefore(markerEnd);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+        }
+        
+        if (markerStart) markerStart.remove();
+        if (markerEnd) markerEnd.remove();
+    }
+
     function applyFontSizeToSelection(sizeVal) {
         saveHistory();
         const selection = window.getSelection();
@@ -1325,6 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selection.removeAllRanges();
             selection.addRange(newRange);
         } else {
+            wrapSelectionWithMarkers();
             document.execCommand('fontSize', false, '7');
             const fontElements = editorTextarea.querySelectorAll('font[size="7"]');
             fontElements.forEach(font => {
@@ -1336,6 +1385,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.innerHTML = font.innerHTML;
                 font.parentNode.replaceChild(span, font);
             });
+            restoreSelectionFromMarkers();
         }
         companySettings.fontSize = parseInt(sizeVal) || 14;
         saveToServer();
@@ -1360,6 +1410,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selection.removeAllRanges();
             selection.addRange(newRange);
         } else {
+            wrapSelectionWithMarkers();
             document.execCommand('fontName', false, familyVal);
             const fontElements = editorTextarea.querySelectorAll(`font[face="${familyVal}"]`);
             fontElements.forEach(font => {
@@ -1371,6 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.innerHTML = font.innerHTML;
                 font.parentNode.replaceChild(span, font);
             });
+            restoreSelectionFromMarkers();
         }
         companySettings.fontFamily = familyVal;
         saveToServer();
