@@ -467,6 +467,60 @@
                     <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Paragraph</div>
                 </div>
 
+                <!-- INSERT SECTION -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px; border-right: 1px solid #444; gap: 4px; margin-left: 10px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <!-- Table Button with Dropdown -->
+                        <div class="editor-dropdown-container" style="position: relative; display: inline-block;">
+                            <button id="editor-btn-table" title="Insert Table" style="background: transparent; color: #fff; border: 1px solid transparent; padding: 4px 8px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 5px; outline: none; font-size: 0.8rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:-1px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="21" y1="9" x2="3" y2="9"/><line x1="21" y1="15" x2="3" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                                Table
+                            </button>
+                            <!-- Grid Selector Dropdown -->
+                            <div id="editor-table-dropdown" class="editor-menu-dropdown" style="display: none; position: absolute; top: 100%; left: 0; background: #2b2b2b; border: 1px solid #555; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; padding: 10px; width: 175px;">
+                                <div id="table-grid-label" style="font-size: 0.75rem; font-weight: 700; color: #ea580c; margin-bottom: 8px; text-align: center;">Insert Table</div>
+                                <div id="table-grid-container" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; width: 155px; height: 125px; cursor: pointer; margin-bottom: 8px;">
+                                    <!-- Generated dynamically in JS -->
+                                </div>
+                                <hr style="border: 0; border-top: 1px solid #444; margin: 8px 0;">
+                                <button id="btn-manual-table" style="background: transparent; color: #fff; border: none; width: 100%; text-align: left; padding: 4px 6px; font-size: 0.75rem; cursor: pointer; border-radius: 3px; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                                    Insert Table...
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Insert</div>
+                </div>
+
+                <!-- TABLE TOOLS SECTION (Contextual) -->
+                <div id="ribbon-table-tools" style="display: none; flex-direction: column; justify-content: space-between; padding: 4px 15px; border-right: 1px solid #444; gap: 4px; margin-left: 10px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <button id="editor-btn-row-above" title="Insert Row Above" style="background: transparent; color: #fff; border: 1px solid transparent; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                            + Row ↑
+                        </button>
+                        <button id="editor-btn-row-below" title="Insert Row Below" style="background: transparent; color: #fff; border: 1px solid transparent; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                            + Row ↓
+                        </button>
+                        <button id="editor-btn-col-left" title="Insert Column Left" style="background: transparent; color: #fff; border: 1px solid transparent; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                            + Col ←
+                        </button>
+                        <button id="editor-btn-col-right" title="Insert Column Right" style="background: transparent; color: #fff; border: 1px solid transparent; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                            + Col →
+                        </button>
+                        <button id="editor-btn-del-row" title="Delete Row" style="background: transparent; color: #f87171; border: 1px solid transparent; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                            - Row
+                        </button>
+                        <button id="editor-btn-del-col" title="Delete Column" style="background: transparent; color: #f87171; border: 1px solid transparent; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmouseover="this.style.background='#3b3b3b';" onmouseout="this.style.background='transparent';" onmousedown="event.preventDefault();">
+                            - Col
+                        </button>
+                        <button id="editor-btn-del-table" title="Delete Table" style="background: #ef4444; color: #fff; border: none; padding: 4px 6px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 3px; outline: none; font-size: 0.75rem;" onmousedown="event.preventDefault();">
+                            Delete Table
+                        </button>
+                    </div>
+                    <div style="font-size: 0.65rem; color: #ea580c; text-align: center; margin-top: 2px; font-weight: 700;">Table Tools</div>
+                </div>
+
                 <!-- EDITING SECTION -->
                 <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px; border-right: 1px solid #444; gap: 4px; margin-left: 10px;">
                     <div style="display: flex; align-items: center; gap: 6px;">
