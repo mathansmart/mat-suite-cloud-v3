@@ -2601,8 +2601,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const findMatchCase = document.getElementById('find-match-case');
     const findReplaceStatus = document.getElementById('find-replace-status');
     const btnFindNext = document.getElementById('btn-find-next');
+    const btnFindAll = document.getElementById('btn-find-all');
     const btnReplace = document.getElementById('btn-replace');
     const btnReplaceAll = document.getElementById('btn-replace-all');
+
+    // Highlight All Matches Helper using TreeWalker to avoid breaking HTML structures
+    function highlightAllMatches(findText, matchCase) {
+        clearAllHighlights();
+        if (!findText || !editorTextarea) return;
+
+        const textNodes = [];
+        const walk = document.createTreeWalker(editorTextarea, NodeFilter.SHOW_TEXT);
+        let node;
+        while (node = walk.nextNode()) {
+            textNodes.push(node);
+        }
+
+        let count = 0;
+        // Search and split backwards to prevent node index shift issues
+        for (let i = textNodes.length - 1; i >= 0; i--) {
+            const textNode = textNodes[i];
+            const text = textNode.nodeValue;
+            
+            let index = matchCase 
+                ? text.indexOf(findText) 
+                : text.toLowerCase().indexOf(findText.toLowerCase());
+                
+            if (index !== -1) {
+                let currentTextNode = textNode;
+                while (index !== -1) {
+                    const matchStart = index;
+                    const matchEnd = index + findText.length;
+                    
+                    const highlightSpan = document.createElement('span');
+                    highlightSpan.className = 'find-highlight-all';
+                    highlightSpan.style.backgroundColor = '#ea580c';
+                    highlightSpan.style.color = '#fff';
+                    highlightSpan.style.borderRadius = '2px';
+                    highlightSpan.style.padding = '0 1px';
+                    highlightSpan.textContent = currentTextNode.nodeValue.slice(matchStart, matchEnd);
+                    
+                    const remainingTextNode = currentTextNode.splitText(matchStart);
+                    remainingTextNode.nodeValue = remainingTextNode.nodeValue.slice(findText.length);
+                    
+                    currentTextNode.parentNode.insertBefore(highlightSpan, remainingTextNode);
+                    count++;
+                    
+                    currentTextNode = remainingTextNode;
+                    const nextText = currentTextNode.nodeValue;
+                    index = matchCase 
+                        ? nextText.indexOf(findText) 
+                        : nextText.toLowerCase().indexOf(findText.toLowerCase());
+                }
+            }
+        }
+
+        if (findReplaceStatus) {
+            findReplaceStatus.textContent = count > 0 
+                ? `Found and highlighted ${count} match(es).` 
+                : 'No matches found.';
+        }
+    }
+
+    // Clear all highlighted matches
+    function clearAllHighlights() {
+        if (!editorTextarea) return;
+        const highlights = editorTextarea.querySelectorAll('.find-highlight-all');
+        highlights.forEach(span => {
+            const textNode = document.createTextNode(span.textContent);
+            span.parentNode.replaceChild(textNode, span);
+        });
+        editorTextarea.normalize(); // Merge adjacent text nodes cleanly
+    }
 
     if (btnFindReplace && findReplaceModal) {
         btnFindReplace.addEventListener('click', (e) => {
@@ -2619,7 +2689,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (findReplaceCloseBtn && findReplaceModal) {
         findReplaceCloseBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            clearAllHighlights();
             findReplaceModal.classList.add('hidden');
+        });
+    }
+
+    // Clear matches highlighting dynamically when user changes inputs
+    if (findInput) {
+        findInput.addEventListener('input', () => {
+            clearAllHighlights();
+            if (findReplaceStatus) findReplaceStatus.textContent = '';
         });
     }
 
@@ -2637,6 +2716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnFindNext) {
         btnFindNext.addEventListener('click', (e) => {
             e.preventDefault();
+            clearAllHighlights(); // Clear global highlights so browser find focus shows cleanly
             if (!findInput || !editorTextarea) return;
             const findText = findInput.value;
             if (!findText) {
@@ -2645,10 +2725,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const matchCase = findMatchCase ? findMatchCase.checked : false;
             
-            // Focus editor textarea before finding so the selection highlights visibly
             editorTextarea.focus();
-            
-            // window.find(aString, aCaseSensitive, aBackwards, aWrapAround, aWholeWord, aSearchInFrames, aShowDialog)
             const found = window.find(findText, matchCase, false, true, false, false, false);
             if (findReplaceStatus) {
                 findReplaceStatus.textContent = found ? 'Match highlighted.' : 'No matches found.';
@@ -2656,9 +2733,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (btnFindAll) {
+        btnFindAll.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!findInput) return;
+            const findText = findInput.value;
+            if (!findText) {
+                if (findReplaceStatus) findReplaceStatus.textContent = 'Please enter a search term.';
+                return;
+            }
+            const matchCase = findMatchCase ? findMatchCase.checked : false;
+            highlightAllMatches(findText, matchCase);
+        });
+    }
+
     if (btnReplace) {
         btnReplace.addEventListener('click', (e) => {
             e.preventDefault();
+            clearAllHighlights();
             if (!findInput || !replaceInput || !editorTextarea) return;
             const findText = findInput.value;
             const replaceText = replaceInput.value;
@@ -2681,11 +2773,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveHistory();
                 if (findReplaceStatus) findReplaceStatus.textContent = 'Replaced.';
                 
-                // Automatically find and highlight the next occurrence
                 editorTextarea.focus();
                 window.find(findText, matchCase, false, true, false, false, false);
             } else {
-                // If selection doesn't match find query, perform a Find Next instead
                 editorTextarea.focus();
                 const found = window.find(findText, matchCase, false, true, false, false, false);
                 if (findReplaceStatus) {
@@ -2698,6 +2788,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnReplaceAll) {
         btnReplaceAll.addEventListener('click', (e) => {
             e.preventDefault();
+            clearAllHighlights();
             if (!findInput || !replaceInput || !editorTextarea) return;
             const findText = findInput.value;
             const replaceText = replaceInput.value;
@@ -2708,12 +2799,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchCase = findMatchCase ? findMatchCase.checked : false;
 
             saveHistory();
-            
-            // Move cursor to absolute start of document to scan top-to-bottom
             moveCursorToDocStart();
             
             let count = 0;
-            // Scan forward without wrap-around to prevent infinite loops
             let found = window.find(findText, matchCase, false, false, false, false, false);
             while (found) {
                 document.execCommand('insertText', false, replaceText);
