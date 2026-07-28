@@ -2580,6 +2580,142 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Find and Replace UI & Functionality ---
+    const btnFindReplace = document.getElementById('editor-btn-find-replace');
+    const findReplaceModal = document.getElementById('find-replace-modal');
+    const findReplaceCloseBtn = document.getElementById('find-replace-close-btn');
+    const findInput = document.getElementById('find-input');
+    const replaceInput = document.getElementById('replace-input');
+    const findMatchCase = document.getElementById('find-match-case');
+    const findReplaceStatus = document.getElementById('find-replace-status');
+    const btnFindNext = document.getElementById('btn-find-next');
+    const btnReplace = document.getElementById('btn-replace');
+    const btnReplaceAll = document.getElementById('btn-replace-all');
+
+    if (btnFindReplace && findReplaceModal) {
+        btnFindReplace.addEventListener('click', (e) => {
+            e.preventDefault();
+            findReplaceModal.classList.remove('hidden');
+            if (findReplaceStatus) findReplaceStatus.textContent = '';
+            if (findInput) {
+                findInput.focus();
+                findInput.select();
+            }
+        });
+    }
+
+    if (findReplaceCloseBtn && findReplaceModal) {
+        findReplaceCloseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            findReplaceModal.classList.add('hidden');
+        });
+    }
+
+    // Helper: Reset cursor position to top of text area
+    function moveCursorToDocStart() {
+        if (!editorTextarea) return;
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(editorTextarea);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    if (btnFindNext) {
+        btnFindNext.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!findInput || !editorTextarea) return;
+            const findText = findInput.value;
+            if (!findText) {
+                if (findReplaceStatus) findReplaceStatus.textContent = 'Please enter a search term.';
+                return;
+            }
+            const matchCase = findMatchCase ? findMatchCase.checked : false;
+            
+            // Focus editor textarea before finding so the selection highlights visibly
+            editorTextarea.focus();
+            
+            // window.find(aString, aCaseSensitive, aBackwards, aWrapAround, aWholeWord, aSearchInFrames, aShowDialog)
+            const found = window.find(findText, matchCase, false, true, false, false, false);
+            if (findReplaceStatus) {
+                findReplaceStatus.textContent = found ? 'Match highlighted.' : 'No matches found.';
+            }
+        });
+    }
+
+    if (btnReplace) {
+        btnReplace.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!findInput || !replaceInput || !editorTextarea) return;
+            const findText = findInput.value;
+            const replaceText = replaceInput.value;
+            if (!findText) {
+                if (findReplaceStatus) findReplaceStatus.textContent = 'Please enter a search term.';
+                return;
+            }
+            const matchCase = findMatchCase ? findMatchCase.checked : false;
+
+            const selection = window.getSelection();
+            const selectedText = selection.toString();
+
+            const isMatch = matchCase 
+                ? (selectedText === findText)
+                : (selectedText.toLowerCase() === findText.toLowerCase());
+
+            if (isMatch) {
+                saveHistory();
+                document.execCommand('insertText', false, replaceText);
+                saveHistory();
+                if (findReplaceStatus) findReplaceStatus.textContent = 'Replaced.';
+                
+                // Automatically find and highlight the next occurrence
+                editorTextarea.focus();
+                window.find(findText, matchCase, false, true, false, false, false);
+            } else {
+                // If selection doesn't match find query, perform a Find Next instead
+                editorTextarea.focus();
+                const found = window.find(findText, matchCase, false, true, false, false, false);
+                if (findReplaceStatus) {
+                    findReplaceStatus.textContent = found ? 'Match found. Click Replace again.' : 'No matches found.';
+                }
+            }
+        });
+    }
+
+    if (btnReplaceAll) {
+        btnReplaceAll.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!findInput || !replaceInput || !editorTextarea) return;
+            const findText = findInput.value;
+            const replaceText = replaceInput.value;
+            if (!findText) {
+                if (findReplaceStatus) findReplaceStatus.textContent = 'Please enter a search term.';
+                return;
+            }
+            const matchCase = findMatchCase ? findMatchCase.checked : false;
+
+            saveHistory();
+            
+            // Move cursor to absolute start of document to scan top-to-bottom
+            moveCursorToDocStart();
+            
+            let count = 0;
+            // Scan forward without wrap-around to prevent infinite loops
+            let found = window.find(findText, matchCase, false, false, false, false, false);
+            while (found) {
+                document.execCommand('insertText', false, replaceText);
+                count++;
+                found = window.find(findText, matchCase, false, false, false, false, false);
+            }
+
+            saveHistory();
+            if (findReplaceStatus) {
+                findReplaceStatus.textContent = `Replaced ${count} occurrences.`;
+            }
+        });
+    }
+
     // --- Startup connection ---
     loadSettings();
 });
