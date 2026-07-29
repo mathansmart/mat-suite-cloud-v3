@@ -1140,3 +1140,33 @@ select, input[type="range"], input[type="number"] {
     line-height: 1.5;
     padding-left: 4px;
 }
+
+/* Table drag & resize handles styling */
+#table-move-handle {
+    transition: background-color 0.15s, transform 0.1s;
+    display: none;
+}
+#table-move-handle:hover {
+    background-color: #c2410c !important;
+    transform: scale(1.1);
+}
+#table-move-handle:active {
+    background-color: #9a3412 !important;
+    transform: scale(0.95);
+}
+
+#table-resize-handle {
+    transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+    display: none;
+}
+#table-resize-handle:hover {
+    background-color: #fef3c7 !important;
+    border-color: #c2410c !important;
+    transform: scale(1.2);
+}
+
+@media print {
+    #table-move-handle, #table-resize-handle {
+        display: none !important;
+    }
+}

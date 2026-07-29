@@ -302,6 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeSettings.letterPadData[COMPANY]) {
                 const compData = activeSettings.letterPadData[COMPANY];
                 companySettings = { ...companySettings, ...compData.settings };
+                
+                // Migrate database old defaults (14 or 16 size, and bold weights) to 12pt and Regular (400)
+                if (companySettings.fontSize === 14 || companySettings.fontSize === 16) {
+                    companySettings.fontSize = 12;
+                }
+                if (companySettings.fontWeight === "600" || companySettings.fontWeight === "700" || companySettings.fontWeight === "bold") {
+                    companySettings.fontWeight = "400";
+                }
+                
                 companyCategories = compData.categories || [];
                 companyAddresses = compData.addresses || [];
             } else {
@@ -3080,6 +3089,291 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateRibbonFromSelection();
             }
         });
+    }
+
+    // --- Interactive Table Move & Resize Handles ---
+    const editorA4Sheet = document.getElementById('editor-a4-sheet');
+    const moveHandle = document.createElement('div');
+    moveHandle.id = 'table-move-handle';
+    moveHandle.contentEditable = 'false';
+    moveHandle.style.cssText = `
+        position: absolute;
+        display: none;
+        width: 22px;
+        height: 22px;
+        background: #ea580c;
+        color: #fff;
+        border-radius: 4px;
+        cursor: move;
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        user-select: none;
+        -webkit-user-select: none;
+    `;
+    moveHandle.innerHTML = '☩'; // 4-directional move icon
+    if (editorA4Sheet) editorA4Sheet.appendChild(moveHandle);
+
+    const resizeHandle = document.createElement('div');
+    resizeHandle.id = 'table-resize-handle';
+    resizeHandle.contentEditable = 'false';
+    resizeHandle.style.cssText = `
+        position: absolute;
+        display: none;
+        width: 12px;
+        height: 12px;
+        background: #ffffff;
+        border: 2.5px solid #ea580c;
+        border-radius: 2px;
+        cursor: se-resize;
+        z-index: 10000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+        user-select: none;
+        -webkit-user-select: none;
+    `;
+    if (editorA4Sheet) editorA4Sheet.appendChild(resizeHandle);
+
+    let currentActiveTable = null;
+
+    function updateTableHandles(table) {
+        if (!table || !editorA4Sheet) {
+            moveHandle.style.display = 'none';
+            resizeHandle.style.display = 'none';
+            currentActiveTable = null;
+            return;
+        }
+
+        currentActiveTable = table;
+        const sheetRect = editorA4Sheet.getBoundingClientRect();
+        const tableRect = table.getBoundingClientRect();
+        
+        const top = tableRect.top - sheetRect.top;
+        const left = tableRect.left - sheetRect.left;
+        const width = tableRect.width;
+        const height = tableRect.height;
+        
+        // Position move handle slightly offset at top-left
+        moveHandle.style.top = (top - 11) + 'px';
+        moveHandle.style.left = (left - 11) + 'px';
+        moveHandle.style.display = 'flex';
+        
+        // Position resize handle at bottom-right
+        resizeHandle.style.top = (top + height - 6) + 'px';
+        resizeHandle.style.left = (left + width - 6) + 'px';
+        resizeHandle.style.display = 'block';
+    }
+
+    function getSelectionTable() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return null;
+        const node = selection.anchorNode;
+        if (!node) return null;
+        const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentNode;
+        return element ? element.closest('table') : null;
+    }
+
+    if (editorTextarea) {
+        editorTextarea.addEventListener('mousemove', (e) => {
+            const table = e.target.closest('table');
+            if (table) {
+                updateTableHandles(table);
+            } else {
+                const selectionTable = getSelectionTable();
+                if (selectionTable) {
+                    updateTableHandles(selectionTable);
+                } else if (e.target !== moveHandle && e.target !== resizeHandle) {
+                    updateTableHandles(null);
+                }
+            }
+        });
+
+        editorTextarea.addEventListener('click', (e) => {
+            const table = e.target.closest('table');
+            if (table) {
+                updateTableHandles(table);
+            } else {
+                updateTableHandles(null);
+            }
+        });
+
+        editorTextarea.addEventListener('input', () => {
+            const selectionTable = getSelectionTable();
+            if (selectionTable) {
+                updateTableHandles(selectionTable);
+            }
+        });
+    }
+
+    // --- Resize Dragging Logic ---
+    let isResizing = false;
+    let resizeStartX, resizeStartY, resizeStartWidth, resizeStartHeight;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentActiveTable) return;
+        
+        isResizing = true;
+        resizeStartX = e.clientX;
+        resizeStartY = e.clientY;
+        resizeStartWidth = currentActiveTable.offsetWidth;
+        resizeStartHeight = currentActiveTable.offsetHeight;
+        
+        document.addEventListener('mousemove', handleResizeMove);
+        document.addEventListener('mouseup', handleResizeMouseUp);
+        
+        currentActiveTable.style.transition = 'none';
+    });
+
+    function handleResizeMove(e) {
+        if (!isResizing || !currentActiveTable) return;
+        
+        const deltaX = e.clientX - resizeStartX;
+        const deltaY = e.clientY - resizeStartY;
+        
+        const newWidth = Math.max(100, resizeStartWidth + deltaX);
+        const newHeight = Math.max(40, resizeStartHeight + deltaY);
+        
+        currentActiveTable.style.width = newWidth + 'px';
+        currentActiveTable.style.height = newHeight + 'px';
+        
+        updateTableHandles(currentActiveTable);
+    }
+
+    function handleResizeMouseUp() {
+        isResizing = false;
+        document.removeEventListener('mousemove', handleResizeMove);
+        document.removeEventListener('mouseup', handleResizeMouseUp);
+        saveHistory();
+    }
+
+    // --- Move Dragging & Position Logic ---
+    let isMoving = false;
+    let moveStartX, moveStartY;
+    let tableStartMarginLeft;
+    let placeholderLine = null;
+
+    moveHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentActiveTable || !editorA4Sheet) return;
+        
+        isMoving = true;
+        moveStartX = e.clientX;
+        moveStartY = e.clientY;
+        
+        const style = window.getComputedStyle(currentActiveTable);
+        tableStartMarginLeft = parseFloat(style.marginLeft) || 0;
+        
+        document.addEventListener('mousemove', handleMoveDrag);
+        document.addEventListener('mouseup', handleMoveMouseUp);
+        
+        placeholderLine = document.createElement('div');
+        placeholderLine.style.cssText = `
+            height: 3px;
+            background: #ea580c;
+            position: absolute;
+            width: 100%;
+            display: none;
+            z-index: 9999;
+            pointer-events: none;
+        `;
+        editorA4Sheet.appendChild(placeholderLine);
+    });
+
+    function handleMoveDrag(e) {
+        if (!isMoving || !currentActiveTable || !editorA4Sheet) return;
+        
+        const deltaX = e.clientX - moveStartX;
+        
+        // 1. Horizontal sideways indentation
+        const newMarginLeft = Math.max(0, tableStartMarginLeft + deltaX);
+        currentActiveTable.style.marginLeft = newMarginLeft + 'px';
+        
+        // 2. Vertical repositioning drop helper
+        const sheetRect = editorA4Sheet.getBoundingClientRect();
+        const clientY = e.clientY;
+        const children = Array.from(editorTextarea.children);
+        let targetSibling = null;
+        let targetPos = 'before';
+        
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if (child === currentActiveTable) continue;
+            
+            const rect = child.getBoundingClientRect();
+            const childMiddle = rect.top + rect.height / 2;
+            
+            if (clientY < childMiddle) {
+                targetSibling = child;
+                targetPos = 'before';
+                break;
+            } else if (i === children.length - 1 || clientY < rect.bottom) {
+                targetSibling = child;
+                targetPos = 'after';
+                break;
+            }
+        }
+        
+        if (targetSibling) {
+            const sibRect = targetSibling.getBoundingClientRect();
+            const top = (targetPos === 'before' ? sibRect.top : sibRect.bottom) - sheetRect.top;
+            
+            placeholderLine.style.top = top + 'px';
+            placeholderLine.style.left = (sibRect.left - sheetRect.left) + 'px';
+            placeholderLine.style.width = sibRect.width + 'px';
+            placeholderLine.style.display = 'block';
+            
+            if (!targetSibling.id) {
+                targetSibling.id = 'temp-sib-' + Date.now();
+            }
+            moveHandle.dataset.targetId = targetSibling.id;
+            moveHandle.dataset.targetPos = targetPos;
+        } else {
+            placeholderLine.style.display = 'none';
+        }
+        
+        updateTableHandles(currentActiveTable);
+    }
+
+    function handleMoveMouseUp() {
+        isMoving = false;
+        document.removeEventListener('mousemove', handleMoveDrag);
+        document.removeEventListener('mouseup', handleMoveMouseUp);
+        
+        if (placeholderLine) {
+            placeholderLine.remove();
+            placeholderLine = null;
+        }
+        
+        if (currentActiveTable && moveHandle.dataset.targetId) {
+            const targetSibling = document.getElementById(moveHandle.dataset.targetId);
+            const targetPos = moveHandle.dataset.targetPos;
+            
+            if (targetSibling) {
+                saveHistory();
+                if (targetPos === 'before') {
+                    editorTextarea.insertBefore(currentActiveTable, targetSibling);
+                } else {
+                    editorTextarea.insertBefore(currentActiveTable, targetSibling.nextSibling);
+                }
+                
+                if (targetSibling.id.startsWith('temp-sib-')) {
+                    targetSibling.removeAttribute('id');
+                }
+                saveHistory();
+            }
+        }
+        
+        moveHandle.removeAttribute('data-target-id');
+        moveHandle.removeAttribute('data-target-pos');
+        
+        if (currentActiveTable) {
+            updateTableHandles(currentActiveTable);
+        }
     }
 
     // --- Startup connection ---
