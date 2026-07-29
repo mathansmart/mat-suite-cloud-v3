@@ -2590,14 +2590,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Sentence Highlight Listener
+    // Sentence Highlight Listener (Modified to only highlight explicitly selected text as requested)
     const sentColorPicker = document.getElementById('editor-sentcolor-picker');
     const sentColorIndicator = document.getElementById('sent-color-indicator');
     if (sentColorPicker) {
         sentColorPicker.addEventListener('input', (e) => {
             const color = e.target.value;
             if (sentColorIndicator) sentColorIndicator.style.background = color;
-            highlightCurrentSentence(color);
+            saveHistory();
+            document.execCommand('hiliteColor', false, color);
+            saveHistory();
         });
     }
 
@@ -3204,37 +3206,50 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!td) {
                 if (!isMoving && !isResizing && !isResizingBorder) {
                     editorTextarea.style.cursor = '';
+                    document.body.style.cursor = '';
                 }
                 return;
             }
 
             const rect = td.getBoundingClientRect();
             const borderTolerance = 6; // pixels tolerance for border selection
+            let foundBorder = false;
             
             // Check right border
             if (rect.right - e.clientX <= borderTolerance && rect.right - e.clientX >= -borderTolerance) {
+                td.style.cursor = 'col-resize';
                 editorTextarea.style.cursor = 'col-resize';
+                document.body.style.cursor = 'col-resize';
                 resizeTargetCell = td;
                 resizeType = 'col';
+                foundBorder = true;
             } 
             // Check left border (resizes previous cell)
             else if (e.clientX - rect.left <= borderTolerance && e.clientX - rect.left >= -borderTolerance) {
                 const prevTd = td.previousElementSibling;
                 if (prevTd) {
+                    td.style.cursor = 'col-resize';
                     editorTextarea.style.cursor = 'col-resize';
+                    document.body.style.cursor = 'col-resize';
                     resizeTargetCell = prevTd;
                     resizeType = 'col';
+                    foundBorder = true;
                 } else {
+                    td.style.cursor = '';
                     editorTextarea.style.cursor = '';
+                    document.body.style.cursor = '';
                     resizeTargetCell = null;
                     resizeType = null;
                 }
             }
             // Check bottom border
             else if (rect.bottom - e.clientY <= borderTolerance && rect.bottom - e.clientY >= -borderTolerance) {
+                td.style.cursor = 'row-resize';
                 editorTextarea.style.cursor = 'row-resize';
+                document.body.style.cursor = 'row-resize';
                 resizeTargetCell = td;
                 resizeType = 'row';
+                foundBorder = true;
             }
             // Check top border (resizes previous row cell)
             else if (e.clientY - rect.top <= borderTolerance && e.clientY - rect.top >= -borderTolerance) {
@@ -3244,22 +3259,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     const colIndex = td.cellIndex;
                     const prevTd = prevTr.cells[colIndex];
                     if (prevTd) {
+                        td.style.cursor = 'row-resize';
                         editorTextarea.style.cursor = 'row-resize';
+                        document.body.style.cursor = 'row-resize';
                         resizeTargetCell = prevTd;
                         resizeType = 'row';
+                        foundBorder = true;
                     } else {
+                        td.style.cursor = '';
                         editorTextarea.style.cursor = '';
+                        document.body.style.cursor = '';
                         resizeTargetCell = null;
                         resizeType = null;
                     }
                 } else {
+                    td.style.cursor = '';
                     editorTextarea.style.cursor = '';
+                    document.body.style.cursor = '';
                     resizeTargetCell = null;
                     resizeType = null;
                 }
             }
-            else {
-                editorTextarea.style.cursor = '';
+            
+            if (!foundBorder) {
+                td.style.cursor = '';
+                if (!isMoving && !isResizing && !isResizingBorder) {
+                    editorTextarea.style.cursor = '';
+                    document.body.style.cursor = '';
+                }
                 resizeTargetCell = null;
                 resizeType = null;
             }
@@ -3281,6 +3308,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (table) {
                     startTableWidth = table.offsetWidth;
                 }
+                
+                document.body.style.cursor = resizeType === 'col' ? 'col-resize' : 'row-resize';
                 
                 document.addEventListener('mousemove', handleBorderResizeMove);
                 document.addEventListener('mouseup', handleBorderResizeMouseUp);
@@ -3351,8 +3380,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('mousemove', handleBorderResizeMove);
         document.removeEventListener('mouseup', handleBorderResizeMouseUp);
         
+        if (editorTextarea) editorTextarea.style.cursor = '';
+        document.body.style.cursor = '';
+        
         if (resizeTargetCell) {
-            if (editorTextarea) editorTextarea.style.cursor = '';
+            resizeTargetCell.style.cursor = '';
             resizeTargetCell = null;
         }
         resizeType = null;
