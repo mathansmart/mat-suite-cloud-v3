@@ -4180,6 +4180,8 @@ function renderDashboard() {
 
     function clearSiTable() {
       siTableData = {}; siAddedPids = [];
+      const supEl = document.getElementById('si-supplier');
+      if (supEl) supEl.value = '';
       saveDraftSI();
       const s = document.getElementById('si-search'); if (s) s.value = '';
       const dr = document.getElementById('si-search-drop'); if (dr) dr.style.display = 'none';
