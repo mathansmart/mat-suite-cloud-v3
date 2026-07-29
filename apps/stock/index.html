@@ -3994,7 +3994,7 @@ function renderDashboard() {
       }
       drop.style.display = 'block';
       drop.innerHTML = results.map(p => {
-        const selected = siAddedPids.includes(p.id);
+        const selected = siAddedPids.some(x => String(x) === String(p.id));
         const catLabel = `<span style="font-size:10px;color:var(--text-muted);margin-left:6px;font-weight:400;">${cn(p.ci)}</span>`;
         return `<div class="drop-item ${selected ? 'selected' : ''}" onclick="selectSiProduct('${p.id}')">
       <span style="font-size:13px;font-weight:${selected ? '800' : '600'};color:${selected ? 'var(--accent)' : 'var(--text)'};">
@@ -4010,16 +4010,18 @@ function renderDashboard() {
     }
 
     function selectSiProduct(pid) {
-      // Validation removed to allow searching and adding old products without a supplier
-      if (siAddedPids.includes(pid)) {
-        // deselect
-        siAddedPids = siAddedPids.filter(x => x !== pid);
+      const exists = siAddedPids.some(x => String(x) === String(pid));
+      if (exists) {
+        siAddedPids = siAddedPids.filter(x => String(x) !== String(pid));
         delete siTableData[pid];
+        delete siTableData[Number(pid)];
       } else {
         siAddedPids.push(pid);
-        const p = P.find(x => x.id === pid);
+        const p = P.find(x => String(x.id) === String(pid));
         siTableData[pid] = { sizes: {}, supplier: '', invoice: '' };
-        szs(p.ci).forEach(s => siTableData[pid].sizes[s] = 0);
+        if (p) {
+          szs(p.ci).forEach(s => siTableData[pid].sizes[s] = 0);
+        }
       }
       saveDraftSI();
       renderSiSearchDropdown();
@@ -4047,7 +4049,7 @@ function renderDashboard() {
       // group by category
       const catGroups = {};
       siAddedPids.forEach(pid => {
-        const p = P.find(x => x.id === pid);
+        const p = P.find(x => String(x.id) === String(pid));
         if (!p) return;
         if (!catGroups[p.ci]) catGroups[p.ci] = [];
         catGroups[p.ci].push(p);
@@ -4058,7 +4060,7 @@ function renderDashboard() {
         const sz = szs(ci);
         const thSz = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:12px;padding:8px 3px;">${s}</th>`).join('');
         const rows = prods.map(p => {
-          const d = siTableData[p.id];
+          const d = siTableData[p.id] || siTableData[String(p.id)] || { sizes: {} };
           const tds = sz.map(s => `
         <td style="padding:3px 2px;">
           <input type="number" min="0" value="${d.sizes[s] || ''}" placeholder="0"
@@ -4146,23 +4148,31 @@ function renderDashboard() {
       wrap.querySelectorAll('.si-qty-input').forEach(el => {
         el.addEventListener('input', function () {
           const pid = this.dataset.pid;
-          siTableData[pid].sizes[this.dataset.sz] = parseInt(this.value) || 0;
-          const rowTot = Object.values(siTableData[pid].sizes).reduce((a, b) => a + b, 0);
-          const rowEl = wrap.querySelector(`tr[data-pid="${pid}"] .si-row-total`);
-          if (rowEl) rowEl.textContent = rowTot;
+          const targetData = siTableData[pid] || siTableData[Number(pid)];
+          if (targetData) {
+            targetData.sizes[this.dataset.sz] = parseInt(this.value) || 0;
+            const rowTot = Object.values(targetData.sizes).reduce((a, b) => a + b, 0);
+            const rowEl = wrap.querySelector(`tr[data-pid="${pid}"] .si-row-total`);
+            if (rowEl) rowEl.textContent = rowTot;
+          }
           saveDraftSI();
           updateSiSum();
         });
       });
       wrap.querySelectorAll('.si-inv-input').forEach(el => {
-        el.addEventListener('input', function () { siTableData[this.dataset.pid].invoice = this.value; saveDraftSI(); });
+        el.addEventListener('input', function () {
+          const pid = this.dataset.pid;
+          const targetData = siTableData[pid] || siTableData[Number(pid)];
+          if (targetData) targetData.invoice = this.value;
+          saveDraftSI();
+        });
       });
       updateSiSum();
     }
 
     function updateSiSum() {
       const tot = siAddedPids.reduce((a, pid) => {
-        const d = siTableData[pid]; return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
+        const d = siTableData[pid] || siTableData[Number(pid)]; return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
       }, 0);
       const el = document.getElementById('si-summary');
       if (el) el.innerHTML = `<strong>${siAddedPids.length}</strong> products · <strong>${tot}</strong> total boxes`;
@@ -4192,8 +4202,8 @@ function renderDashboard() {
 
       let saved = 0;
       siAddedPids.forEach(pid => {
-        const p = P.find(x => x.id === pid);
-        const d = siTableData[pid]; if (!d) return;
+        const p = P.find(x => String(x.id) === String(pid));
+        const d = siTableData[pid] || siTableData[Number(pid)]; if (!d || !p) return;
         Object.entries(d.sizes).forEach(([sz, qty]) => {
           if (!qty || qty <= 0) return;
           p.s[sz] = (p.s[sz] || 0) + qty;
@@ -4235,7 +4245,7 @@ function renderDashboard() {
       }
       drop.style.display = 'block';
       drop.innerHTML = results.map(p => {
-        const selected = soAddedPids.includes(p.id);
+        const selected = soAddedPids.some(x => String(x) === String(p.id));
         const catLabel = `<span style="font-size:10px;color:var(--text-muted);margin-left:6px;font-weight:400;">${cn(p.ci)}</span>`;
         return `<div class="drop-item ${selected ? 'selected' : ''}" onclick="selectSoProduct('${p.id}')">
       <span style="font-size:13px;font-weight:${selected ? '800' : '600'};color:${selected ? 'var(--warn)' : 'var(--text)'};">
@@ -4251,14 +4261,18 @@ function renderDashboard() {
     }
 
     function selectSoProduct(pid) {
-      if (soAddedPids.includes(pid)) {
-        soAddedPids = soAddedPids.filter(x => x !== pid);
+      const exists = soAddedPids.some(x => String(x) === String(pid));
+      if (exists) {
+        soAddedPids = soAddedPids.filter(x => String(x) !== String(pid));
         delete soData[pid];
+        delete soData[Number(pid)];
       } else {
         soAddedPids.push(pid);
         soData[pid] = { sizes: {}, supplier: '', invoice: '' };
-        const p = P.find(x => x.id === pid);
-        szs(p.ci).forEach(s => soData[pid].sizes[s] = 0);
+        const p = P.find(x => String(x.id) === String(pid));
+        if (p) {
+          szs(p.ci).forEach(s => soData[pid].sizes[s] = 0);
+        }
       }
       saveDraftSO();
       renderSoSearchDropdown();
@@ -4280,7 +4294,7 @@ function renderDashboard() {
       // group by category
       const catGroups = {};
       soAddedPids.forEach(pid => {
-        const p = P.find(x => x.id === pid);
+        const p = P.find(x => String(x.id) === String(pid));
         if (!p) return;
         if (!catGroups[p.ci]) catGroups[p.ci] = [];
         catGroups[p.ci].push(p);
@@ -4291,7 +4305,7 @@ function renderDashboard() {
         const sz = szs(ci);
         const thSz = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:12px;padding:8px 3px;">${s}</th>`).join('');
         const rows = prods.map(p => {
-          const d = soData[p.id] || { sizes: {} };
+          const d = soData[p.id] || soData[String(p.id)] || { sizes: {} };
           const tds = sz.map(s => {
             const cur = (p.s ? p.s[s] : 0) || 0;
             const sc = cur <= 0 ? 'color:var(--danger)' : cur <= p.m ? 'color:var(--warn)' : 'color:var(--accent3)';
@@ -4389,37 +4403,54 @@ function renderDashboard() {
       cont.querySelectorAll('.so-qty-input').forEach(el => {
         el.addEventListener('input', function () {
           const p = this.dataset.pid, s = this.dataset.sz;
-          soData[p].sizes[s] = parseInt(this.value) || 0;
-          const pr = P.find(x => x.id === p);
-          const av = pr.s[s] || 0;
-          if (soData[p].sizes[s] > av) this.classList.add('exceed');
-          else this.classList.remove('exceed');
-          const rowTot = Object.values(soData[p].sizes || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-          const rowEl = cont.querySelector(`tr[data-pid="${p}"] .so-row-total`);
-          if (rowEl) rowEl.textContent = rowTot;
+          const targetData = soData[p] || soData[Number(p)];
+          if (targetData) {
+            targetData.sizes[s] = parseInt(this.value) || 0;
+            const pr = P.find(x => String(x.id) === String(p));
+            if (pr) {
+              const av = pr.s[s] || 0;
+              if (targetData.sizes[s] > av) this.classList.add('exceed');
+              else this.classList.remove('exceed');
+            }
+            const rowTot = Object.values(targetData.sizes || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+            const rowEl = cont.querySelector(`tr[data-pid="${p}"] .so-row-total`);
+            if (rowEl) rowEl.textContent = rowTot;
+          }
           saveDraftSO();
           updateSoSum();
         });
       });
       cont.querySelectorAll('.so-sup-input').forEach(el => {
-        el.addEventListener('input', function () { soData[this.dataset.pid].supplier = this.value; });
+        el.addEventListener('input', function () {
+          const p = this.dataset.pid;
+          const targetData = soData[p] || soData[Number(p)];
+          if (targetData) targetData.supplier = this.value;
+          saveDraftSO();
+        });
       });
       cont.querySelectorAll('.so-inv-input').forEach(el => {
-        el.addEventListener('input', function () { soData[this.dataset.pid].invoice = this.value; });
+        el.addEventListener('input', function () {
+          const p = this.dataset.pid;
+          const targetData = soData[p] || soData[Number(p)];
+          if (targetData) targetData.invoice = this.value;
+          saveDraftSO();
+        });
       });
       updateSoSum();
     }
 
     function removeSoProduct(pid) {
-      soAddedPids = soAddedPids.filter(x => x !== pid);
+      soAddedPids = soAddedPids.filter(x => String(x) !== String(pid));
       delete soData[pid];
+      delete soData[Number(pid)];
+      saveDraftSO();
       renderSoSearchDropdown();
       renderSoEntries();
     }
 
     function updateSoSum() {
       const tot = soAddedPids.reduce((a, pid) => {
-        const d = soData[pid]; return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
+        const d = soData[pid] || soData[Number(pid)]; return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
       }, 0);
       const el = document.getElementById('so-summary');
       if (el) el.innerHTML = `<strong>${soAddedPids.length}</strong> products · <strong>${tot}</strong> total boxes`;
@@ -4439,8 +4470,8 @@ function renderDashboard() {
       const now = new Date().toTimeString().slice(0, 8);
       let saved = 0;
       soAddedPids.forEach(pid => {
-        const p = P.find(x => x.id === pid);
-        const d = soData[pid]; if (!d) return;
+        const p = P.find(x => String(x.id) === String(pid));
+        const d = soData[pid] || soData[Number(pid)]; if (!d || !p) return;
         Object.entries(d.sizes).forEach(([sz, qty]) => {
           if (!qty || qty <= 0) return;
           p.s[sz] = (p.s[sz] || 0) - qty;
