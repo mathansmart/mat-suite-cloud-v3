@@ -3092,7 +3092,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Interactive Table Move & Resize Handles ---
-    const editorA4Sheet = document.getElementById('editor-a4-sheet');
     const moveHandle = document.createElement('div');
     moveHandle.id = 'table-move-handle';
     moveHandle.contentEditable = 'false';
