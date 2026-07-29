@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeSettings = {}; // Full server settings object
     let companySettings = {
         fontFamily: "'Outfit', sans-serif",
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: "400",
         fontStyle: "normal",
         textDecoration: "none",
@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveSettings = () => {
         companySettings = {
             fontFamily: fontFamilySelect.value,
-            fontSize: parseInt(fontSizeSlider.value) || 14,
+            fontSize: parseInt(fontSizeSlider.value) || 12,
             fontWeight: fontWeightSelect.value,
             lineHeight: parseFloat(lineHeightSlider.value) || 1.2,
             topMargin: parseInt(topMarginSlider.value) || 50,
