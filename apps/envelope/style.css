@@ -1166,7 +1166,8 @@ select, input[type="range"], input[type="number"] {
 }
 
 @media print {
-    #table-move-handle, #table-resize-handle {
+    #table-move-handle, #table-resize-handle,
+    #table-edge-right, #table-edge-left, #table-edge-bottom, #table-edge-top {
         display: none !important;
     }
 }

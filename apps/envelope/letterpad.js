@@ -3262,12 +3262,81 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     if (editorA4Sheet) editorA4Sheet.appendChild(resizeHandle);
 
+    // Create 4 edge resize handles
+    const edgeRight = document.createElement('div');
+    edgeRight.id = 'table-edge-right';
+    edgeRight.contentEditable = 'false';
+    edgeRight.style.cssText = `
+        position: absolute;
+        display: none;
+        width: 6px;
+        cursor: col-resize;
+        z-index: 9999;
+        background: transparent;
+        transition: background-color 0.15s;
+    `;
+    edgeRight.addEventListener('mouseover', () => { edgeRight.style.backgroundColor = '#ea580c'; });
+    edgeRight.addEventListener('mouseout', () => { edgeRight.style.backgroundColor = 'transparent'; });
+    if (editorA4Sheet) editorA4Sheet.appendChild(edgeRight);
+
+    const edgeLeft = document.createElement('div');
+    edgeLeft.id = 'table-edge-left';
+    edgeLeft.contentEditable = 'false';
+    edgeLeft.style.cssText = `
+        position: absolute;
+        display: none;
+        width: 6px;
+        cursor: col-resize;
+        z-index: 9999;
+        background: transparent;
+        transition: background-color 0.15s;
+    `;
+    edgeLeft.addEventListener('mouseover', () => { edgeLeft.style.backgroundColor = '#ea580c'; });
+    edgeLeft.addEventListener('mouseout', () => { edgeLeft.style.backgroundColor = 'transparent'; });
+    if (editorA4Sheet) editorA4Sheet.appendChild(edgeLeft);
+
+    const edgeBottom = document.createElement('div');
+    edgeBottom.id = 'table-edge-bottom';
+    edgeBottom.contentEditable = 'false';
+    edgeBottom.style.cssText = `
+        position: absolute;
+        display: none;
+        height: 6px;
+        cursor: row-resize;
+        z-index: 9999;
+        background: transparent;
+        transition: background-color 0.15s;
+    `;
+    edgeBottom.addEventListener('mouseover', () => { edgeBottom.style.backgroundColor = '#ea580c'; });
+    edgeBottom.addEventListener('mouseout', () => { edgeBottom.style.backgroundColor = 'transparent'; });
+    if (editorA4Sheet) editorA4Sheet.appendChild(edgeBottom);
+
+    const edgeTop = document.createElement('div');
+    edgeTop.id = 'table-edge-top';
+    edgeTop.contentEditable = 'false';
+    edgeTop.style.cssText = `
+        position: absolute;
+        display: none;
+        height: 6px;
+        cursor: row-resize;
+        z-index: 9999;
+        background: transparent;
+        transition: background-color 0.15s;
+    `;
+    edgeTop.addEventListener('mouseover', () => { edgeTop.style.backgroundColor = '#ea580c'; });
+    edgeTop.addEventListener('mouseout', () => { edgeTop.style.backgroundColor = 'transparent'; });
+    if (editorA4Sheet) editorA4Sheet.appendChild(edgeTop);
+
     let currentActiveTable = null;
 
     function updateTableHandles(table) {
         if (!table || !editorA4Sheet) {
             moveHandle.style.display = 'none';
             resizeHandle.style.display = 'none';
+            edgeRight.style.display = 'none';
+            edgeLeft.style.display = 'none';
+            edgeBottom.style.display = 'none';
+            edgeTop.style.display = 'none';
             currentActiveTable = null;
             return;
         }
@@ -3286,10 +3355,177 @@ document.addEventListener('DOMContentLoaded', () => {
         moveHandle.style.left = (left - 11) + 'px';
         moveHandle.style.display = 'flex';
         
-        // Position resize handle at bottom-right
+        // Position corner resize handle at bottom-right
         resizeHandle.style.top = (top + height - 6) + 'px';
         resizeHandle.style.left = (left + width - 6) + 'px';
         resizeHandle.style.display = 'block';
+
+        // Position 4 edge resize handles
+        // Right edge
+        edgeRight.style.top = top + 'px';
+        edgeRight.style.left = (left + width - 3) + 'px';
+        edgeRight.style.height = height + 'px';
+        edgeRight.style.display = 'block';
+
+        // Left edge
+        edgeLeft.style.top = top + 'px';
+        edgeLeft.style.left = (left - 3) + 'px';
+        edgeLeft.style.height = height + 'px';
+        edgeLeft.style.display = 'block';
+
+        // Bottom edge
+        edgeBottom.style.top = (top + height - 3) + 'px';
+        edgeBottom.style.left = left + 'px';
+        edgeBottom.style.width = width + 'px';
+        edgeBottom.style.display = 'block';
+
+        // Top edge
+        edgeTop.style.top = (top - 3) + 'px';
+        edgeTop.style.left = left + 'px';
+        edgeTop.style.width = width + 'px';
+        edgeTop.style.display = 'block';
+    }
+
+    // --- 4 Edge Resizing Listeners ---
+    let isResizingRight = false;
+    let rightStartX, rightStartWidth;
+
+    edgeRight.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentActiveTable) return;
+        
+        isResizingRight = true;
+        rightStartX = e.clientX;
+        rightStartWidth = currentActiveTable.offsetWidth;
+        
+        document.body.style.cursor = 'col-resize';
+        document.addEventListener('mousemove', handleRightMove);
+        document.addEventListener('mouseup', handleRightMouseUp);
+    });
+
+    function handleRightMove(e) {
+        if (!isResizingRight || !currentActiveTable) return;
+        const deltaX = e.clientX - rightStartX;
+        const newWidth = Math.max(100, rightStartWidth + deltaX);
+        currentActiveTable.style.width = newWidth + 'px';
+        updateTableHandles(currentActiveTable);
+    }
+
+    function handleRightMouseUp() {
+        isResizingRight = false;
+        document.body.style.cursor = '';
+        document.removeEventListener('mousemove', handleRightMove);
+        document.removeEventListener('mouseup', handleRightMouseUp);
+        saveHistory();
+    }
+
+    let isResizingLeft = false;
+    let leftStartX, leftStartWidth, leftStartMargin;
+
+    edgeLeft.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentActiveTable) return;
+        
+        isResizingLeft = true;
+        leftStartX = e.clientX;
+        leftStartWidth = currentActiveTable.offsetWidth;
+        
+        const style = window.getComputedStyle(currentActiveTable);
+        leftStartMargin = parseFloat(style.marginLeft) || 0;
+        
+        document.body.style.cursor = 'col-resize';
+        document.addEventListener('mousemove', handleLeftMove);
+        document.addEventListener('mouseup', handleLeftMouseUp);
+    });
+
+    function handleLeftMove(e) {
+        if (!isResizingLeft || !currentActiveTable) return;
+        const deltaX = e.clientX - leftStartX;
+        
+        const newMarginLeft = Math.max(0, leftStartMargin + deltaX);
+        const actualDeltaMargin = newMarginLeft - leftStartMargin;
+        const newWidth = Math.max(100, leftStartWidth - actualDeltaMargin);
+        
+        currentActiveTable.style.marginLeft = newMarginLeft + 'px';
+        currentActiveTable.style.width = newWidth + 'px';
+        
+        updateTableHandles(currentActiveTable);
+    }
+
+    function handleLeftMouseUp() {
+        isResizingLeft = false;
+        document.body.style.cursor = '';
+        document.removeEventListener('mousemove', handleLeftMove);
+        document.removeEventListener('mouseup', handleLeftMouseUp);
+        saveHistory();
+    }
+
+    let isResizingBottom = false;
+    let bottomStartY, bottomStartHeight;
+
+    edgeBottom.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentActiveTable) return;
+        
+        isResizingBottom = true;
+        bottomStartY = e.clientY;
+        bottomStartHeight = currentActiveTable.offsetHeight;
+        
+        document.body.style.cursor = 'row-resize';
+        document.addEventListener('mousemove', handleBottomMove);
+        document.addEventListener('mouseup', handleBottomMouseUp);
+    });
+
+    function handleBottomMove(e) {
+        if (!isResizingBottom || !currentActiveTable) return;
+        const deltaY = e.clientY - bottomStartY;
+        const newHeight = Math.max(40, bottomStartHeight + deltaY);
+        currentActiveTable.style.height = newHeight + 'px';
+        updateTableHandles(currentActiveTable);
+    }
+
+    function handleBottomMouseUp() {
+        isResizingBottom = false;
+        document.body.style.cursor = '';
+        document.removeEventListener('mousemove', handleBottomMove);
+        document.removeEventListener('mouseup', handleBottomMouseUp);
+        saveHistory();
+    }
+
+    let isResizingTop = false;
+    let topStartY, topStartHeight;
+
+    edgeTop.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentActiveTable) return;
+        
+        isResizingTop = true;
+        topStartY = e.clientY;
+        topStartHeight = currentActiveTable.offsetHeight;
+        
+        document.body.style.cursor = 'row-resize';
+        document.addEventListener('mousemove', handleTopMove);
+        document.addEventListener('mouseup', handleTopMouseUp);
+    });
+
+    function handleTopMove(e) {
+        if (!isResizingTop || !currentActiveTable) return;
+        const deltaY = e.clientY - topStartY;
+        const newHeight = Math.max(40, topStartHeight - deltaY);
+        currentActiveTable.style.height = newHeight + 'px';
+        updateTableHandles(currentActiveTable);
+    }
+
+    function handleTopMouseUp() {
+        isResizingTop = false;
+        document.body.style.cursor = '';
+        document.removeEventListener('mousemove', handleTopMove);
+        document.removeEventListener('mouseup', handleTopMouseUp);
+        saveHistory();
     }
 
     function getSelectionTable() {
