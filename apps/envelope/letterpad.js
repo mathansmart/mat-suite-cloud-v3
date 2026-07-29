@@ -3287,33 +3287,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isMoving || !currentActiveTable || !editorA4Sheet) return;
         
         const deltaX = e.clientX - moveStartX;
+        const deltaY = e.clientY - moveStartY;
         
-        // 1. Horizontal sideways indentation
-        const newMarginLeft = Math.max(0, tableStartMarginLeft + deltaX);
-        currentActiveTable.style.marginLeft = newMarginLeft + 'px';
+        // 1. Fluid visual feedback: make the table follow the cursor
+        currentActiveTable.style.position = 'relative';
+        currentActiveTable.style.left = deltaX + 'px';
+        currentActiveTable.style.top = deltaY + 'px';
+        currentActiveTable.style.zIndex = '99999';
         
         // 2. Vertical repositioning drop helper
         const sheetRect = editorA4Sheet.getBoundingClientRect();
+        const textareaRect = editorTextarea.getBoundingClientRect();
         const clientY = e.clientY;
         const children = Array.from(editorTextarea.children);
         let targetSibling = null;
         let targetPos = 'before';
         
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i];
-            if (child === currentActiveTable) continue;
-            
-            const rect = child.getBoundingClientRect();
-            const childMiddle = rect.top + rect.height / 2;
-            
-            if (clientY < childMiddle) {
-                targetSibling = child;
-                targetPos = 'before';
-                break;
-            } else if (i === children.length - 1 || clientY < rect.bottom) {
-                targetSibling = child;
-                targetPos = 'after';
-                break;
+        if (clientY < textareaRect.top + 20) {
+            targetSibling = editorTextarea.firstElementChild;
+            targetPos = 'before';
+        } else if (clientY > textareaRect.bottom - 20) {
+            targetSibling = editorTextarea.lastElementChild;
+            targetPos = 'after';
+        } else {
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                if (child === currentActiveTable) continue;
+                
+                const rect = child.getBoundingClientRect();
+                const childMiddle = rect.top + rect.height / 2;
+                
+                if (clientY < childMiddle) {
+                    targetSibling = child;
+                    targetPos = 'before';
+                    break;
+                } else if (i === children.length - 1 || clientY < rect.bottom) {
+                    targetSibling = child;
+                    targetPos = 'after';
+                    break;
+                }
             }
         }
         
@@ -3338,6 +3350,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTableHandles(currentActiveTable);
     }
 
+    function ensureTrailingParagraph() {
+        if (editorTextarea && editorTextarea.lastElementChild && editorTextarea.lastElementChild.tagName === 'TABLE') {
+            const p = document.createElement('p');
+            p.innerHTML = '<br>';
+            editorTextarea.appendChild(p);
+        }
+    }
+
     function handleMoveMouseUp() {
         isMoving = false;
         document.removeEventListener('mousemove', handleMoveDrag);
@@ -3348,12 +3368,27 @@ document.addEventListener('DOMContentLoaded', () => {
             placeholderLine = null;
         }
         
+        // Reset relative drag styles
+        if (currentActiveTable) {
+            currentActiveTable.style.position = '';
+            currentActiveTable.style.left = '';
+            currentActiveTable.style.top = '';
+            currentActiveTable.style.zIndex = '';
+        }
+        
         if (currentActiveTable && moveHandle.dataset.targetId) {
             const targetSibling = document.getElementById(moveHandle.dataset.targetId);
             const targetPos = moveHandle.dataset.targetPos;
             
             if (targetSibling) {
                 saveHistory();
+                
+                // Recalculate final horizontal margin-left relative to parent
+                const finalRect = currentActiveTable.getBoundingClientRect();
+                const parentRect = editorTextarea.getBoundingClientRect();
+                const newMarginLeft = Math.max(0, finalRect.left - parentRect.left);
+                currentActiveTable.style.marginLeft = newMarginLeft + 'px';
+                
                 if (targetPos === 'before') {
                     editorTextarea.insertBefore(currentActiveTable, targetSibling);
                 } else {
@@ -3363,6 +3398,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (targetSibling.id.startsWith('temp-sib-')) {
                     targetSibling.removeAttribute('id');
                 }
+                
+                ensureTrailingParagraph();
                 saveHistory();
             }
         }
