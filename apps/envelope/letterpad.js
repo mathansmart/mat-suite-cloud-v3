@@ -3174,8 +3174,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return element ? element.closest('table') : null;
     }
 
+    let resizeTargetCell = null;
+    let resizeType = null; // 'col' or 'row'
+    let isResizingBorder = false;
+    let borderResizeStartX = 0;
+    let borderResizeStartY = 0;
+    let startCellWidth = 0;
+    let startCellHeight = 0;
+    let startTableWidth = 0;
+
     if (editorTextarea) {
         editorTextarea.addEventListener('mousemove', (e) => {
+            if (isResizingBorder) return;
+
             const table = e.target.closest('table');
             if (table) {
                 updateTableHandles(table);
@@ -3187,9 +3198,104 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateTableHandles(null);
                 }
             }
+
+            // Cell border resizing detection
+            const td = e.target.closest('td, th');
+            if (!td) {
+                if (!isMoving && !isResizing && !isResizingBorder) {
+                    editorTextarea.style.cursor = '';
+                }
+                return;
+            }
+
+            const rect = td.getBoundingClientRect();
+            const borderTolerance = 6; // pixels tolerance for border selection
+            
+            // Check right border
+            if (rect.right - e.clientX <= borderTolerance && rect.right - e.clientX >= -borderTolerance) {
+                editorTextarea.style.cursor = 'col-resize';
+                resizeTargetCell = td;
+                resizeType = 'col';
+            } 
+            // Check left border (resizes previous cell)
+            else if (e.clientX - rect.left <= borderTolerance && e.clientX - rect.left >= -borderTolerance) {
+                const prevTd = td.previousElementSibling;
+                if (prevTd) {
+                    editorTextarea.style.cursor = 'col-resize';
+                    resizeTargetCell = prevTd;
+                    resizeType = 'col';
+                } else {
+                    editorTextarea.style.cursor = '';
+                    resizeTargetCell = null;
+                    resizeType = null;
+                }
+            }
+            // Check bottom border
+            else if (rect.bottom - e.clientY <= borderTolerance && rect.bottom - e.clientY >= -borderTolerance) {
+                editorTextarea.style.cursor = 'row-resize';
+                resizeTargetCell = td;
+                resizeType = 'row';
+            }
+            // Check top border (resizes previous row cell)
+            else if (e.clientY - rect.top <= borderTolerance && e.clientY - rect.top >= -borderTolerance) {
+                const tr = td.parentElement;
+                const prevTr = tr.previousElementSibling;
+                if (prevTr) {
+                    const colIndex = td.cellIndex;
+                    const prevTd = prevTr.cells[colIndex];
+                    if (prevTd) {
+                        editorTextarea.style.cursor = 'row-resize';
+                        resizeTargetCell = prevTd;
+                        resizeType = 'row';
+                    } else {
+                        editorTextarea.style.cursor = '';
+                        resizeTargetCell = null;
+                        resizeType = null;
+                    }
+                } else {
+                    editorTextarea.style.cursor = '';
+                    resizeTargetCell = null;
+                    resizeType = null;
+                }
+            }
+            else {
+                editorTextarea.style.cursor = '';
+                resizeTargetCell = null;
+                resizeType = null;
+            }
+        });
+
+        editorTextarea.addEventListener('mousedown', (e) => {
+            if (resizeTargetCell && resizeType) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                isResizingBorder = true;
+                borderResizeStartX = e.clientX;
+                borderResizeStartY = e.clientY;
+                
+                startCellWidth = resizeTargetCell.offsetWidth;
+                startCellHeight = resizeTargetCell.offsetHeight;
+                
+                const table = resizeTargetCell.closest('table');
+                if (table) {
+                    startTableWidth = table.offsetWidth;
+                }
+                
+                document.addEventListener('mousemove', handleBorderResizeMove);
+                document.addEventListener('mouseup', handleBorderResizeMouseUp);
+            } else {
+                const table = e.target.closest('table');
+                if (table) {
+                    updateTableHandles(table);
+                } else {
+                    updateTableHandles(null);
+                }
+            }
         });
 
         editorTextarea.addEventListener('click', (e) => {
+            if (isResizingBorder) return;
             const table = e.target.closest('table');
             if (table) {
                 updateTableHandles(table);
@@ -3204,6 +3310,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateTableHandles(selectionTable);
             }
         });
+    }
+
+    function handleBorderResizeMove(e) {
+        if (!isResizingBorder || !resizeTargetCell) return;
+        
+        const table = resizeTargetCell.closest('table');
+        
+        if (resizeType === 'col') {
+            const deltaX = e.clientX - borderResizeStartX;
+            const newWidth = Math.max(30, startCellWidth + deltaX);
+            
+            // Apply cell width change
+            resizeTargetCell.style.width = newWidth + 'px';
+            
+            // Also adjust table's overall width style if it exists
+            if (table) {
+                if (table.style.width && table.style.width !== 'auto') {
+                    const tableDelta = newWidth - startCellWidth;
+                    const newTableWidth = Math.max(100, startTableWidth + tableDelta);
+                    table.style.width = newTableWidth + 'px';
+                }
+                updateTableHandles(table);
+            }
+        } else if (resizeType === 'row') {
+            const deltaY = e.clientY - borderResizeStartY;
+            const newHeight = Math.max(20, startCellHeight + deltaY);
+            
+            // Apply row height change
+            resizeTargetCell.style.height = newHeight + 'px';
+            
+            if (table) {
+                updateTableHandles(table);
+            }
+        }
+    }
+
+    function handleBorderResizeMouseUp() {
+        isResizingBorder = false;
+        document.removeEventListener('mousemove', handleBorderResizeMove);
+        document.removeEventListener('mouseup', handleBorderResizeMouseUp);
+        
+        if (resizeTargetCell) {
+            if (editorTextarea) editorTextarea.style.cursor = '';
+            resizeTargetCell = null;
+        }
+        resizeType = null;
+        saveHistory();
     }
 
     // --- Resize Dragging Logic ---
