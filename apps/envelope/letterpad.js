@@ -2933,11 +2933,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!editorTextarea) return;
         saveHistory();
         
-        let tableHtml = `<table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-family: inherit;"><tbody>`;
+        let tableHtml = `<table style="width: auto; border-collapse: collapse; margin: 15px 0; font-family: inherit;"><tbody>`;
         for (let r = 0; r < rows; r++) {
             tableHtml += '<tr>';
             for (let c = 0; c < cols; c++) {
-                tableHtml += `<td style="border: 1px solid #a3a3a3; padding: 8px; min-width: 50px; min-height: 24px; vertical-align: top;"><br></td>`;
+                tableHtml += `<td style="border: 1px solid #cbd5e1; padding: 8px 12px; width: 100px; min-width: 50px; min-height: 24px; vertical-align: top;"><br></td>`;
             }
             tableHtml += '</tr>';
         }
