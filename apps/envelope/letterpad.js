@@ -2564,44 +2564,169 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Font (Letter) Color Listener
-    const fontColorPicker = document.getElementById('editor-fontcolor-picker');
-    const fontColorIndicator = document.getElementById('font-color-indicator');
-    if (fontColorPicker) {
-        fontColorPicker.addEventListener('input', (e) => {
-            const color = e.target.value;
-            if (fontColorIndicator) fontColorIndicator.style.background = color;
-            saveHistory();
-            document.execCommand('foreColor', false, color);
-            saveHistory();
-        });
-    }
+    // --- MS Word-Style Theme Color Grid Dropdowns ---
+    function setupColorDropdowns() {
+        const themeColors = [
+            ['#ffffff', '#000000', '#eeece1', '#1f497d', '#4f81bd', '#c0504d', '#9bbb59', '#8064a2', '#4bacc6', '#f79646'],
+            ['#f2f2f2', '#7f7f7f', '#eeece1', '#dce6f1', '#ebf1f9', '#f2dbdb', '#eef3e2', '#e5e0ec', '#dbf0f5', '#fdeada'],
+            ['#d9d9d9', '#595959', '#ddd9c3', '#b8cce4', '#c6d9f0', '#e5b9b7', '#d7e3bc', '#ccc1d9', '#b7dde8', '#fbd5b5'],
+            ['#bfbfbf', '#3f3f3f', '#c4bd97', '#95b3d7', '#8db4e2', '#d99694', '#c3d69b', '#b2a1c7', '#92cddc', '#fac08f'],
+            ['#a6a6a6', '#262626', '#938953', '#366092', '#376091', '#953734', '#76933c', '#5f497a', '#31859c', '#e36c09'],
+            ['#7f7f7f', '#0d0d0d', '#494429', '#163356', '#243f60', '#632423', '#4f6128', '#3f3151', '#205867', '#974806']
+        ];
 
-    // Text Highlight Listener
-    const highlightPicker = document.getElementById('editor-highlight-picker');
-    const highlightIndicator = document.getElementById('highlight-color-indicator');
-    if (highlightPicker) {
-        highlightPicker.addEventListener('input', (e) => {
-            const color = e.target.value;
-            if (highlightIndicator) highlightIndicator.style.background = color;
-            saveHistory();
-            document.execCommand('hiliteColor', false, color);
-            saveHistory();
-        });
-    }
+        const standardColors = ['#c00000', '#ff0000', '#ffc000', '#ffff00', '#92d050', '#00b050', '#00b0f0', '#0070c0', '#002060', '#7030a0'];
 
-    // Sentence Highlight Listener (Modified to only highlight explicitly selected text as requested)
-    const sentColorPicker = document.getElementById('editor-sentcolor-picker');
-    const sentColorIndicator = document.getElementById('sent-color-indicator');
-    if (sentColorPicker) {
-        sentColorPicker.addEventListener('input', (e) => {
-            const color = e.target.value;
-            if (sentColorIndicator) sentColorIndicator.style.background = color;
-            saveHistory();
-            document.execCommand('hiliteColor', false, color);
-            saveHistory();
+        function buildDropdownHTML(defaultColorLabel, defaultColor) {
+            let gridHtml = '';
+            themeColors.forEach(row => {
+                row.forEach(color => {
+                    gridHtml += `<div class="color-grid-cell" data-color="${color}" style="background-color: ${color}; width: 15px; height: 15px; border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; transition: transform 0.1s;" title="${color}"></div>`;
+                });
+            });
+
+            let stdHtml = '';
+            standardColors.forEach(color => {
+                stdHtml += `<div class="color-grid-cell" data-color="${color}" style="background-color: ${color}; width: 15px; height: 15px; border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; transition: transform 0.1s;" title="${color}"></div>`;
+            });
+
+            return `
+                <div class="editor-color-dropdown hidden" style="position: absolute; left: 0; top: 28px; z-index: 10000; background: #222; border: 1px solid #444; border-radius: 5px; padding: 10px; width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                    <div style="border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 6px;">
+                        <button class="automatic-color-btn" data-color="${defaultColor}" style="background: transparent; color: #fff; border: 1px solid #444; width: 100%; text-align: left; padding: 4px 8px; border-radius: 3px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 8px; outline: none;">
+                            <span style="display: inline-block; width: 12px; height: 12px; background: ${defaultColor === 'transparent' ? '#fff' : defaultColor}; border: 1px solid #fff; border-radius: 2px;"></span>
+                            ${defaultColorLabel}
+                        </button>
+                    </div>
+                    
+                    <div style="font-size: 0.65rem; color: #999; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Theme Colors</div>
+                    <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-bottom: 8px;">
+                        ${gridHtml}
+                    </div>
+
+                    <div style="font-size: 0.65rem; color: #999; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Standard Colors</div>
+                    <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-bottom: 8px;">
+                        ${stdHtml}
+                    </div>
+                    
+                    <div style="border-top: 1px solid #333; padding-top: 6px; display: flex; align-items: center;">
+                        <button class="more-colors-btn" style="background: transparent; color: #fff; border: none; width: 100%; text-align: left; padding: 4px 8px; border-radius: 3px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; outline: none;">
+                            🎨 More Colors...
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const pickers = [
+            {
+                btnId: 'editor-btn-fontcolor',
+                pickerId: 'editor-fontcolor-picker',
+                indicatorId: 'font-color-indicator',
+                command: 'foreColor',
+                defaultLabel: 'Automatic (Black)',
+                defaultColor: '#000000'
+            },
+            {
+                btnId: 'editor-btn-highlight',
+                pickerId: 'editor-highlight-picker',
+                indicatorId: 'highlight-color-indicator',
+                command: 'hiliteColor',
+                defaultLabel: 'No Color',
+                defaultColor: 'transparent'
+            },
+            {
+                btnId: 'editor-btn-sentcolor',
+                pickerId: 'editor-sentcolor-picker',
+                indicatorId: 'sent-color-indicator',
+                command: 'hiliteColor',
+                defaultLabel: 'No Color',
+                defaultColor: 'transparent'
+            }
+        ];
+
+        pickers.forEach(config => {
+            const btn = document.getElementById(config.btnId);
+            const nativePicker = document.getElementById(config.pickerId);
+            const indicator = document.getElementById(config.indicatorId);
+            if (!btn || !nativePicker) return;
+
+            nativePicker.style.display = 'none';
+
+            const wrapper = btn.parentElement;
+            wrapper.style.position = 'relative';
+            
+            const dropdownContainer = document.createElement('div');
+            dropdownContainer.innerHTML = buildDropdownHTML(config.defaultLabel, config.defaultColor);
+            const dropdown = dropdownContainer.firstElementChild;
+            wrapper.appendChild(dropdown);
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                document.querySelectorAll('.editor-color-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.add('hidden');
+                });
+                
+                dropdown.classList.toggle('hidden');
+            });
+
+            dropdown.querySelectorAll('.color-grid-cell').forEach(cell => {
+                cell.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Keep selection focus inside editor
+                });
+                cell.addEventListener('click', (e) => {
+                    const color = cell.dataset.color;
+                    applyColor(color);
+                    dropdown.classList.add('hidden');
+                });
+            });
+
+            const autoBtn = dropdown.querySelector('.automatic-color-btn');
+            if (autoBtn) {
+                autoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); });
+                autoBtn.addEventListener('click', (e) => {
+                    const color = autoBtn.dataset.color;
+                    applyColor(color);
+                    dropdown.classList.add('hidden');
+                });
+            }
+
+            const moreBtn = dropdown.querySelector('.more-colors-btn');
+            if (moreBtn) {
+                moreBtn.addEventListener('mousedown', (e) => { e.preventDefault(); });
+                moreBtn.addEventListener('click', (e) => {
+                    dropdown.classList.add('hidden');
+                    nativePicker.click();
+                });
+            }
+
+            nativePicker.addEventListener('input', (e) => {
+                const color = e.target.value;
+                applyColor(color);
+            });
+
+            function applyColor(color) {
+                if (indicator) {
+                    indicator.style.background = color === 'transparent' ? 'transparent' : color;
+                }
+                saveHistory();
+                document.execCommand(config.command, false, color);
+                saveHistory();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.editor-color-dropdown').forEach(dropdown => {
+                const parent = dropdown.parentElement;
+                if (parent && !parent.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
         });
     }
+    setupColorDropdowns();
 
     // --- Find and Replace UI & Functionality ---
     const btnFindReplace = document.getElementById('editor-btn-find-replace');
