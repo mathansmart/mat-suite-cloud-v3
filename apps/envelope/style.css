@@ -1171,3 +1171,65 @@ select, input[type="range"], input[type="number"] {
         display: none !important;
     }
 }
+
+/* --- Redesigned Address Card Styles --- */
+.initials-avatar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    font-family: 'Outfit', sans-serif !important;
+}
+
+.address-card .chevron-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+}
+
+.address-card .hover-action-buttons {
+    display: none !important;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.address-card:hover .chevron-icon {
+    display: none !important;
+}
+
+.address-card:hover .hover-action-buttons {
+    display: flex !important;
+    opacity: 1;
+}
+
+.hover-action-buttons .action-btn {
+    opacity: 1 !important;
+    padding: 6px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    transition: transform 0.2s, background-color 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.hover-action-buttons .action-btn:hover {
+    transform: scale(1.1);
+}
+
+.hover-action-buttons .action-btn.edit {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #3b82f6 !important;
+}
+
+.hover-action-buttons .action-btn.edit:hover {
+    background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.hover-action-buttons .action-btn.delete {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+}
+
+.hover-action-buttons .action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+}

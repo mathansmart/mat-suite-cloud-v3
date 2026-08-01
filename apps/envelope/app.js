@@ -805,6 +805,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const getInitials = (name) => {
+        if (!name) return '??';
+        const parts = name.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 1) {
+            return parts[0].slice(0, 2).toUpperCase();
+        }
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+    };
+
+    const getPastelColor = (name) => {
+        const colors = [
+            { bg: 'rgba(59, 130, 246, 0.1)', fg: '#3b82f6' }, // Blue
+            { bg: 'rgba(236, 72, 153, 0.1)', fg: '#ec4899' }, // Pink
+            { bg: 'rgba(249, 115, 22, 0.1)', fg: '#f97316' }, // Orange
+            { bg: 'rgba(16, 185, 129, 0.1)', fg: '#10b981' }, // Green
+            { bg: 'rgba(139, 92, 246, 0.1)', fg: '#8b5cf6' }, // Purple
+            { bg: 'rgba(245, 158, 11, 0.1)', fg: '#f59e0b' }  // Yellow
+        ];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const index = Math.abs(hash) % colors.length;
+        return colors[index];
+    };
+
     const renderAddresses = (filter = '') => {
         addressList.innerHTML = '';
         
@@ -834,13 +860,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = `address-card ${selectedIds.includes(addr.id) ? 'selected' : ''} ${index === searchFocusIndex ? 'keyboard-focus' : ''}`;
             card.dataset.id = addr.id;
+            
+            const initials = getInitials(addr.name);
+            const color = getPastelColor(addr.name);
+            const displayAddress = addr.address ? addr.address.replace(/\n/g, ', ') : '';
+
             card.innerHTML = `
-                <div style="flex: 1; display: flex; align-items: center;">
-                    <h4 style="margin: 0; font-size: 1rem;">${addr.name}</h4>
+                <div style="flex: 1; display: flex; align-items: center; gap: 15px; min-width: 0;">
+                    <!-- Initials circle -->
+                    <div class="initials-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: ${color.bg}; color: ${color.fg}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13.5px; flex-shrink: 0; letter-spacing: 0.5px;">
+                        ${initials}
+                    </div>
+                    <div style="min-width: 0; flex: 1;">
+                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${addr.name}</h4>
+                        <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayAddress}</p>
+                    </div>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn delete" data-id="${addr.id}">Delete</button>
-                    <button class="action-btn edit" data-id="${addr.id}">Edit</button>
+                
+                <div class="card-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; width: 60px; height: 40px; position: relative;">
+                    <!-- Default Chevron Icon -->
+                    <span class="chevron-icon" style="color: var(--text-secondary); opacity: 0.6; font-size: 16px; transition: opacity 0.2s;">
+                        <i class="ti ti-chevron-right"></i>
+                    </span>
+                    <!-- Hover Action Buttons -->
+                    <div class="hover-action-buttons" style="display: none; align-items: center; gap: 6px; position: absolute; right: 0;">
+                        <button class="action-btn edit" data-id="${addr.id}" title="Edit" style="padding: 6px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="ti ti-edit" style="font-size: 14px; pointer-events: none;"></i></button>
+                        <button class="action-btn delete" data-id="${addr.id}" title="Delete" style="padding: 6px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="ti ti-trash" style="font-size: 14px; pointer-events: none;"></i></button>
+                    </div>
                 </div>
             `;
 
