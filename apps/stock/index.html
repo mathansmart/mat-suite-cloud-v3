@@ -4024,7 +4024,13 @@ function renderDashboard() {
         }
       }
       saveDraftSI();
-      renderSiSearchDropdown();
+      const s = document.getElementById('si-search');
+      if (s) {
+        s.value = '';
+        s.dispatchEvent(new Event('input'));
+      }
+      const drop = document.getElementById('si-search-drop');
+      if (drop) drop.style.display = 'none';
       renderSiTable();
     }
 
@@ -4281,7 +4287,13 @@ function renderDashboard() {
         }
       }
       saveDraftSO();
-      renderSoSearchDropdown();
+      const s = document.getElementById('so-search');
+      if (s) {
+        s.value = '';
+        s.dispatchEvent(new Event('input'));
+      }
+      const drop = document.getElementById('so-search-drop');
+      if (drop) drop.style.display = 'none';
       renderSoEntries();
     }
 
