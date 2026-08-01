@@ -8228,8 +8228,15 @@ function d2i(val) {
       const mBtn = document.getElementById('modal-btn');
       if (mBtn) mBtn.style.display = ''; 
       document.getElementById('modal-overlay').classList.remove('open');
-      const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
-      if (cancelBtn) cancelBtn.style.display = '';
+      document.getElementById('modal-title').style.display = '';
+      
+      const cancelBtn = document.querySelector('.modal-overlay .modal-footer .btn-ghost') || document.querySelector('.modal-overlay .modal-footer .btn-primary');
+      if (cancelBtn) {
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'btn btn-ghost';
+        cancelBtn.style.cssText = '';
+      }
+
       const modalEl = document.getElementById('modal-overlay').querySelector('.modal');
       if (modalEl) {
         modalEl.style.width = '';
@@ -8990,42 +8997,111 @@ function d2i(val) {
 
     function showSuppliersModal() {
       const suppliers = S.suppliers || [];
-      document.getElementById('modal-title').textContent = 'Suppliers List (' + suppliers.length + ')';
       
-      let html = '<div style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;padding-right:5px;">';
+      // Hide default title to use our premium custom header
+      document.getElementById('modal-title').style.display = 'none';
+      
+      // Calculate overall inward boxes sum
+      let overallBoxesSum = 0;
+      T.forEach(t => {
+         if (t.tp === 'IN' && t.q) {
+            overallBoxesSum += (Number(t.q) || 0);
+         }
+      });
+
+      // Calculate totals per supplier
+      const supTotals = {};
+      T.forEach(t => {
+         if (t.tp === 'IN' && t.pa) {
+            supTotals[t.pa] = (supTotals[t.pa] || 0) + (Number(t.q) || 0);
+         }
+      });
+
+      let listHtml = '';
       if (suppliers.length === 0) {
-        html += '<div style="color:var(--text-muted);text-align:center;padding:20px;">No suppliers found.</div>';
+        listHtml += '<div style="color:var(--text-muted);text-align:center;padding:30px;font-weight:600;">No suppliers found.</div>';
       } else {
         const sortedSuppliers = [...suppliers].sort((a,b)=>a.n.localeCompare(b.n));
         
-        // Calculate totals from transactions
-        const supTotals = {};
-        T.forEach(t => {
-           if (t.tp === 'IN' && t.pa) {
-              supTotals[t.pa] = (supTotals[t.pa] || 0) + (Number(t.q) || 0);
-           }
-        });
-
         sortedSuppliers.forEach((s, idx) => {
           const totBoxes = supTotals[s.n] || 0;
-          const phoneStr = s.p ? `<div style="font-size:13px; color:var(--text-muted);"><i class="ti ti-phone" style="font-size:12px; margin-right:4px;"></i> ${s.p}</div>` : '';
+          const pct = overallBoxesSum > 0 ? Math.round((totBoxes / overallBoxesSum) * 100) : 0;
+          const phoneStr = s.p ? `<div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:4px; margin-top:2px;"><i class="ti ti-phone" style="font-size:11px;"></i> ${s.p}</div>` : '';
           
-          html += `<div style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; gap:12px;">
-            <div style="width:36px;height:36px;border-radius:50%;background:rgba(59,130,246,0.1);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:bold;">${idx+1}</div>
-            <div style="flex:1;">
-               <div style="font-weight:600;color:var(--text-main);font-size:15px;">${s.n}</div>
-               ${phoneStr}
+          listHtml += `
+            <div class="supplier-stat-card" style="position:relative; overflow:hidden; padding:15px; background:var(--surface); border:1.5px solid var(--border-light); border-radius:14px; display:flex; flex-direction:column; gap:10px; transition:all 0.25s ease; box-shadow:0 2px 6px rgba(0,0,0,0.02);" 
+                 onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(99,102,241,0.06)';" 
+                 onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.02)';">
+              
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1)); color:#6366f1; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; font-family:'JetBrains Mono',monospace;">
+                     ${idx + 1}
+                  </div>
+                  <div>
+                     <div style="font-weight:700; color:var(--text-main); font-size:14.5px; letter-spacing:0.1px;">${s.n}</div>
+                     ${phoneStr}
+                  </div>
+                </div>
+
+                <div style="text-align:right;">
+                  <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--primary); font-size:15px; display:flex; align-items:baseline; justify-content:flex-end; gap:3px;">
+                     ${totBoxes} <span style="font-size:10px; font-weight:700; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
+                  </div>
+                  <div style="font-size:10px; font-weight:700; color:#a855f7; font-family:'JetBrains Mono',monospace;">${pct}% Share</div>
+                </div>
+              </div>
+
+              <!-- Share Progress Bar -->
+              <div style="width:100%; height:5px; background:var(--border-light); border-radius:10px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #6366f1, #a855f7); border-radius:10px; transition:width 0.5s ease;"></div>
+              </div>
             </div>
-            <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--primary); font-size:16px;">
-               ${totBoxes} <span style="font-size:11px; font-weight:700; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
-            </div>
-          </div>`;
+          `;
         });
       }
-      html += '</div>';
+
+      const html = `
+        <div style="font-family:'Nunito', sans-serif;">
+          <!-- Custom Premium Header -->
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; border-bottom:1.5px solid var(--border-light); padding-bottom:15px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15)); display:flex; align-items:center; justify-content:center; color:#6366f1;">
+                <i class="ti ti-truck-delivery" style="font-size:22px;"></i>
+              </div>
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:800; color:var(--text-main); letter-spacing:0.5px;">Suppliers Directory</h3>
+                <p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:600;">Overall inward boxes contributions</p>
+              </div>
+            </div>
+            <span style="background:linear-gradient(135deg, #6366f1, #a855f7); color:#fff; padding:5px 12px; border-radius:30px; font-size:12px; font-weight:800; box-shadow: 0 4px 10px rgba(99,102,241,0.3); font-family:'JetBrains Mono',monospace;">${suppliers.length} Active</span>
+          </div>
+
+          <!-- Cards List -->
+          <div style="display:flex; flex-direction:column; gap:12px; max-height:55vh; overflow-y:auto; padding-right:6px; margin-bottom:5px;">
+             ${listHtml}
+          </div>
+        </div>
+      `;
       
       document.getElementById('modal-content').innerHTML = html;
       document.getElementById('modal-btn').style.display = 'none';
+      
+      // Style cancel button in the footer as a premium close button
+      const cancelBtn = document.querySelector('.modal-overlay .modal-footer .btn-ghost');
+      if (cancelBtn) {
+        cancelBtn.textContent = 'Close';
+        cancelBtn.className = 'btn btn-primary';
+        cancelBtn.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+        cancelBtn.style.color = '#fff';
+        cancelBtn.style.border = 'none';
+        cancelBtn.style.boxShadow = '0 4px 12px rgba(99,102,241,0.2)';
+        cancelBtn.style.borderRadius = '20px';
+        cancelBtn.style.padding = '8px 24px';
+        cancelBtn.style.fontSize = '12.5px';
+        cancelBtn.style.fontWeight = '700';
+      }
+
       document.getElementById('modal-overlay').classList.add('open');
     }
 
