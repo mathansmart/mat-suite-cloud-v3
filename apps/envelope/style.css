@@ -394,6 +394,7 @@ select, input[type="range"], input[type="number"] {
     box-shadow: var(--shadow-sm);
     display: flex;
     align-items: center;
+    justify-content: space-between !important;
     animation: slideInUp 0.4s ease-out both;
 }
 

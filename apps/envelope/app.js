@@ -808,10 +808,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const getInitials = (name) => {
         if (!name) return '??';
         const parts = name.trim().split(/\s+/).filter(Boolean);
-        if (parts.length === 1) {
-            return parts[0].slice(0, 2).toUpperCase();
+        if (parts.length === 0) return '??';
+        
+        const firstWord = parts[0];
+        if (firstWord.length === 1 && parts.length > 1) {
+            const secondWord = parts[1];
+            return (firstWord[0] + secondWord[0]).toUpperCase();
         }
-        return (parts[0][0] + parts[1][0]).toUpperCase();
+        return firstWord.slice(0, 2).toUpperCase();
     };
 
     const getPastelColor = (name) => {
@@ -873,11 +877,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div style="min-width: 0; flex: 1;">
                         <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${addr.name}</h4>
-                        <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayAddress}</p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.78rem; color: var(--text-secondary); white-space: normal; word-break: break-word; line-height: 1.4;">${displayAddress}</p>
                     </div>
                 </div>
                 
-                <div class="card-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; width: 60px; height: 40px; position: relative;">
+                <div class="card-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; width: 70px; height: 40px; position: relative; flex-shrink: 0;">
                     <!-- Default Chevron Icon -->
                     <span class="chevron-icon" style="color: var(--text-secondary); opacity: 0.6; font-size: 16px; transition: opacity 0.2s;">
                         <i class="ti ti-chevron-right"></i>
