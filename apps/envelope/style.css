@@ -414,16 +414,11 @@ select, input[type="range"], input[type="number"] {
 }
 
 .address-card.selected {
-    background: var(--accent-blue);
-    border-color: var(--accent-blue);
-}
-
-.address-card.selected h4 {
-    color: #ffffff;
-}
-
-.address-card.selected .action-btn {
-    color: #ffffff;
+    background: rgba(59, 130, 246, 0.08) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    border-left: 5px solid var(--accent-blue) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08) !important;
+    transform: translateY(-2px);
 }
 
 .address-card.keyboard-focus {
