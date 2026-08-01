@@ -47,6 +47,13 @@ const SETTINGS_FILE = path.join(STORAGE_DIR, 'settings.json');
 const SENDERS_FILE = path.join(STORAGE_DIR, 'senders.json');
 const CATEGORIES_FILE = path.join(STORAGE_DIR, 'categories.json');
 
+const getProfileFile = (filePath, profile) => {
+    if (profile === '2') {
+        return filePath.replace(/\.json$/, '_vester.json');
+    }
+    return filePath;
+};
+
 // --- MongoDB Configuration ---
 let mongoose;
 let isMongoConnected = false;
@@ -128,8 +135,9 @@ app.get(['/api/senders', '/api/envelope/senders'], async (req, res) => {
         }
     }
     try {
-        if (!existsSync(SENDERS_FILE)) return res.json([]);
-        const data = await fs.readFile(SENDERS_FILE, 'utf8');
+        const file = getProfileFile(SENDERS_FILE, req.query.profile);
+        if (!existsSync(file)) return res.json([]);
+        const data = await fs.readFile(file, 'utf8');
         res.json(JSON.parse(data));
     } catch (err) {
         res.status(500).json({ error: 'Failed to read senders' });
@@ -148,7 +156,8 @@ app.post(['/api/senders', '/api/envelope/senders'], async (req, res) => {
         }
     }
     try {
-        await fs.writeFile(SENDERS_FILE, JSON.stringify(req.body, null, 2));
+        const file = getProfileFile(SENDERS_FILE, req.query.profile);
+        await fs.writeFile(file, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save senders' });
@@ -167,8 +176,9 @@ app.get(['/api/categories', '/api/envelope/categories'], async (req, res) => {
         }
     }
     try {
-        if (!existsSync(CATEGORIES_FILE)) return res.json([]); // Empty by default
-        const data = await fs.readFile(CATEGORIES_FILE, 'utf8');
+        const file = getProfileFile(CATEGORIES_FILE, req.query.profile);
+        if (!existsSync(file)) return res.json([]); // Empty by default
+        const data = await fs.readFile(file, 'utf8');
         res.json(JSON.parse(data));
     } catch (err) {
         res.status(500).json({ error: 'Failed to read categories' });
@@ -187,7 +197,8 @@ app.post(['/api/categories', '/api/envelope/categories'], async (req, res) => {
         }
     }
     try {
-        await fs.writeFile(CATEGORIES_FILE, JSON.stringify(req.body, null, 2));
+        const file = getProfileFile(CATEGORIES_FILE, req.query.profile);
+        await fs.writeFile(file, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save categories' });
@@ -206,8 +217,9 @@ app.get(['/api/addresses', '/api/envelope/addresses'], async (req, res) => {
         }
     }
     try {
-        if (!existsSync(DATA_FILE)) return res.json([]);
-        const data = await fs.readFile(DATA_FILE, 'utf8');
+        const file = getProfileFile(DATA_FILE, req.query.profile);
+        if (!existsSync(file)) return res.json([]);
+        const data = await fs.readFile(file, 'utf8');
         res.json(JSON.parse(data));
     } catch (err) {
         res.status(500).json({ error: 'Failed to read data' });
@@ -226,7 +238,8 @@ app.post(['/api/addresses', '/api/envelope/addresses'], async (req, res) => {
         }
     }
     try {
-        await fs.writeFile(DATA_FILE, JSON.stringify(req.body, null, 2));
+        const file = getProfileFile(DATA_FILE, req.query.profile);
+        await fs.writeFile(file, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save data' });
@@ -251,9 +264,10 @@ app.get(['/api/recycle', '/api/envelope/recycle'], async (req, res) => {
         }
     }
     try {
+        const file = getProfileFile(RECYCLE_FILE, req.query.profile);
         const { existsSync } = require('fs');
-        if (!existsSync(RECYCLE_FILE)) return res.json([]);
-        const data = await fs.readFile(RECYCLE_FILE, 'utf8');
+        if (!existsSync(file)) return res.json([]);
+        const data = await fs.readFile(file, 'utf8');
         let recycled = JSON.parse(data);
         
         // Auto-cleanup: Filter out entries older than 15 days
@@ -266,7 +280,7 @@ app.get(['/api/recycle', '/api/envelope/recycle'], async (req, res) => {
         });
 
         if (filtered.length !== recycled.length) {
-            fs.writeFile(RECYCLE_FILE, JSON.stringify(filtered, null, 2)).catch(err => {
+            fs.writeFile(file, JSON.stringify(filtered, null, 2)).catch(err => {
                 console.error('Failed to clean up old recycled entries on disk:', err);
             });
         }
@@ -288,7 +302,8 @@ app.post(['/api/recycle', '/api/envelope/recycle'], async (req, res) => {
         }
     }
     try {
-        await fs.writeFile(RECYCLE_FILE, JSON.stringify(req.body, null, 2));
+        const file = getProfileFile(RECYCLE_FILE, req.query.profile);
+        await fs.writeFile(file, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save recycle data' });
@@ -307,8 +322,9 @@ app.get(['/api/settings', '/api/envelope/settings'], async (req, res) => {
         }
     }
     try {
-        if (!existsSync(SETTINGS_FILE)) return res.json({});
-        const data = await fs.readFile(SETTINGS_FILE, 'utf8');
+        const file = getProfileFile(SETTINGS_FILE, req.query.profile);
+        if (!existsSync(file)) return res.json({});
+        const data = await fs.readFile(file, 'utf8');
         res.json(JSON.parse(data));
     } catch (err) {
         res.status(500).json({ error: 'Failed to read settings' });
@@ -327,7 +343,8 @@ app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
         }
     }
     try {
-        await fs.writeFile(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+        const file = getProfileFile(SETTINGS_FILE, req.query.profile);
+        await fs.writeFile(file, JSON.stringify(req.body, null, 2));
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save settings' });
