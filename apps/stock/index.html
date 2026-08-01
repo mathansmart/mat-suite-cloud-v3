@@ -1976,7 +1976,7 @@
                   <option value="">All Categories</option>
                 </select>
               </div>
-              <div class="form-group"><label class="form-label" title="Optional">Supplier (Optional)</label>
+              <div class="form-group"><label class="form-label" title="Required">Supplier <span style="color: #ef4444;">*</span></label>
                 <select class="form-select" id="si-supplier" autocomplete="off">
                   <option value="" selected>-- Select Supplier --</option>
                 </select>
@@ -4180,6 +4180,7 @@ function renderDashboard() {
 
     function clearSiTable() {
       siTableData = {}; siAddedPids = [];
+      const d = document.getElementById('si-date'); if (d) d.value = '';
       const supEl = document.getElementById('si-supplier');
       if (supEl) supEl.value = '';
       saveDraftSI();
@@ -4190,12 +4191,15 @@ function renderDashboard() {
 
     function saveSiTable() {
       if (!siAddedPids.length) { showAlert('Stock In', 'Please select a product!'); return; }
-      const dateDisp = document.getElementById('si-date').value || todayD();
-      const date = d2i(dateDisp);
-      const now = new Date().toTimeString().slice(0, 8);
+      const dateVal = (document.getElementById('si-date').value || '').trim();
+      if (!dateVal) { showAlert('Stock In', 'Please enter or select the Date!'); return; }
+      const date = d2i(dateVal);
+      if (!date || date.length < 10) { showAlert('Stock In', 'Please enter a valid date in DD-MM-YYYY format!'); return; }
       
       const supEl = document.getElementById('si-supplier');
       const globalSupplierId = supEl ? supEl.value : '';
+      if (!globalSupplierId) { showAlert('Stock In', 'Please select a Supplier!'); return; }
+
       let globalSupplierName = '';
       if (globalSupplierId && S.suppliers) {
         const sObj = S.suppliers.find(s => String(s.id) === String(globalSupplierId));
@@ -5201,7 +5205,7 @@ function d2i(val) {
     function renderSoHistorySearch(v) { renderSoHistory(null, v); }
     function initSI() {
       updateCatOpts();
-      const d = document.getElementById('si-date'); if (d && !d.value) d.value = todayD();
+      const d = document.getElementById('si-date'); if (d && !d.value) d.value = '';
       const s = document.getElementById('si-search'); if (s) s.value = '';
       const dr = document.getElementById('si-search-drop'); if (dr) dr.style.display = 'none';
       const supEl = document.getElementById('si-supplier');
@@ -8925,7 +8929,7 @@ function d2i(val) {
         if (S.recycleBin.length !== startLen) {
           persist();
         }
-        document.getElementById('si-date').value = todayD();
+        document.getElementById('si-date').value = '';
         document.getElementById('so-date').value = todayD();
         document.getElementById('bulk-txn-date').value = todayD();
         
