@@ -876,8 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${initials}
                     </div>
                     <div style="min-width: 0; flex: 1;">
-                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${addr.name}</h4>
-                        <p style="margin: 4px 0 0 0; font-size: 0.78rem; color: var(--text-secondary); white-space: normal; word-break: break-word; line-height: 1.4;">${displayAddress}</p>
+                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 5px;">${addr.name}</h4>
                     </div>
                 </div>
                 

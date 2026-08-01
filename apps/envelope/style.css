@@ -100,10 +100,14 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at top right, #E0F2FE, transparent),
-                radial-gradient(circle at bottom left, #F0FDF4, transparent);
+    background: 
+        radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.15), transparent 45%), /* Indigo/Blue */
+        radial-gradient(circle at 10% 80%, rgba(244, 63, 94, 0.15), transparent 45%),   /* Rose/Pink */
+        radial-gradient(circle at 90% 95%, rgba(245, 158, 11, 0.12), transparent 40%),  /* Orange/Yellow */
+        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.08), transparent 50%),  /* Purple */
+        #f8fafc; /* Premium off-white base */
     z-index: -1;
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .app-container {
