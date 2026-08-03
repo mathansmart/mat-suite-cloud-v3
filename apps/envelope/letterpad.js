@@ -1557,6 +1557,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveHistory();
             }
         });
+
+        // Intercept paste event and insert plain text to prevent styling/margin breakages
+        editorTextarea.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            try {
+                if (!document.execCommand('insertText', false, text)) {
+                    throw new Error('execCommand failed');
+                }
+            } catch (err) {
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+                selection.deleteFromDocument();
+                const range = selection.getRangeAt(0);
+                const textNode = document.createTextNode(text);
+                range.insertNode(textNode);
+                range.setStartAfter(textNode);
+                range.setEndAfter(textNode);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            editorTextarea.dispatchEvent(new Event('input'));
+        });
     }
 
     // Bullet/Number list elements
