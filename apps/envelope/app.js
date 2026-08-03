@@ -203,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const senderPhone = document.getElementById('sender-phone');
     const addSenderBtn = document.getElementById('add-sender-btn');
 
-    // Settings Tab Elements (Mapped to accordion/menu items)
-    const settingsTabBtns = document.querySelectorAll('.settings-menu-item');
+    // Settings Tab Elements (Supports both old tabs and new menu items)
+    const settingsTabBtns = document.querySelectorAll('.settings-menu-item, .settings-tab-btn');
     const settingsPanes = document.querySelectorAll('.settings-pane');
     const settingsMenuList = document.getElementById('settings-menu-list');
     const settingsBackBtn = document.getElementById('settings-back-btn');
@@ -1638,33 +1638,50 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             const currentBtn = e.currentTarget;
             const target = currentBtn.dataset.tab;
-            console.log('Opening settings page:', target);
+            console.log('Opening settings tab/page:', target);
             
-            // Hide main menu list
-            if (settingsMenuList) settingsMenuList.classList.add('hidden');
-            
-            // Show Back button
-            if (settingsBackBtn) settingsBackBtn.classList.remove('hidden');
-            
-            // Update Title text
-            if (settingsModalTitle) {
-                const sectionNames = {
-                    envelope: '✉️ Envelope Settings',
-                    a5: '📄 A5 Paper Settings',
-                    categories: '📁 Manage Categories',
-                    letterpad: '📝 Manage Letter Pad'
-                };
-                settingsModalTitle.textContent = sectionNames[target] || 'System Settings';
-            }
-            
-            // Show active pane & Save Settings Button
-            settingsPanes.forEach(p => {
-                p.classList.remove('active');
-                if (p.id === `pane-${target}`) {
-                    p.classList.add('active');
+            // Check if we are in the new menu navigation mode
+            if (settingsMenuList) {
+                // New layout: Hide menu list, show back button and title
+                settingsMenuList.classList.add('hidden');
+                if (settingsBackBtn) settingsBackBtn.classList.remove('hidden');
+                if (settingsModalTitle) {
+                    const sectionNames = {
+                        envelope: '✉️ Envelope Settings',
+                        a5: '📄 A5 Paper Settings',
+                        categories: '📁 Manage Categories',
+                        letterpad: '📝 Manage Letter Pad'
+                    };
+                    settingsModalTitle.textContent = sectionNames[target] || 'System Settings';
                 }
-            });
-            if (saveSettingsBtn) saveSettingsBtn.classList.remove('hidden');
+                
+                // Show active pane & Save Settings Button
+                settingsPanes.forEach(p => {
+                    p.classList.remove('active');
+                    if (p.id === `pane-${target}`) {
+                        p.classList.add('active');
+                    }
+                });
+                if (saveSettingsBtn) saveSettingsBtn.classList.remove('hidden');
+            } else {
+                // Old layout fallback: Switch active class on buttons
+                settingsTabBtns.forEach(b => {
+                    b.classList.remove('active');
+                    const icon = b.querySelector('.accordion-icon');
+                    if (icon) icon.textContent = '▶';
+                });
+                currentBtn.classList.add('active');
+                const activeIcon = currentBtn.querySelector('.accordion-icon');
+                if (activeIcon) activeIcon.textContent = '▼';
+                
+                // Switch active classes on panes
+                settingsPanes.forEach(p => {
+                    p.classList.remove('active');
+                    if (p.id === `pane-${target}`) {
+                        p.classList.add('active');
+                    }
+                });
+            }
         });
     });
 
