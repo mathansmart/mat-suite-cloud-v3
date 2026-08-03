@@ -203,9 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const senderPhone = document.getElementById('sender-phone');
     const addSenderBtn = document.getElementById('add-sender-btn');
 
-    // Settings Tab Elements
-    const settingsTabBtns = document.querySelectorAll('.settings-tab-btn');
+    // Settings Tab Elements (Mapped to accordion/menu items)
+    const settingsTabBtns = document.querySelectorAll('.settings-menu-item');
     const settingsPanes = document.querySelectorAll('.settings-pane');
+    const settingsMenuList = document.getElementById('settings-menu-list');
+    const settingsBackBtn = document.getElementById('settings-back-btn');
+    const settingsModalTitle = document.getElementById('settings-modal-title');
 
     // --- Helper Functions ---
     const checkDuplicateName = (name) => {
@@ -1576,12 +1579,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openSettingsBtn) {
         openSettingsBtn.addEventListener('click', () => {
             applySettingsToInputs();
+            goBackToSettingsMenu();
             settingsModal.classList.remove('hidden');
         });
     }
     if (closeSettingsBtn) {
         closeSettingsBtn.addEventListener('click', () => {
             applySettingsToInputs();
+            goBackToSettingsMenu();
             settingsModal.classList.add('hidden');
         });
     }
@@ -1615,29 +1620,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Back to Settings Menu helper
+    const goBackToSettingsMenu = () => {
+        if (settingsMenuList) settingsMenuList.classList.remove('hidden');
+        if (settingsBackBtn) settingsBackBtn.classList.add('hidden');
+        if (settingsModalTitle) settingsModalTitle.textContent = '⚙️ System Settings';
+        
+        settingsPanes.forEach(pane => pane.classList.remove('active'));
+        if (saveSettingsBtn) saveSettingsBtn.classList.add('hidden');
+    };
+
+    if (settingsBackBtn) {
+        settingsBackBtn.addEventListener('click', goBackToSettingsMenu);
+    }
+
     settingsTabBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const currentBtn = e.currentTarget;
             const target = currentBtn.dataset.tab;
-            console.log('Switching to tab:', target);
+            console.log('Opening settings page:', target);
             
-            // Switch active classes on buttons & update chevron characters
-            settingsTabBtns.forEach(b => {
-                b.classList.remove('active');
-                const icon = b.querySelector('.accordion-icon');
-                if (icon) icon.textContent = '▶';
-            });
-            currentBtn.classList.add('active');
-            const activeIcon = currentBtn.querySelector('.accordion-icon');
-            if (activeIcon) activeIcon.textContent = '▼';
+            // Hide main menu list
+            if (settingsMenuList) settingsMenuList.classList.add('hidden');
             
-            // Switch active classes on panes
+            // Show Back button
+            if (settingsBackBtn) settingsBackBtn.classList.remove('hidden');
+            
+            // Update Title text
+            if (settingsModalTitle) {
+                const sectionNames = {
+                    envelope: '✉️ Envelope Settings',
+                    a5: '📄 A5 Paper Settings',
+                    categories: '📁 Manage Categories',
+                    letterpad: '📝 Manage Letter Pad'
+                };
+                settingsModalTitle.textContent = sectionNames[target] || 'System Settings';
+            }
+            
+            // Show active pane & Save Settings Button
             settingsPanes.forEach(p => {
                 p.classList.remove('active');
                 if (p.id === `pane-${target}`) {
                     p.classList.add('active');
                 }
             });
+            if (saveSettingsBtn) saveSettingsBtn.classList.remove('hidden');
         });
     });
 

@@ -1225,3 +1225,33 @@ select, input[type="range"], input[type="number"] {
 .hover-action-buttons .action-btn.delete:hover {
     background: rgba(239, 68, 68, 0.2) !important;
 }
+
+/* --- Settings Menu Item List Accordion --- */
+.settings-menu-item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
+}
+
+.settings-menu-item:hover {
+    transform: translateY(-2px);
+    background: #F8FAFC;
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: var(--shadow-md);
+}
+
+.settings-menu-item:active {
+    transform: translateY(0);
+}
