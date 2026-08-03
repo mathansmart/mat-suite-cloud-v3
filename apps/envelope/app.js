@@ -872,8 +872,8 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div style="flex: 1; display: flex; align-items: center; gap: 15px; min-width: 0;">
                     <!-- Initials circle -->
-                    <div class="initials-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: ${color.bg}; color: ${color.fg}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13.5px; flex-shrink: 0; letter-spacing: 0.5px;">
-                        ${initials}
+                    <div class="initials-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: ${color.bg}; color: ${color.fg}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="ti ti-user" style="font-size: 18px;"></i>
                     </div>
                     <div style="min-width: 0; flex: 1;">
                         <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 5px;">${addr.name}</h4>
