@@ -120,14 +120,12 @@
             </div>
             
             <div class="format-selector" style="margin-bottom: 20px;">
-                <button class="settings-tab-btn active" data-tab="envelope">Envelope</button>
-                <button class="settings-tab-btn" data-tab="a5">A5 Paper</button>
-                <button class="settings-tab-btn" data-tab="categories">Categories</button>
-                <button class="settings-tab-btn" data-tab="letterpad">Letter Pad</button>
-            </div>
-
-            <!-- Envelope Settings Pane -->
-            <div id="pane-envelope" class="settings-pane active">
+                <button class="settings-tab-btn active" data-tab="envelope">
+                    <span>✉️ Envelope Settings</span>
+                    <span class="accordion-icon">▼</span>
+                </button>
+                <!-- Envelope Settings Pane -->
+                <div id="pane-envelope" class="settings-pane active">
                 <div class="control-group">
                     <h3>Font Styles</h3>
                     <label>Font Family</label>
@@ -197,6 +195,10 @@
             </div>
 
             <!-- A5 Settings Pane -->
+            <button class="settings-tab-btn" data-tab="a5">
+                <span>📄 A5 Paper Settings</span>
+                <span class="accordion-icon">▶</span>
+            </button>
             <div id="pane-a5" class="settings-pane">
                 <div class="control-group">
                     <h3>Sender Profile (FROM)</h3>
@@ -249,6 +251,10 @@
             </div>
 
             <!-- Categories Pane -->
+            <button class="settings-tab-btn" data-tab="categories">
+                <span>📁 Manage Categories</span>
+                <span class="accordion-icon">▶</span>
+            </button>
             <div id="pane-categories" class="settings-pane">
                 <div class="control-group">
                     <h3>Manage Categories</h3>
@@ -264,6 +270,10 @@
             </div>
 
             <!-- Letter Pad Pane -->
+            <button class="settings-tab-btn" data-tab="letterpad">
+                <span>📝 Manage Letter Pad</span>
+                <span class="accordion-icon">▶</span>
+            </button>
             <div id="pane-letterpad" class="settings-pane">
                 <div class="control-group">
                     <h3>Manage Letter Pad Companies</h3>
@@ -275,13 +285,15 @@
                     <div id="manage-company-list" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; max-height: 250px; overflow-y: auto;">
                         <!-- Filled by JS -->
                     </div>
+                    <!-- Share App Connection Link (Moved to Letter Pad Pane Only) -->
+                    <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <button id="share-app-btn" class="btn secondary" style="justify-content: center; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color: #38bdf8; padding: 8px; font-size: 0.8rem; width: 100%; gap: 6px;">🔗 Share Connection Link</button>
+                    </div>
                 </div>
             </div>
+            </div> <!-- End of format-selector accordion container -->
 
-            <!-- Share App Connection Link -->
-            <button id="share-app-btn" class="btn secondary" style="margin-top: 15px; justify-content: center; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color: #38bdf8; padding: 8px; font-size: 0.8rem; width: 100%; gap: 6px;">🔗 Share Connection Link</button>
-
-            <button id="save-settings-btn" class="btn primary" style="margin-top: 10px; width: 100%; justify-content: center;">💾 SAVE SETTINGS</button>
+            <button id="save-settings-btn" class="btn primary" style="margin-top: 20px; width: 100%; justify-content: center;">💾 SAVE SETTINGS</button>
         </div>
     </div>
 
