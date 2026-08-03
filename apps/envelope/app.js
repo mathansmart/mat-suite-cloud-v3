@@ -1621,9 +1621,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = currentBtn.dataset.tab;
             console.log('Switching to tab:', target);
             
-            // Switch active classes on buttons
-            settingsTabBtns.forEach(b => b.classList.remove('active'));
+            // Switch active classes on buttons & update chevron characters
+            settingsTabBtns.forEach(b => {
+                b.classList.remove('active');
+                const icon = b.querySelector('.accordion-icon');
+                if (icon) icon.textContent = '▶';
+            });
             currentBtn.classList.add('active');
+            const activeIcon = currentBtn.querySelector('.accordion-icon');
+            if (activeIcon) activeIcon.textContent = '▼';
             
             // Switch active classes on panes
             settingsPanes.forEach(p => {
