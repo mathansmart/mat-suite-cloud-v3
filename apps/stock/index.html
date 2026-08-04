@@ -2446,6 +2446,40 @@
   </div>
   <div id="lbl-logout-title" style="display:none;"></div>
   <script>
+    function getSubCategoryIcon(name) {
+      if (!name) return 'ti ti-category';
+      const n = name.toLowerCase().trim();
+      
+      // T-shirt / Shirts
+      if (n.includes('tshirt') || n.includes('t-shirt') || n.includes('t shirt')) {
+        return 'ti ti-shirt';
+      }
+      if (n.includes('shirt')) {
+        return 'ti ti-shirt';
+      }
+      
+      // Girls / Female
+      if (n.includes('girl') || n.includes('girls') || n.includes('girles') || n.includes('woman') || n.includes('women') || n.includes('female') || n.includes('lady') || n.includes('ladies') || n.includes('dress') || n.includes('frock') || n.includes('skirt') || n.includes('kurti') || n.includes('tops')) {
+        return 'ti ti-woman';
+      }
+      
+      // Boys / Male
+      if (n.includes('boy') || n.includes('boys') || n.includes('man') || n.includes('men') || n.includes('male') || n.includes('gent') || n.includes('gents')) {
+        return 'ti ti-user';
+      }
+      
+      // Kids / Children
+      if (n.includes('kid') || n.includes('kids') || n.includes('child') || n.includes('children') || n.includes('baby') || n.includes('babies')) {
+        return 'ti ti-mood-kid';
+      }
+      
+      // Pants / Jeans / Bottoms
+      if (n.includes('pant') || n.includes('pants') || n.includes('trouser') || n.includes('trousers') || n.includes('jeans') || n.includes('legging') || n.includes('leggings') || n.includes('track') || n.includes('short') || n.includes('shorts')) {
+        return 'ti ti-hanger';
+      }
+      
+      return 'ti ti-category';
+    }
 
     let toastTimer;
     function d2i(d) {
@@ -3492,7 +3526,7 @@ function exportPreviewToExcel() {
       <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:10px; margin-bottom: 25px; box-shadow:0 4px 12px rgba(0,0,0,0.03); overflow:hidden;">
          <div style="background:linear-gradient(90deg, var(--surface2) 0%, var(--surface) 100%); padding:12px 16px; border-bottom:1.5px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
             <div style="font-weight:800; font-size:18px; color:var(--primary); display:flex; align-items:center; gap:8px;">
-               <i class="ti ti-category" style="color:var(--accent); font-size:18px;"></i>
+               <i class="${getSubCategoryIcon(scName)}" style="color:var(--accent); font-size:18px;"></i>
                ${scName}
             </div>
             <div style="font-size:12px; font-weight:600; color:var(--text-muted); background:var(--background); padding:4px 10px; border-radius:20px; border:1px solid var(--border);">
@@ -3726,7 +3760,7 @@ function renderDashboard() {
         <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:10px; margin-bottom: 25px; box-shadow:0 4px 12px rgba(0,0,0,0.03); overflow:hidden;">
            <div style="background:linear-gradient(90deg, var(--surface2) 0%, var(--surface) 100%); padding:12px 16px; border-bottom:1.5px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
               <div style="font-weight:700; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
-                 <i class="ti ti-category" style="color:var(--accent); font-size:18px;"></i>
+                 <i class="${getSubCategoryIcon(scName)}" style="color:var(--accent); font-size:18px;"></i>
                  ${scName}
               </div>
               <div style="font-size:12px; font-weight:600; color:var(--text-muted); background:var(--background); padding:4px 10px; border-radius:20px; border:1px solid var(--border);">
@@ -7823,8 +7857,9 @@ function d2i(val) {
       if (!S.subCategories) S.subCategories = ['T-SHIRT', 'SHIRT', 'GENERAL'];
       wrap.innerHTML = S.subCategories.map(sc => `
         <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:6px 14px; display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700; color:#1e293b; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+          <i class="${getSubCategoryIcon(sc)}" style="font-size:15px; color:var(--accent);"></i>
           ${sc}
-          <div style="display:flex; gap:6px;">
+          <div style="display:flex; gap:6px; margin-left:auto;">
             <span style="cursor:pointer; color:#3b82f6; font-size:16px;" onclick="openEditSubCategory('${sc}')" title="Edit"><i class="ti ti-edit"></i></span>
             <span style="cursor:pointer; color:var(--danger); font-size:16px;" onclick="deleteSubCategory('${sc}')" title="Delete"><i class="ti ti-trash"></i></span>
           </div>
