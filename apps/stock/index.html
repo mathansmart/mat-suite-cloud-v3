@@ -8800,8 +8800,11 @@ function d2i(val) {
       dot.title = online ? 'Server Online' : 'Server Offline';
     }
 
-    let curBulkMonth = 'ALL';
+    let curBulkMonth = '';
     function renderBulkHistory(monthDisp) {
+      if (!curBulkMonth) {
+        curBulkMonth = todayStr().slice(0, 7);
+      }
       if (monthDisp) {
         if (monthDisp === 'ALL') {
           curBulkMonth = 'ALL';
