@@ -9030,6 +9030,68 @@ function d2i(val) {
 
     initApp();
 
+    function showSupplierDetail(supplierName) {
+      // Find all inward transactions for this supplier
+      const supplies = T.filter(t => t.tp === 'IN' && t.pa === supplierName);
+      
+      // Group by product name
+      const prodTotals = {};
+      supplies.forEach(t => {
+        const q = Number(t.q) || 0;
+        prodTotals[t.pn] = (prodTotals[t.pn] || 0) + q;
+      });
+      
+      // Sort products by quantity descending
+      const sortedProds = Object.entries(prodTotals)
+        .map(([name, boxes]) => ({ name, boxes }))
+        .sort((a, b) => b.boxes - a.boxes);
+        
+      const totalBoxes = sortedProds.reduce((sum, item) => sum + item.boxes, 0);
+
+      let prodListHtml = '';
+      if (sortedProds.length === 0) {
+        prodListHtml = '<div style="color:var(--text-muted); text-align:center; padding:30px; font-weight:600;">No product supplies recorded for this supplier.</div>';
+      } else {
+        sortedProds.forEach((p, idx) => {
+          prodListHtml += `
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.02); line-height:1.4;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:28px; height:28px; border-radius:8px; background:rgba(99,102,241,0.08); color:#6366f1; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; font-family:'JetBrains Mono',monospace;">
+                  ${idx + 1}
+                </div>
+                <div style="font-weight:700; color:var(--text-main); font-size:13.5px; line-height:1.4; padding-bottom:2px;">${p.name}</div>
+              </div>
+              <div style="font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--primary); font-size:14px;">
+                ${p.boxes} <span style="font-size:10px; font-weight:700; color:var(--text-muted); font-family:'Nunito',sans-serif;">Boxes</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      const html = `
+        <div style="font-family:'Nunito', sans-serif;">
+          <!-- Header with Back Button -->
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; border-bottom:1.5px solid var(--border-light); padding-bottom:15px;">
+            <button class="btn btn-ghost" onclick="showSuppliersModal()" style="padding:6px 10px; font-size:13px; font-weight:700; color:#6366f1; display:flex; align-items:center; gap:4px; border:1px solid rgba(99,102,241,0.2); border-radius:8px; background:rgba(99,102,241,0.05); cursor:pointer;">
+              ← Back
+            </button>
+            <div>
+              <h3 style="margin:0; font-size:15px; font-weight:800; color:var(--text-main); letter-spacing:0.5px; line-height:1.4; padding-bottom:2px;">${supplierName}</h3>
+              <p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:600;">Total Supply: ${totalBoxes} Boxes</p>
+            </div>
+          </div>
+
+          <!-- Product Supply List -->
+          <div style="display:flex; flex-direction:column; gap:10px; max-height:50vh; overflow-y:auto; padding-right:6px; margin-bottom:5px;">
+            ${prodListHtml}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-content').innerHTML = html;
+    }
+
     function showSuppliersModal() {
       const suppliers = S.suppliers || [];
       
@@ -9064,9 +9126,10 @@ function d2i(val) {
           const phoneStr = s.p ? `<div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:4px; margin-top:2px;"><i class="ti ti-phone" style="font-size:11px;"></i> ${s.p}</div>` : '';
           
           listHtml += `
-            <div class="supplier-stat-card" style="position:relative; overflow:hidden; padding:15px; background:var(--surface); border:1.5px solid var(--border-light); border-radius:14px; display:flex; flex-direction:column; gap:10px; transition:all 0.25s ease; box-shadow:0 2px 6px rgba(0,0,0,0.02);" 
+            <div class="supplier-stat-card" style="position:relative; overflow:hidden; padding:15px; background:var(--surface); border:1.5px solid var(--border-light); border-radius:14px; display:flex; flex-direction:column; gap:10px; transition:all 0.25s ease; box-shadow:0 2px 6px rgba(0,0,0,0.02); cursor:pointer;" 
                  onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(99,102,241,0.06)';" 
-                 onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.02)';">
+                 onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.02)';"
+                 onclick="showSupplierDetail('${s.n.replace(/'/g, "\\'")}')">
               
               <div style="display:flex; align-items:center; justify-content:space-between;">
                 <div style="display:flex; align-items:center; gap:12px;">
@@ -9074,7 +9137,7 @@ function d2i(val) {
                      ${idx + 1}
                   </div>
                   <div>
-                     <div style="font-weight:700; color:var(--text-main); font-size:14.5px; letter-spacing:0.1px;">${s.n}</div>
+                     <div style="font-weight:700; color:var(--text-main); font-size:14.5px; letter-spacing:0.1px; line-height:1.4; padding-bottom:2px;">${s.n}</div>
                      ${phoneStr}
                   </div>
                 </div>
