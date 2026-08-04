@@ -9056,7 +9056,7 @@ function d2i(val) {
           prodListHtml += `
             <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.02); line-height:1.4;">
               <div style="display:flex; align-items:center; gap:10px;">
-                <div style="width:28px; height:28px; border-radius:8px; background:rgba(99,102,241,0.08); color:#6366f1; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; font-family:'JetBrains Mono',monospace;">
+                <div style="width:28px; height:28px; border-radius:8px; background:rgba(99,102,241,0.08); color:#6366f1; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; font-family:'Nunito',sans-serif; line-height:1; padding-bottom:1px; box-sizing:border-box;">
                   ${idx + 1}
                 </div>
                 <div style="font-weight:700; color:var(--text-main); font-size:13.5px; line-height:1.4; padding-bottom:2px;">${p.name}</div>
@@ -9090,6 +9090,22 @@ function d2i(val) {
       `;
 
       document.getElementById('modal-content').innerHTML = html;
+
+      // Style cancel button in the footer to go back to list
+      const cancelBtn = document.querySelector('.modal-overlay .modal-footer .btn-ghost') || document.querySelector('.modal-overlay .modal-footer .btn-primary');
+      if (cancelBtn) {
+        cancelBtn.textContent = 'Back to List';
+        cancelBtn.className = 'btn btn-primary';
+        cancelBtn.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+        cancelBtn.style.color = '#fff';
+        cancelBtn.style.border = 'none';
+        cancelBtn.style.boxShadow = '0 4px 12px rgba(99,102,241,0.2)';
+        cancelBtn.style.borderRadius = '20px';
+        cancelBtn.style.padding = '8px 24px';
+        cancelBtn.style.fontSize = '12.5px';
+        cancelBtn.style.fontWeight = '700';
+        cancelBtn.onclick = showSuppliersModal;
+      }
     }
 
     function showSuppliersModal() {
@@ -9133,7 +9149,7 @@ function d2i(val) {
               
               <div style="display:flex; align-items:center; justify-content:space-between;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                  <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1)); color:#6366f1; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; font-family:'JetBrains Mono',monospace;">
+                  <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1)); color:#6366f1; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; font-family:'Nunito',sans-serif; line-height:1; padding-bottom:1px; box-sizing:border-box;">
                      ${idx + 1}
                   </div>
                   <div>
@@ -9186,7 +9202,7 @@ function d2i(val) {
       document.getElementById('modal-btn').style.display = 'none';
       
       // Style cancel button in the footer as a premium close button
-      const cancelBtn = document.querySelector('.modal-overlay .modal-footer .btn-ghost');
+      const cancelBtn = document.querySelector('.modal-overlay .modal-footer .btn-ghost') || document.querySelector('.modal-overlay .modal-footer .btn-primary');
       if (cancelBtn) {
         cancelBtn.textContent = 'Close';
         cancelBtn.className = 'btn btn-primary';
@@ -9198,6 +9214,7 @@ function d2i(val) {
         cancelBtn.style.padding = '8px 24px';
         cancelBtn.style.fontSize = '12.5px';
         cancelBtn.style.fontWeight = '700';
+        cancelBtn.onclick = closeModal;
       }
 
       document.getElementById('modal-overlay').classList.add('open');
