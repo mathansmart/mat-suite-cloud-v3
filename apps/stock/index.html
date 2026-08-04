@@ -8896,14 +8896,14 @@ function d2i(val) {
             </select>
           </div>
         </div>
-        <div class="table-wrap" style="overflow:hidden; max-height:400px; overflow-y:auto;">
+        <div class="table-wrap" style="max-height:400px; overflow-y:auto; overflow-x:hidden;">
           <table style="width:100%; border-collapse:collapse;">
-            <thead style="background:var(--surface2); position:sticky; top:0; z-index:1;">
+            <thead>
               <tr>
-                <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border);">${t('bulk_date')}</th>
-                <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border);">${t('bulk_file')}</th>
-                <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border);">${t('bulk_items')}</th>
-                <th style="text-align:right; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border);">Action</th>
+                <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border); position:sticky; top:0; z-index:10; background:var(--surface2);">${t('bulk_date')}</th>
+                <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border); position:sticky; top:0; z-index:10; background:var(--surface2);">${t('bulk_file')}</th>
+                <th style="text-align:left; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border); position:sticky; top:0; z-index:10; background:var(--surface2);">${t('bulk_items')}</th>
+                <th style="text-align:right; padding:10px 12px; font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:1px; border-bottom:1.5px solid var(--border); position:sticky; top:0; z-index:10; background:var(--surface2);">Action</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
