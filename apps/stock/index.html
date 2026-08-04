@@ -4247,6 +4247,7 @@ function renderDashboard() {
       }
 
       let saved = 0;
+      const now = new Date().toTimeString().slice(0, 8);
       siAddedPids.forEach(pid => {
         const p = P.find(x => String(x.id) === String(pid));
         const d = siTableData[pid] || siTableData[Number(pid)]; if (!d || !p) return;
