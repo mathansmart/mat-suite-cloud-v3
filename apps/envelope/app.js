@@ -850,11 +850,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return false;
             if (!filter.trim()) return true;
             
-            const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || ''), (addr.category || '')].join(' ').toLowerCase();
+            const rawNameText = (addr.name || '').toLowerCase();
             // Remove punctuation from the target text as well
-            const cleanCombinedText = rawCombinedText.replace(/[^a-z0-9\s]/gi, '');
+            const cleanNameText = rawNameText.replace(/[^a-z0-9\s]/gi, '');
             
-            return searchTerms.every(term => cleanCombinedText.includes(term));
+            return searchTerms.every(term => cleanNameText.includes(term));
         });
 
         // 2. Sort: Alphabetical (A-Z)
@@ -1136,9 +1136,9 @@ document.addEventListener('DOMContentLoaded', () => {
             addresses.forEach(addr => {
                 if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return;
                 if (filter.trim()) {
-                    const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || ''), (addr.category || '')].join(' ').toLowerCase();
-                    const cleanCombinedText = rawCombinedText.replace(/[^a-z0-9\s]/gi, '');
-                    if (!searchTerms.every(term => cleanCombinedText.includes(term))) return;
+                    const rawNameText = (addr.name || '').toLowerCase();
+                    const cleanNameText = rawNameText.replace(/[^a-z0-9\s]/gi, '');
+                    if (!searchTerms.every(term => cleanNameText.includes(term))) return;
                 }
                 if (!selectedIds.includes(addr.id)) {
                     selectedIds.push(addr.id);
