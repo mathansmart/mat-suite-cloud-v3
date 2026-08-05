@@ -1628,6 +1628,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         settingsPanes.forEach(pane => pane.classList.remove('active'));
         if (saveSettingsBtn) saveSettingsBtn.classList.add('hidden');
+
+        // Reset active state for old layout accordion buttons
+        settingsTabBtns.forEach(b => {
+            b.classList.remove('active');
+            const icon = b.querySelector('.accordion-icon');
+            if (icon) icon.textContent = '▶';
+        });
     };
 
     if (settingsBackBtn) {
@@ -1638,7 +1645,16 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             const currentBtn = e.currentTarget;
             const target = currentBtn.dataset.tab;
-            console.log('Opening settings tab/page:', target);
+            console.log('Opening/Toggling settings tab/page:', target);
+            
+            // Check if this pane is already active to toggle it close
+            const activePane = document.getElementById(`pane-${target}`);
+            const isAlreadyActive = activePane && activePane.classList.contains('active');
+            
+            if (isAlreadyActive) {
+                goBackToSettingsMenu();
+                return;
+            }
             
             // Check if we are in the new menu navigation mode
             if (settingsMenuList) {
