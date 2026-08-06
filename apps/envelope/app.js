@@ -841,9 +841,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderAddresses = (filter = '') => {
         addressList.innerHTML = '';
         
-        // Remove punctuation from filter and split by spaces
-        const cleanFilter = filter.toLowerCase().replace(/[^a-z0-9\s]/gi, '');
-        const searchTerms = cleanFilter.trim().split(/\s+/).filter(Boolean);
+        // Remove spaces and punctuation from filter
+        const cleanFilter = filter.toLowerCase().replace(/[^a-z0-9]/gi, '');
         
         // 1. Filter
         let filtered = addresses.filter(addr => {
@@ -851,10 +850,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!filter.trim()) return true;
             
             const rawNameText = (addr.name || '').toLowerCase();
-            // Remove punctuation from the target text as well
-            const cleanNameText = rawNameText.replace(/[^a-z0-9\s]/gi, '');
+            // Remove spaces and punctuation from the target text as well
+            const cleanNameText = rawNameText.replace(/[^a-z0-9]/gi, '');
             
-            return searchTerms.every(term => cleanNameText.includes(term));
+            return cleanNameText.includes(cleanFilter);
         });
 
         // 2. Sort: Alphabetical (A-Z)
@@ -1130,15 +1129,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', () => {
             const filter = searchInput.value;
-            const cleanFilter = filter.toLowerCase().replace(/[^a-z0-9\s]/gi, '');
-            const searchTerms = cleanFilter.trim().split(/\s+/).filter(Boolean);
+            const cleanFilter = filter.toLowerCase().replace(/[^a-z0-9]/gi, '');
             
             addresses.forEach(addr => {
                 if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return;
                 if (filter.trim()) {
                     const rawNameText = (addr.name || '').toLowerCase();
-                    const cleanNameText = rawNameText.replace(/[^a-z0-9\s]/gi, '');
-                    if (!searchTerms.every(term => cleanNameText.includes(term))) return;
+                    const cleanNameText = rawNameText.replace(/[^a-z0-9]/gi, '');
+                    if (!cleanNameText.includes(cleanFilter)) return;
                 }
                 if (!selectedIds.includes(addr.id)) {
                     selectedIds.push(addr.id);
