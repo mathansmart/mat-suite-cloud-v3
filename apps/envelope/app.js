@@ -1864,7 +1864,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="note-text" style="font-size: 0.8rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px;"></span>
                 <span class="note-time" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; margin-top: 4px;">${note.time}</span>
             `;
-            card.querySelector('.note-card-title').textContent = note.title || 'Untitled Note';
+            
+            const isExcel = note.type === 'excel';
+            card.querySelector('.note-card-title').textContent = (isExcel ? '📊 ' : '📄 ') + (note.title || 'Untitled Note');
             card.querySelector('.note-text').textContent = note.text;
 
             // Click event to show note content in center page
@@ -1876,11 +1878,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 const noteDetailTitle = document.getElementById('note-detail-title');
                 const noteDetailContent = document.getElementById('note-detail-content');
                 const noteDetailTime = document.getElementById('note-detail-time');
+                const excelViewerContainer = document.getElementById('excel-viewer-container');
+                const excelViewerTable = document.getElementById('excel-viewer-table');
                 
-                if (noteDetailSection && noteDetailContent && noteDetailTime) {
-                    if (noteDetailTitle) noteDetailTitle.textContent = '📝 ' + (note.title || 'Untitled Note');
-                    noteDetailContent.textContent = note.text;
+                if (noteDetailSection && noteDetailTime) {
+                    if (noteDetailTitle) noteDetailTitle.textContent = (isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note');
                     noteDetailTime.textContent = note.time;
+                    
+                    if (isExcel && excelViewerContainer && excelViewerTable) {
+                        if (noteDetailContent) noteDetailContent.classList.add('hidden');
+                        excelViewerContainer.classList.remove('hidden');
+                        
+                        excelViewerTable.innerHTML = '';
+                        const data = note.excelData || { headers: [], rows: [] };
+                        
+                        // Render headers
+                        const trHead = document.createElement('tr');
+                        (data.headers || []).forEach(h => {
+                            const th = document.createElement('th');
+                            th.textContent = h;
+                            trHead.appendChild(th);
+                        });
+                        excelViewerTable.appendChild(trHead);
+                        
+                        // Render rows
+                        (data.rows || []).forEach(row => {
+                            const tr = document.createElement('tr');
+                            row.forEach(cell => {
+                                const td = document.createElement('td');
+                                td.textContent = cell;
+                                tr.appendChild(td);
+                            });
+                            excelViewerTable.appendChild(tr);
+                        });
+                    } else {
+                        if (excelViewerContainer) excelViewerContainer.classList.add('hidden');
+                        if (noteDetailContent) {
+                            noteDetailContent.classList.remove('hidden');
+                            noteDetailContent.textContent = note.text;
+                        }
+                    }
                     
                     if (addressListSection) addressListSection.classList.add('hidden');
                     noteDetailSection.classList.remove('hidden');
@@ -1899,8 +1936,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const noteDetailSection = document.getElementById('note-detail-section');
                     const noteDetailTitle = document.getElementById('note-detail-title');
                     const addressListSection = document.querySelector('.address-list-section');
-                    if (noteDetailContent && noteDetailContent.textContent === note.text && noteDetailTitle && noteDetailTitle.textContent === '📝 ' + (note.title || 'Untitled Note')) {
+                    const excelViewerContainer = document.getElementById('excel-viewer-container');
+                    
+                    if (noteDetailTitle && noteDetailTitle.textContent === ((isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note'))) {
                         if (noteDetailSection) noteDetailSection.classList.add('hidden');
+                        if (excelViewerContainer) excelViewerContainer.classList.add('hidden');
                         if (addressListSection) addressListSection.classList.remove('hidden');
                     }
 
@@ -1927,6 +1967,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newNote = {
                 id: Date.now(),
                 title: 'Untitled Note',
+                type: 'plain',
                 text: text,
                 time: timeStr
             };
@@ -1948,11 +1989,124 @@ document.addEventListener('DOMContentLoaded', () => {
     const centerNotebookTextarea = document.getElementById('center-notebook-textarea');
     const centerSaveNoteBtn = document.getElementById('center-save-note-btn');
 
+    // Excel Sheet state variables & controls
+    const togglePlainSheetBtn = document.getElementById('toggle-plain-sheet-btn');
+    const toggleExcelSheetBtn = document.getElementById('toggle-excel-sheet-btn');
+    const excelEditorContainer = document.getElementById('excel-editor-container');
+    const excelEditorTable = document.getElementById('excel-editor-table');
+    const excelAddRowBtn = document.getElementById('excel-add-row-btn');
+    const excelAddColBtn = document.getElementById('excel-add-col-btn');
+    const excelClearBtn = document.getElementById('excel-clear-btn');
+
+    let currentNoteType = 'plain'; // 'plain' or 'excel'
+    let excelHeaders = ['A', 'B', 'C', 'D'];
+    let excelRows = [
+        ['', '', '', ''],
+        ['', '', '', ''],
+        ['', '', '', ''],
+        ['', '', '', '']
+    ];
+
+    const renderExcelEditorTable = () => {
+        if (!excelEditorTable) return;
+        excelEditorTable.innerHTML = '';
+
+        // Render headers
+        const trHead = document.createElement('tr');
+        excelHeaders.forEach(h => {
+            const th = document.createElement('th');
+            th.textContent = h;
+            trHead.appendChild(th);
+        });
+        excelEditorTable.appendChild(trHead);
+
+        // Render rows
+        excelRows.forEach((row, rowIndex) => {
+            const tr = document.createElement('tr');
+            row.forEach((cell, colIndex) => {
+                const td = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = cell;
+                input.addEventListener('input', (e) => {
+                    excelRows[rowIndex][colIndex] = e.target.value;
+                });
+                td.appendChild(input);
+                tr.appendChild(td);
+            });
+            excelEditorTable.appendChild(tr);
+        });
+    };
+
+    if (togglePlainSheetBtn && toggleExcelSheetBtn && centerNotebookTextarea && excelEditorContainer) {
+        togglePlainSheetBtn.addEventListener('click', () => {
+            currentNoteType = 'plain';
+            togglePlainSheetBtn.className = 'btn primary';
+            toggleExcelSheetBtn.className = 'btn secondary';
+            toggleExcelSheetBtn.style.background = 'transparent';
+            toggleExcelSheetBtn.style.color = 'var(--text-secondary)';
+            toggleExcelSheetBtn.style.borderColor = 'var(--border-color)';
+            
+            centerNotebookTextarea.classList.remove('hidden');
+            excelEditorContainer.classList.add('hidden');
+        });
+
+        toggleExcelSheetBtn.addEventListener('click', () => {
+            currentNoteType = 'excel';
+            toggleExcelSheetBtn.className = 'btn primary';
+            toggleExcelSheetBtn.style.background = '';
+            toggleExcelSheetBtn.style.color = '';
+            toggleExcelSheetBtn.style.borderColor = '';
+            togglePlainSheetBtn.className = 'btn secondary';
+            togglePlainSheetBtn.style.background = 'transparent';
+            togglePlainSheetBtn.style.color = 'var(--text-secondary)';
+            togglePlainSheetBtn.style.borderColor = 'var(--border-color)';
+
+            centerNotebookTextarea.classList.add('hidden');
+            excelEditorContainer.classList.remove('hidden');
+            renderExcelEditorTable();
+        });
+    }
+
+    if (excelAddRowBtn) {
+        excelAddRowBtn.addEventListener('click', () => {
+            const newRow = Array(excelHeaders.length).fill('');
+            excelRows.push(newRow);
+            renderExcelEditorTable();
+        });
+    }
+
+    if (excelAddColBtn) {
+        excelAddColBtn.addEventListener('click', () => {
+            const nextCharCode = 65 + excelHeaders.length; // 65 is 'A'
+            const nextHeader = String.fromCharCode(nextCharCode);
+            excelHeaders.push(nextHeader);
+            excelRows.forEach(row => row.push(''));
+            renderExcelEditorTable();
+        });
+    }
+
+    if (excelClearBtn) {
+        excelClearBtn.addEventListener('click', () => {
+            excelHeaders = ['A', 'B', 'C', 'D'];
+            excelRows = [
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', '']
+            ];
+            renderExcelEditorTable();
+        });
+    }
+
     if (notebookTextarea && centerNotebookTextarea && noteEditorSection && addressListSection) {
         notebookTextarea.addEventListener('focus', () => {
             // Copy whatever is inside right side textarea to the center editor
             centerNotebookTextarea.value = notebookTextarea.value;
             if (centerNotebookTitle) centerNotebookTitle.value = '';
+            
+            // Revert tab state to Plain Sheet by default
+            if (togglePlainSheetBtn) togglePlainSheetBtn.click();
             
             // Hide normal address list and active view note sections
             addressListSection.classList.add('hidden');
@@ -1979,23 +2133,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (centerSaveNoteBtn && centerNotebookTextarea && notebookTextarea && noteEditorSection && addressListSection) {
         centerSaveNoteBtn.addEventListener('click', () => {
-            const text = centerNotebookTextarea.value.trim();
-            if (!text) {
-                showNotification('Please enter some text before saving.', 'warning', 'Empty Note');
-                return;
-            }
-
             const title = centerNotebookTitle ? centerNotebookTitle.value.trim() : '';
-
             const now = new Date();
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + now.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-            const newNote = {
-                id: Date.now(),
-                title: title || 'Untitled Note',
-                text: text,
-                time: timeStr
-            };
+            let newNote;
+            if (currentNoteType === 'excel') {
+                // Generate preview summary of cells
+                const textPreview = excelRows.map(row => row.filter(cell => cell.trim().length > 0).join(' | ')).filter(r => r.length > 0).join('\n');
+                newNote = {
+                    id: Date.now(),
+                    title: title || 'Untitled Excel Sheet',
+                    type: 'excel',
+                    text: textPreview || 'Empty Excel Sheet',
+                    excelData: {
+                        headers: [...excelHeaders],
+                        rows: JSON.parse(JSON.stringify(excelRows))
+                    },
+                    time: timeStr
+                };
+            } else {
+                const text = centerNotebookTextarea.value.trim();
+                if (!text) {
+                    showNotification('Please enter some text before saving.', 'warning', 'Empty Note');
+                    return;
+                }
+                newNote = {
+                    id: Date.now(),
+                    title: title || 'Untitled Note',
+                    type: 'plain',
+                    text: text,
+                    time: timeStr
+                };
+            }
 
             notebookNotes.unshift(newNote);
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
@@ -2004,6 +2174,15 @@ document.addEventListener('DOMContentLoaded', () => {
             centerNotebookTextarea.value = '';
             if (centerNotebookTitle) centerNotebookTitle.value = '';
             notebookTextarea.value = '';
+            
+            // Reset excel state
+            excelHeaders = ['A', 'B', 'C', 'D'];
+            excelRows = [
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', '']
+            ];
             
             renderNotebookNotes();
             

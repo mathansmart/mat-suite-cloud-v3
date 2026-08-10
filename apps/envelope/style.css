@@ -1424,3 +1424,41 @@ select, input[type="range"], input[type="number"] {
 .note-card:hover .delete-note-btn {
     opacity: 1;
 }
+
+/* Excel Sheet Styles */
+#excel-editor-table, #excel-viewer-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+#excel-editor-table th, #excel-viewer-table th {
+    background: #f1f5f9;
+    color: var(--text-primary);
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    padding: 6px 12px;
+    user-select: none;
+}
+#excel-editor-table td, #excel-viewer-table td {
+    border: 1px solid #cbd5e1;
+    padding: 2px 4px;
+    background: #fff;
+    color: var(--text-primary);
+    min-width: 80px;
+}
+#excel-editor-table td input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: inherit;
+    outline: none;
+    padding: 4px 6px;
+}
+#excel-editor-table td input:focus {
+    background: #eff6ff;
+}
+#excel-viewer-table td {
+    padding: 6px 10px;
+}
