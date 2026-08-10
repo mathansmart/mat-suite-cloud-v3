@@ -2007,13 +2007,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Excel formatting toolbar DOM references
     const excelFormatBold = document.getElementById('excel-format-bold');
-    const excelFormatAlign = document.getElementById('excel-format-align');
-    const excelFormatColor = document.getElementById('excel-format-color');
+    const excelAlignLeft = document.getElementById('excel-align-left');
+    const excelAlignCenter = document.getElementById('excel-align-center');
+    const excelAlignRight = document.getElementById('excel-align-right');
+    const excelColorBtn = document.getElementById('excel-color-btn');
+    const excelColorDropdown = document.getElementById('excel-color-dropdown');
+    const excelHiddenColorPicker = document.getElementById('excel-hidden-color-picker');
 
     let currentNoteType = 'plain'; // 'plain' or 'excel'
     let excelHeaders = ['A', 'B', 'C', 'D'];
     let activeCell = { rowIndex: 0, colIndex: 0 };
     
+    // Custom color palettes
+    const themeColors = [
+        '#ffffff', '#000000', '#eeece1', '#1f497d', '#4f81bd', '#c0504d', '#9bbb59', '#8064a2', '#4bacc6', '#f79646',
+        '#f2f2f2', '#7f7f7f', '#ddd9c3', '#c6d9f0', '#dce6f1', '#f2dcdb', '#ebf1de', '#e5e0ec', '#dbeef3', '#fde9d9',
+        '#d9d9d9', '#595959', '#c4bd97', '#8db4e2', '#b8cce4', '#e5b9b7', '#d7e3bc', '#ccc1d9', '#b7dee8', '#fbd5b5'
+    ];
+    
+    const standardColors = [
+        '#c00000', '#ff0000', '#ffc000', '#ffff00', '#92d050', '#00b050', '#00b0f0', '#0070c0', '#002060', '#7030a0'
+    ];
+
+    let recentColors = ['#000000'];
+
     // Initialize 2D cell objects array
     const createEmptyCell = () => ({ value: '', bold: false, align: 'left', color: '#000000' });
     let excelRows = [
@@ -2022,6 +2039,140 @@ document.addEventListener('DOMContentLoaded', () => {
         [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
         [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
     ];
+
+    const updateAlignButtons = (align) => {
+        [excelAlignLeft, excelAlignCenter, excelAlignRight].forEach(btn => {
+            if (btn) {
+                btn.style.background = '';
+                btn.style.color = '';
+            }
+        });
+        let activeBtn = null;
+        if (align === 'left' && excelAlignLeft) activeBtn = excelAlignLeft;
+        if (align === 'center' && excelAlignCenter) activeBtn = excelAlignCenter;
+        if (align === 'right' && excelAlignRight) activeBtn = excelAlignRight;
+        if (activeBtn) {
+            activeBtn.style.background = 'var(--accent-blue)';
+            activeBtn.style.color = '#fff';
+        }
+    };
+
+    const applyAlignment = (align) => {
+        const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
+        cell.align = align;
+        updateAlignButtons(align);
+        
+        const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
+        if (input) {
+            input.style.textAlign = align;
+        }
+    };
+
+    if (excelAlignLeft) excelAlignLeft.addEventListener('click', () => applyAlignment('left'));
+    if (excelAlignCenter) excelAlignCenter.addEventListener('click', () => applyAlignment('center'));
+    if (excelAlignRight) excelAlignRight.addEventListener('click', () => applyAlignment('right'));
+
+    const renderColorGrids = () => {
+        const themeGrid = document.getElementById('theme-colors-grid');
+        const standardGrid = document.getElementById('standard-colors-grid');
+        const recentGrid = document.getElementById('recent-colors-grid');
+
+        if (themeGrid) {
+            themeGrid.innerHTML = '';
+            themeColors.forEach(color => {
+                const box = document.createElement('div');
+                box.style.width = '14px';
+                box.style.height = '14px';
+                box.style.background = color;
+                box.style.border = '1px solid #444';
+                box.style.cursor = 'pointer';
+                box.style.borderRadius = '2px';
+                box.addEventListener('click', () => applyColor(color));
+                themeGrid.appendChild(box);
+            });
+        }
+
+        if (standardGrid) {
+            standardGrid.innerHTML = '';
+            standardColors.forEach(color => {
+                const box = document.createElement('div');
+                box.style.width = '14px';
+                box.style.height = '14px';
+                box.style.background = color;
+                box.style.border = '1px solid #444';
+                box.style.cursor = 'pointer';
+                box.style.borderRadius = '2px';
+                box.addEventListener('click', () => applyColor(color));
+                standardGrid.appendChild(box);
+            });
+        }
+
+        if (recentGrid) {
+            recentGrid.innerHTML = '';
+            recentColors.forEach(color => {
+                const box = document.createElement('div');
+                box.style.width = '14px';
+                box.style.height = '14px';
+                box.style.background = color;
+                box.style.border = '1px solid #444';
+                box.style.cursor = 'pointer';
+                box.style.borderRadius = '2px';
+                box.addEventListener('click', () => applyColor(color));
+                recentGrid.appendChild(box);
+            });
+        }
+    };
+
+    const applyColor = (color) => {
+        const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
+        cell.color = color;
+        
+        // Add to recent colors (keep unique, max 10)
+        recentColors = [color, ...recentColors.filter(c => c !== color)].slice(0, 10);
+        renderColorGrids();
+
+        // Update active cell text color in DOM
+        const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
+        if (input) {
+            input.style.color = color;
+        }
+
+        // Close dropdown
+        if (excelColorDropdown) excelColorDropdown.classList.add('hidden');
+        
+        // Update color underline of the "A" button
+        const colorUnderline = document.querySelector('#excel-color-btn span:first-child');
+        if (colorUnderline) colorUnderline.style.borderBottomColor = color;
+    };
+
+    if (excelColorBtn && excelColorDropdown) {
+        excelColorBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            excelColorDropdown.classList.toggle('hidden');
+            renderColorGrids();
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            excelColorDropdown.classList.add('hidden');
+        });
+        excelColorDropdown.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    const colorAutoBtn = document.getElementById('color-auto-btn');
+    if (colorAutoBtn) {
+        colorAutoBtn.addEventListener('click', () => applyColor('#000000'));
+    }
+
+    const moreColorsTrigger = document.getElementById('more-colors-trigger');
+    if (moreColorsTrigger && excelHiddenColorPicker) {
+        moreColorsTrigger.addEventListener('click', () => {
+            excelHiddenColorPicker.click();
+        });
+        excelHiddenColorPicker.addEventListener('input', (e) => {
+            applyColor(e.target.value);
+        });
+    }
 
     const renderExcelEditorTable = () => {
         if (!excelEditorTable) return;
@@ -2069,9 +2220,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         excelFormatBold.style.borderColor = '';
                     }
 
-                    // Update alignment select and color picker
-                    excelFormatAlign.value = cell.align || 'left';
-                    excelFormatColor.value = cell.color || '#000000';
+                    // Update active alignment button state
+                    updateAlignButtons(cell.align || 'left');
+
+                    // Update color button underline color
+                    const colorUnderline = document.querySelector('#excel-color-btn span:first-child');
+                    if (colorUnderline) {
+                        colorUnderline.style.borderBottomColor = cell.color || '#000000';
+                    }
                 });
 
                 // Keyboard arrow/enter navigation
@@ -2084,6 +2240,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         e.preventDefault();
                         if (r < excelRows.length - 1) {
                             targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                        } else {
+                            // At the last row! Auto add a row!
+                            const newRow = Array(excelHeaders.length).fill(null).map(() => createEmptyCell());
+                            excelRows.push(newRow);
+                            renderExcelEditorTable();
+                            
+                            // Focus the cell in the newly created row
+                            setTimeout(() => {
+                                const newInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                                if (newInput) newInput.focus();
+                            }, 50);
+                            return;
                         }
                     } else if (e.key === 'ArrowUp') {
                         e.preventDefault();
@@ -2142,30 +2310,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
             if (input) {
                 input.style.fontWeight = cell.bold ? 'bold' : 'normal';
-            }
-        });
-    }
-
-    if (excelFormatAlign) {
-        excelFormatAlign.addEventListener('change', () => {
-            const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
-            cell.align = excelFormatAlign.value;
-
-            const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
-            if (input) {
-                input.style.textAlign = cell.align;
-            }
-        });
-    }
-
-    if (excelFormatColor) {
-        excelFormatColor.addEventListener('input', () => {
-            const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
-            cell.color = excelFormatColor.value;
-
-            const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
-            if (input) {
-                input.style.color = cell.color;
             }
         });
     }

@@ -163,15 +163,51 @@
                                 <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 4px;"></div>
                                 <!-- Formatting Controls -->
                                 <div style="display: flex; gap: 6px; align-items: center;">
-                                    <button id="excel-format-bold" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; outline: none; border-color: var(--border-color);">B</button>
-                                    <select id="excel-format-align" style="padding: 4px; font-size: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: #fff; cursor: pointer; height: 28px; color: var(--text-primary);">
-                                        <option value="left">Align Left</option>
-                                        <option value="center">Align Center</option>
-                                        <option value="right">Align Right</option>
-                                    </select>
-                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                        <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Color:</span>
-                                        <input type="color" id="excel-format-color" style="border: 1px solid var(--border-color); border-radius: 4px; width: 28px; height: 28px; cursor: pointer; padding: 0; background: transparent; outline: none;">
+                                    <button id="excel-format-bold" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; outline: none; border-color: var(--border-color); background: transparent;">B</button>
+                                    
+                                    <!-- Alignment Buttons -->
+                                    <div style="display: flex; gap: 2px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; height: 28px; background: transparent;">
+                                        <button id="excel-align-left" class="btn secondary" style="padding: 0; width: 26px; font-size: 0.75rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Left">⫷</button>
+                                        <button id="excel-align-center" class="btn secondary" style="padding: 0; width: 26px; font-size: 0.75rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Center">⫸⫷</button>
+                                        <button id="excel-align-right" class="btn secondary" style="padding: 0; width: 26px; font-size: 0.75rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Right">⫸</button>
+                                    </div>
+
+                                    <!-- Custom Color Picker Dropdown -->
+                                    <div style="position: relative; display: inline-block;">
+                                        <button id="excel-color-btn" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; height: 28px; display: flex; align-items: center; gap: 4px; border-color: var(--border-color); background: transparent;" title="Font Color">
+                                            <span style="border-bottom: 3.5px solid #000000; padding-bottom: 1px; display: inline-block; width: 14px; text-align: center; font-weight: 800;">A</span>
+                                            <span style="font-size: 0.5rem; opacity: 0.7;">▼</span>
+                                        </button>
+                                        <!-- Dropdown Menu -->
+                                        <div id="excel-color-dropdown" class="hidden" style="position: absolute; top: 32px; left: 0; background: #262626; border: 1px solid #444; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); padding: 12px; z-index: 100; width: 210px; color: #fff;">
+                                            <div id="color-auto-btn" style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.75rem; transition: background 0.2s; margin-bottom: 8px;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='transparent'">
+                                                <div style="width: 14px; height: 14px; background: #000000; border: 1px solid #666; border-radius: 2px;"></div>
+                                                <span style="font-weight: 600;">Automatic</span>
+                                            </div>
+                                            
+                                            <div style="font-size: 0.65rem; color: #aaa; margin: 4px 4px 6px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Theme Colors</div>
+                                            <div id="theme-colors-grid" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 8px; padding: 0 4px;">
+                                                <!-- Theme grids populated by JS -->
+                                            </div>
+
+                                            <div style="font-size: 0.65rem; color: #aaa; margin: 8px 4px 6px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Standard Colors</div>
+                                            <div id="standard-colors-grid" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 8px; padding: 0 4px;">
+                                                <!-- Standard grids populated by JS -->
+                                            </div>
+
+                                            <div style="font-size: 0.65rem; color: #aaa; margin: 8px 4px 6px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recent Colors</div>
+                                            <div id="recent-colors-grid" style="display: flex; gap: 4px; margin-bottom: 8px; min-height: 16px; flex-wrap: wrap; padding: 0 4px;">
+                                                <!-- Recent grids populated by JS -->
+                                            </div>
+                                            
+                                            <div style="border-top: 1px solid #444; margin-top: 8px; padding-top: 6px; display: flex; align-items: center; justify-content: space-between; padding-left: 4px; padding-right: 4px;">
+                                                <div id="more-colors-trigger" style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">
+                                                    <span>🎨</span>
+                                                    <span>More Colors...</span>
+                                                </div>
+                                                <input type="color" id="excel-hidden-color-picker" style="opacity: 0; width: 0; height: 0; position: absolute;">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
