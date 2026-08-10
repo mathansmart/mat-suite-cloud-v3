@@ -1921,17 +1921,6 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
             notebookTextarea.value = '';
             renderNotebookNotes();
-
-            // Automatically filter contacts by the newly saved note text
-            const searchInput = document.getElementById('search-input');
-            const searchClearBtn = document.getElementById('search-clear-btn');
-            if (searchInput) {
-                searchInput.value = text;
-                if (searchClearBtn) searchClearBtn.classList.remove('hidden');
-                const event = new Event('input', { bubbles: true });
-                searchInput.dispatchEvent(event);
-            }
-
             showNotification('Note saved successfully!', 'success', 'Saved');
         });
     }
