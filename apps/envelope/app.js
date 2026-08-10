@@ -1906,7 +1906,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             const tr = document.createElement('tr');
                             row.forEach(cell => {
                                 const td = document.createElement('td');
-                                td.textContent = cell;
+                                if (cell && typeof cell === 'object') {
+                                    td.textContent = cell.value || '';
+                                    td.style.fontWeight = cell.bold ? 'bold' : 'normal';
+                                    td.style.textAlign = cell.align || 'left';
+                                    td.style.color = cell.color || '#000000';
+                                } else {
+                                    td.textContent = cell || '';
+                                }
                                 tr.appendChild(td);
                             });
                             excelViewerTable.appendChild(tr);
@@ -1998,13 +2005,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const excelAddColBtn = document.getElementById('excel-add-col-btn');
     const excelClearBtn = document.getElementById('excel-clear-btn');
 
+    // Excel formatting toolbar DOM references
+    const excelFormatBold = document.getElementById('excel-format-bold');
+    const excelFormatAlign = document.getElementById('excel-format-align');
+    const excelFormatColor = document.getElementById('excel-format-color');
+
     let currentNoteType = 'plain'; // 'plain' or 'excel'
     let excelHeaders = ['A', 'B', 'C', 'D'];
+    let activeCell = { rowIndex: 0, colIndex: 0 };
+    
+    // Initialize 2D cell objects array
+    const createEmptyCell = () => ({ value: '', bold: false, align: 'left', color: '#000000' });
     let excelRows = [
-        ['', '', '', ''],
-        ['', '', '', ''],
-        ['', '', '', ''],
-        ['', '', '', '']
+        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
     ];
 
     const renderExcelEditorTable = () => {
@@ -2027,16 +2043,132 @@ document.addEventListener('DOMContentLoaded', () => {
                 const td = document.createElement('td');
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.value = cell;
+                input.value = cell.value || '';
+                
+                // Apply saved styling properties
+                input.style.fontWeight = cell.bold ? 'bold' : 'normal';
+                input.style.textAlign = cell.align || 'left';
+                input.style.color = cell.color || '#000000';
+
                 input.addEventListener('input', (e) => {
-                    excelRows[rowIndex][colIndex] = e.target.value;
+                    excelRows[rowIndex][colIndex].value = e.target.value;
                 });
+
+                // Focus event to update formatting toolbar
+                input.addEventListener('focus', () => {
+                    activeCell = { rowIndex, colIndex };
+                    
+                    // Highlight bold button
+                    if (cell.bold) {
+                        excelFormatBold.style.background = 'var(--accent-blue)';
+                        excelFormatBold.style.color = '#fff';
+                        excelFormatBold.style.borderColor = 'var(--accent-blue)';
+                    } else {
+                        excelFormatBold.style.background = '';
+                        excelFormatBold.style.color = '';
+                        excelFormatBold.style.borderColor = '';
+                    }
+
+                    // Update alignment select and color picker
+                    excelFormatAlign.value = cell.align || 'left';
+                    excelFormatColor.value = cell.color || '#000000';
+                });
+
+                // Keyboard arrow/enter navigation
+                input.addEventListener('keydown', (e) => {
+                    const r = rowIndex;
+                    const c = colIndex;
+                    let targetInput = null;
+
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (r < excelRows.length - 1) {
+                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (r > 0) {
+                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 1}) td:nth-child(${c + 1}) input`);
+                        }
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (r < excelRows.length - 1) {
+                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                        }
+                    } else if (e.key === 'ArrowLeft') {
+                        if (input.selectionStart === 0) {
+                            e.preventDefault();
+                            if (c > 0) {
+                                targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c}) input`);
+                            }
+                        }
+                    } else if (e.key === 'ArrowRight') {
+                        if (input.selectionStart === input.value.length) {
+                            e.preventDefault();
+                            if (c < excelHeaders.length - 1) {
+                                targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c + 2}) input`);
+                            }
+                        }
+                    }
+
+                    if (targetInput) {
+                        targetInput.focus();
+                    }
+                });
+
                 td.appendChild(input);
                 tr.appendChild(td);
             });
             excelEditorTable.appendChild(tr);
         });
     };
+
+    // Format buttons action listeners
+    if (excelFormatBold) {
+        excelFormatBold.addEventListener('click', () => {
+            const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
+            cell.bold = !cell.bold;
+            
+            if (cell.bold) {
+                excelFormatBold.style.background = 'var(--accent-blue)';
+                excelFormatBold.style.color = '#fff';
+                excelFormatBold.style.borderColor = 'var(--accent-blue)';
+            } else {
+                excelFormatBold.style.background = '';
+                excelFormatBold.style.color = '';
+                excelFormatBold.style.borderColor = '';
+            }
+
+            const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
+            if (input) {
+                input.style.fontWeight = cell.bold ? 'bold' : 'normal';
+            }
+        });
+    }
+
+    if (excelFormatAlign) {
+        excelFormatAlign.addEventListener('change', () => {
+            const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
+            cell.align = excelFormatAlign.value;
+
+            const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
+            if (input) {
+                input.style.textAlign = cell.align;
+            }
+        });
+    }
+
+    if (excelFormatColor) {
+        excelFormatColor.addEventListener('input', () => {
+            const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
+            cell.color = excelFormatColor.value;
+
+            const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
+            if (input) {
+                input.style.color = cell.color;
+            }
+        });
+    }
 
     if (togglePlainSheetBtn && toggleExcelSheetBtn && centerNotebookTextarea && excelEditorContainer) {
         togglePlainSheetBtn.addEventListener('click', () => {
@@ -2070,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (excelAddRowBtn) {
         excelAddRowBtn.addEventListener('click', () => {
-            const newRow = Array(excelHeaders.length).fill('');
+            const newRow = Array(excelHeaders.length).fill(null).map(() => createEmptyCell());
             excelRows.push(newRow);
             renderExcelEditorTable();
         });
@@ -2081,7 +2213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextCharCode = 65 + excelHeaders.length; // 65 is 'A'
             const nextHeader = String.fromCharCode(nextCharCode);
             excelHeaders.push(nextHeader);
-            excelRows.forEach(row => row.push(''));
+            excelRows.forEach(row => row.push(createEmptyCell()));
             renderExcelEditorTable();
         });
     }
@@ -2090,10 +2222,10 @@ document.addEventListener('DOMContentLoaded', () => {
         excelClearBtn.addEventListener('click', () => {
             excelHeaders = ['A', 'B', 'C', 'D'];
             excelRows = [
-                ['', '', '', ''],
-                ['', '', '', ''],
-                ['', '', '', ''],
-                ['', '', '', '']
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
             ];
             renderExcelEditorTable();
         });
@@ -2140,7 +2272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let newNote;
             if (currentNoteType === 'excel') {
                 // Generate preview summary of cells
-                const textPreview = excelRows.map(row => row.filter(cell => cell.trim().length > 0).join(' | ')).filter(r => r.length > 0).join('\n');
+                const textPreview = excelRows.map(row => row.map(cell => cell.value).filter(val => val && val.trim().length > 0).join(' | ')).filter(r => r.length > 0).join('\n');
                 newNote = {
                     id: Date.now(),
                     title: title || 'Untitled Excel Sheet',
@@ -2178,10 +2310,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset excel state
             excelHeaders = ['A', 'B', 'C', 'D'];
             excelRows = [
-                ['', '', '', ''],
-                ['', '', '', ''],
-                ['', '', '', ''],
-                ['', '', '', '']
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
+                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
             ];
             
             renderNotebookNotes();
