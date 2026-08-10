@@ -1869,14 +1869,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const addressListSection = document.querySelector('.address-list-section');
                 const noteDetailSection = document.getElementById('note-detail-section');
+                const notebookPanel = document.querySelector('.notebook-panel');
                 const noteDetailContent = document.getElementById('note-detail-content');
                 const noteDetailTime = document.getElementById('note-detail-time');
                 
-                if (addressListSection && noteDetailSection && noteDetailContent && noteDetailTime) {
+                if (noteDetailSection && noteDetailContent && noteDetailTime) {
                     noteDetailContent.textContent = note.text;
                     noteDetailTime.textContent = note.time;
                     
-                    addressListSection.classList.add('hidden');
+                    if (addressListSection) addressListSection.classList.add('hidden');
+                    if (notebookPanel) notebookPanel.classList.add('hidden');
                     noteDetailSection.classList.remove('hidden');
                 }
             });
@@ -1891,10 +1893,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Close view if deleted note was open
                     const noteDetailContent = document.getElementById('note-detail-content');
                     const noteDetailSection = document.getElementById('note-detail-section');
-                    const addressListSection = document.querySelector('.address-list-section');
+                    const notebookPanel = document.querySelector('.notebook-panel');
                     if (noteDetailContent && noteDetailContent.textContent === note.text) {
                         if (noteDetailSection) noteDetailSection.classList.add('hidden');
-                        if (addressListSection) addressListSection.classList.remove('hidden');
+                        if (notebookPanel) notebookPanel.classList.remove('hidden');
                     }
 
                     renderNotebookNotes();
@@ -1931,15 +1933,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Notebook detail back button handler
+    // Sidebar and Notebook Navigation Handlers
+    const openNotebookBtn = document.getElementById('open-notebook-btn');
+    const notebookBackBtn = document.getElementById('notebook-back-btn');
     const noteDetailBackBtn = document.getElementById('note-detail-back-btn');
     const addressListSection = document.querySelector('.address-list-section');
     const noteDetailSection = document.getElementById('note-detail-section');
+    const notebookPanel = document.querySelector('.notebook-panel');
     
-    if (noteDetailBackBtn && addressListSection && noteDetailSection) {
+    if (openNotebookBtn) {
+        openNotebookBtn.addEventListener('click', () => {
+            if (addressListSection) addressListSection.classList.add('hidden');
+            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+            if (notebookPanel) notebookPanel.classList.remove('hidden');
+        });
+    }
+
+    if (notebookBackBtn) {
+        notebookBackBtn.addEventListener('click', () => {
+            if (notebookPanel) notebookPanel.classList.add('hidden');
+            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+            if (addressListSection) addressListSection.classList.remove('hidden');
+        });
+    }
+    
+    if (noteDetailBackBtn) {
         noteDetailBackBtn.addEventListener('click', () => {
-            noteDetailSection.classList.add('hidden');
-            addressListSection.classList.remove('hidden');
+            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+            if (notebookPanel) notebookPanel.classList.add('hidden');
+            if (addressListSection) addressListSection.classList.remove('hidden');
         });
     }
 
