@@ -1931,6 +1931,74 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Notebook center editor focus, save and back button handlers
+    const noteEditorSection = document.getElementById('note-editor-section');
+    const noteEditorBackBtn = document.getElementById('note-editor-back-btn');
+    const centerNotebookTextarea = document.getElementById('center-notebook-textarea');
+    const centerSaveNoteBtn = document.getElementById('center-save-note-btn');
+
+    if (notebookTextarea && centerNotebookTextarea && noteEditorSection && addressListSection) {
+        notebookTextarea.addEventListener('focus', () => {
+            // Copy whatever is inside right side textarea to the center editor
+            centerNotebookTextarea.value = notebookTextarea.value;
+            
+            // Hide normal address list and active view note sections
+            addressListSection.classList.add('hidden');
+            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+            
+            // Show note editor section in the center
+            noteEditorSection.classList.remove('hidden');
+            
+            // Blur right-side textarea and focus center editor textarea
+            notebookTextarea.blur();
+            setTimeout(() => centerNotebookTextarea.focus(), 50);
+        });
+    }
+
+    if (noteEditorBackBtn && noteEditorSection && addressListSection && notebookTextarea && centerNotebookTextarea) {
+        noteEditorBackBtn.addEventListener('click', () => {
+            // Copy back the typed text to the right side textarea in case they want to continue later
+            notebookTextarea.value = centerNotebookTextarea.value;
+            
+            noteEditorSection.classList.add('hidden');
+            addressListSection.classList.remove('hidden');
+        });
+    }
+
+    if (centerSaveNoteBtn && centerNotebookTextarea && notebookTextarea && noteEditorSection && addressListSection) {
+        centerSaveNoteBtn.addEventListener('click', () => {
+            const text = centerNotebookTextarea.value.trim();
+            if (!text) {
+                showNotification('Please enter some text before saving.', 'warning', 'Empty Note');
+                return;
+            }
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+            const newNote = {
+                id: Date.now(),
+                text: text,
+                time: timeStr
+            };
+
+            notebookNotes.unshift(newNote);
+            localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+            
+            // Reset both textareas
+            centerNotebookTextarea.value = '';
+            notebookTextarea.value = '';
+            
+            renderNotebookNotes();
+            
+            // Revert back to address list
+            noteEditorSection.classList.add('hidden');
+            addressListSection.classList.remove('hidden');
+            
+            showNotification('Note saved successfully!', 'success', 'Saved');
+        });
+    }
+
     // Notebook detail back button handler
     const noteDetailBackBtn = document.getElementById('note-detail-back-btn');
     const addressListSection = document.querySelector('.address-list-section');
