@@ -1855,10 +1855,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Delete event handler
-            card.querySelector('.delete-note-btn').addEventListener('click', () => {
+            card.querySelector('.delete-note-btn').addEventListener('click', (e) => {
+                e.stopPropagation(); // Stop card click from triggering
                 showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
                     notebookNotes = notebookNotes.filter(n => n.id !== note.id);
                     localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+                    
+                    // If the current search input matches the deleted note's text, clear the search filter
+                    const searchInput = document.getElementById('search-input');
+                    if (searchInput && searchInput.value === note.text) {
+                        searchInput.value = '';
+                        const event = new Event('input', { bubbles: true });
+                        searchInput.dispatchEvent(event);
+                    }
+                    
                     renderNotebookNotes();
                     showNotification('Note deleted!', 'success', 'Deleted');
                 });
