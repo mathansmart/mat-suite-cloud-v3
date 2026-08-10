@@ -1894,6 +1894,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         // Render headers
                         const trHead = document.createElement('tr');
+                        const thAll = document.createElement('th');
+                        thAll.textContent = '◢';
+                        thAll.style.background = '#e2e8f0';
+                        trHead.appendChild(thAll);
+
                         (data.headers || []).forEach(h => {
                             const th = document.createElement('th');
                             th.textContent = h;
@@ -1902,8 +1907,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         excelViewerTable.appendChild(trHead);
                         
                         // Render rows
-                        (data.rows || []).forEach(row => {
+                        (data.rows || []).forEach((row, rIdx) => {
                             const tr = document.createElement('tr');
+                            const thRow = document.createElement('th');
+                            thRow.textContent = rIdx + 1;
+                            thRow.style.background = '#f1f5f9';
+                            thRow.style.color = 'var(--text-secondary)';
+                            thRow.style.textAlign = 'center';
+                            thRow.style.border = '1px solid #cbd5e1';
+                            thRow.style.padding = '6px 8px';
+                            tr.appendChild(thRow);
+
                             row.forEach(cell => {
                                 const td = document.createElement('td');
                                 if (cell && typeof cell === 'object') {
@@ -2174,15 +2188,84 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    let isDraggingSelection = false;
+    let dragStartCell = null;
+    let selectedCells = []; // array of { rowIndex, colIndex }
+
+    const clearSelection = () => {
+        selectedCells = [];
+        if (excelEditorTable) {
+            const cells = excelEditorTable.querySelectorAll('td');
+            cells.forEach(td => td.classList.remove('selected-cell'));
+        }
+    };
+
+    const selectRange = (start, end) => {
+        clearSelection();
+        const minRow = Math.min(start.rowIndex, end.rowIndex);
+        const maxRow = Math.max(start.rowIndex, end.rowIndex);
+        const minCol = Math.min(start.colIndex, end.colIndex);
+        const maxCol = Math.max(start.colIndex, end.colIndex);
+
+        for (let r = minRow; r <= maxRow; r++) {
+            for (let c = minCol; c <= maxCol; c++) {
+                selectedCells.push({ rowIndex: r, colIndex: c });
+                const td = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c + 2})`);
+                if (td) td.classList.add('selected-cell');
+            }
+        }
+    };
+
+    // Helper to get selected cell targets
+    const getTargetCells = () => {
+        if (selectedCells.length > 0) {
+            return selectedCells;
+        }
+        return [activeCell];
+    };
+
+    // Global mouseup to stop drag selection
+    window.addEventListener('mouseup', () => {
+        isDraggingSelection = false;
+    });
+
     const renderExcelEditorTable = () => {
         if (!excelEditorTable) return;
         excelEditorTable.innerHTML = '';
 
         // Render headers
         const trHead = document.createElement('tr');
-        excelHeaders.forEach(h => {
+        
+        // Select all intersection corner
+        const thAll = document.createElement('th');
+        thAll.className = 'select-all-header';
+        thAll.textContent = '◢';
+        thAll.title = 'Select All Cells';
+        thAll.addEventListener('click', () => {
+            clearSelection();
+            excelRows.forEach((row, r) => {
+                row.forEach((cell, c) => {
+                    selectedCells.push({ rowIndex: r, colIndex: c });
+                    const td = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c + 2})`);
+                    if (td) td.classList.add('selected-cell');
+                });
+            });
+        });
+        trHead.appendChild(thAll);
+
+        excelHeaders.forEach((h, colIndex) => {
             const th = document.createElement('th');
             th.textContent = h;
+            th.style.cursor = 'pointer';
+            th.title = `Select Column ${h}`;
+            th.addEventListener('click', () => {
+                clearSelection();
+                excelRows.forEach((row, r) => {
+                    selectedCells.push({ rowIndex: r, colIndex: colIndex });
+                    const td = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${colIndex + 2})`);
+                    if (td) td.classList.add('selected-cell');
+                });
+            });
             trHead.appendChild(th);
         });
         excelEditorTable.appendChild(trHead);
@@ -2190,6 +2273,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render rows
         excelRows.forEach((row, rowIndex) => {
             const tr = document.createElement('tr');
+            
+            // Row number header
+            const thRow = document.createElement('th');
+            thRow.className = 'row-header';
+            thRow.textContent = rowIndex + 1;
+            thRow.title = `Select Row ${rowIndex + 1}`;
+            thRow.addEventListener('click', () => {
+                clearSelection();
+                row.forEach((cell, colIndex) => {
+                    selectedCells.push({ rowIndex, colIndex });
+                    const td = excelEditorTable.querySelector(`tr:nth-child(${rowIndex + 2}) td:nth-child(${colIndex + 2})`);
+                    if (td) td.classList.add('selected-cell');
+                });
+            });
+            tr.appendChild(thRow);
+
             row.forEach((cell, colIndex) => {
                 const td = document.createElement('td');
                 const input = document.createElement('input');
@@ -2230,6 +2329,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
+                // Mouse selection drag handlers on td
+                td.addEventListener('mousedown', (e) => {
+                    if (e.target === input) {
+                        // If they click the text input directly, do not block keyboard typing selection
+                        if (e.ctrlKey || e.metaKey) {
+                            // Ctrl-Click multi-selection toggle
+                            e.preventDefault();
+                            const alreadySelected = selectedCells.some(item => item.rowIndex === rowIndex && item.colIndex === colIndex);
+                            if (alreadySelected) {
+                                selectedCells = selectedCells.filter(item => !(item.rowIndex === rowIndex && item.colIndex === colIndex));
+                                td.classList.remove('selected-cell');
+                            } else {
+                                selectedCells.push({ rowIndex, colIndex });
+                                td.classList.add('selected-cell');
+                            }
+                        } else {
+                            clearSelection();
+                            selectedCells.push({ rowIndex, colIndex });
+                            td.classList.add('selected-cell');
+                        }
+                        return;
+                    }
+                    e.preventDefault();
+                    isDraggingSelection = true;
+                    dragStartCell = { rowIndex, colIndex };
+                    selectRange(dragStartCell, { rowIndex, colIndex });
+                });
+
+                td.addEventListener('mouseenter', () => {
+                    if (isDraggingSelection && dragStartCell) {
+                        selectRange(dragStartCell, { rowIndex, colIndex });
+                    }
+                });
+
                 // Keyboard arrow/enter navigation
                 input.addEventListener('keydown', (e) => {
                     const r = rowIndex;
@@ -2239,7 +2372,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         if (r < excelRows.length - 1) {
-                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 2}) input`);
                         } else {
                             // At the last row! Auto add a row!
                             const newRow = Array(excelHeaders.length).fill(null).map(() => createEmptyCell());
@@ -2248,7 +2381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             // Focus the cell in the newly created row
                             setTimeout(() => {
-                                const newInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                                const newInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 2}) input`);
                                 if (newInput) newInput.focus();
                             }, 50);
                             return;
@@ -2256,25 +2389,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (e.key === 'ArrowUp') {
                         e.preventDefault();
                         if (r > 0) {
-                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 1}) td:nth-child(${c + 1}) input`);
+                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 1}) td:nth-child(${c + 2}) input`);
                         }
                     } else if (e.key === 'ArrowDown') {
                         e.preventDefault();
                         if (r < excelRows.length - 1) {
-                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 1}) input`);
+                            targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 3}) td:nth-child(${c + 2}) input`);
                         }
                     } else if (e.key === 'ArrowLeft') {
                         if (input.selectionStart === 0) {
                             e.preventDefault();
                             if (c > 0) {
-                                targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c}) input`);
+                                targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c + 1}) input`);
                             }
                         }
                     } else if (e.key === 'ArrowRight') {
                         if (input.selectionStart === input.value.length) {
                             e.preventDefault();
                             if (c < excelHeaders.length - 1) {
-                                targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c + 2}) input`);
+                                targetInput = excelEditorTable.querySelector(`tr:nth-child(${r + 2}) td:nth-child(${c + 3}) input`);
                             }
                         }
                     }
@@ -2294,10 +2427,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Format buttons action listeners
     if (excelFormatBold) {
         excelFormatBold.addEventListener('click', () => {
-            const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
-            cell.bold = !cell.bold;
-            
-            if (cell.bold) {
+            const targets = getTargetCells();
+            const firstCell = excelRows[targets[0].rowIndex][targets[0].colIndex];
+            const targetBoldState = !firstCell.bold;
+
+            targets.forEach(target => {
+                const cell = excelRows[target.rowIndex][target.colIndex];
+                cell.bold = targetBoldState;
+                const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+                if (input) {
+                    input.style.fontWeight = cell.bold ? 'bold' : 'normal';
+                }
+            });
+
+            if (targetBoldState) {
                 excelFormatBold.style.background = 'var(--accent-blue)';
                 excelFormatBold.style.color = '#fff';
                 excelFormatBold.style.borderColor = 'var(--accent-blue)';
@@ -2305,11 +2448,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 excelFormatBold.style.background = '';
                 excelFormatBold.style.color = '';
                 excelFormatBold.style.borderColor = '';
-            }
-
-            const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
-            if (input) {
-                input.style.fontWeight = cell.bold ? 'bold' : 'normal';
             }
         });
     }

@@ -1462,3 +1462,38 @@ select, input[type="range"], input[type="number"] {
 #excel-viewer-table td {
     padding: 6px 10px;
 }
+
+#excel-editor-table th.row-header {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    padding: 6px 8px;
+    user-select: none;
+    cursor: pointer;
+}
+#excel-editor-table th.row-header:hover {
+    background: #e2e8f0;
+}
+#excel-editor-table th.select-all-header {
+    background: #e2e8f0;
+    color: var(--text-primary);
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    padding: 6px 8px;
+    user-select: none;
+    cursor: pointer;
+}
+#excel-editor-table th.select-all-header:hover {
+    background: #cbd5e1;
+}
+
+/* Selected cell styling overrides */
+#excel-editor-table td.selected-cell {
+    background: #e0f2fe !important;
+}
+#excel-editor-table td.selected-cell input {
+    background: #e0f2fe !important;
+}
