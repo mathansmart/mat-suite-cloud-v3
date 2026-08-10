@@ -1932,6 +1932,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Notebook center editor focus, save and back button handlers
+    const addressListSection = document.querySelector('.address-list-section');
+    const noteDetailSection = document.getElementById('note-detail-section');
     const noteEditorSection = document.getElementById('note-editor-section');
     const noteEditorBackBtn = document.getElementById('note-editor-back-btn');
     const centerNotebookTextarea = document.getElementById('center-notebook-textarea');
@@ -2001,8 +2003,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Notebook detail back button handler
     const noteDetailBackBtn = document.getElementById('note-detail-back-btn');
-    const addressListSection = document.querySelector('.address-list-section');
-    const noteDetailSection = document.getElementById('note-detail-section');
     
     if (noteDetailBackBtn && addressListSection && noteDetailSection) {
         noteDetailBackBtn.addEventListener('click', () => {
