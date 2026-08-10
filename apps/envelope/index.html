@@ -67,7 +67,6 @@
 
             <button id="add-new-btn" class="btn primary" style="justify-content: center; padding: 0.6rem 1rem;">＋ New Contact</button>
             <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button id="open-notebook-btn" class="btn secondary" style="justify-content: center; padding: 6px 4px; font-size: 0.75rem; width: 100%; background: rgba(59, 130, 246, 0.08); color: var(--accent-blue); border-color: rgba(59, 130, 246, 0.2);">📓 Notebook</button>
                 <button id="open-settings-btn" class="btn secondary" style="justify-content: center; padding: 6px 4px; font-size: 0.75rem; width: 100%;">⚙️ Settings</button>
                 <button id="reload-btn" class="btn tertiary" style="justify-content: center; font-size: 0.7rem; border: 1px solid transparent; padding: 2px; width: 100%; margin-top: -3px;">🔄 Reload System</button>
             </div>
@@ -127,11 +126,10 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Notebook Panel (Hidden by default, shown in center when toggled) -->
-                <div class="notebook-panel hidden">
-                    <div class="notebook-header" style="display: flex; align-items: center; gap: 10px;">
-                        <button id="notebook-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
-                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800;">📓 Notebook</h2>
+                <!-- Right Column: Notebook Panel -->
+                <div class="notebook-panel">
+                    <div class="notebook-header">
+                        <h2>📝 Notebook</h2>
                     </div>
                     <div class="notebook-input-area">
                         <textarea id="notebook-textarea" placeholder="Type a note here (e.g. reminders, custom margins...)"></textarea>
