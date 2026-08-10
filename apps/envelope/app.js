@@ -1857,10 +1857,14 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'note-card';
             card.style.cursor = 'pointer'; // Make it visually clickable
             card.innerHTML = `
-                <span class="note-text"></span>
-                <span class="note-time">${note.time}</span>
-                <button class="delete-note-btn" title="Delete Note"><i class="ti ti-trash"></i></button>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; width: 100%;">
+                    <span class="note-card-title" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;"></span>
+                    <button class="delete-note-btn" title="Delete Note" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 0 4px; transition: color 0.2s;"><i class="ti ti-trash"></i></button>
+                </div>
+                <span class="note-text" style="font-size: 0.8rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px;"></span>
+                <span class="note-time" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; margin-top: 4px;">${note.time}</span>
             `;
+            card.querySelector('.note-card-title').textContent = note.title || 'Untitled Note';
             card.querySelector('.note-text').textContent = note.text;
 
             // Click event to show note content in center page
@@ -1869,10 +1873,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const addressListSection = document.querySelector('.address-list-section');
                 const noteDetailSection = document.getElementById('note-detail-section');
+                const noteDetailTitle = document.getElementById('note-detail-title');
                 const noteDetailContent = document.getElementById('note-detail-content');
                 const noteDetailTime = document.getElementById('note-detail-time');
                 
                 if (noteDetailSection && noteDetailContent && noteDetailTime) {
+                    if (noteDetailTitle) noteDetailTitle.textContent = '📝 ' + (note.title || 'Untitled Note');
                     noteDetailContent.textContent = note.text;
                     noteDetailTime.textContent = note.time;
                     
@@ -1891,8 +1897,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Close view if deleted note was open
                     const noteDetailContent = document.getElementById('note-detail-content');
                     const noteDetailSection = document.getElementById('note-detail-section');
+                    const noteDetailTitle = document.getElementById('note-detail-title');
                     const addressListSection = document.querySelector('.address-list-section');
-                    if (noteDetailContent && noteDetailContent.textContent === note.text) {
+                    if (noteDetailContent && noteDetailContent.textContent === note.text && noteDetailTitle && noteDetailTitle.textContent === '📝 ' + (note.title || 'Untitled Note')) {
                         if (noteDetailSection) noteDetailSection.classList.add('hidden');
                         if (addressListSection) addressListSection.classList.remove('hidden');
                     }
@@ -1919,6 +1926,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const newNote = {
                 id: Date.now(),
+                title: 'Untitled Note',
                 text: text,
                 time: timeStr
             };
@@ -1936,6 +1944,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const noteDetailSection = document.getElementById('note-detail-section');
     const noteEditorSection = document.getElementById('note-editor-section');
     const noteEditorBackBtn = document.getElementById('note-editor-back-btn');
+    const centerNotebookTitle = document.getElementById('center-notebook-title');
     const centerNotebookTextarea = document.getElementById('center-notebook-textarea');
     const centerSaveNoteBtn = document.getElementById('center-save-note-btn');
 
@@ -1943,6 +1952,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notebookTextarea.addEventListener('focus', () => {
             // Copy whatever is inside right side textarea to the center editor
             centerNotebookTextarea.value = notebookTextarea.value;
+            if (centerNotebookTitle) centerNotebookTitle.value = '';
             
             // Hide normal address list and active view note sections
             addressListSection.classList.add('hidden');
@@ -1975,11 +1985,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const title = centerNotebookTitle ? centerNotebookTitle.value.trim() : '';
+
             const now = new Date();
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + now.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
             const newNote = {
                 id: Date.now(),
+                title: title || 'Untitled Note',
                 text: text,
                 time: timeStr
             };
@@ -1987,8 +2000,9 @@ document.addEventListener('DOMContentLoaded', () => {
             notebookNotes.unshift(newNote);
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
             
-            // Reset both textareas
+            // Reset both textareas and title input
             centerNotebookTextarea.value = '';
+            if (centerNotebookTitle) centerNotebookTitle.value = '';
             notebookTextarea.value = '';
             
             renderNotebookNotes();

@@ -117,7 +117,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--primary-bg); padding-bottom: 1rem;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <button id="note-detail-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
-                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800;">📝 View Note</h2>
+                            <h2 id="note-detail-title" style="margin: 0; font-size: 1.25rem; font-weight: 800;">📝 View Note</h2>
                         </div>
                         <span id="note-detail-time" style="font-size: 0.8rem; color: var(--text-secondary);">Today, 2:45 PM</span>
                     </div>
@@ -135,6 +135,7 @@
                         </div>
                     </div>
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+                        <input type="text" id="center-notebook-title" placeholder="Enter Note Title / File Name..." style="width: 100%; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 0.75rem 1.25rem; font-family: inherit; font-size: 1.05rem; font-weight: 600; color: var(--text-primary); outline: none; transition: border-color 0.2s;">
                         <textarea id="center-notebook-textarea" placeholder="Type your important note here (e.g. reminders, custom margins, instructions...)" style="flex: 1; width: 100%; min-height: 250px; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 1.25rem; font-family: inherit; font-size: 1rem; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.6;"></textarea>
                         <button id="center-save-note-btn" class="save-note-btn" style="align-self: flex-start; padding: 0.8rem 2rem; font-size: 0.95rem;">💾 Save Note</button>
                     </div>
