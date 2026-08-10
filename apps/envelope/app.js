@@ -1855,6 +1855,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notebookNotes.forEach(note => {
             const card = document.createElement('div');
             card.className = 'note-card';
+            card.style.cursor = 'pointer'; // Make it visually clickable
             card.innerHTML = `
                 <span class="note-text"></span>
                 <span class="note-time">${note.time}</span>
@@ -1862,12 +1863,40 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             card.querySelector('.note-text').textContent = note.text;
 
+            // Click event to show note content in center page
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.delete-note-btn')) return;
+                
+                const addressListSection = document.querySelector('.address-list-section');
+                const noteDetailSection = document.getElementById('note-detail-section');
+                const noteDetailContent = document.getElementById('note-detail-content');
+                const noteDetailTime = document.getElementById('note-detail-time');
+                
+                if (addressListSection && noteDetailSection && noteDetailContent && noteDetailTime) {
+                    noteDetailContent.textContent = note.text;
+                    noteDetailTime.textContent = note.time;
+                    
+                    addressListSection.classList.add('hidden');
+                    noteDetailSection.classList.remove('hidden');
+                }
+            });
+
             // Delete event handler
             card.querySelector('.delete-note-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
                     notebookNotes = notebookNotes.filter(n => n.id !== note.id);
                     localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+                    
+                    // Close view if deleted note was open
+                    const noteDetailContent = document.getElementById('note-detail-content');
+                    const noteDetailSection = document.getElementById('note-detail-section');
+                    const addressListSection = document.querySelector('.address-list-section');
+                    if (noteDetailContent && noteDetailContent.textContent === note.text) {
+                        if (noteDetailSection) noteDetailSection.classList.add('hidden');
+                        if (addressListSection) addressListSection.classList.remove('hidden');
+                    }
+
                     renderNotebookNotes();
                     showNotification('Note deleted!', 'success', 'Deleted');
                 });
@@ -1899,6 +1928,18 @@ document.addEventListener('DOMContentLoaded', () => {
             notebookTextarea.value = '';
             renderNotebookNotes();
             showNotification('Note saved successfully!', 'success', 'Saved');
+        });
+    }
+
+    // Notebook detail back button handler
+    const noteDetailBackBtn = document.getElementById('note-detail-back-btn');
+    const addressListSection = document.querySelector('.address-list-section');
+    const noteDetailSection = document.getElementById('note-detail-section');
+    
+    if (noteDetailBackBtn && addressListSection && noteDetailSection) {
+        noteDetailBackBtn.addEventListener('click', () => {
+            noteDetailSection.classList.add('hidden');
+            addressListSection.classList.remove('hidden');
         });
     }
 
