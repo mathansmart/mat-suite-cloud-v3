@@ -1842,6 +1842,18 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             card.querySelector('.note-text').textContent = note.text;
 
+            // Click event to search/filter contacts in center page
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.delete-note-btn')) return;
+                
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = note.text;
+                    const event = new Event('input', { bubbles: true });
+                    searchInput.dispatchEvent(event);
+                }
+            });
+
             // Delete event handler
             card.querySelector('.delete-note-btn').addEventListener('click', () => {
                 showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
