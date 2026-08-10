@@ -81,8 +81,9 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="main-header">
-                <div class="search-bar">
-                    <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="new-password">
+                <div class="search-bar" style="position: relative; display: flex; align-items: center; flex: 1;">
+                    <input type="text" id="search-input" placeholder="Search contacts..." autocomplete="new-password" style="width: 100%; padding-right: 2.5rem;">
+                    <button id="search-clear-btn" class="hidden" style="position: absolute; right: 1rem; background: transparent; border: none; font-size: 1.1rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; z-index: 5;">✕</button>
                 </div>
                 <div class="header-actions">
                     <button id="bulk-print-btn" class="btn primary">🖨️ PRINT SELECTED</button>

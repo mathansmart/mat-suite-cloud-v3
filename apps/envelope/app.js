@@ -1156,7 +1156,27 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', (e) => {
         searchFocusIndex = -1;
         renderAddresses(e.target.value);
+        
+        // Show/hide clear button dynamically
+        const searchClearBtn = document.getElementById('search-clear-btn');
+        if (searchClearBtn) {
+            if (e.target.value.trim().length > 0) {
+                searchClearBtn.classList.remove('hidden');
+            } else {
+                searchClearBtn.classList.add('hidden');
+            }
+        }
     });
+
+    const searchClearBtn = document.getElementById('search-clear-btn');
+    if (searchClearBtn) {
+        searchClearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClearBtn.classList.add('hidden');
+            searchFocusIndex = -1;
+            renderAddresses('');
+        });
+    }
 
     searchInput.addEventListener('keydown', (e) => {
         const cards = addressList.querySelectorAll('.address-card');
@@ -1847,8 +1867,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.target.closest('.delete-note-btn')) return;
                 
                 const searchInput = document.getElementById('search-input');
+                const searchClearBtn = document.getElementById('search-clear-btn');
                 if (searchInput) {
                     searchInput.value = note.text;
+                    if (searchClearBtn) searchClearBtn.classList.remove('hidden');
                     const event = new Event('input', { bubbles: true });
                     searchInput.dispatchEvent(event);
                 }
@@ -1899,6 +1921,17 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
             notebookTextarea.value = '';
             renderNotebookNotes();
+
+            // Automatically filter contacts by the newly saved note text
+            const searchInput = document.getElementById('search-input');
+            const searchClearBtn = document.getElementById('search-clear-btn');
+            if (searchInput) {
+                searchInput.value = text;
+                if (searchClearBtn) searchClearBtn.classList.remove('hidden');
+                const event = new Event('input', { bubbles: true });
+                searchInput.dispatchEvent(event);
+            }
+
             showNotification('Note saved successfully!', 'success', 'Saved');
         });
     }
