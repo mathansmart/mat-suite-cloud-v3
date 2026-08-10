@@ -1813,6 +1813,83 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Notebook Logic ---
+    let notebookNotes = [];
+    const notebookTextarea = document.getElementById('notebook-textarea');
+    const saveNoteBtn = document.getElementById('save-note-btn');
+    const notebookNotesList = document.getElementById('notebook-notes-list');
+
+    const renderNotebookNotes = () => {
+        if (!notebookNotesList) return;
+        notebookNotesList.innerHTML = '';
+        
+        if (notebookNotes.length === 0) {
+            notebookNotesList.innerHTML = `
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 20px; opacity: 0.6;">
+                    No notes saved yet.
+                </div>
+            `;
+            return;
+        }
+
+        notebookNotes.forEach(note => {
+            const card = document.createElement('div');
+            card.className = 'note-card';
+            card.innerHTML = `
+                <span class="note-text"></span>
+                <span class="note-time">${note.time}</span>
+                <button class="delete-note-btn" title="Delete Note"><i class="ti ti-trash"></i></button>
+            `;
+            card.querySelector('.note-text').textContent = note.text;
+
+            // Delete event handler
+            card.querySelector('.delete-note-btn').addEventListener('click', () => {
+                showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
+                    notebookNotes = notebookNotes.filter(n => n.id !== note.id);
+                    localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+                    renderNotebookNotes();
+                    showNotification('Note deleted!', 'success', 'Deleted');
+                });
+            });
+
+            notebookNotesList.appendChild(card);
+        });
+    };
+
+    if (saveNoteBtn && notebookTextarea) {
+        saveNoteBtn.addEventListener('click', () => {
+            const text = notebookTextarea.value.trim();
+            if (!text) {
+                showNotification('Please enter some text before saving.', 'warning', 'Empty Note');
+                return;
+            }
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+            const newNote = {
+                id: Date.now(),
+                text: text,
+                time: timeStr
+            };
+
+            notebookNotes.unshift(newNote);
+            localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+            notebookTextarea.value = '';
+            renderNotebookNotes();
+            showNotification('Note saved successfully!', 'success', 'Saved');
+        });
+    }
+
+    // Load initial notes
+    try {
+        notebookNotes = JSON.parse(localStorage.getItem('envelope_notebook_notes')) || [];
+    } catch (e) {
+        console.error('Failed to parse envelope notes:', e);
+        notebookNotes = [];
+    }
+    renderNotebookNotes();
+
     // --- Initialization ---
     initConnection();
 });
