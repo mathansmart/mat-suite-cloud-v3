@@ -2297,6 +2297,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = cell.value || '';
+                input.spellcheck = true;
+                input.size = Math.max(10, (cell.value || '').length + 1);
                 
                 // Apply saved styling properties
                 input.style.fontWeight = cell.bold ? 'bold' : 'normal';
@@ -2305,6 +2307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 input.addEventListener('input', (e) => {
                     excelRows[rowIndex][colIndex].value = e.target.value;
+                    input.size = Math.max(10, e.target.value.length + 1);
                 });
 
                 // Focus event to update formatting toolbar
