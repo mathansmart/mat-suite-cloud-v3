@@ -2298,7 +2298,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.type = 'text';
                 input.value = cell.value || '';
                 input.spellcheck = true;
-                input.size = Math.max(10, (cell.value || '').length + 1);
+                
+                // Set exact character fit width (approx 8px per character + 16px padding, min 80px)
+                const adjustInputWidth = (inp, val) => {
+                    const len = (val || '').length;
+                    const w = Math.max(80, (len * 8) + 16);
+                    inp.style.width = w + 'px';
+                };
+                adjustInputWidth(input, cell.value || '');
                 
                 // Apply saved styling properties
                 input.style.fontWeight = cell.bold ? 'bold' : 'normal';
@@ -2307,7 +2314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 input.addEventListener('input', (e) => {
                     excelRows[rowIndex][colIndex].value = e.target.value;
-                    input.size = Math.max(10, e.target.value.length + 1);
+                    adjustInputWidth(input, e.target.value);
                 });
 
                 // Focus event to update formatting toolbar
@@ -2362,7 +2369,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         return;
                     }
-                    e.preventDefault();
                     isDraggingSelection = true;
                     dragStartCell = { rowIndex, colIndex };
                     selectRange(dragStartCell, { rowIndex, colIndex });
