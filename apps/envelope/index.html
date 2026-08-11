@@ -147,7 +147,10 @@
                             <button id="toggle-excel-sheet-btn" class="btn secondary" style="padding: 6px 16px; font-size: 0.8rem; font-weight: 700; background: transparent; color: var(--text-secondary); border-color: var(--border-color);">📊 Excel Sheet</button>
                         </div>
 
-                        <input type="text" id="center-notebook-title" placeholder="Enter Note Title / File Name..." style="width: 100%; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 0.75rem 1.25rem; font-family: inherit; font-size: 1.05rem; font-weight: 600; color: var(--text-primary); outline: none; transition: border-color 0.2s;">
+                        <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                            <input type="text" id="center-notebook-title" placeholder="Enter Note Title / File Name..." style="flex: 1; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 0.75rem 1.25rem; font-family: inherit; font-size: 1.05rem; font-weight: 600; color: var(--text-primary); outline: none; transition: border-color 0.2s; margin: 0;">
+                            <button id="center-save-note-btn" class="save-note-btn" style="padding: 0.75rem 1.75rem; font-size: 0.95rem; font-weight: 700; white-space: nowrap; cursor: pointer; border-radius: var(--radius-md); height: 50px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; box-shadow: var(--shadow-sm);">💾 Save Note</button>
+                        </div>
                         
                         <!-- Plain Sheet Textarea -->
                         <textarea id="center-notebook-textarea" placeholder="Type your important note here (e.g. reminders, custom margins, instructions...)" style="flex: 1; width: 100%; min-height: 250px; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 1.25rem; font-family: inherit; font-size: 1rem; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.6;"></textarea>
@@ -217,8 +220,6 @@
                                 </table>
                             </div>
                         </div>
-
-                        <button id="center-save-note-btn" class="save-note-btn" style="align-self: flex-start; padding: 0.8rem 2rem; font-size: 0.95rem;">💾 Save Note</button>
                     </div>
                 </div>
 
