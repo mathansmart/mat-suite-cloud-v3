@@ -2029,7 +2029,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const excelHiddenColorPicker = document.getElementById('excel-hidden-color-picker');
 
     let currentNoteType = 'plain'; // 'plain' or 'excel'
-    let excelHeaders = ['A', 'B', 'C', 'D'];
+    let excelHeaders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     let activeCell = { rowIndex: 0, colIndex: 0 };
     
     // Custom color palettes
@@ -2047,12 +2047,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize 2D cell objects array
     const createEmptyCell = () => ({ value: '', bold: false, align: 'left', color: '#000000' });
-    let excelRows = [
-        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-        [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
-    ];
+    const createDefaultRow = (colCount) => Array(colCount).fill(null).map(() => createEmptyCell());
+    let excelRows = Array(10).fill(null).map(() => createDefaultRow(8));
 
     const updateAlignButtons = (align) => {
         [excelAlignLeft, excelAlignCenter, excelAlignRight].forEach(btn => {
@@ -2517,18 +2513,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (excelClearBtn) {
-        excelClearBtn.addEventListener('click', () => {
-            excelHeaders = ['A', 'B', 'C', 'D'];
-            excelRows = [
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
-            ];
-            renderExcelEditorTable();
-        });
-    }
+
 
     if (notebookTextarea && centerNotebookTextarea && noteEditorSection && addressListSection) {
         notebookTextarea.addEventListener('focus', () => {
@@ -2607,13 +2592,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notebookTextarea.value = '';
             
             // Reset excel state
-            excelHeaders = ['A', 'B', 'C', 'D'];
-            excelRows = [
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()],
-                [createEmptyCell(), createEmptyCell(), createEmptyCell(), createEmptyCell()]
-            ];
+            excelHeaders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            excelRows = Array(10).fill(null).map(() => createDefaultRow(8));
             
             renderNotebookNotes();
             
