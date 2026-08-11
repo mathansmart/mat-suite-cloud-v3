@@ -133,58 +133,58 @@
                 </div>
 
                 <!-- Left Column: Note Editor View (Hidden by default) -->
-                <div id="note-editor-section" class="hidden" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 1.5rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--primary-bg); padding-bottom: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <button id="note-editor-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
-                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800;">📝 Write Note</h2>
+                <div id="note-editor-section" class="hidden" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button id="note-editor-back-btn" class="btn ghost" style="padding: 2px 4px; font-size: 0.95rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 700; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
+                            <h2 style="margin: 0; font-size: 1.05rem; font-weight: 800;">📝 Write Note</h2>
                         </div>
                     </div>
-                    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 1rem; overflow: hidden;">
+                    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem; overflow: hidden;">
                         <!-- Sheet Type Toggles -->
-                        <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-                            <button id="toggle-plain-sheet-btn" class="btn primary" style="padding: 6px 16px; font-size: 0.8rem; font-weight: 700;">📄 Plain Sheet</button>
-                            <button id="toggle-excel-sheet-btn" class="btn secondary" style="padding: 6px 16px; font-size: 0.8rem; font-weight: 700; background: transparent; color: var(--text-secondary); border-color: var(--border-color);">📊 Excel Sheet</button>
+                        <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem;">
+                            <button id="toggle-plain-sheet-btn" class="btn primary" style="padding: 4px 12px; font-size: 0.75rem; font-weight: 700;">📄 Plain Sheet</button>
+                            <button id="toggle-excel-sheet-btn" class="btn secondary" style="padding: 4px 12px; font-size: 0.75rem; font-weight: 700; background: transparent; color: var(--text-secondary); border-color: var(--border-color);">📊 Excel Sheet</button>
                         </div>
 
-                        <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
-                            <input type="text" id="center-notebook-title" placeholder="Enter Note Title / File Name..." style="flex: 1; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 0.75rem 1.25rem; font-family: inherit; font-size: 1.05rem; font-weight: 600; color: var(--text-primary); outline: none; transition: border-color 0.2s; margin: 0;">
-                            <button id="center-save-note-btn" class="save-note-btn" style="padding: 0.75rem 1.75rem; font-size: 0.95rem; font-weight: 700; white-space: nowrap; cursor: pointer; border-radius: var(--radius-md); height: 50px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; box-shadow: var(--shadow-sm);">💾 Save Note</button>
+                        <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                            <input type="text" id="center-notebook-title" placeholder="Enter Note Title / File Name..." style="flex: 1; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 0.5rem 1rem; font-family: inherit; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); outline: none; transition: border-color 0.2s; margin: 0; height: 38px; box-sizing: border-box;">
+                            <button id="center-save-note-btn" class="save-note-btn" style="padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; white-space: nowrap; cursor: pointer; border-radius: var(--radius-md); height: 38px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; box-shadow: var(--shadow-sm); border: none;">💾 Save Note</button>
                         </div>
                         
                         <!-- Plain Sheet Textarea -->
-                        <textarea id="center-notebook-textarea" placeholder="Type your important note here (e.g. reminders, custom margins, instructions...)" style="flex: 1; width: 100%; min-height: 100px; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 1.25rem; font-family: inherit; font-size: 1rem; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.6;"></textarea>
+                        <textarea id="center-notebook-textarea" placeholder="Type your important note here (e.g. reminders, custom margins, instructions...)" style="flex: 1; width: 100%; min-height: 100px; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 1rem; font-family: inherit; font-size: 0.95rem; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.5;"></textarea>
                         
                         <!-- Excel Sheet Editor Container (Hidden by default) -->
-                        <div id="excel-editor-container" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem; overflow: hidden;">
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <div id="excel-editor-container" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.5rem; overflow: hidden;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem;">
                                 <div style="display: flex; gap: 4px;">
-                                    <button id="excel-add-row-btn" class="btn secondary" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">➕ Row</button>
-                                    <button id="excel-add-col-btn" class="btn secondary" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">➕ Column</button>
-                                    <button id="excel-clear-btn" class="btn tertiary" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; color: #ef4444; border-color: rgba(239,68,68,0.2); cursor: pointer;">🧹 Clear</button>
+                                    <button id="excel-add-row-btn" class="btn secondary" style="padding: 3px 8px; font-size: 0.7rem; font-weight: 600; cursor: pointer; height: 26px;">➕ Row</button>
+                                    <button id="excel-add-col-btn" class="btn secondary" style="padding: 3px 8px; font-size: 0.7rem; font-weight: 600; cursor: pointer; height: 26px;">➕ Column</button>
+                                    <button id="excel-clear-btn" class="btn tertiary" style="padding: 3px 8px; font-size: 0.7rem; font-weight: 600; color: #ef4444; border-color: rgba(239,68,68,0.2); cursor: pointer; height: 26px;">🧹 Clear</button>
                                 </div>
-                                <div style="width: 1px; height: 18px; background: var(--border-color); margin: 0 4px;"></div>
+                                <div style="width: 1px; height: 16px; background: var(--border-color); margin: 0 2px;"></div>
                                 <!-- Formatting Controls -->
-                                <div style="display: flex; gap: 6px; align-items: center;">
-                                    <button id="excel-format-bold" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; outline: none; border-color: var(--border-color); background: transparent;">B</button>
+                                <div style="display: flex; gap: 4px; align-items: center;">
+                                    <button id="excel-format-bold" class="btn secondary" style="padding: 0; font-size: 0.7rem; font-weight: 800; cursor: pointer; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; outline: none; border-color: var(--border-color); background: transparent;">B</button>
                                     
                                     <!-- Alignment Buttons -->
-                                    <div style="display: flex; gap: 2px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; height: 28px; background: transparent;">
-                                        <button id="excel-align-left" class="btn secondary" style="padding: 0; width: 26px; font-size: 0.75rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Left">⫷</button>
-                                        <button id="excel-align-center" class="btn secondary" style="padding: 0; width: 26px; font-size: 0.75rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Center">⫸⫷</button>
-                                        <button id="excel-align-right" class="btn secondary" style="padding: 0; width: 26px; font-size: 0.75rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Right">⫸</button>
+                                    <div style="display: flex; gap: 1px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; height: 26px; background: transparent;">
+                                        <button id="excel-align-left" class="btn secondary" style="padding: 0; width: 24px; font-size: 0.7rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Left">⫷</button>
+                                        <button id="excel-align-center" class="btn secondary" style="padding: 0; width: 24px; font-size: 0.7rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Center">⫸⫷</button>
+                                        <button id="excel-align-right" class="btn secondary" style="padding: 0; width: 24px; font-size: 0.7rem; border: none; cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center; background: transparent;" title="Align Right">⫸</button>
                                     </div>
 
                                     <!-- Custom Color Picker Dropdown -->
                                     <div style="position: relative; display: inline-block;">
-                                        <button id="excel-color-btn" class="btn secondary" style="padding: 4px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; height: 28px; display: flex; align-items: center; gap: 4px; border-color: var(--border-color); background: transparent;" title="Font Color">
-                                            <span style="border-bottom: 3.5px solid #000000; padding-bottom: 1px; display: inline-block; width: 14px; text-align: center; font-weight: 800;">A</span>
-                                            <span style="font-size: 0.5rem; opacity: 0.7;">▼</span>
+                                        <button id="excel-color-btn" class="btn secondary" style="padding: 2px 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; height: 26px; display: flex; align-items: center; gap: 2px; border-color: var(--border-color); background: transparent;" title="Font Color">
+                                            <span style="border-bottom: 3px solid #000000; padding-bottom: 1px; display: inline-block; width: 12px; text-align: center; font-weight: 800;">A</span>
+                                            <span style="font-size: 0.45rem; opacity: 0.7;">▼</span>
                                         </button>
                                         <!-- Dropdown Menu -->
-                                        <div id="excel-color-dropdown" class="hidden" style="position: absolute; top: 32px; left: 0; background: #262626; border: 1px solid #444; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); padding: 12px; z-index: 100; width: 210px; color: #fff;">
-                                            <div id="color-auto-btn" style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.75rem; transition: background 0.2s; margin-bottom: 8px;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='transparent'">
-                                                <div style="width: 14px; height: 14px; background: #000000; border: 1px solid #666; border-radius: 2px;"></div>
+                                        <div id="excel-color-dropdown" class="hidden" style="position: absolute; top: 30px; left: 0; background: #262626; border: 1px solid #444; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); padding: 10px; z-index: 100; width: 200px; color: #fff;">
+                                            <div id="color-auto-btn" style="display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.7rem; transition: background 0.2s; margin-bottom: 6px;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='transparent'">
+                                                <div style="width: 12px; height: 12px; background: #000000; border: 1px solid #666; border-radius: 2px;"></div>
                                                 <span style="font-weight: 600;">Automatic</span>
                                             </div>
                                             
