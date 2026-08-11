@@ -2331,6 +2331,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Mouse selection drag handlers on td
                 td.addEventListener('mousedown', (e) => {
+                    // Force focus on this cell's input immediately
+                    if (input && document.activeElement !== input) {
+                        input.focus();
+                    }
+
                     if (e.target === input) {
                         // If they click the text input directly, do not block keyboard typing selection
                         if (e.ctrlKey || e.metaKey) {
