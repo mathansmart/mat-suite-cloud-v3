@@ -2072,14 +2072,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyAlignment = (align) => {
-        const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
-        cell.align = align;
+        const targets = getTargetCells();
+        targets.forEach(target => {
+            const cell = excelRows[target.rowIndex][target.colIndex];
+            cell.align = align;
+            const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+            if (input) {
+                input.style.textAlign = align;
+            }
+        });
         updateAlignButtons(align);
-        
-        const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
-        if (input) {
-            input.style.textAlign = align;
-        }
     };
 
     if (excelAlignLeft) excelAlignLeft.addEventListener('click', () => applyAlignment('left'));
@@ -2138,18 +2140,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyColor = (color) => {
-        const cell = excelRows[activeCell.rowIndex][activeCell.colIndex];
-        cell.color = color;
+        const targets = getTargetCells();
+        targets.forEach(target => {
+            const cell = excelRows[target.rowIndex][target.colIndex];
+            cell.color = color;
+            const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+            if (input) {
+                input.style.color = color;
+            }
+        });
         
         // Add to recent colors (keep unique, max 10)
         recentColors = [color, ...recentColors.filter(c => c !== color)].slice(0, 10);
         renderColorGrids();
-
-        // Update active cell text color in DOM
-        const input = excelEditorTable.querySelector(`tr:nth-child(${activeCell.rowIndex + 2}) td:nth-child(${activeCell.colIndex + 1}) input`);
-        if (input) {
-            input.style.color = color;
-        }
 
         // Close dropdown
         if (excelColorDropdown) excelColorDropdown.classList.add('hidden');
