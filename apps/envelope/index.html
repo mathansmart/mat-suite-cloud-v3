@@ -113,7 +113,7 @@
                 </div>
 
                 <!-- Left Column: Note Detail View (Hidden by default) -->
-                <div id="note-detail-section" class="hidden" style="flex: 1; height: 100%; display: flex; flex-direction: column; gap: 1.5rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+                <div id="note-detail-section" class="hidden" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 1.5rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--primary-bg); padding-bottom: 1rem;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <button id="note-detail-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
@@ -125,7 +125,7 @@
                         <!-- Note content will be injected here -->
                     </div>
                     <!-- Excel Sheet Viewer Container (Hidden by default) -->
-                    <div id="excel-viewer-container" class="hidden" style="flex: 1; overflow: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); margin: 0.5rem 0; padding: 1px;">
+                    <div id="excel-viewer-container" class="hidden" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); margin: 0.5rem 0; padding: 1px;">
                         <table id="excel-viewer-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: monospace; text-align: left;">
                             <!-- Populated by JS -->
                         </table>
@@ -133,14 +133,14 @@
                 </div>
 
                 <!-- Left Column: Note Editor View (Hidden by default) -->
-                <div id="note-editor-section" class="hidden" style="flex: 1; height: 100%; display: flex; flex-direction: column; gap: 1.5rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+                <div id="note-editor-section" class="hidden" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 1.5rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--primary-bg); padding-bottom: 1rem;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <button id="note-editor-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
                             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800;">📝 Write Note</h2>
                         </div>
                     </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 1rem; overflow: hidden;">
                         <!-- Sheet Type Toggles -->
                         <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
                             <button id="toggle-plain-sheet-btn" class="btn primary" style="padding: 6px 16px; font-size: 0.8rem; font-weight: 700;">📄 Plain Sheet</button>
@@ -153,10 +153,10 @@
                         </div>
                         
                         <!-- Plain Sheet Textarea -->
-                        <textarea id="center-notebook-textarea" placeholder="Type your important note here (e.g. reminders, custom margins, instructions...)" style="flex: 1; width: 100%; min-height: 250px; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 1.25rem; font-family: inherit; font-size: 1rem; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.6;"></textarea>
+                        <textarea id="center-notebook-textarea" placeholder="Type your important note here (e.g. reminders, custom margins, instructions...)" style="flex: 1; width: 100%; min-height: 100px; background: var(--primary-bg); border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 1.25rem; font-family: inherit; font-size: 1rem; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.2s; line-height: 1.6;"></textarea>
                         
                         <!-- Excel Sheet Editor Container (Hidden by default) -->
-                        <div id="excel-editor-container" class="hidden" style="flex: 1; display: flex; flex-direction: column; gap: 0.75rem; min-height: 300px; overflow: hidden;">
+                        <div id="excel-editor-container" class="hidden" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem; overflow: hidden;">
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
                                 <div style="display: flex; gap: 4px;">
                                     <button id="excel-add-row-btn" class="btn secondary" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">➕ Row</button>
