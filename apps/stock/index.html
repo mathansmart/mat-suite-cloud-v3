@@ -3873,11 +3873,11 @@ function renderDashboard() {
     function renderProductColumn(prod, isMain) {
       const cat = S.categories.find(c => String(c.id) === String(prod.ci));
       const catName = cat ? cat.n : 'Unknown';
-      const sz = cat ? cat.sizes : Object.keys(prod.s);
-      const tot = sz.reduce((a, s) => a + (prod.s[s] || 0), 0);
+      const sz = cat ? cat.sizes : Object.keys(prod.s || {});
+      const tot = sz.reduce((a, s) => a + ((prod.s ? prod.s[s] : 0) || 0), 0);
 
       const sizeRows = sz.map(s => {
-        const qty = prod.s[s] || 0;
+        const qty = (prod.s ? prod.s[s] : 0) || 0;
         const io = qty === 0, il = !io && qty <= prod.m;
         const color = io ? 'var(--danger)' : il ? 'var(--warn)' : 'var(--accent3)';
         const badge = io ? '🔴 OUT' : il ? '🟡 LOW' : '🟢 OK';
@@ -4258,6 +4258,7 @@ function renderDashboard() {
         if (!d.sizes) d.sizes = {};
         Object.entries(d.sizes).forEach(([sz, qty]) => {
           if (!qty || qty <= 0) return;
+          if (!p.s) p.s = {};
           p.s[sz] = (p.s[sz] || 0) + qty;
           T.push({
             id: 'T' + Date.now() + Math.random(), d: date + 'T' + now, pid: p.id, pn: p.n, ci: p.ci,
@@ -4544,6 +4545,7 @@ function renderDashboard() {
         if (!d.sizes) d.sizes = {};
         Object.entries(d.sizes).forEach(([sz, qty]) => {
           if (!qty || qty <= 0) return;
+          if (!p.s) p.s = {};
           p.s[sz] = (p.s[sz] || 0) - qty;
           T.push({ 
             id: 'T' + Date.now() + Math.random(), 
@@ -4748,6 +4750,7 @@ function renderDashboard() {
         if (newQty === oldQty) return; // no change
         const diff = newQty - oldQty;
         // reverse old, apply new
+        if (!p.s) p.s = {};
         if (txnType === 'IN') p.s[s] = ((p.s ? p.s[s] : 0) || 0) - oldQty + newQty;
         else p.s[s] = ((p.s ? p.s[s] : 0) || 0) + oldQty - newQty;
         // update transactions
@@ -4796,6 +4799,7 @@ function renderDashboard() {
         });
         const p = P.find(x => x.id === pid);
         if (p) {
+          if (!p.s) p.s = {};
           toDelete.forEach(t => {
             if (t.tp === 'IN') p.s[t.sz] = (p.s[t.sz] || 0) - t.q;
             else p.s[t.sz] = (p.s[t.sz] || 0) + t.q;
@@ -7797,6 +7801,7 @@ function d2i(val) {
           showAlert('Cannot Restore', 'The product for this transaction does not exist. Please restore the product first.');
           return;
         }
+        if (!p.s) p.s = {};
         item.data.forEach(t => {
           if (t.tp === 'IN') p.s[t.sz] = (p.s[t.sz] || 0) + t.q;
           else p.s[t.sz] = (p.s[t.sz] || 0) - t.q;
@@ -7812,6 +7817,7 @@ function d2i(val) {
         item.data.txns.forEach(t => {
           const p = P.find(x => x.id === t.pid);
           if (p) {
+            if (!p.s) p.s = {};
             p.s[t.sz] = (p.s[t.sz] || 0) - t.q;
           }
           T.push(t);
@@ -8957,6 +8963,7 @@ function d2i(val) {
         toDelete.forEach(t => {
           const p = P.find(x => x.id === t.pid);
           if (p) {
+            if (!p.s) p.s = {};
             p.s[t.sz] = (p.s[t.sz] || 0) + t.q;
           }
         });
