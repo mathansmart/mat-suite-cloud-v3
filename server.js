@@ -1,3 +1,10 @@
+try {
+  require('dns').setServers(['8.8.8.8', '1.1.1.1']);
+  console.log('✅ Custom DNS servers set for Node.js (8.8.8.8, 1.1.1.1)');
+} catch (e) {
+  console.error('⚠️ Failed to set custom DNS servers:', e);
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
