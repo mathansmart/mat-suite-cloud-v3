@@ -4102,6 +4102,7 @@ function renderDashboard() {
         const thSz = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:12px;padding:8px 3px;">${s}</th>`).join('');
         const rows = prods.map(p => {
           const d = siTableData[p.id] || siTableData[String(p.id)] || { sizes: {} };
+          if (d && !d.sizes) d.sizes = {};
           const tds = sz.map(s => `
         <td style="padding:3px 2px;">
           <input type="number" min="0" value="${d.sizes[s] || ''}" placeholder="0"
@@ -4213,7 +4214,9 @@ function renderDashboard() {
 
     function updateSiSum() {
       const tot = siAddedPids.reduce((a, pid) => {
-        const d = siTableData[pid] || siTableData[Number(pid)]; return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
+        const d = siTableData[pid] || siTableData[Number(pid)]; 
+        if (d && !d.sizes) d.sizes = {};
+        return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
       }, 0);
       const el = document.getElementById('si-summary');
       if (el) el.innerHTML = `<strong>${siAddedPids.length}</strong> products · <strong>${tot}</strong> total boxes`;
@@ -4252,6 +4255,7 @@ function renderDashboard() {
       siAddedPids.forEach(pid => {
         const p = P.find(x => String(x.id) === String(pid));
         const d = siTableData[pid] || siTableData[Number(pid)]; if (!d || !p) return;
+        if (!d.sizes) d.sizes = {};
         Object.entries(d.sizes).forEach(([sz, qty]) => {
           if (!qty || qty <= 0) return;
           p.s[sz] = (p.s[sz] || 0) + qty;
@@ -4367,6 +4371,7 @@ function renderDashboard() {
         const thSz = sz.map(s => `<th style="text-align:center;min-width:52px;font-size:12px;padding:8px 3px;">${s}</th>`).join('');
         const rows = prods.map(p => {
           const d = soData[p.id] || soData[String(p.id)] || { sizes: {} };
+          if (d && !d.sizes) d.sizes = {};
           const tds = sz.map(s => {
             const cur = (p.s ? p.s[s] : 0) || 0;
             const sc = cur <= 0 ? 'color:var(--danger)' : cur <= p.m ? 'color:var(--warn)' : 'color:var(--accent3)';
@@ -4377,7 +4382,7 @@ function renderDashboard() {
           <div style="font-size:9px;text-align:center;font-family:'JetBrains Mono',monospace;${sc}">Stk:${cur}</div>
         </td>`;
           }).join('');
-          const rowTot = Object.values(d.sizes || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+          const rowTot = Object.values(d.sizes).reduce((a, b) => a + (Number(b) || 0), 0);
           return `<tr data-pid="${p.id}">
         <td style="font-weight:700;font-size:13px;white-space:nowrap;padding:6px 10px;border-right:1.5px solid var(--border);">${p.n}</td>
         ${tds}
@@ -4466,10 +4471,11 @@ function renderDashboard() {
           const p = this.dataset.pid, s = this.dataset.sz;
           const targetData = soData[p] || soData[Number(p)];
           if (targetData) {
+            if (!targetData.sizes) targetData.sizes = {};
             targetData.sizes[s] = parseInt(this.value) || 0;
             const pr = P.find(x => String(x.id) === String(p));
             if (pr) {
-              const av = pr.s[s] || 0;
+              const av = (pr.s ? pr.s[s] : 0) || 0;
               if (targetData.sizes[s] > av) this.classList.add('exceed');
               else this.classList.remove('exceed');
             }
@@ -4511,7 +4517,9 @@ function renderDashboard() {
 
     function updateSoSum() {
       const tot = soAddedPids.reduce((a, pid) => {
-        const d = soData[pid] || soData[Number(pid)]; return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
+        const d = soData[pid] || soData[Number(pid)]; 
+        if (d && !d.sizes) d.sizes = {};
+        return d ? a + Object.values(d.sizes).reduce((x, y) => x + y, 0) : a;
       }, 0);
       const el = document.getElementById('so-summary');
       if (el) el.innerHTML = `<strong>${soAddedPids.length}</strong> products · <strong>${tot}</strong> total boxes`;
@@ -4533,6 +4541,7 @@ function renderDashboard() {
       soAddedPids.forEach(pid => {
         const p = P.find(x => String(x.id) === String(pid));
         const d = soData[pid] || soData[Number(pid)]; if (!d || !p) return;
+        if (!d.sizes) d.sizes = {};
         Object.entries(d.sizes).forEach(([sz, qty]) => {
           if (!qty || qty <= 0) return;
           p.s[sz] = (p.s[sz] || 0) - qty;
@@ -5273,7 +5282,12 @@ function d2i(val) {
         try {
           const draft = JSON.parse(draftStr);
           if (draft.pids) siAddedPids = draft.pids.filter(pid => P.some(x => x.id === pid));
-          if (draft.data) siTableData = draft.data;
+          if (draft.data) {
+            siTableData = draft.data;
+            for (const k in siTableData) {
+              if (siTableData[k] && !siTableData[k].sizes) siTableData[k].sizes = {};
+            }
+          }
           if (draft.date) d.value = draft.date;
           if (draft.sup && supEl) supEl.value = draft.sup;
         } catch(e) {}
@@ -5297,7 +5311,12 @@ function d2i(val) {
         try {
           const draft = JSON.parse(draftStr);
           if (draft.pids) soAddedPids = draft.pids.filter(pid => P.some(x => x.id === pid));
-          if (draft.data) soData = draft.data;
+          if (draft.data) {
+            soData = draft.data;
+            for (const k in soData) {
+              if (soData[k] && !soData[k].sizes) soData[k].sizes = {};
+            }
+          }
           if (draft.date && d) d.value = draft.date;
           if (draft.cust && custEl) custEl.value = draft.cust;
         } catch(e) {}
