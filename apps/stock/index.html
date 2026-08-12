@@ -5116,7 +5116,7 @@ function d2i(val) {
       monthsSet.add(todayStr().slice(0, 7)); // Always include current month
       if (Array.isArray(T)) {
         T.forEach(t => {
-          if (t.tp === type && t.d) {
+          if ((!type || t.tp === type) && t.d) {
             const m = getMonthFromDateStr(t.d);
             if (m) monthsSet.add(m);
           }
