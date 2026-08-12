@@ -223,22 +223,35 @@ app.post('/api/stock/data', (req, res) => {
     res.json({ success: true });
     (async () => {
         try {
-            if (settings) await StockSettings.findOneAndUpdate({ id: 1 }, { data: JSON.stringify(settings) }, { upsert: true });
+            if (settings) {
+                await StockSettings.findOneAndUpdate({ id: 1 }, { data: JSON.stringify(settings) }, { upsert: true });
+            }
             if (products) {
-                await StockProduct.deleteMany({});
-                await StockProduct.insertMany(products.map(p => ({ id: p.id, data: JSON.stringify(p) })));
+                for (const p of products) {
+                    if (p && p.id) {
+                        await StockProduct.findOneAndUpdate({ id: p.id }, { data: JSON.stringify(p) }, { upsert: true });
+                    }
+                }
             }
             if (transactions) {
-                await StockTransaction.deleteMany({});
-                await StockTransaction.insertMany(transactions.map(t => ({ id: t.id, data: JSON.stringify(t) })));
+                for (const t of transactions) {
+                    if (t && t.id) {
+                        await StockTransaction.findOneAndUpdate({ id: t.id }, { data: JSON.stringify(t) }, { upsert: true });
+                    }
+                }
             }
             if (users) {
-                await StockUser.deleteMany({});
-                await StockUser.insertMany(users);
+                for (const u of users) {
+                    if (u && u.username) {
+                        await StockUser.findOneAndUpdate({ username: u.username }, u, { upsert: true });
+                    }
+                }
             }
             if (recycleBin) {
-                await StockRecycle.deleteMany({});
-                await StockRecycle.insertMany(recycleBin.map(r => ({ id: r.id || Date.now() + Math.random(), data: JSON.stringify(r) })));
+                for (const r of recycleBin) {
+                    const rId = r.id || Date.now() + Math.random();
+                    await StockRecycle.findOneAndUpdate({ id: rId }, { data: JSON.stringify(r) }, { upsert: true });
+                }
             }
         } catch (err) { console.error('Failed to save stock data in background:', err); }
     })();
