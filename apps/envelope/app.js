@@ -1951,7 +1951,38 @@ document.addEventListener('DOMContentLoaded', () => {
                             thRow.style.color = 'var(--text-secondary)';
                             thRow.style.textAlign = 'center';
                             thRow.style.border = '1px solid #cbd5e1';
-                            thRow.style.padding = '6px 8px';
+                            thRow.style.padding = '6px 2px';
+                            thRow.style.position = 'relative';
+                            thRow.className = 'row-header';
+
+                            // Row resizer handle
+                            const rowResizer = document.createElement('div');
+                            rowResizer.className = 'row-resizer';
+                            thRow.appendChild(rowResizer);
+
+                            let startY, startHeight;
+                            rowResizer.addEventListener('mousedown', (e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                startY = e.clientY;
+                                startHeight = tr.offsetHeight;
+                                rowResizer.classList.add('resizing');
+
+                                const doRowDrag = (ev) => {
+                                    const height = Math.max(25, startHeight + (ev.clientY - startY));
+                                    tr.style.height = height + 'px';
+                                };
+
+                                const stopRowDrag = () => {
+                                    document.documentElement.removeEventListener('mousemove', doRowDrag);
+                                    document.documentElement.removeEventListener('mouseup', stopRowDrag);
+                                    rowResizer.classList.remove('resizing');
+                                };
+
+                                document.documentElement.addEventListener('mousemove', doRowDrag);
+                                document.documentElement.addEventListener('mouseup', stopRowDrag);
+                            });
+
                             tr.appendChild(thRow);
 
                             row.forEach(cell => {
@@ -2352,7 +2383,11 @@ document.addEventListener('DOMContentLoaded', () => {
             thRow.className = 'row-header';
             thRow.textContent = rowIndex + 1;
             thRow.title = `Select Row ${rowIndex + 1}`;
-            thRow.addEventListener('click', () => {
+            thRow.style.position = 'relative';
+            thRow.style.padding = '6px 2px';
+
+            thRow.addEventListener('click', (e) => {
+                if (e.target.classList.contains('row-resizer')) return;
                 clearSelection();
                 row.forEach((cell, colIndex) => {
                     selectedCells.push({ rowIndex, colIndex });
@@ -2360,6 +2395,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (td) td.classList.add('selected-cell');
                 });
             });
+
+            // Row resizer handle
+            const rowResizer = document.createElement('div');
+            rowResizer.className = 'row-resizer';
+            thRow.appendChild(rowResizer);
+
+            let startY, startHeight;
+            rowResizer.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                startY = e.clientY;
+                startHeight = tr.offsetHeight;
+                rowResizer.classList.add('resizing');
+
+                const doRowDrag = (ev) => {
+                    const height = Math.max(25, startHeight + (ev.clientY - startY));
+                    tr.style.height = height + 'px';
+                };
+
+                const stopRowDrag = () => {
+                    document.documentElement.removeEventListener('mousemove', doRowDrag);
+                    document.documentElement.removeEventListener('mouseup', stopRowDrag);
+                    rowResizer.classList.remove('resizing');
+                };
+
+                document.documentElement.addEventListener('mousemove', doRowDrag);
+                document.documentElement.addEventListener('mouseup', stopRowDrag);
+            });
+
             tr.appendChild(thRow);
 
             row.forEach((cell, colIndex) => {
@@ -2369,14 +2433,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.value = cell.value || '';
                 input.spellcheck = true;
                 
-                // Set exact character fit width (approx 8px per character + 16px padding, min 80px)
-                const adjustInputWidth = (inp, val) => {
-                    const len = (val || '').length;
-                    const w = Math.max(80, (len * 8) + 16);
-                    inp.style.width = w + 'px';
-                };
-                adjustInputWidth(input, cell.value || '');
-                
                 // Apply saved styling properties
                 input.style.fontWeight = cell.bold ? 'bold' : 'normal';
                 input.style.textAlign = cell.align || 'left';
@@ -2384,7 +2440,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 input.addEventListener('input', (e) => {
                     excelRows[rowIndex][colIndex].value = e.target.value;
-                    adjustInputWidth(input, e.target.value);
                 });
 
                 // Focus event to update formatting toolbar
