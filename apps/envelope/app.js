@@ -39,6 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const PROFILE = urlParams.get('profile') || '1';
     const PROFILE_QUERY = `?profile=${PROFILE}`;
     
+    // Dynamic localStorage key for profile isolation
+    const NOTEBOOK_STORAGE_KEY = `envelope_notebook_notes_prof_${PROFILE}`;
+    
+    // Migration: If Milton (Profile 1) and new key is empty, but old shared key contains notes, copy them
+    if (PROFILE === '1' && !localStorage.getItem(NOTEBOOK_STORAGE_KEY)) {
+        const oldNotes = localStorage.getItem('envelope_notebook_notes');
+        if (oldNotes) {
+            localStorage.setItem(NOTEBOOK_STORAGE_KEY, oldNotes);
+            console.log('✅ Migrated Milton notes to profile-isolated key');
+        }
+    }
+    
     // Set UI Badge
     setTimeout(() => {
         const badge = document.getElementById('profile-badge');
@@ -2277,7 +2289,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
                     notebookNotes = notebookNotes.filter(n => n.id !== note.id);
-                    localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+                    localStorage.setItem(NOTEBOOK_STORAGE_KEY, JSON.stringify(notebookNotes));
                     activeSettings.notebookNotes = notebookNotes;
                     saveSettingsToServer();
                     
@@ -2323,7 +2335,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             notebookNotes.unshift(newNote);
-            localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+            localStorage.setItem(NOTEBOOK_STORAGE_KEY, JSON.stringify(notebookNotes));
             activeSettings.notebookNotes = notebookNotes;
             saveSettingsToServer();
             notebookTextarea.value = '';
@@ -3140,7 +3152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 notebookNotes.unshift(newNote);
             }
 
-            localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+            localStorage.setItem(NOTEBOOK_STORAGE_KEY, JSON.stringify(notebookNotes));
             activeSettings.notebookNotes = notebookNotes;
             saveSettingsToServer();
             
@@ -3192,7 +3204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load initial notes
     try {
-        notebookNotes = JSON.parse(localStorage.getItem('envelope_notebook_notes')) || [];
+        notebookNotes = JSON.parse(localStorage.getItem(NOTEBOOK_STORAGE_KEY)) || [];
     } catch (e) {
         console.error('Failed to parse envelope notes:', e);
         notebookNotes = [];
