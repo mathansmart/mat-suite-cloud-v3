@@ -1840,6 +1840,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Notebook Logic ---
     let notebookNotes = [];
+    let editingNoteId = null;
 
     // Canvas-based text measurement for Excel auto-fit on double click
     const getTextWidth = (text, font) => {
@@ -1904,6 +1905,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         excelViewerTable.innerHTML = '';
                         const data = note.excelData || { headers: [], rows: [] };
+
+                        // Find used range to only display columns & rows that have text content
+                        let lastUsedCol = -1;
+                        (data.headers || []).forEach((h, cIdx) => {
+                            const hasContent = (data.rows || []).some(row => {
+                                const cell = row[cIdx];
+                                const val = cell && typeof cell === 'object' ? (cell.value || '') : (cell || '');
+                                return val.trim().length > 0;
+                            });
+                            if (hasContent) {
+                                lastUsedCol = cIdx;
+                            }
+                        });
+
+                        let lastUsedRow = -1;
+                        (data.rows || []).forEach((row, rIdx) => {
+                            const hasContent = row.some(cell => {
+                                const val = cell && typeof cell === 'object' ? (cell.value || '') : (cell || '');
+                                return val.trim().length > 0;
+                            });
+                            if (hasContent) {
+                                lastUsedRow = rIdx;
+                            }
+                        });
+
+                        const maxColIndexToShow = Math.max(0, lastUsedCol);
+                        const maxRowIndexToShow = Math.max(0, lastUsedRow);
                         
                         // Render headers
                         const trHead = document.createElement('tr');
@@ -1912,10 +1940,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         thAll.style.background = '#e2e8f0';
                         trHead.appendChild(thAll);
 
-                        (data.headers || []).forEach((h, colIndex) => {
+                        const headersToShow = (data.headers || []).slice(0, maxColIndexToShow + 1);
+                        headersToShow.forEach((h, colIndex) => {
                             const th = document.createElement('th');
                             th.textContent = h;
                             th.style.position = 'relative';
+                            
+                            // Apply preserved width
+                            if (data.colWidths && data.colWidths[colIndex]) {
+                                th.style.width = data.colWidths[colIndex];
+                                th.style.minWidth = data.colWidths[colIndex];
+                            }
                             
                             // Resizer handle
                             const resizer = document.createElement('div');
@@ -1976,8 +2011,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         excelViewerTable.appendChild(trHead);
                         
                         // Render rows
-                        (data.rows || []).forEach((row, rIdx) => {
+                        const rowsToShow = (data.rows || []).slice(0, maxRowIndexToShow + 1);
+                        rowsToShow.forEach((row, rIdx) => {
                             const tr = document.createElement('tr');
+                            
+                            // Apply preserved height
+                            if (data.rowHeights && data.rowHeights[rIdx]) {
+                                tr.style.height = data.rowHeights[rIdx];
+                            }
+
                             const thRow = document.createElement('th');
                             thRow.textContent = rIdx + 1;
                             thRow.style.background = '#f1f5f9';
@@ -2025,7 +2067,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             tr.appendChild(thRow);
 
-                            row.forEach(cell => {
+                            const cellsToShow = row.slice(0, maxColIndexToShow + 1);
+                            cellsToShow.forEach(cell => {
                                 const td = document.createElement('td');
                                 if (cell && typeof cell === 'object') {
                                     td.textContent = cell.value || '';
@@ -2045,6 +2088,82 @@ document.addEventListener('DOMContentLoaded', () => {
                             noteDetailContent.classList.remove('hidden');
                             noteDetailContent.textContent = note.text;
                         }
+                    }
+                    
+                    // Bind Edit button listener
+                    const noteDetailEditBtn = document.getElementById('note-detail-edit-btn');
+                    if (noteDetailEditBtn) {
+                        const newEditBtn = noteDetailEditBtn.cloneNode(true);
+                        noteDetailEditBtn.parentNode.replaceChild(newEditBtn, noteDetailEditBtn);
+                        newEditBtn.addEventListener('click', () => {
+                            editingNoteId = note.id;
+                            if (centerNotebookTitle) centerNotebookTitle.value = note.title || '';
+                            
+                            if (isExcel) {
+                                currentNoteType = 'excel';
+                                if (toggleExcelSheetBtn) {
+                                    toggleExcelSheetBtn.classList.add('primary');
+                                    toggleExcelSheetBtn.classList.remove('secondary');
+                                    toggleExcelSheetBtn.style.background = '';
+                                    toggleExcelSheetBtn.style.color = '';
+                                }
+                                if (togglePlainSheetBtn) {
+                                    togglePlainSheetBtn.classList.remove('primary');
+                                    togglePlainSheetBtn.classList.add('secondary');
+                                    togglePlainSheetBtn.style.background = 'transparent';
+                                    togglePlainSheetBtn.style.color = 'var(--text-secondary)';
+                                }
+                                if (centerNotebookTextarea) centerNotebookTextarea.classList.add('hidden');
+                                if (excelEditorContainer) excelEditorContainer.classList.remove('hidden');
+
+                                excelHeaders = [...note.excelData.headers];
+                                excelRows = JSON.parse(JSON.stringify(note.excelData.rows));
+                                renderExcelEditorTable();
+                                
+                                // Apply saved widths/heights to editor table
+                                if (note.excelData.colWidths) {
+                                    const thElements = excelEditorTable.querySelectorAll('tr:first-child th');
+                                    for (let i = 1; i < thElements.length; i++) {
+                                        const savedW = note.excelData.colWidths[i - 1];
+                                        if (savedW) {
+                                            thElements[i].style.width = savedW;
+                                            thElements[i].style.minWidth = savedW;
+                                        }
+                                    }
+                                }
+                                if (note.excelData.rowHeights) {
+                                    const trElements = excelEditorTable.querySelectorAll('tr');
+                                    for (let i = 1; i < trElements.length; i++) {
+                                        const savedH = note.excelData.rowHeights[i - 1];
+                                        if (savedH) {
+                                            trElements[i].style.height = savedH;
+                                        }
+                                    }
+                                }
+                            } else {
+                                currentNoteType = 'plain';
+                                if (togglePlainSheetBtn) {
+                                    togglePlainSheetBtn.classList.add('primary');
+                                    togglePlainSheetBtn.classList.remove('secondary');
+                                    togglePlainSheetBtn.style.background = '';
+                                    togglePlainSheetBtn.style.color = '';
+                                }
+                                if (toggleExcelSheetBtn) {
+                                    toggleExcelSheetBtn.classList.remove('primary');
+                                    toggleExcelSheetBtn.classList.add('secondary');
+                                    toggleExcelSheetBtn.style.background = 'transparent';
+                                    toggleExcelSheetBtn.style.color = 'var(--text-secondary)';
+                                }
+                                if (centerNotebookTextarea) {
+                                    centerNotebookTextarea.classList.remove('hidden');
+                                    centerNotebookTextarea.value = note.text || '';
+                                }
+                                if (excelEditorContainer) excelEditorContainer.classList.add('hidden');
+                            }
+                            
+                            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+                            if (noteEditorSection) noteEditorSection.classList.remove('hidden');
+                        });
                     }
                     
                     if (addressListSection) addressListSection.classList.add('hidden');
@@ -2712,6 +2831,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (notebookTextarea && centerNotebookTextarea && noteEditorSection && addressListSection) {
         notebookTextarea.addEventListener('focus', () => {
+            editingNoteId = null; // Clear editing state for new note
             // Copy whatever is inside right side textarea to the center editor
             centerNotebookTextarea.value = notebookTextarea.value;
             if (centerNotebookTitle) centerNotebookTitle.value = '';
@@ -2750,16 +2870,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let newNote;
             if (currentNoteType === 'excel') {
+                // Get current column widths from editor table
+                const colWidths = [];
+                const thElements = excelEditorTable.querySelectorAll('tr:first-child th');
+                for (let i = 1; i < thElements.length; i++) {
+                    colWidths.push(thElements[i].style.width || '100px');
+                }
+
+                // Get current row heights from editor table
+                const rowHeights = [];
+                const trElements = excelEditorTable.querySelectorAll('tr');
+                for (let i = 1; i < trElements.length; i++) {
+                    rowHeights.push(trElements[i].style.height || '');
+                }
+
                 // Generate preview summary of cells
                 const textPreview = excelRows.map(row => row.map(cell => cell.value).filter(val => val && val.trim().length > 0).join(' | ')).filter(r => r.length > 0).join('\n');
                 newNote = {
-                    id: Date.now(),
+                    id: editingNoteId || Date.now(),
                     title: title || 'Untitled Excel Sheet',
                     type: 'excel',
                     text: textPreview || 'Empty Excel Sheet',
                     excelData: {
                         headers: [...excelHeaders],
-                        rows: JSON.parse(JSON.stringify(excelRows))
+                        rows: JSON.parse(JSON.stringify(excelRows)),
+                        colWidths: colWidths,
+                        rowHeights: rowHeights
                     },
                     time: timeStr
                 };
@@ -2770,7 +2906,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 newNote = {
-                    id: Date.now(),
+                    id: editingNoteId || Date.now(),
                     title: title || 'Untitled Note',
                     type: 'plain',
                     text: text,
@@ -2778,7 +2914,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
 
-            notebookNotes.unshift(newNote);
+            if (editingNoteId) {
+                const idx = notebookNotes.findIndex(n => n.id === editingNoteId);
+                if (idx !== -1) {
+                    notebookNotes[idx] = newNote;
+                } else {
+                    notebookNotes.unshift(newNote);
+                }
+                editingNoteId = null; // Reset
+            } else {
+                notebookNotes.unshift(newNote);
+            }
+
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
             activeSettings.notebookNotes = notebookNotes;
             saveSettingsToServer();

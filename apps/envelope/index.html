@@ -119,7 +119,10 @@
                             <button id="note-detail-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
                             <h2 id="note-detail-title" style="margin: 0; font-size: 1.25rem; font-weight: 800;">📝 View Note</h2>
                         </div>
-                        <span id="note-detail-time" style="font-size: 0.8rem; color: var(--text-secondary);">Today, 2:45 PM</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button id="note-detail-edit-btn" class="btn secondary" style="padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 4px; height: 28px; background: transparent;">✏️ Edit</button>
+                            <span id="note-detail-time" style="font-size: 0.8rem; color: var(--text-secondary);">Today, 2:45 PM</span>
+                        </div>
                     </div>
                     <div id="note-detail-content" style="flex: 1; font-size: 1.05rem; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; overflow-y: auto; padding: 0.5rem 0;">
                         <!-- Note content will be injected here -->
