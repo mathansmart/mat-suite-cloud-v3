@@ -1858,11 +1858,12 @@ document.addEventListener('DOMContentLoaded', () => {
         notebookNotesList.innerHTML = '';
 
         const notebookSearchInput = document.getElementById('notebook-search-input');
-        const query = notebookSearchInput ? notebookSearchInput.value.toLowerCase().trim() : '';
+        const rawQuery = notebookSearchInput ? notebookSearchInput.value.trim() : '';
+        const normalizedQuery = rawQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
 
         const filteredNotes = notebookNotes.filter(note => {
-            const titleMatch = (note.title || '').toLowerCase().includes(query);
-            const textMatch = (note.text || '').toLowerCase().includes(query);
+            const titleMatch = (note.title || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(normalizedQuery);
+            const textMatch = (note.text || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(normalizedQuery);
             return titleMatch || textMatch;
         });
         
@@ -3200,7 +3201,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const excelViewerTable = document.getElementById('excel-viewer-table');
     if (excelViewerSearchInput && excelViewerTable) {
         excelViewerSearchInput.addEventListener('input', () => {
-            const query = excelViewerSearchInput.value.toLowerCase().trim();
+            const rawQuery = excelViewerSearchInput.value.trim();
+            const normalizedQuery = rawQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
             const rows = excelViewerTable.querySelectorAll('tr');
             // Skip the header row
             for (let i = 1; i < rows.length; i++) {
@@ -3208,11 +3210,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cells = tr.querySelectorAll('td');
                 let matches = false;
                 cells.forEach(td => {
-                    if (td.textContent.toLowerCase().includes(query)) {
+                    const normalizedCell = td.textContent.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (normalizedCell.includes(normalizedQuery)) {
                         matches = true;
                     }
                 });
-                if (matches || query === '') {
+                if (matches || rawQuery === '') {
                     tr.style.display = '';
                 } else {
                     tr.style.display = 'none';
