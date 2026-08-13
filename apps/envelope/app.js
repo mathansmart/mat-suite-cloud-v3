@@ -49,14 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     // --- Startup Connection Check ---
-    const initConnection = async (retries = 12) => {
+    const initConnection = async (retries = 20) => {
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingStatus = document.getElementById('loading-status');
         const repairBtn = document.getElementById('emergency-repair-btn');
 
         for (let i = 0; i < retries; i++) {
+            // Use AbortController to prevent fetch from hanging indefinitely during Render cold start
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+
             try {
-                const resp = await fetch(`${API_BASE}/api/envelope/status${PROFILE_QUERY}`);
+                const resp = await fetch(`${API_BASE}/api/envelope/status${PROFILE_QUERY}`, { 
+                    signal: controller.signal 
+                });
+                clearTimeout(timeoutId);
+
                 if (resp.ok) {
                     const data = await resp.json();
                     console.log('✅ Connected to Envelope Pro Server v' + data.version);
@@ -73,14 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             } catch (err) {
+                clearTimeout(timeoutId);
                 console.warn(`Attempt ${i+1}: Server not ready yet...`);
                 if (loadingStatus) {
                     const progress = Math.round(((i + 1) / retries) * 100);
-                    loadingStatus.innerHTML = `Searching for Server... (${i+1}/${retries})<br><small style="opacity: 0.7; font-size: 0.7rem;">Please wait, system is initializing</small>`;
+                    loadingStatus.innerHTML = `Connecting to System... (${i+1}/${retries})<br><small style="opacity: 0.8; font-size: 0.75rem; color: var(--accent-blue); font-weight: 600;">Please wait, waking up cloud server...</small>`;
                     const progressBar = document.querySelector('.loader-progress');
                     if (progressBar) progressBar.style.width = `${progress}%`;
                 }
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, 1200));
             }
         }
 
@@ -89,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingStatus.innerHTML = `
                 <span style="color: var(--danger); font-weight:700;">CONNECTION DELAYED</span><br>
                 <div style="font-size: 0.8rem; margin-top: 10px; line-height: 1.4;">
-                    The printer software is taking longer than usual to start.<br>
+                    The server is taking longer than usual to start.<br>
                     <button onclick="window.location.reload()" class="btn secondary" style="margin-top: 15px; padding: 5px 15px; font-size: 0.8rem;">Try Connecting Again</button>
                 </div>`;
             if (repairBtn) repairBtn.classList.remove('hidden');
