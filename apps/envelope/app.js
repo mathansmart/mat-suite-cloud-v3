@@ -1907,6 +1907,37 @@ document.addEventListener('DOMContentLoaded', () => {
                         (data.headers || []).forEach(h => {
                             const th = document.createElement('th');
                             th.textContent = h;
+                            th.style.position = 'relative';
+                            
+                            // Resizer handle
+                            const resizer = document.createElement('div');
+                            resizer.className = 'col-resizer';
+                            th.appendChild(resizer);
+
+                            let startX, startWidth;
+                            resizer.addEventListener('mousedown', (e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                startX = e.clientX;
+                                startWidth = th.offsetWidth;
+                                resizer.classList.add('resizing');
+
+                                const doDrag = (ev) => {
+                                    const width = Math.max(80, startWidth + (ev.clientX - startX));
+                                    th.style.width = width + 'px';
+                                    th.style.minWidth = width + 'px';
+                                };
+
+                                const stopDrag = () => {
+                                    document.documentElement.removeEventListener('mousemove', doDrag);
+                                    document.documentElement.removeEventListener('mouseup', stopDrag);
+                                    resizer.classList.remove('resizing');
+                                };
+
+                                document.documentElement.addEventListener('mousemove', doDrag);
+                                document.documentElement.addEventListener('mouseup', stopDrag);
+                            });
+
                             trHead.appendChild(th);
                         });
                         excelViewerTable.appendChild(trHead);
@@ -2265,8 +2296,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const th = document.createElement('th');
             th.textContent = h;
             th.style.cursor = 'pointer';
+            th.style.position = 'relative';
             th.title = `Select Column ${h}`;
-            th.addEventListener('click', () => {
+            
+            // Add column select click handler (only on th text, not resizer)
+            th.addEventListener('click', (e) => {
+                if (e.target.classList.contains('col-resizer')) return;
                 clearSelection();
                 excelRows.forEach((row, r) => {
                     selectedCells.push({ rowIndex: r, colIndex: colIndex });
@@ -2274,6 +2309,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (td) td.classList.add('selected-cell');
                 });
             });
+
+            // Resizer handle
+            const resizer = document.createElement('div');
+            resizer.className = 'col-resizer';
+            th.appendChild(resizer);
+
+            let startX, startWidth;
+            resizer.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                startX = e.clientX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+
+                const doDrag = (ev) => {
+                    const width = Math.max(80, startWidth + (ev.clientX - startX));
+                    th.style.width = width + 'px';
+                    th.style.minWidth = width + 'px';
+                };
+
+                const stopDrag = () => {
+                    document.documentElement.removeEventListener('mousemove', doDrag);
+                    document.documentElement.removeEventListener('mouseup', stopDrag);
+                    resizer.classList.remove('resizing');
+                };
+
+                document.documentElement.addEventListener('mousemove', doDrag);
+                document.documentElement.addEventListener('mouseup', stopDrag);
+            });
+
             trHead.appendChild(th);
         });
         excelEditorTable.appendChild(trHead);

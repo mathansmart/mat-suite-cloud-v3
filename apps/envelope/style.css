@@ -1507,3 +1507,31 @@ select, input[type="range"], input[type="number"] {
 #excel-editor-table td.selected-cell input {
     background: #e0f2fe !important;
 }
+
+#excel-editor-table, #excel-viewer-table {
+    table-layout: fixed;
+    width: max-content;
+    min-width: 100%;
+}
+
+#excel-editor-table th, #excel-viewer-table th {
+    position: relative;
+    min-width: 80px;
+    width: 100px;
+}
+
+/* Col Resizer handle style */
+.col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    cursor: col-resize;
+    user-select: none;
+    height: 100%;
+    z-index: 10;
+}
+.col-resizer:hover, .col-resizer.resizing {
+    background-color: var(--primary) !important;
+    opacity: 0.8;
+}
