@@ -396,6 +396,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 activeSettings.letterPadCompanies = [];
             }
+            if (saved.notebookNotes) {
+                activeSettings.notebookNotes = saved.notebookNotes;
+                notebookNotes = saved.notebookNotes;
+                renderNotebookNotes();
+            }
             applySettingsToInputs();
             renderManageCompaniesList();
             renderLetterpadCompanies();
@@ -1951,6 +1956,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
                     notebookNotes = notebookNotes.filter(n => n.id !== note.id);
                     localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+                    activeSettings.notebookNotes = notebookNotes;
+                    saveSettingsToServer();
                     
                     // Close view if deleted note was open
                     const noteDetailContent = document.getElementById('note-detail-content');
@@ -1995,6 +2002,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             notebookNotes.unshift(newNote);
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+            activeSettings.notebookNotes = notebookNotes;
+            saveSettingsToServer();
             notebookTextarea.value = '';
             renderNotebookNotes();
             showNotification('Note saved successfully!', 'success', 'Saved');
@@ -2585,6 +2594,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             notebookNotes.unshift(newNote);
             localStorage.setItem('envelope_notebook_notes', JSON.stringify(notebookNotes));
+            activeSettings.notebookNotes = notebookNotes;
+            saveSettingsToServer();
             
             // Reset both textareas and title input
             centerNotebookTextarea.value = '';
