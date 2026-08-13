@@ -1879,7 +1879,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filteredNotes.length === 0) {
             notebookNotesList.innerHTML = `
                 <div style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 20px; opacity: 0.6;">
-                    ${query ? 'No matching notes found.' : 'No notes saved yet.'}
+                    ${rawQuery ? 'No matching notes found.' : 'No notes saved yet.'}
                 </div>
             `;
             return;
