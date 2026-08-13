@@ -1840,6 +1840,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Notebook Logic ---
     let notebookNotes = [];
+
+    // Canvas-based text measurement for Excel auto-fit on double click
+    const getTextWidth = (text, font) => {
+        const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+        const context = canvas.getContext("2d");
+        context.font = font || "13.6px monospace";
+        return context.measureText(text).width;
+    };
     const notebookTextarea = document.getElementById('notebook-textarea');
     const saveNoteBtn = document.getElementById('save-note-btn');
     const notebookNotesList = document.getElementById('notebook-notes-list');
@@ -1904,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         thAll.style.background = '#e2e8f0';
                         trHead.appendChild(thAll);
 
-                        (data.headers || []).forEach(h => {
+                        (data.headers || []).forEach((h, colIndex) => {
                             const th = document.createElement('th');
                             th.textContent = h;
                             th.style.position = 'relative';
@@ -1913,6 +1921,31 @@ document.addEventListener('DOMContentLoaded', () => {
                             const resizer = document.createElement('div');
                             resizer.className = 'col-resizer';
                             th.appendChild(resizer);
+
+                            // Double click to auto-fit column
+                            resizer.addEventListener('dblclick', (e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                let maxWidth = 80;
+                                (data.rows || []).forEach(row => {
+                                    const cell = row[colIndex];
+                                    let cellVal = '';
+                                    let isBold = false;
+                                    if (cell && typeof cell === 'object') {
+                                        cellVal = cell.value || '';
+                                        isBold = cell.bold;
+                                    } else {
+                                        cellVal = cell || '';
+                                    }
+                                    const font = `${isBold ? 'bold' : 'normal'} 13.6px monospace`;
+                                    const width = getTextWidth(cellVal, font) + 20; // cell padding
+                                    if (width > maxWidth) {
+                                        maxWidth = width;
+                                    }
+                                });
+                                th.style.width = maxWidth + 'px';
+                                th.style.minWidth = maxWidth + 'px';
+                            });
 
                             let startX, startWidth;
                             resizer.addEventListener('mousedown', (e) => {
@@ -1959,6 +1992,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             const rowResizer = document.createElement('div');
                             rowResizer.className = 'row-resizer';
                             thRow.appendChild(rowResizer);
+
+                            // Double click to auto-fit / reset row height
+                            rowResizer.addEventListener('dblclick', (e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                tr.style.height = '';
+                            });
 
                             let startY, startHeight;
                             rowResizer.addEventListener('mousedown', (e) => {
@@ -2346,6 +2386,25 @@ document.addEventListener('DOMContentLoaded', () => {
             resizer.className = 'col-resizer';
             th.appendChild(resizer);
 
+            // Double click to auto-fit column
+            resizer.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                let maxWidth = 80;
+                excelRows.forEach((row) => {
+                    const cell = row[colIndex];
+                    const cellVal = cell ? (cell.value || '') : '';
+                    const isBold = cell ? cell.bold : false;
+                    const font = `${isBold ? 'bold' : 'normal'} 13.6px monospace`;
+                    const width = getTextWidth(cellVal, font) + 24; // text width + input padding
+                    if (width > maxWidth) {
+                        maxWidth = width;
+                    }
+                });
+                th.style.width = maxWidth + 'px';
+                th.style.minWidth = maxWidth + 'px';
+            });
+
             let startX, startWidth;
             resizer.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
@@ -2400,6 +2459,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const rowResizer = document.createElement('div');
             rowResizer.className = 'row-resizer';
             thRow.appendChild(rowResizer);
+
+            // Double click to auto-fit / reset row height
+            rowResizer.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                tr.style.height = '';
+            });
 
             let startY, startHeight;
             rowResizer.addEventListener('mousedown', (e) => {
