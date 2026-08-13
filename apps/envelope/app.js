@@ -3195,6 +3195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Bind real-time row search filter for Excel Viewer table
     const excelViewerSearchInput = document.getElementById('excel-viewer-search-input');
+    const excelViewerTable = document.getElementById('excel-viewer-table');
     if (excelViewerSearchInput && excelViewerTable) {
         excelViewerSearchInput.addEventListener('input', () => {
             const query = excelViewerSearchInput.value.toLowerCase().trim();
