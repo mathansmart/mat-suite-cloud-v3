@@ -2870,30 +2870,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let newNote;
             if (currentNoteType === 'excel') {
-                // Get current column widths from editor table
+                // Find last used column in the editor
+                let lastUsedCol = -1;
+                excelHeaders.forEach((h, cIdx) => {
+                    const hasContent = excelRows.some(row => {
+                        const cell = row[cIdx];
+                        const val = cell && typeof cell === 'object' ? (cell.value || '') : (cell || '');
+                        return val.trim().length > 0;
+                    });
+                    if (hasContent) {
+                        lastUsedCol = cIdx;
+                    }
+                });
+
+                // Find last used row in the editor
+                let lastUsedRow = -1;
+                excelRows.forEach((row, rIdx) => {
+                    const hasContent = row.some(cell => {
+                        const val = cell && typeof cell === 'object' ? (cell.value || '') : (cell || '');
+                        return val.trim().length > 0;
+                    });
+                    if (hasContent) {
+                        lastUsedRow = rIdx;
+                    }
+                });
+
+                const maxColIndexToShow = Math.max(0, lastUsedCol);
+                const maxRowIndexToShow = Math.max(0, lastUsedRow);
+
+                // Trim headers and rows
+                const trimmedHeaders = excelHeaders.slice(0, maxColIndexToShow + 1);
+                const trimmedRows = excelRows.slice(0, maxRowIndexToShow + 1).map(row => {
+                    return row.slice(0, maxColIndexToShow + 1);
+                });
+
+                // Get current column widths from editor table for trimmed columns
                 const colWidths = [];
                 const thElements = excelEditorTable.querySelectorAll('tr:first-child th');
-                for (let i = 1; i < thElements.length; i++) {
-                    colWidths.push(thElements[i].style.width || '100px');
+                for (let i = 1; i <= maxColIndexToShow + 1; i++) {
+                    if (thElements[i]) {
+                        colWidths.push(thElements[i].style.width || '100px');
+                    } else {
+                        colWidths.push('100px');
+                    }
                 }
 
-                // Get current row heights from editor table
+                // Get current row heights from editor table for trimmed rows
                 const rowHeights = [];
                 const trElements = excelEditorTable.querySelectorAll('tr');
-                for (let i = 1; i < trElements.length; i++) {
-                    rowHeights.push(trElements[i].style.height || '');
+                for (let i = 1; i <= maxRowIndexToShow + 1; i++) {
+                    if (trElements[i]) {
+                        rowHeights.push(trElements[i].style.height || '');
+                    } else {
+                        rowHeights.push('');
+                    }
                 }
 
                 // Generate preview summary of cells
-                const textPreview = excelRows.map(row => row.map(cell => cell.value).filter(val => val && val.trim().length > 0).join(' | ')).filter(r => r.length > 0).join('\n');
+                const textPreview = trimmedRows.map(row => row.map(cell => cell.value).filter(val => val && val.trim().length > 0).join(' | ')).filter(r => r.length > 0).join('\n');
                 newNote = {
                     id: editingNoteId || Date.now(),
                     title: title || 'Untitled Excel Sheet',
                     type: 'excel',
                     text: textPreview || 'Empty Excel Sheet',
                     excelData: {
-                        headers: [...excelHeaders],
-                        rows: JSON.parse(JSON.stringify(excelRows)),
+                        headers: trimmedHeaders,
+                        rows: JSON.parse(JSON.stringify(trimmedRows)),
                         colWidths: colWidths,
                         rowHeights: rowHeights
                     },
