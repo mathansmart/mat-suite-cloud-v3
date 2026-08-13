@@ -1856,17 +1856,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderNotebookNotes = () => {
         if (!notebookNotesList) return;
         notebookNotesList.innerHTML = '';
+
+        const searchInput = document.getElementById('notebook-search-input');
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        const filteredNotes = notebookNotes.filter(note => {
+            const titleMatch = (note.title || '').toLowerCase().includes(query);
+            const textMatch = (note.text || '').toLowerCase().includes(query);
+            return titleMatch || textMatch;
+        });
         
-        if (notebookNotes.length === 0) {
+        if (filteredNotes.length === 0) {
             notebookNotesList.innerHTML = `
                 <div style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 20px; opacity: 0.6;">
-                    No notes saved yet.
+                    ${query ? 'No matching notes found.' : 'No notes saved yet.'}
                 </div>
             `;
             return;
         }
 
-        notebookNotes.forEach(note => {
+        filteredNotes.forEach(note => {
             const card = document.createElement('div');
             card.className = 'note-card';
             card.style.cursor = 'pointer'; // Make it visually clickable
@@ -3168,6 +3177,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Failed to parse envelope notes:', e);
         notebookNotes = [];
     }
+    // Bind search input filter event
+    const searchInput = document.getElementById('notebook-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            renderNotebookNotes();
+        });
+    }
+
     renderNotebookNotes();
 
     // --- Initialization ---

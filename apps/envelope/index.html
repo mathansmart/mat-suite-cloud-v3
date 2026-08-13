@@ -113,22 +113,22 @@
                 </div>
 
                 <!-- Left Column: Note Detail View (Hidden by default) -->
-                <div id="note-detail-section" class="hidden" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 1.5rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--primary-bg); padding-bottom: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <button id="note-detail-back-btn" class="btn ghost" style="padding: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 4px; color: var(--accent-blue); font-weight: 600; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
-                            <h2 id="note-detail-title" style="margin: 0; font-size: 1.25rem; font-weight: 800;">📝 View Note</h2>
+                <div id="note-detail-section" class="hidden" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 0.6rem; background: var(--sidebar-bg); border-radius: var(--radius-lg); padding: 0.75rem 1.25rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button id="note-detail-back-btn" class="btn ghost" style="padding: 2px 4px; font-size: 0.85rem; display: flex; align-items: center; gap: 2px; color: var(--accent-blue); font-weight: 700; cursor: pointer; outline: none; border: none; background: transparent;">← Back</button>
+                            <h2 id="note-detail-title" style="margin: 0; font-size: 0.95rem; font-weight: 800;">📝 View Note</h2>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <button id="note-detail-edit-btn" class="btn secondary" style="padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 4px; height: 28px; background: transparent;">✏️ Edit</button>
-                            <span id="note-detail-time" style="font-size: 0.8rem; color: var(--text-secondary);">Today, 2:45 PM</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button id="note-detail-edit-btn" class="btn secondary" style="padding: 2px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 4px; height: 26px; background: transparent;">✏️ Edit</button>
+                            <span id="note-detail-time" style="font-size: 0.75rem; color: var(--text-secondary);">Today, 2:45 PM</span>
                         </div>
                     </div>
-                    <div id="note-detail-content" style="flex: 1; font-size: 1.05rem; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; overflow-y: auto; padding: 0.5rem 0;">
+                    <div id="note-detail-content" style="flex: 1; font-size: 0.95rem; color: var(--text-primary); line-height: 1.5; white-space: pre-wrap; overflow-y: auto; padding: 0.25rem 0;">
                         <!-- Note content will be injected here -->
                     </div>
                     <!-- Excel Sheet Viewer Container (Hidden by default) -->
-                    <div id="excel-viewer-container" class="hidden" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); margin: 0.5rem 0; padding: 1px;">
+                    <div id="excel-viewer-container" class="hidden" style="flex: 1.8; min-height: 0; overflow: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); margin: 0.25rem 0 0.5rem 0; padding: 1px;">
                         <table id="excel-viewer-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: monospace; text-align: left;">
                             <!-- Populated by JS -->
                         </table>
@@ -249,6 +249,9 @@
                         <button id="save-note-btn" class="save-note-btn">💾 Save Note</button>
                     </div>
                     <div class="notes-list-title">Saved Notes</div>
+                    <div style="padding: 0 0 0.5rem 0;">
+                        <input type="text" id="notebook-search-input" placeholder="🔍 Search saved notes..." style="width: 100%; padding: 6px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); color: var(--text-primary); outline: none; box-sizing: border-box;">
+                    </div>
                     <div id="notebook-notes-list" class="notes-scroll-container">
                         <!-- Dynamically rendered notes cards -->
                     </div>
