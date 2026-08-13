@@ -1902,6 +1902,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const noteDetailContent = document.getElementById('note-detail-content');
                 const noteDetailTime = document.getElementById('note-detail-time');
                 const excelViewerSearchInput = document.getElementById('excel-viewer-search-input');
+                const excelViewerContainer = document.getElementById('excel-viewer-container');
+                const excelViewerTable = document.getElementById('excel-viewer-table');
                 
                 if (noteDetailSection && noteDetailTime) {
                     if (noteDetailTitle) noteDetailTitle.textContent = (isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note');
