@@ -2096,8 +2096,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     td.style.fontWeight = cell.bold ? 'bold' : 'normal';
                                     td.style.textAlign = cell.align || 'left';
                                     td.style.color = cell.color || '#000000';
+                                    td.style.fontSize = cell.fontSize || '14px';
                                 } else {
                                     td.textContent = cell || '';
+                                    td.style.fontSize = '14px';
                                 }
                                 tr.appendChild(td);
                             });
@@ -2108,6 +2110,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (noteDetailContent) {
                             noteDetailContent.classList.remove('hidden');
                             noteDetailContent.textContent = note.text;
+                            
+                            // Apply saved styles for Plain Note
+                            const style = note.style || { bold: false, color: '#000000', align: 'left', fontSize: '14px' };
+                            noteDetailContent.style.fontWeight = style.bold ? 'bold' : 'normal';
+                            noteDetailContent.style.color = style.color || '#000000';
+                            noteDetailContent.style.textAlign = style.align || 'left';
+                            noteDetailContent.style.fontSize = style.fontSize || '14px';
                         }
                     }
                     
@@ -2119,7 +2128,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         newEditBtn.addEventListener('click', () => {
                             editingNoteId = note.id;
                             if (centerNotebookTitle) centerNotebookTitle.value = note.title || '';
-                            
                             if (isExcel) {
                                 currentNoteType = 'excel';
                                 if (toggleExcelSheetBtn) {
@@ -2136,6 +2144,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                                 if (centerNotebookTextarea) centerNotebookTextarea.classList.add('hidden');
                                 if (excelEditorContainer) excelEditorContainer.classList.remove('hidden');
+                                const excelOnlyButtons = document.getElementById('excel-only-buttons');
+                                if (excelOnlyButtons) excelOnlyButtons.classList.remove('hidden');
 
                                 excelHeaders = [...note.excelData.headers];
                                 excelRows = JSON.parse(JSON.stringify(note.excelData.rows));
@@ -2198,6 +2208,29 @@ document.addEventListener('DOMContentLoaded', () => {
                                     centerNotebookTextarea.value = note.text || '';
                                 }
                                 if (excelEditorContainer) excelEditorContainer.classList.add('hidden');
+                                const excelOnlyButtons = document.getElementById('excel-only-buttons');
+                                if (excelOnlyButtons) excelOnlyButtons.classList.add('hidden');
+
+                                // Load saved formatting styles for Plain Note
+                                const style = note.style || { bold: false, color: '#000000', align: 'left', fontSize: '14px' };
+                                isPlainBold = style.bold;
+                                plainColor = style.color || '#000000';
+                                plainAlign = style.align || 'left';
+                                plainFontSize = style.fontSize || '14px';
+
+                                if (centerNotebookTextarea) {
+                                    centerNotebookTextarea.style.fontWeight = isPlainBold ? 'bold' : 'normal';
+                                    centerNotebookTextarea.style.color = plainColor;
+                                    centerNotebookTextarea.style.textAlign = plainAlign;
+                                    centerNotebookTextarea.style.fontSize = plainFontSize;
+                                }
+
+                                // Update toolbar UI
+                                updateBoldButtonUI(isPlainBold);
+                                updateAlignButtons(plainAlign);
+                                const colorUnderline = document.querySelector('#excel-color-btn span:first-child');
+                                if (colorUnderline) colorUnderline.style.borderBottomColor = plainColor;
+                                if (excelFontSizeSelect) excelFontSizeSelect.value = plainFontSize;
                             }
                             
                             if (noteDetailSection) noteDetailSection.classList.add('hidden');
@@ -2315,9 +2348,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let recentColors = ['#000000'];
 
     // Initialize 2D cell objects array
-    const createEmptyCell = () => ({ value: '', bold: false, align: 'left', color: '#000000' });
+    const createEmptyCell = () => ({ value: '', bold: false, align: 'left', color: '#000000', fontSize: '14px' });
     const createDefaultRow = (colCount) => Array(colCount).fill(null).map(() => createEmptyCell());
     let excelRows = Array(10).fill(null).map(() => createDefaultRow(8));
+
+    // Plain Note formatting state variables
+    let isPlainBold = false;
+    let plainColor = '#000000';
+    let plainAlign = 'left';
+    let plainFontSize = '14px';
 
     const updateAlignButtons = (align) => {
         [excelAlignLeft, excelAlignCenter, excelAlignRight].forEach(btn => {
@@ -2337,15 +2376,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyAlignment = (align) => {
-        const targets = getTargetCells();
-        targets.forEach(target => {
-            const cell = excelRows[target.rowIndex][target.colIndex];
-            cell.align = align;
-            const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
-            if (input) {
-                input.style.textAlign = align;
+        if (currentNoteType === 'excel') {
+            const targets = getTargetCells();
+            targets.forEach(target => {
+                const cell = excelRows[target.rowIndex][target.colIndex];
+                cell.align = align;
+                const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+                if (input) {
+                    input.style.textAlign = align;
+                }
+            });
+        } else {
+            plainAlign = align;
+            if (centerNotebookTextarea) {
+                centerNotebookTextarea.style.textAlign = align;
             }
-        });
+        }
         updateAlignButtons(align);
     };
 
@@ -2405,15 +2451,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyColor = (color) => {
-        const targets = getTargetCells();
-        targets.forEach(target => {
-            const cell = excelRows[target.rowIndex][target.colIndex];
-            cell.color = color;
-            const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
-            if (input) {
-                input.style.color = color;
+        if (currentNoteType === 'excel') {
+            const targets = getTargetCells();
+            targets.forEach(target => {
+                const cell = excelRows[target.rowIndex][target.colIndex];
+                cell.color = color;
+                const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+                if (input) {
+                    input.style.color = color;
+                }
+            });
+        } else {
+            plainColor = color;
+            if (centerNotebookTextarea) {
+                centerNotebookTextarea.style.color = color;
             }
-        });
+        }
         
         // Add to recent colors (keep unique, max 10)
         recentColors = [color, ...recentColors.filter(c => c !== color)].slice(0, 10);
@@ -2661,6 +2714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.style.fontWeight = cell.bold ? 'bold' : 'normal';
                 input.style.textAlign = cell.align || 'left';
                 input.style.color = cell.color || '#000000';
+                input.style.fontSize = cell.fontSize || '14px';
 
                 input.addEventListener('input', (e) => {
                     excelRows[rowIndex][colIndex].value = e.target.value;
@@ -2688,6 +2742,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const colorUnderline = document.querySelector('#excel-color-btn span:first-child');
                     if (colorUnderline) {
                         colorUnderline.style.borderBottomColor = cell.color || '#000000';
+                    }
+
+                    // Update font size dropdown value
+                    const excelFontSizeSelect = document.getElementById('excel-font-size-select');
+                    if (excelFontSizeSelect) {
+                        excelFontSizeSelect.value = cell.fontSize || '14px';
                     }
                 });
 
@@ -2791,34 +2851,70 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Format buttons action listeners
+    const updateBoldButtonUI = (boldState) => {
+        if (!excelFormatBold) return;
+        if (boldState) {
+            excelFormatBold.style.background = 'var(--accent-blue)';
+            excelFormatBold.style.color = '#fff';
+            excelFormatBold.style.borderColor = 'var(--accent-blue)';
+        } else {
+            excelFormatBold.style.background = '';
+            excelFormatBold.style.color = '';
+            excelFormatBold.style.borderColor = '';
+        }
+    };
+
     if (excelFormatBold) {
         excelFormatBold.addEventListener('click', () => {
-            const targets = getTargetCells();
-            const firstCell = excelRows[targets[0].rowIndex][targets[0].colIndex];
-            const targetBoldState = !firstCell.bold;
+            if (currentNoteType === 'excel') {
+                const targets = getTargetCells();
+                const firstCell = excelRows[targets[0].rowIndex][targets[0].colIndex];
+                const targetBoldState = !firstCell.bold;
 
-            targets.forEach(target => {
-                const cell = excelRows[target.rowIndex][target.colIndex];
-                cell.bold = targetBoldState;
-                const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
-                if (input) {
-                    input.style.fontWeight = cell.bold ? 'bold' : 'normal';
-                }
-            });
-
-            if (targetBoldState) {
-                excelFormatBold.style.background = 'var(--accent-blue)';
-                excelFormatBold.style.color = '#fff';
-                excelFormatBold.style.borderColor = 'var(--accent-blue)';
+                targets.forEach(target => {
+                    const cell = excelRows[target.rowIndex][target.colIndex];
+                    cell.bold = targetBoldState;
+                    const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+                    if (input) {
+                        input.style.fontWeight = cell.bold ? 'bold' : 'normal';
+                    }
+                });
+                updateBoldButtonUI(targetBoldState);
             } else {
-                excelFormatBold.style.background = '';
-                excelFormatBold.style.color = '';
-                excelFormatBold.style.borderColor = '';
+                isPlainBold = !isPlainBold;
+                if (centerNotebookTextarea) {
+                    centerNotebookTextarea.style.fontWeight = isPlainBold ? 'bold' : 'normal';
+                }
+                updateBoldButtonUI(isPlainBold);
+            }
+        });
+    }
+
+    const excelFontSizeSelect = document.getElementById('excel-font-size-select');
+    if (excelFontSizeSelect) {
+        excelFontSizeSelect.addEventListener('change', (e) => {
+            const size = e.target.value;
+            if (currentNoteType === 'excel') {
+                const targets = getTargetCells();
+                targets.forEach(target => {
+                    const cell = excelRows[target.rowIndex][target.colIndex];
+                    cell.fontSize = size;
+                    const input = excelEditorTable.querySelector(`tr:nth-child(${target.rowIndex + 2}) td:nth-child(${target.colIndex + 2}) input`);
+                    if (input) {
+                        input.style.fontSize = size;
+                    }
+                });
+            } else {
+                plainFontSize = size;
+                if (centerNotebookTextarea) {
+                    centerNotebookTextarea.style.fontSize = size;
+                }
             }
         });
     }
 
     if (togglePlainSheetBtn && toggleExcelSheetBtn && centerNotebookTextarea && excelEditorContainer) {
+        const excelOnlyButtons = document.getElementById('excel-only-buttons');
         togglePlainSheetBtn.addEventListener('click', () => {
             currentNoteType = 'plain';
             togglePlainSheetBtn.className = 'btn primary';
@@ -2829,6 +2925,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             centerNotebookTextarea.classList.remove('hidden');
             excelEditorContainer.classList.add('hidden');
+            if (excelOnlyButtons) excelOnlyButtons.classList.add('hidden');
         });
 
         toggleExcelSheetBtn.addEventListener('click', () => {
@@ -2844,6 +2941,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             centerNotebookTextarea.classList.add('hidden');
             excelEditorContainer.classList.remove('hidden');
+            if (excelOnlyButtons) excelOnlyButtons.classList.remove('hidden');
             renderExcelEditorTable();
         });
     }
@@ -2991,6 +3089,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     title: title || 'Untitled Note',
                     type: 'plain',
                     text: text,
+                    style: {
+                        bold: isPlainBold,
+                        color: plainColor || '#000000',
+                        align: plainAlign || 'left',
+                        fontSize: plainFontSize || '14px'
+                    },
                     time: timeStr
                 };
             }
@@ -3016,6 +3120,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (centerNotebookTitle) centerNotebookTitle.value = '';
             notebookTextarea.value = '';
             
+            // Reset plain format styles
+            isPlainBold = false;
+            plainColor = '#000000';
+            plainAlign = 'left';
+            plainFontSize = '14px';
+            if (centerNotebookTextarea) {
+                centerNotebookTextarea.style.fontWeight = 'normal';
+                centerNotebookTextarea.style.color = '#000000';
+                centerNotebookTextarea.style.textAlign = 'left';
+                centerNotebookTextarea.style.fontSize = '14px';
+            }
+            updateBoldButtonUI(false);
+            updateAlignButtons('left');
+            const colorUnderline = document.querySelector('#excel-color-btn span:first-child');
+            if (colorUnderline) colorUnderline.style.borderBottomColor = '#000000';
+            if (excelFontSizeSelect) excelFontSizeSelect.value = '14px';
+
             // Reset excel state
             excelHeaders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
             excelRows = Array(10).fill(null).map(() => createDefaultRow(8));
