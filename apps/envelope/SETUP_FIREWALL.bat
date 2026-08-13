@@ -15,9 +15,9 @@ if %errorLevel% neq 0 (
     exit /b
 )
 
-echo [1/2] Resetting Firewall Rules for Port 3000...
+echo [1/2] Resetting Firewall Rules for Ports 3000 and 3001...
 netsh advfirewall firewall delete rule name="Envelope Pro Server" >nul 2>&1
-netsh advfirewall firewall add rule name="Envelope Pro Server" dir=in action=allow protocol=TCP localport=3000
+netsh advfirewall firewall add rule name="Envelope Pro Server" dir=in action=allow protocol=TCP localport=3000,3001
 
 echo [2/2] Detecting your Network Address (IP)...
 for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4 Address"') do (
@@ -32,9 +32,10 @@ echo FIREWALL SETUP COMPLETE!
 echo.
 if defined MYIP (
     echo You can now visit Envelope Pro on other devices at:
-    echo http://!MYIP!:3000
+    echo For Local Offline Database: http://!MYIP!:3000
+    echo For Local Online Database:  http://!MYIP!:3001
 ) else (
-    echo Rule added successfully. 
+    echo Rules added successfully. 
     echo Please check your Wi-Fi settings for your device IP.
 )
 echo ===================================================
