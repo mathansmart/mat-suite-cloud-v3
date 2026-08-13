@@ -1857,8 +1857,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!notebookNotesList) return;
         notebookNotesList.innerHTML = '';
 
-        const searchInput = document.getElementById('notebook-search-input');
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const notebookSearchInput = document.getElementById('notebook-search-input');
+        const query = notebookSearchInput ? notebookSearchInput.value.toLowerCase().trim() : '';
 
         const filteredNotes = notebookNotes.filter(note => {
             const titleMatch = (note.title || '').toLowerCase().includes(query);
@@ -3178,9 +3178,9 @@ document.addEventListener('DOMContentLoaded', () => {
         notebookNotes = [];
     }
     // Bind search input filter event
-    const searchInput = document.getElementById('notebook-search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', () => {
+    const notebookSearchInput = document.getElementById('notebook-search-input');
+    if (notebookSearchInput) {
+        notebookSearchInput.addEventListener('input', () => {
             renderNotebookNotes();
         });
     }
