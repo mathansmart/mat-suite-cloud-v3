@@ -1950,6 +1950,27 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (data.colWidths && data.colWidths[colIndex]) {
                                 th.style.width = data.colWidths[colIndex];
                                 th.style.minWidth = data.colWidths[colIndex];
+                            } else {
+                                // Auto-fit column on load for old notes
+                                let maxWidth = 80;
+                                (data.rows || []).forEach(row => {
+                                    const cell = row[colIndex];
+                                    let cellVal = '';
+                                    let isBold = false;
+                                    if (cell && typeof cell === 'object') {
+                                        cellVal = cell.value || '';
+                                        isBold = cell.bold;
+                                    } else {
+                                        cellVal = cell || '';
+                                    }
+                                    const font = `${isBold ? 'bold' : 'normal'} 13.6px monospace`;
+                                    const width = getTextWidth(cellVal, font) + 20; // cell padding
+                                    if (width > maxWidth) {
+                                        maxWidth = width;
+                                    }
+                                });
+                                th.style.width = maxWidth + 'px';
+                                th.style.minWidth = maxWidth + 'px';
                             }
                             
                             // Resizer handle
@@ -2129,6 +2150,24 @@ document.addEventListener('DOMContentLoaded', () => {
                                             thElements[i].style.width = savedW;
                                             thElements[i].style.minWidth = savedW;
                                         }
+                                    }
+                                } else {
+                                    // Auto-fit editor columns on load if colWidths are not present
+                                    const thElements = excelEditorTable.querySelectorAll('tr:first-child th');
+                                    for (let i = 1; i < thElements.length; i++) {
+                                        let maxWidth = 80;
+                                        excelRows.forEach(row => {
+                                            const cell = row[i - 1];
+                                            const cellVal = cell ? (cell.value || '') : '';
+                                            const isBold = cell ? cell.bold : false;
+                                            const font = `${isBold ? 'bold' : 'normal'} 13.6px monospace`;
+                                            const width = getTextWidth(cellVal, font) + 24; // text width + input padding
+                                            if (width > maxWidth) {
+                                                maxWidth = width;
+                                            }
+                                        });
+                                        thElements[i].style.width = maxWidth + 'px';
+                                        thElements[i].style.minWidth = maxWidth + 'px';
                                     }
                                 }
                                 if (note.excelData.rowHeights) {
