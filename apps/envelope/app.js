@@ -1901,12 +1901,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const noteDetailTitle = document.getElementById('note-detail-title');
                 const noteDetailContent = document.getElementById('note-detail-content');
                 const noteDetailTime = document.getElementById('note-detail-time');
-                const excelViewerContainer = document.getElementById('excel-viewer-container');
-                const excelViewerTable = document.getElementById('excel-viewer-table');
+                const excelViewerSearchInput = document.getElementById('excel-viewer-search-input');
                 
                 if (noteDetailSection && noteDetailTime) {
                     if (noteDetailTitle) noteDetailTitle.textContent = (isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note');
                     noteDetailTime.textContent = note.time;
+                    
+                    if (excelViewerSearchInput) {
+                        excelViewerSearchInput.value = '';
+                        if (isExcel) {
+                            excelViewerSearchInput.classList.remove('hidden');
+                        } else {
+                            excelViewerSearchInput.classList.add('hidden');
+                        }
+                    }
                     
                     if (isExcel && excelViewerContainer && excelViewerTable) {
                         if (noteDetailContent) noteDetailContent.classList.add('hidden');
@@ -3182,6 +3190,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (notebookSearchInput) {
         notebookSearchInput.addEventListener('input', () => {
             renderNotebookNotes();
+        });
+    }
+
+    // Bind real-time row search filter for Excel Viewer table
+    const excelViewerSearchInput = document.getElementById('excel-viewer-search-input');
+    if (excelViewerSearchInput && excelViewerTable) {
+        excelViewerSearchInput.addEventListener('input', () => {
+            const query = excelViewerSearchInput.value.toLowerCase().trim();
+            const rows = excelViewerTable.querySelectorAll('tr');
+            // Skip the header row
+            for (let i = 1; i < rows.length; i++) {
+                const tr = rows[i];
+                const cells = tr.querySelectorAll('td');
+                let matches = false;
+                cells.forEach(td => {
+                    if (td.textContent.toLowerCase().includes(query)) {
+                        matches = true;
+                    }
+                });
+                if (matches || query === '') {
+                    tr.style.display = '';
+                } else {
+                    tr.style.display = 'none';
+                }
+            }
         });
     }
 
