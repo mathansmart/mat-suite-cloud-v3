@@ -417,6 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 activeSettings.letterPadCompanies = [];
             }
+            if (saved.letterPadData) {
+                activeSettings.letterPadData = saved.letterPadData;
+            } else {
+                activeSettings.letterPadData = {};
+            }
             if (saved.notebookNotes) {
                 activeSettings.notebookNotes = saved.notebookNotes;
                 notebookNotes = saved.notebookNotes;
