@@ -110,6 +110,45 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(__dirname)); // Serve the frontend from current directory
 
+// --- Security Middlewares (Hardening against Hackers/Scanners) ---
+
+// 1. HTTP Security Headers (Helmet equivalents for XSS, Clickjacking, Sniffing protection)
+app.use((req, res, next) => {
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Content-Security-Policy', "default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data:; img-src 'self' data: https:;");
+    next();
+});
+
+// 2. NoSQL Injection Prevention (Sanitize request query parameters & body keys starting with $)
+function sanitizeNoSql(obj) {
+    if (obj && typeof obj === 'object') {
+        for (const key in obj) {
+            if (key.startsWith('$')) {
+                delete obj[key];
+            } else if (typeof obj[key] === 'object') {
+                sanitizeNoSql(obj[key]);
+            }
+        }
+    }
+}
+app.use((req, res, next) => {
+    sanitizeNoSql(req.query);
+    sanitizeNoSql(req.body);
+    next();
+});
+
+// 3. Strict Profile Input Validation (Prevent path traversal and force safe profile defaults)
+app.use((req, res, next) => {
+    if (req.query && req.query.profile) {
+        if (req.query.profile !== '1' && req.query.profile !== '2') {
+            req.query.profile = '1'; // Force safe fallback
+        }
+    }
+    next();
+});
+
 // --- API Endpoints ---
 
 // Check Status
