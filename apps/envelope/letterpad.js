@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let companySettings = {
         fontFamily: "'Outfit', sans-serif",
         fontSize: 12,
-        fontWeight: "400",
+        fontWeight: "300",
         fontStyle: "normal",
         textDecoration: "none",
         textAlign: "left",
@@ -307,8 +307,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (companySettings.fontSize === 14 || companySettings.fontSize === 16) {
                     companySettings.fontSize = 12;
                 }
-                if (companySettings.fontWeight === "600" || companySettings.fontWeight === "700" || companySettings.fontWeight === "bold") {
-                    companySettings.fontWeight = "400";
+                if (companySettings.fontWeight === "600" || companySettings.fontWeight === "700" || companySettings.fontWeight === "bold" || companySettings.fontWeight === "400") {
+                    companySettings.fontWeight = "300";
                 }
                 
                 companyCategories = compData.categories || [];
