@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Dynamic localStorage key for profile isolation
     const NOTEBOOK_STORAGE_KEY = `envelope_notebook_notes_prof_${PROFILE}`;
+    const mainSearchBar = document.querySelector('.search-bar');
     
     // Migration: If Milton (Profile 1) and new key is empty, but old shared key contains notes, copy them
     if (PROFILE === '1' && !localStorage.getItem(NOTEBOOK_STORAGE_KEY)) {
@@ -2284,7 +2285,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                     
-                    if (addressListSection) addressListSection.classList.add('hidden');
+                    if (addressListSection) {
+                        addressListSection.classList.add('hidden');
+                        if (mainSearchBar) mainSearchBar.classList.add('hidden');
+                    }
                     noteDetailSection.classList.remove('hidden');
                 }
             });
@@ -2308,7 +2312,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (noteDetailTitle && noteDetailTitle.textContent === ((isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note'))) {
                         if (noteDetailSection) noteDetailSection.classList.add('hidden');
                         if (excelViewerContainer) excelViewerContainer.classList.add('hidden');
-                        if (addressListSection) addressListSection.classList.remove('hidden');
+                        if (addressListSection) {
+                            addressListSection.classList.remove('hidden');
+                            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
+                        }
                     }
 
                     renderNotebookNotes();
@@ -3024,6 +3031,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Hide normal address list and active view note sections
             addressListSection.classList.add('hidden');
+            if (mainSearchBar) mainSearchBar.classList.add('hidden');
             if (noteDetailSection) noteDetailSection.classList.add('hidden');
             
             // Show note editor section in the center
@@ -3042,6 +3050,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             noteEditorSection.classList.add('hidden');
             addressListSection.classList.remove('hidden');
+            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
         });
     }
 
@@ -3192,6 +3201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Revert back to address list
             noteEditorSection.classList.add('hidden');
             addressListSection.classList.remove('hidden');
+            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
             
             showNotification('Note saved successfully!', 'success', 'Saved');
         });
@@ -3204,6 +3214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         noteDetailBackBtn.addEventListener('click', () => {
             noteDetailSection.classList.add('hidden');
             addressListSection.classList.remove('hidden');
+            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
         });
     }
 
