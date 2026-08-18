@@ -62,26 +62,29 @@
                 </div>
             </header>
 
-            <div style="margin-bottom: 1.5rem;">
-                <h1 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Letter Pad Address Book</h1>
-                <p style="font-size: 0.8rem; color: var(--text-secondary);">Select the contacts to print on this company's Letter Pad.</p>
-            </div>
-
-            <!-- Category Filter Cards -->
-            <div style="margin-bottom: 1.8rem;">
-                <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 12px;">
-                    <!-- Filled by JS -->
+            <!-- Scrollable content wrapper to prevent address list cut-off -->
+            <div class="scrollable-content" style="flex: 1; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h1 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Letter Pad Address Book</h1>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Select the contacts to print on this company's Letter Pad.</p>
                 </div>
-            </div>
 
-            <section class="address-grid" id="address-list">
-                <!-- Address cards will be injected here -->
-            </section>
+                <!-- Category Filter Cards -->
+                <div style="margin-bottom: 1.8rem;">
+                    <div id="category-list" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
 
-            <!-- Footer -->
-            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px; font-family: 'Outfit', sans-serif;">
-                <p style="font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7;">Designed & Developed</p>
-                <p style="font-size: 0.9rem; font-weight: 800; color: var(--text-primary); letter-spacing: 1px; opacity: 0.8;">by mathan</p>
+                <section class="address-grid" id="address-list" style="margin-bottom: 1.5rem;">
+                    <!-- Address cards will be injected here -->
+                </section>
+
+                <!-- Footer -->
+                <div style="text-align: center; margin-top: auto; padding-bottom: 20px; font-family: 'Outfit', sans-serif;">
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7;">Designed & Developed</p>
+                    <p style="font-size: 0.9rem; font-weight: 800; color: var(--text-primary); letter-spacing: 1px; opacity: 0.8;">by mathan</p>
+                </div>
             </div>
         </main>
     </div>

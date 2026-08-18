@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchFocusIndex = -1;
     let pendingConfirmCallback = null;
     let duplicateAlertTimeout = null;
+    let savedSelectionRange = null;
 
     // --- DOM Elements ---
     document.getElementById('selected-company-badge').textContent = COMPANY;
@@ -1470,6 +1471,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sync ribbon button active states from browser cursor selection state
     const updateRibbonFromSelection = () => {
         if (!editorTextarea) return;
+
+        // Save selection range in real-time if inside the editor area
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            if (editorTextarea.contains(range.startContainer) || editorTextarea.contains(range.endContainer)) {
+                savedSelectionRange = range;
+            }
+        }
         
         if (editorBtnBold) {
             if (document.queryCommandState('bold')) editorBtnBold.classList.add('active');
@@ -1790,10 +1800,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ribbon Toggle Button Listeners via document.execCommand
+    // Ribbon Toggle Button Listeners via document.execCommand with selection range preservation
+    const restoreSelectionRange = () => {
+        if (savedSelectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelectionRange);
+        }
+    };
+
     if (editorBtnBold) {
         editorBtnBold.addEventListener('click', (e) => {
             e.preventDefault();
+            restoreSelectionRange();
             document.execCommand('bold', false, null);
             updateRibbonFromSelection();
         });
@@ -1801,6 +1820,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editorBtnItalic) {
         editorBtnItalic.addEventListener('click', (e) => {
             e.preventDefault();
+            restoreSelectionRange();
             document.execCommand('italic', false, null);
             updateRibbonFromSelection();
         });
@@ -1808,6 +1828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editorBtnUnderline) {
         editorBtnUnderline.addEventListener('click', (e) => {
             e.preventDefault();
+            restoreSelectionRange();
             document.execCommand('underline', false, null);
             updateRibbonFromSelection();
         });
