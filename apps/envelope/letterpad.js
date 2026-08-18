@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!name) return null;
         const normalized = name.trim().toLowerCase();
         return companyAddresses.find(a => 
-            a.id !== editingId && 
+            String(a.id) !== String(editingId) && 
             a.name.trim().toLowerCase() === normalized
         );
     };
@@ -1008,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification('Saved as a new document!', 'success', 'Save As');
             } else {
                 // Save: Overwrite existing document
-                const index = companyAddresses.findIndex(a => a.id === editingId);
+                const index = companyAddresses.findIndex(a => String(a.id) === String(editingId));
                 if (index !== -1) {
                     companyAddresses[index] = { 
                         id: editingId, 

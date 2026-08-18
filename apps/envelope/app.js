@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!name) return null;
         const normalized = name.trim().toLowerCase();
         return addresses.find(a => 
-            a.id !== editingId && 
+            String(a.id) !== String(editingId) && 
             a.name.trim().toLowerCase() === normalized
         );
     };
@@ -1132,8 +1132,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function saveProcessed() {
             if (editingId) {
-                const index = addresses.findIndex(a => a.id === editingId);
-                addresses[index] = { ...addresses[index], name, city, address, phone, category };
+                const index = addresses.findIndex(a => String(a.id) === String(editingId));
+                if (index !== -1) {
+                    addresses[index] = { ...addresses[index], name, city, address, phone, category };
+                }
                 editingId = null;
             } else {
                 addresses.push({ id: Date.now(), name, city, address, phone, category });
