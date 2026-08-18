@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const normalized = name.trim().toLowerCase();
         return companyAddresses.find(a => 
             String(a.id) !== String(editingId) && 
-            a.name.trim().toLowerCase() === normalized
+            (a.name || '').trim().toLowerCase() === normalized
         );
     };
 
@@ -350,13 +350,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
+            const response = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(activeSettings)
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         } catch (err) {
             console.error('Failed to save to server', err);
+            throw err; // Propagate error
         }
     };
 
