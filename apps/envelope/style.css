@@ -1562,3 +1562,8 @@ select, input[type="range"], input[type="number"] {
     padding: 6px 2px !important;
     box-sizing: border-box;
 }
+
+/* Force b and strong tags (and all their inner descendants) to render bolded at 700 weight */
+b, strong, b *, strong * {
+    font-weight: 700 !important;
+}
