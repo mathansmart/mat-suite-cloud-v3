@@ -342,11 +342,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const saveToServer = async () => {
+        // Clean up duplicated logo images inside addresses to prevent payload bloating
+        const cleanedAddresses = (companyAddresses || []).map(addr => {
+            const { logoImg, ...rest } = addr;
+            return rest;
+        });
+
         // Save current memory caches back into master settings
         activeSettings.letterPadData[COMPANY] = {
             settings: companySettings,
             categories: companyCategories,
-            addresses: companyAddresses
+            addresses: cleanedAddresses
         };
 
         try {
@@ -1006,8 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: Date.now(), 
                     name, 
                     address, 
-                    category, 
-                    logoImg: companySettings.miltonLogoImg || null 
+                    category
                 });
                 showNotification('Saved as a new document!', 'success', 'Save As');
             } else {
@@ -1018,8 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         id: editingId, 
                         name, 
                         address, 
-                        category, 
-                        logoImg: companySettings.miltonLogoImg || null 
+                        category
                     };
                 }
                 showNotification('Document updated successfully!', 'success', 'Saved');
@@ -1031,8 +1035,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: Date.now(), 
                 name, 
                 address, 
-                category, 
-                logoImg: companySettings.miltonLogoImg || null 
+                category
             });
             showNotification('Document saved successfully!', 'success', 'Saved');
         }
