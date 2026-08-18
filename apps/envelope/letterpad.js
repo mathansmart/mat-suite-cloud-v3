@@ -977,7 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cancelBtn.addEventListener('click', () => modalOverlay.classList.add('hidden'));
 
-    saveAddressBtn.addEventListener('click', () => {
+    saveAddressBtn.addEventListener('click', async () => {
         const name = inputName.value.trim();
         const address = editorTextarea ? editorTextarea.innerHTML.trim() : '';
         const category = inputCategory ? inputCategory.value : '';
@@ -1036,9 +1036,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sort alphabetically
         companyAddresses.sort((a,b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 
-        saveToServer();
-        renderAddresses();
-        modalOverlay.classList.add('hidden');
+        // Disable button during save to prevent early reload or double submission
+        saveAddressBtn.disabled = true;
+        const originalText = saveAddressBtn.textContent;
+        saveAddressBtn.textContent = 'Saving...';
+
+        try {
+            await saveToServer();
+            renderAddresses();
+            modalOverlay.classList.add('hidden');
+        } catch (err) {
+            console.error(err);
+            showNotification('Failed to save to server.', 'error', 'Error');
+        } finally {
+            saveAddressBtn.disabled = false;
+            saveAddressBtn.textContent = originalText;
+        }
     });
 
     addressList.addEventListener('click', (e) => {
@@ -1800,35 +1813,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ribbon Toggle Button Listeners via document.execCommand with selection range preservation
-    const restoreSelectionRange = () => {
-        if (savedSelectionRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(savedSelectionRange);
-        }
-    };
-
+    // Ribbon Toggle Button Listeners via document.execCommand using mousedown to prevent selection loss
     if (editorBtnBold) {
-        editorBtnBold.addEventListener('click', (e) => {
-            e.preventDefault();
-            restoreSelectionRange();
+        editorBtnBold.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('bold', false, null);
             updateRibbonFromSelection();
         });
     }
     if (editorBtnItalic) {
-        editorBtnItalic.addEventListener('click', (e) => {
-            e.preventDefault();
-            restoreSelectionRange();
+        editorBtnItalic.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('italic', false, null);
             updateRibbonFromSelection();
         });
     }
     if (editorBtnUnderline) {
-        editorBtnUnderline.addEventListener('click', (e) => {
-            e.preventDefault();
-            restoreSelectionRange();
+        editorBtnUnderline.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('underline', false, null);
             updateRibbonFromSelection();
         });
@@ -2003,31 +2005,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Alignment buttons listeners
+    // Alignment buttons listeners via mousedown to prevent selection loss
     if (editorAlignLeft) {
-        editorAlignLeft.addEventListener('click', (e) => {
-            e.preventDefault();
+        editorAlignLeft.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('justifyLeft', false, null);
             updateRibbonFromSelection();
         });
     }
     if (editorAlignCenter) {
-        editorAlignCenter.addEventListener('click', (e) => {
-            e.preventDefault();
+        editorAlignCenter.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('justifyCenter', false, null);
             updateRibbonFromSelection();
         });
     }
     if (editorAlignRight) {
-        editorAlignRight.addEventListener('click', (e) => {
-            e.preventDefault();
+        editorAlignRight.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('justifyRight', false, null);
             updateRibbonFromSelection();
         });
     }
     if (editorAlignJustify) {
-        editorAlignJustify.addEventListener('click', (e) => {
-            e.preventDefault();
+        editorAlignJustify.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents selection loss
             document.execCommand('justifyFull', false, null);
             updateRibbonFromSelection();
         });
