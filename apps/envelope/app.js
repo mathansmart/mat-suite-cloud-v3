@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSettings = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`);
+            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}&t=${Date.now()}`);
             const saved = await resp.json();
             
             if (saved.envelope) {
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSenders = async () => {
         try {
-            const res = await fetch(`${API_BASE}/api/envelope/senders${PROFILE_QUERY}`);
+            const res = await fetch(`${API_BASE}/api/envelope/senders${PROFILE_QUERY}&t=${Date.now()}`);
             senders = await res.json();
             renderSendersList();
             updateSenderDropdown();
@@ -463,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Categories Methods ---
     const loadCategories = async () => {
         try {
-            const res = await fetch(`${API_BASE}/api/envelope/categories${PROFILE_QUERY}`);
+            const res = await fetch(`${API_BASE}/api/envelope/categories${PROFILE_QUERY}&t=${Date.now()}`);
             categories = await res.json();
             renderCategories();
         } catch (err) {
@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadAddresses = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/addresses${PROFILE_QUERY}`);
+            const resp = await fetch(`${API_BASE}/api/envelope/addresses${PROFILE_QUERY}&t=${Date.now()}`);
             addresses = await resp.json();
             renderAddresses();
             updateStats();
@@ -1756,7 +1756,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Recycle Bin Logic ---
     const loadRecycled = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/recycle${PROFILE_QUERY}`);
+            const resp = await fetch(`${API_BASE}/api/envelope/recycle${PROFILE_QUERY}&t=${Date.now()}`);
             recycledAddresses = await resp.json();
             renderRecycleBin();
         } catch (err) {

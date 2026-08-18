@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Loading & Saving ---
     const loadSettings = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`);
+            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}&t=${Date.now()}`);
             activeSettings = await resp.json();
             
             // Validate structure

@@ -112,12 +112,19 @@ app.use(express.static(__dirname)); // Serve the frontend from current directory
 
 // --- Security Middlewares (Hardening against Hackers/Scanners) ---
 
-// 1. HTTP Security Headers (Helmet equivalents for XSS, Clickjacking, Sniffing protection)
+// 1. HTTP Security Headers (Helmet equivalents for XSS, Clickjacking, Sniffing protection, Caching control)
 app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Content-Security-Policy', "default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data:; img-src 'self' data: https:;");
+    
+    // Disable caching for all API responses to ensure real-time settings sync
+    if (req.url.startsWith('/api/')) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
     next();
 });
 
