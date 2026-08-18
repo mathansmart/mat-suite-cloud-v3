@@ -594,7 +594,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderCategories = () => {
         if (categoryList) {
             categoryList.innerHTML = '';
-            
+            // If filtering by a specific category, show a "Back" button
+            if (activeCategoryFilter !== 'All') {
+                const backBtn = document.createElement('button');
+                backBtn.innerHTML = `<span>⬅</span> <span>Back</span>`;
+                styleCategoryBox(backBtn, false);
+                backBtn.addEventListener('click', () => {
+                    activeCategoryFilter = 'All';
+                    renderCategories();
+                    renderAddresses(searchInput.value);
+                });
+                categoryList.appendChild(backBtn);
+            }
+
             // Custom Category Boxes
             companyCategories.forEach(cat => {
                 const btn = document.createElement('button');
