@@ -106,8 +106,8 @@ try {
 }
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(__dirname)); // Serve the frontend from current directory
 
 // --- Security Middlewares (Hardening against Hackers/Scanners) ---
