@@ -3265,4 +3265,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     initConnection();
+
+    // Auto-open if redirected back from Letterpad page
+    if (urlParams.get('openLetterpad') === 'true' && typeof renderLetterpadCompanies === 'function' && letterpadModal) {
+        renderLetterpadCompanies();
+        letterpadModal.classList.remove('hidden');
+    }
 });

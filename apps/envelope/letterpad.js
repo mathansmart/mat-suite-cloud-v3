@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backBtn) {
         backBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = `index.html${PROFILE_QUERY}`;
+            window.location.href = `index.html${PROFILE_QUERY}&openLetterpad=true`;
         });
     }
 
