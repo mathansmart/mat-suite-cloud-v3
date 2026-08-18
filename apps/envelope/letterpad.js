@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let companyCategories = [];
     let companyAddresses = [];
 
-    let activeCategoryFilter = "All";
+    let activeCategoryFilter = "";
     let selectedIds = [];
     let editingId = null;
     let editingOriginalName = null;
@@ -606,12 +606,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (categoryList) {
             categoryList.innerHTML = '';
             // If filtering by a specific category, show a "Back" button
-            if (activeCategoryFilter !== 'All') {
+            if (activeCategoryFilter !== '') {
                 const backBtn = document.createElement('button');
                 backBtn.innerHTML = `<span>⬅</span> <span>Back</span>`;
                 styleCategoryBox(backBtn, false);
                 backBtn.addEventListener('click', () => {
-                    activeCategoryFilter = 'All';
+                    activeCategoryFilter = '';
                     renderCategories();
                     renderAddresses(searchInput.value);
                 });
@@ -787,7 +787,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Filter contacts
         let filtered = companyAddresses.filter(addr => {
-            if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return false;
+            if (activeCategoryFilter === '') {
+                // Default landing list: ONLY show uncategorized contacts (category is empty/undefined)
+                if (addr.category && addr.category.trim() !== '') return false;
+            } else {
+                // Category selected: ONLY show contacts in this specific category
+                if (addr.category !== activeCategoryFilter) return false;
+            }
             if (!filter.trim()) return true;
             
             const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || ''), (addr.category || '')].join(' ').toLowerCase();
@@ -978,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resetHistory();
         }
         
-        if (inputCategory) inputCategory.value = activeCategoryFilter !== 'All' ? activeCategoryFilter : '';
+        if (inputCategory) inputCategory.value = activeCategoryFilter;
         
         formatEditorA4Sheet();
         modalOverlay.classList.remove('hidden');
@@ -1132,7 +1138,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerms = cleanFilter.trim().split(/\s+/).filter(Boolean);
         
         companyAddresses.forEach(addr => {
-            if (activeCategoryFilter !== 'All' && addr.category !== activeCategoryFilter) return;
+            if (activeCategoryFilter === '') {
+                if (addr.category && addr.category.trim() !== '') return;
+            } else {
+                if (addr.category !== activeCategoryFilter) return;
+            }
             if (filter.trim()) {
                 const rawCombinedText = [(addr.name || ''), (addr.address || ''), (addr.phone || ''), (addr.city || ''), (addr.category || '')].join(' ').toLowerCase();
                 const cleanCombinedText = rawCombinedText.replace(/[^a-z0-9\s]/gi, '');
