@@ -3272,5 +3272,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (urlParams.get('openLetterpad') === 'true' && typeof renderLetterpadCompanies === 'function' && letterpadModal) {
         renderLetterpadCompanies();
         letterpadModal.classList.remove('hidden');
+        // Clear parameter from URL so it doesn't open again on page refresh
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('openLetterpad');
+            window.history.replaceState({}, document.title, url.pathname + url.search);
+        } catch (e) {}
     }
 });
