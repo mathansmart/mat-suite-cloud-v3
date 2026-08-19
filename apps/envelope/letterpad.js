@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const PROFILE_QUERY = `?profile=${PROFILE}`;
     const API_BASE = window.location.origin;
 
+    // Safety fallback: auto-hide loading screen after 3 seconds in case of network timeouts or browser cache glitches
+    setTimeout(() => {
+        const loader = document.getElementById('loading-overlay');
+        if (loader && !loader.classList.contains('fade-out')) {
+            console.warn('Safety timeout: forcing loader to hide.');
+            loader.classList.add('fade-out');
+        }
+    }, 3000);
+
     if (!COMPANY) {
         alert("No company selected. Returning to Address Book.");
         window.location.href = `index.html${PROFILE_QUERY}`;
