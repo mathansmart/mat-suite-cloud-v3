@@ -39,6 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const PROFILE = urlParams.get('profile') || '1';
     const PROFILE_QUERY = `?profile=${PROFILE}`;
     
+    // Cache loading for instant letterpad company rendering
+    const LETTERPAD_COMPANIES_CACHE_KEY = `envelope_letterpad_companies_prof_${PROFILE}`;
+    let isLoadingSettings = true;
+    try {
+        const cachedComp = localStorage.getItem(LETTERPAD_COMPANIES_CACHE_KEY);
+        if (cachedComp) {
+            activeSettings.letterPadCompanies = JSON.parse(cachedComp);
+        }
+    } catch (e) {
+        console.error('Failed to parse cached companies:', e);
+    }
+    
     // Dynamic localStorage key for profile isolation
     const NOTEBOOK_STORAGE_KEY = `envelope_notebook_notes_prof_${PROFILE}`;
     const mainSearchBar = document.querySelector('.search-bar');
@@ -415,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (saved.letterPadCompanies) {
                 activeSettings.letterPadCompanies = saved.letterPadCompanies;
+                localStorage.setItem(LETTERPAD_COMPANIES_CACHE_KEY, JSON.stringify(saved.letterPadCompanies));
             } else {
                 activeSettings.letterPadCompanies = [];
             }
@@ -434,6 +447,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.warn('Failed to load settings from server.', err);
             showNotification('Error loading settings from server. Please refresh.', 'error', 'Error');
+        } finally {
+            isLoadingSettings = false;
+            renderLetterpadCompanies();
         }
     };
 
@@ -1268,6 +1284,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const companies = activeSettings.letterPadCompanies || [];
         if (companies.length === 0) {
+            if (isLoadingSettings) {
+                letterpadCompanyList.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 30px 10px;">
+                        <span style="font-size: 1.5rem; display: inline-block; margin-bottom: 8px;">⏳</span>
+                        <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Loading Company Profiles...</p>
+                    </div>
+                `;
+                return;
+            }
             letterpadCompanyList.innerHTML = `
                 <div style="text-align: center; color: var(--text-secondary); padding: 20px 10px;">
                     <p style="margin: 0 0 10px 0; font-size: 0.9rem;">No companies added yet.</p>
