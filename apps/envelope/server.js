@@ -356,6 +356,33 @@ app.post(['/api/recycle', '/api/envelope/recycle'], async (req, res) => {
     }
 });
 
+app.post(['/api/recycle/add', '/api/envelope/recycle/add'], async (req, res) => {
+    if (isMongoConnected && getEnvelopeModels) {
+        const { Recycle } = getEnvelopeModels(req.query.profile);
+        try {
+            const newItem = new Recycle(req.body);
+            await newItem.save();
+            return res.json({ success: true });
+        } catch (err) {
+            console.error('Failed to add to recycle in MongoDB, falling back to disk:', err.message);
+        }
+    }
+    try {
+        const file = getProfileFile(RECYCLE_FILE, req.query.profile);
+        const { existsSync } = require('fs');
+        let recycled = [];
+        if (existsSync(file)) {
+            const fileData = await fs.readFile(file, 'utf8');
+            recycled = JSON.parse(fileData);
+        }
+        recycled.push(req.body);
+        await fs.writeFile(file, JSON.stringify(recycled, null, 2));
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to add to recycle bin' });
+    }
+});
+
 // Settings
 app.get(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     if (isMongoConnected && getEnvelopeModels) {

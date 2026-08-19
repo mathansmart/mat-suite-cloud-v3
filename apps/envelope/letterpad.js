@@ -1072,7 +1072,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rawId) return;
 
         if (e.target.classList.contains('delete')) {
-            showNotification('Are you sure you want to permanently delete this contact?', 'confirm', 'Confirm Delete', () => {
+            showNotification('Are you sure you want to delete this document and move it to the Recycle Bin?', 'confirm', 'Delete Document', async () => {
+                const addr = companyAddresses.find(a => String(a.id) === rawId);
+                if (addr) {
+                    try {
+                        const recycledItem = {
+                            ...addr,
+                            deletedType: 'letterpad',
+                            company: COMPANY,
+                            deletedAt: new Date().toISOString()
+                        };
+                        await fetch(`${API_BASE}/api/envelope/recycle/add${PROFILE_QUERY}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(recycledItem)
+                        });
+                    } catch (err) {
+                        console.error('Failed to move document to recycle bin:', err);
+                    }
+                }
                 companyAddresses = companyAddresses.filter(a => String(a.id) !== rawId);
                 const idx = selectedIds.findIndex(id => String(id) === rawId);
                 if (idx !== -1) selectedIds.splice(idx, 1);

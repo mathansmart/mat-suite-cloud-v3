@@ -1340,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveToLocal();
                 renderAddresses();
                 if (deletedItem) {
-                    recycledAddresses.push({ ...deletedItem, deletedAt: new Date().toISOString() });
+                    recycledAddresses.push({ ...deletedItem, deletedType: 'address', deletedAt: new Date().toISOString() });
                     saveRecycled();
                     showNotification(`"${deletedItem.name}" moved to Recycle Bin!`, 'success', 'Moved to Trash');
                 }
@@ -1777,6 +1777,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const restoreLetterpadLetter = async (item) => {
+        try {
+            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}&t=${Date.now()}`);
+            const settings = await resp.json();
+            
+            if (!settings.letterPadData) settings.letterPadData = {};
+            const comp = item.company || '';
+            if (comp) {
+                if (!settings.letterPadData[comp]) {
+                    settings.letterPadData[comp] = { settings: {}, categories: [], addresses: [] };
+                }
+                const compAddresses = settings.letterPadData[comp].addresses || [];
+                if (!compAddresses.some(a => String(a.id) === String(item.id))) {
+                    const { deletedAt, deletedType, company, ...rest } = item;
+                    compAddresses.push(rest);
+                    settings.letterPadData[comp].addresses = compAddresses;
+                    
+                    await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(settings)
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Failed to restore letterpad document:', e);
+        }
+    };
+
     const renderRecycleBin = () => {
         const recycleList = document.getElementById('recycle-list');
         const recycleEmptyMsg = document.getElementById('recycle-empty-msg');
@@ -1809,12 +1838,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const diffTime = Math.max(0, new Date(delDate.getTime() + 15 * 24 * 60 * 60 * 1000) - new Date());
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
+            // Custom display name and description based on type
+            let displayName = item.title || item.name || 'Untitled';
+            let displaySub = '';
+            
+            if (item.deletedType === 'note') {
+                displaySub = `📓 Notebook Note • ${item.type === 'excel' ? 'Excel Sheet' : 'Plain Text'}`;
+            } else if (item.deletedType === 'letterpad') {
+                displaySub = `✉️ Letterpad Letter • Company: ${item.company || 'Unknown'}`;
+            } else {
+                displaySub = `👤 Contact • ${item.city || ''} ${item.phone ? '• PH: ' + item.phone : ''}`;
+            }
+            
             const div = document.createElement('div');
             div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; margin-bottom: 8px; transition: all 0.2s;';
             div.innerHTML = `
                 <div style="flex: 1; min-width: 0; padding-right: 15px; text-align: left;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.city || ''} ${item.phone ? '• PH: ' + item.phone : ''}</div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displaySub}</div>
                     <div style="font-size: 0.7rem; color: #ef4444; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
                         🕒 ${diffDays} day${diffDays !== 1 ? 's' : ''} left
                     </div>
@@ -1826,24 +1867,39 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             
             // Restore button handler
-            div.querySelector('.restore-btn').addEventListener('click', () => {
+            div.querySelector('.restore-btn').addEventListener('click', async () => {
                 recycledAddresses = recycledAddresses.filter(r => String(r.id) !== String(item.id));
-                if (!addresses.some(a => String(a.id) === String(item.id))) {
-                    const { deletedAt, ...rest } = item;
-                    addresses.push(rest);
+                
+                if (item.deletedType === 'letterpad') {
+                    await restoreLetterpadLetter(item);
+                } else if (item.deletedType === 'note') {
+                    if (!notebookNotes.some(n => String(n.id) === String(item.id))) {
+                        const { deletedAt, deletedType, ...rest } = item;
+                        notebookNotes.unshift(rest);
+                        localStorage.setItem(NOTEBOOK_STORAGE_KEY, JSON.stringify(notebookNotes));
+                        activeSettings.notebookNotes = notebookNotes;
+                        await saveSettingsToServer();
+                        renderNotebookNotes();
+                    }
+                } else {
+                    if (!addresses.some(a => String(a.id) === String(item.id))) {
+                        const { deletedAt, deletedType, ...rest } = item;
+                        addresses.push(rest);
+                    }
+                    saveToLocal();
+                    renderAddresses();
                 }
-                saveToLocal();
+                
                 saveRecycled();
-                renderAddresses();
-                showNotification(`"${item.name}" restored to Address Book!`, 'success', 'Restored');
+                showNotification(`"${displayName}" restored successfully!`, 'success', 'Restored');
             });
             
             // Permanent delete button handler
             div.querySelector('.perm-delete-btn').addEventListener('click', () => {
-                showNotification(`Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`, 'confirm', 'Delete Permanently', () => {
+                showNotification(`Are you sure you want to permanently delete "${displayName}"? This action cannot be undone.`, 'confirm', 'Delete Permanently', () => {
                     recycledAddresses = recycledAddresses.filter(r => String(r.id) !== String(item.id));
                     saveRecycled();
-                    showNotification(`"${item.name}" permanently deleted!`, 'success', 'Deleted');
+                    showNotification(`"${displayName}" permanently deleted!`, 'success', 'Deleted');
                 });
             });
             
@@ -2298,7 +2354,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Delete event handler
             card.querySelector('.delete-note-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
-                showNotification('Are you sure you want to delete this note?', 'confirm', 'Delete Note', () => {
+                showNotification('Are you sure you want to delete this note and move it to the Recycle Bin?', 'confirm', 'Delete Note', () => {
+                    const deletedNote = {
+                        ...note,
+                        deletedType: 'note',
+                        deletedAt: new Date().toISOString()
+                    };
+                    recycledAddresses.push(deletedNote);
+                    saveRecycled();
+                    
                     notebookNotes = notebookNotes.filter(n => n.id !== note.id);
                     localStorage.setItem(NOTEBOOK_STORAGE_KEY, JSON.stringify(notebookNotes));
                     activeSettings.notebookNotes = notebookNotes;
