@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSettings = async () => {
         try {
-            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}&t=${Date.now()}`);
+            const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}&lightweight=true&t=${Date.now()}`);
             const saved = await resp.json();
             
             if (saved.envelope) {

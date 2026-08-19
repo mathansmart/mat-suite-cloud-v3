@@ -383,13 +383,17 @@ app.post(['/api/recycle/add', '/api/envelope/recycle/add'], async (req, res) => 
     }
 });
 
-// Settings
 app.get(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     if (isMongoConnected && getEnvelopeModels) {
         const { Settings } = getEnvelopeModels(req.query.profile);
         try {
             const doc = await Settings.findOne();
-            return res.json(doc ? JSON.parse(doc.data) : {});
+            let data = doc ? JSON.parse(doc.data) : {};
+            if (req.query.lightweight === 'true') {
+                const { letterPadData, ...lightData } = data;
+                return res.json(lightData);
+            }
+            return res.json(data);
         } catch (err) {
             console.error('Failed to read settings from MongoDB, falling back to disk:', err.message);
         }
@@ -397,8 +401,13 @@ app.get(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     try {
         const file = getProfileFile(SETTINGS_FILE, req.query.profile);
         if (!existsSync(file)) return res.json({});
-        const data = await fs.readFile(file, 'utf8');
-        res.json(JSON.parse(data));
+        const fileData = await fs.readFile(file, 'utf8');
+        let data = JSON.parse(fileData);
+        if (req.query.lightweight === 'true') {
+            const { letterPadData, ...lightData } = data;
+            return res.json(lightData);
+        }
+        res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Failed to read settings' });
     }
@@ -408,8 +417,16 @@ app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     if (isMongoConnected && getEnvelopeModels) {
         const { Settings } = getEnvelopeModels(req.query.profile);
         try {
+            const doc = await Settings.findOne();
+            let existing = doc ? JSON.parse(doc.data) : {};
+            
+            const merged = { ...existing, ...req.body };
+            if (existing.letterPadData && !req.body.letterPadData) {
+                merged.letterPadData = existing.letterPadData;
+            }
+            
             await Settings.deleteMany({});
-            await Settings.create({ data: JSON.stringify(req.body) });
+            await Settings.create({ data: JSON.stringify(merged) });
             return res.json({ success: true });
         } catch (err) {
             console.error('Failed to save settings in MongoDB, falling back to disk:', err.message);
@@ -417,7 +434,19 @@ app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
     }
     try {
         const file = getProfileFile(SETTINGS_FILE, req.query.profile);
-        await fs.writeFile(file, JSON.stringify(req.body, null, 2));
+        const { existsSync } = require('fs');
+        let existing = {};
+        if (existsSync(file)) {
+            const fileData = await fs.readFile(file, 'utf8');
+            existing = JSON.parse(fileData);
+        }
+        
+        const merged = { ...existing, ...req.body };
+        if (existing.letterPadData && !req.body.letterPadData) {
+            merged.letterPadData = existing.letterPadData;
+        }
+        
+        await fs.writeFile(file, JSON.stringify(merged, null, 2));
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save settings' });
