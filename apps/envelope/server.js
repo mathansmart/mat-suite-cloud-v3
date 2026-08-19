@@ -421,7 +421,7 @@ app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
             let existing = doc ? JSON.parse(doc.data) : {};
             
             const merged = { ...existing, ...req.body };
-            if (existing.letterPadData && !req.body.letterPadData) {
+            if (existing.letterPadData && (!req.body.letterPadData || Object.keys(req.body.letterPadData).length === 0)) {
                 merged.letterPadData = existing.letterPadData;
             }
             
@@ -442,7 +442,7 @@ app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
         }
         
         const merged = { ...existing, ...req.body };
-        if (existing.letterPadData && !req.body.letterPadData) {
+        if (existing.letterPadData && (!req.body.letterPadData || Object.keys(req.body.letterPadData).length === 0)) {
             merged.letterPadData = existing.letterPadData;
         }
         
