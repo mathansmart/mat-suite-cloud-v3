@@ -432,7 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderManageCompaniesList();
             renderLetterpadCompanies();
         } catch (err) {
-            console.warn('Failed to load settings from server.');
+            console.warn('Failed to load settings from server.', err);
+            showNotification('Error loading settings from server. Please refresh.', 'error', 'Error');
         }
     };
 
