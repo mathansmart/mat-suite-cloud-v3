@@ -7554,28 +7554,44 @@ function d2i(val) {
 
       if (PROFILE === '2') {
         // --- FITVEE GRID MATRIX PRINT LAYOUT ---
-        // Helper to parse product name into design and color
+        // Helper to parse product name into design, color, and color number
         function parseProductColor(name) {
           let cleanName = name.trim();
-          if (cleanName.includes(' - ')) {
-            const parts = cleanName.split(' - ').map(x => x.trim());
-            const color = parts.pop();
-            const design = parts.join(' - ');
-            return { design, color };
+          let colorNo = '';
+          let rest = cleanName;
+          
+          // Extract color number if '#' exists
+          if (cleanName.includes('#')) {
+            const hashParts = cleanName.split('#');
+            colorNo = hashParts.pop().trim();
+            rest = hashParts.join('#').trim();
           }
-          if (cleanName.includes('-')) {
-            const parts = cleanName.split('-').map(x => x.trim());
-            const color = parts.pop();
-            const design = parts.join(' - ');
-            return { design, color };
+          
+          let design = 'STOCK LIST';
+          let color = rest;
+          
+          // Split design and color by ' - ' or '-' or space
+          if (rest.includes(' - ')) {
+            const parts = rest.split(' - ').map(x => x.trim());
+            color = parts.pop();
+            design = parts.join(' - ');
+          } else if (rest.includes('-')) {
+            const parts = rest.split('-').map(x => x.trim());
+            color = parts.pop();
+            design = parts.join(' - ');
+          } else {
+            const parts = rest.split(/\s+/);
+            if (parts.length > 1) {
+              color = parts.pop();
+              design = parts.join(' ');
+            }
           }
-          const parts = cleanName.split(/\s+/);
-          if (parts.length > 1) {
-            const color = parts.pop();
-            const design = parts.join(' ');
-            return { design, color };
-          }
-          return { design: 'STOCK LIST', color: cleanName };
+          
+          return {
+            design: design.toUpperCase().trim(),
+            color: color.toUpperCase().trim(),
+            colorNo: colorNo
+          };
         }
 
         // Group by design
@@ -7586,8 +7602,9 @@ function d2i(val) {
           if (totalStock <= 0) return; // Filter out zero stock colors
           
           const parsed = parseProductColor(p.n);
-          const designName = parsed.design.toUpperCase();
-          const colorName = parsed.color.toUpperCase();
+          const designName = parsed.design;
+          const colorName = parsed.color;
+          const colorNo = parsed.colorNo;
           
           if (!designsMap.has(designName)) {
             designsMap.set(designName, {
@@ -7599,6 +7616,7 @@ function d2i(val) {
           const group = designsMap.get(designName);
           group.colors.push({
             colorName: colorName,
+            colorNo: colorNo,
             stock: p.s || {},
             product: p
           });
@@ -7625,7 +7643,7 @@ function d2i(val) {
               .print-page:last-child { page-break-after: avoid; break-after: avoid; }
               .title { text-align: center; font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; border-bottom: 2px solid #000; padding-bottom: 8px; }
               table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
-              th, td { border: 1.5px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; }
+              th, td { border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; }
               th { font-weight: 800; background-color: #f8fafc; text-transform: uppercase; }
               .color-name { text-align: left; padding-left: 12px; font-weight: 700; text-transform: uppercase; }
               .bold { font-weight: 800; }
@@ -7682,10 +7700,11 @@ function d2i(val) {
             }).join('');
             
             grandTotal += rowTotal;
+            const clrNoDisplay = colObj.colorNo || (index + 1);
             
             rowHtml += `
               <tr>
-                <td>${index + 1}</td>
+                <td>${clrNoDisplay}</td>
                 <td class="color-name">${colObj.colorName}</td>
                 ${sizeCols}
                 <td class="bold">${rowTotal}</td>
