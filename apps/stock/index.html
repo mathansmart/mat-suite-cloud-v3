@@ -2447,6 +2447,34 @@
   </div>
   <div id="lbl-logout-title" style="display:none;"></div>
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const PROFILE = urlParams.get('profile') || '1';
+    const PROFILE_QUERY = `?profile=${PROFILE}`;
+    const COMPANY_NAME = PROFILE === '2' ? 'FITVEE' : 'VESTER';
+
+    if (PROFILE === '2') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.documentElement.style.setProperty('--primary', '#10b981');
+        document.documentElement.style.setProperty('--accent', '#10b981');
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+          sidebar.style.background = 'linear-gradient(180deg, #064e3b 0%, #022c22 100%)';
+        }
+        document.title = 'Fitvee Stock Manager';
+        
+        const compEls = document.querySelectorAll('.company, .logo div, .logo span');
+        compEls.forEach(el => {
+          if (el.textContent.trim().toUpperCase() === 'VESTER') {
+            el.textContent = COMPANY_NAME;
+          }
+        });
+        const sidebarLogo = document.querySelector('.sidebar .logo div');
+        if (sidebarLogo && sidebarLogo.textContent.trim().toUpperCase() === 'VESTER') {
+          sidebarLogo.textContent = COMPANY_NAME;
+        }
+      });
+    }
+
     function getSubCategoryIcon(name) {
       if (!name) return 'ti ti-category';
       const n = name.toLowerCase().trim();
@@ -2734,7 +2762,7 @@
       ],
       subCategories: ['T-SHIRT', 'SHIRT', 'GENERAL'],
       defMin: 5,
-      company: 'Vester',
+      company: COMPANY_NAME,
       recycleBin: []
     };
     let gsm3_p = [], gsm3_t = [], gsm3_users = [];
@@ -2743,7 +2771,7 @@
 
     async function persist() {
       try {
-        await fetch('/api/stock/data', {
+        await fetch('/api/stock/data' + PROFILE_QUERY, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ settings: S, products: P, transactions: T, users: USERS })
@@ -3624,7 +3652,7 @@ function renderDashboard() {
          }
       }
       const compEl = document.getElementById('dash-company-name');
-      if (compEl) compEl.textContent = 'Vester';
+      if (compEl) compEl.textContent = COMPANY_NAME;
       updateBadge();
 
       const searchEl = document.getElementById('dash-search');
@@ -6704,7 +6732,7 @@ function d2i(val) {
         return `${absVal.toLocaleString()} ${unit}`;
       };
 
-       const shopName = "VESTER";
+       const shopName = COMPANY_NAME;
       const dateRangeStr = `${formatDateToDMY(globalLedgerFrom)} to ${formatDateToDMY(globalLedgerTo)}`;
 
       const rowsHtml = stats.map(s => {
@@ -7404,7 +7432,7 @@ function d2i(val) {
 
       const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
       const modeLabel = csMode === 'internal' ? 'INTERNAL CATALOG' : 'STOCK AVAILABILITY REPORT';
-      let msg = `📦 *VESTER - ${modeLabel}* 📦\nDate: ${dateStr}\n`;
+      let msg = `📦 *${COMPANY_NAME} - ${modeLabel}* 📦\nDate: ${dateStr}\n`;
 
       activeSubCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
@@ -7527,7 +7555,7 @@ function d2i(val) {
       let printHtml = `
         <html>
         <head>
-          <title>VESTER ${docTitle} - ${dateStr}</title>
+          <title>${COMPANY_NAME} ${docTitle} - ${dateStr}</title>
           <style>
             @page { size: A4; margin: 12mm 15mm; }
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #212b36; padding: 0; background: #fff; font-size: 13px; }
@@ -8154,7 +8182,7 @@ function d2i(val) {
       const tb = document.getElementById('users-tbody');
       if (!tb) return;
       
-      const resp = await fetch('/api/stock/data');
+      const resp = await fetch('/api/stock/data' + PROFILE_QUERY);
       const data = await resp.json();
       USERS = data.gsm3_users;
       let users = USERS;
@@ -8530,7 +8558,7 @@ function d2i(val) {
       const localMatch = USERS.find(x => x.username === u && x.password === p);
       
       try {
-        const resp = await fetch('/api/stock/data').catch(() => null);
+        const resp = await fetch('/api/stock/data' + PROFILE_QUERY).catch(() => null);
         if (resp && resp.ok) {
           const data = await resp.json();
           // Merge server users with local ones if available
@@ -8980,7 +9008,7 @@ function d2i(val) {
 
     async function initApp(retry = 0) {
       try {
-        const resp = await fetch('/api/stock/data?v=' + Date.now());
+        const resp = await fetch('/api/stock/data' + PROFILE_QUERY + '&v=' + Date.now());
         if (resp.ok) {
           const d = await resp.json();
           if (d.settings) S = d.settings;
