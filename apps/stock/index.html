@@ -7555,7 +7555,7 @@ function d2i(val) {
       if (PROFILE === '2') {
         // --- FITVEE GRID MATRIX PRINT LAYOUT ---
         // Helper to parse product name into design, color, and color number
-        function parseProductColor(name) {
+        function parseProductColor(name, query) {
           let cleanName = name.trim();
           let colorNo = '';
           let rest = cleanName;
@@ -7567,23 +7567,35 @@ function d2i(val) {
             rest = hashParts.join('#').trim();
           }
           
-          let design = 'STOCK LIST';
-          let color = rest;
+          let design = '';
+          let color = '';
           
-          // Split design and color by ' - ' or '-' or space
-          if (rest.includes(' - ')) {
-            const parts = rest.split(' - ').map(x => x.trim());
-            color = parts.pop();
-            design = parts.join(' - ');
-          } else if (rest.includes('-')) {
-            const parts = rest.split('-').map(x => x.trim());
-            color = parts.pop();
-            design = parts.join(' - ');
+          const cleanQuery = (query || '').trim().toUpperCase();
+          const cleanRest = rest.toUpperCase();
+          
+          // If a query is provided and the product name starts with it, use it as design name
+          if (cleanQuery && cleanQuery.length >= 3 && cleanRest.startsWith(cleanQuery)) {
+            design = cleanQuery;
+            color = rest.substring(cleanQuery.length).replace(/^[-–—\s]+/i, '').trim();
           } else {
-            const parts = rest.split(/\s+/);
-            if (parts.length > 1) {
+            // Fallback splitting logic
+            if (rest.includes(' - ')) {
+              const parts = rest.split(' - ').map(x => x.trim());
               color = parts.pop();
-              design = parts.join(' ');
+              design = parts.join(' - ');
+            } else if (rest.includes('-')) {
+              const parts = rest.split('-').map(x => x.trim());
+              color = parts.pop();
+              design = parts.join(' - ');
+            } else {
+              const parts = rest.split(/\s+/);
+              if (parts.length > 1) {
+                color = parts.pop();
+                design = parts.join(' ');
+              } else {
+                color = rest;
+                design = 'STOCK LIST';
+              }
             }
           }
           
@@ -7601,7 +7613,7 @@ function d2i(val) {
           const totalStock = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
           if (totalStock <= 0) return; // Filter out zero stock colors
           
-          const parsed = parseProductColor(p.n);
+          const parsed = parseProductColor(p.n, q);
           const designName = parsed.design;
           const colorName = parsed.color;
           const colorNo = parsed.colorNo;
