@@ -674,6 +674,22 @@ process.on('unhandledRejection', (reason, promise) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Cloud Unified Server running at http://localhost:${PORT}`);
     console.log(`📂 Storage: ${isMongoConnected ? 'MongoDB Atlas' : STORAGE_DIR}`);
+    
+    // Keep-alive for free tier (prevents Render container from sleeping)
+    const RENDER_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || 'https://mat-suite-cloud-v3.onrender.com';
+    if (RENDER_URL) {
+        setInterval(() => {
+            const https = require('https');
+            const http = require('http');
+            const client = RENDER_URL.startsWith('https') ? https : http;
+            
+            client.get(RENDER_URL + '/api/server-info', (res) => {
+                console.log(`[Keep-Alive] Ping successful! Status: ${res.statusCode}`);
+            }).on('error', (err) => {
+                console.error('[Keep-Alive] Ping failed:', err.message);
+            });
+        }, 13 * 60 * 1000); // 13 minutes (Render sleeps after 15 minutes of inactivity)
+    }
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
         process.exit(0);
