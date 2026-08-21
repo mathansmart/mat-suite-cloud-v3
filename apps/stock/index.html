@@ -7552,6 +7552,204 @@ function d2i(val) {
       const csMode = document.getElementById('cs-mode-filter')?.value || 'customer';
       const docTitle = 'Stock Availability Catalog';
 
+      if (PROFILE === '2') {
+        // --- FITVEE GRID MATRIX PRINT LAYOUT ---
+        // Helper to parse product name into design and color
+        function parseProductColor(name) {
+          let cleanName = name.trim();
+          if (cleanName.includes(' - ')) {
+            const parts = cleanName.split(' - ').map(x => x.trim());
+            const color = parts.pop();
+            const design = parts.join(' - ');
+            return { design, color };
+          }
+          if (cleanName.includes('-')) {
+            const parts = cleanName.split('-').map(x => x.trim());
+            const color = parts.pop();
+            const design = parts.join(' - ');
+            return { design, color };
+          }
+          const parts = cleanName.split(/\s+/);
+          if (parts.length > 1) {
+            const color = parts.pop();
+            const design = parts.join(' ');
+            return { design, color };
+          }
+          return { design: 'STOCK LIST', color: cleanName };
+        }
+
+        // Group by design
+        const designsMap = new Map();
+        
+        filteredProds.forEach(p => {
+          const totalStock = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
+          if (totalStock <= 0) return; // Filter out zero stock colors
+          
+          const parsed = parseProductColor(p.n);
+          const designName = parsed.design.toUpperCase();
+          const colorName = parsed.color.toUpperCase();
+          
+          if (!designsMap.has(designName)) {
+            designsMap.set(designName, {
+              designName: designName,
+              colors: [],
+              categoryIds: new Set()
+            });
+          }
+          const group = designsMap.get(designName);
+          group.colors.push({
+            colorName: colorName,
+            stock: p.s || {},
+            product: p
+          });
+          if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(cId => group.categoryIds.add(String(cId)));
+          } else {
+            group.categoryIds.add(String(p.ci));
+          }
+        });
+
+        if (designsMap.size === 0) {
+          alert('No items with stock found to print!');
+          return;
+        }
+
+        let printHtml = `
+          <html>
+          <head>
+            <title>${COMPANY_NAME} Stock Catalog - ${dateStr}</title>
+            <style>
+              @page { size: A4 portrait; margin: 10mm; }
+              body { font-family: 'Nunito', 'Segoe UI', Arial, sans-serif; margin: 0; padding: 5px; background: #fff; color: #000; }
+              .print-page { page-break-after: always; break-after: page; }
+              .print-page:last-child { page-break-after: avoid; break-after: avoid; }
+              .title { text-align: center; font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; border-bottom: 2px solid #000; padding-bottom: 8px; }
+              table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+              th, td { border: 1.5px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; }
+              th { font-weight: 800; background-color: #f8fafc; text-transform: uppercase; }
+              .color-name { text-align: left; padding-left: 12px; font-weight: 700; text-transform: uppercase; }
+              .bold { font-weight: 800; }
+            </style>
+          </head>
+          <body>
+        `;
+
+        let isFirst = true;
+        designsMap.forEach((group, designName) => {
+          // Resolve sizes
+          const sizesSet = new Set();
+          group.categoryIds.forEach(cId => {
+            const catObj = S.categories.find(c => String(c.id) === String(cId));
+            if (catObj && catObj.sizes) {
+              catObj.sizes.forEach(sz => sizesSet.add(sz));
+            }
+          });
+          const sizes = Array.from(sizesSet);
+          
+          // Sort sizes
+          sizes.sort((a, b) => {
+            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+            const cleanA = String(a).toUpperCase().trim();
+            const cleanB = String(b).toUpperCase().trim();
+            const idxA = sizeOrder.indexOf(cleanA);
+            const idxB = sizeOrder.indexOf(cleanB);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return cleanA.localeCompare(cleanB);
+          });
+          
+          if (sizes.length === 0) {
+            sizes.push('FREE');
+          }
+          
+          // Calculate column totals and rows
+          let rowHtml = '';
+          const colTotals = {};
+          sizes.forEach(sz => colTotals[sz] = 0);
+          let grandTotal = 0;
+          
+          group.colors.forEach((colObj, index) => {
+            let rowTotal = 0;
+            const sizeCols = sizes.map(sz => {
+              const qty = Number(colObj.stock[sz]) || 0;
+              rowTotal += qty;
+              colTotals[sz] += qty;
+              return `<td>${qty}</td>`;
+            }).join('');
+            
+            grandTotal += rowTotal;
+            
+            rowHtml += `
+              <tr>
+                <td>${index + 1}</td>
+                <td class="color-name">${colObj.colorName}</td>
+                ${sizeCols}
+                <td class="bold">${rowTotal}</td>
+              </tr>
+            `;
+          });
+          
+          const footerSizeCols = sizes.map(sz => {
+            return `<td class="bold">${colTotals[sz]}</td>`;
+          }).join('');
+          
+          if (!isFirst) {
+            printHtml += `<div class="print-page">`;
+          } else {
+            printHtml += `<div>`;
+            isFirst = false;
+          }
+          
+          printHtml += `
+            <div class="title">${designName} TOTAL STOCK LIST ${dateStr}</div>
+            <table>
+              <thead>
+                <tr>
+                  <th rowspan="2" style="width: 8%;">CLR NO</th>
+                  <th rowspan="2" style="width: 25%;">COLOUR</th>
+                  <th colspan="${sizes.length}">SIZE</th>
+                  <th rowspan="2" style="width: 12%;">TOTAL</th>
+                </tr>
+                <tr>
+                  ${sizes.map(sz => `<th>${sz}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${rowHtml}
+              </tbody>
+              <tfoot>
+                <tr class="bold" style="background-color: #f8fafc;">
+                  <td colspan="2">TOTAL</td>
+                  ${footerSizeCols}
+                  <td>${grandTotal}</td>
+                </tr>
+              </tfoot>
+            </table>
+            </div>
+          `;
+        });
+        
+        printHtml += `
+          </body>
+          </html>
+        `;
+
+        const win = window.open('', '_blank');
+        if (win) {
+          win.document.write(printHtml);
+          win.document.close();
+          setTimeout(() => {
+            win.print();
+          }, 300);
+        }
+        return;
+      }
+
+      // --- VESTER ORIGINAL PRINT LAYOUT ---
       let printHtml = `
         <html>
         <head>
@@ -7666,7 +7864,7 @@ function d2i(val) {
           }
           const sizes = Array.from(sizesSet);
           sizes.sort((a, b) => {
-            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
             const cleanA = String(a).toUpperCase().trim();
             const cleanB = String(b).toUpperCase().trim();
             const idxA = sizeOrder.indexOf(cleanA);
@@ -7734,7 +7932,6 @@ function d2i(val) {
         }, 300);
       }
     }
-
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
       renderUsersTable();
