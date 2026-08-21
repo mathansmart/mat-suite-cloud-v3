@@ -258,6 +258,10 @@
             border-color: #e11d48;
             box-shadow: 0 10px 20px rgba(225, 29, 72, 0.15);
         }
+        .fitvee-btn:hover {
+            border-color: #10b981;
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
+        }
         .profile-btn h3 { margin: 15px 0 5px; font-size: 1.2rem; }
         .profile-btn p { font-size: 0.8rem; color: var(--muted); }
 
@@ -302,14 +306,14 @@
                     <div class="icon">✉️</div>
                 </div>
 
-                <a href="/stock/" class="card" id="card-stock">
+                <div class="card" id="card-stock" style="cursor: pointer;">
                     <div class="card-content">
                         <div class="card-title">Stock Manager</div>
                         <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
                         <div class="btn-link">LAUNCH APP</div>
                     </div>
                     <div class="icon">📦</div>
-                </a>
+                </div>
             </div>
 
             <div class="footer">
@@ -323,6 +327,24 @@
 
         <!-- Left Panel: Full image view -->
         <div class="left-panel">
+        </div>
+    </div>
+
+    <!-- Stock Profile Selection Modal -->
+    <div id="stock-profile-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2 style="margin-bottom: 30px; font-family: 'Playfair Display', serif; font-size: 2rem;">Select Stock Profile</h2>
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <a href="/stock/?profile=1" class="profile-btn milton-btn">
+                    <span style="font-size: 2.5rem;">🏭</span>
+                    <h3>VESTER</h3>
+                </a>
+                <a href="/stock/?profile=2" class="profile-btn fitvee-btn">
+                    <span style="font-size: 2.5rem;">🏢</span>
+                    <h3>FITVEE</h3>
+                </a>
+            </div>
+            <button id="close-stock-modal" style="margin-top: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--muted); color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s;">Cancel</button>
         </div>
     </div>
 
@@ -352,6 +374,26 @@
         cardEnvelope.addEventListener('click', (e) => {
             e.preventDefault();
             profileModal.classList.remove('hidden');
+        });
+
+        const cardStock = document.getElementById('card-stock');
+        const stockProfileModal = document.getElementById('stock-profile-modal');
+        const closeStockModal = document.getElementById('close-stock-modal');
+
+        cardStock.addEventListener('click', (e) => {
+            e.preventDefault();
+            stockProfileModal.classList.remove('hidden');
+        });
+
+        closeStockModal.addEventListener('click', () => {
+            stockProfileModal.classList.add('hidden');
+        });
+
+        closeStockModal.addEventListener('mouseover', () => closeStockModal.style.color = 'var(--text)');
+        closeStockModal.addEventListener('mouseout', () => closeStockModal.style.color = 'var(--muted)');
+
+        stockProfileModal.addEventListener('click', (e) => {
+            if (e.target === stockProfileModal) stockProfileModal.classList.add('hidden');
         });
 
         closeModal.addEventListener('click', () => {
