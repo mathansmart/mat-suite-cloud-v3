@@ -7831,8 +7831,6 @@ function d2i(val) {
           <style>
             @page { size: A4 portrait; margin: 10mm; }
             body { font-family: 'Nunito', 'Segoe UI', Arial, sans-serif; margin: 0; padding: 5px; background: #fff; color: #000; }
-            .print-page { page-break-after: always; break-after: page; }
-            .print-page:last-child { page-break-after: avoid; break-after: avoid; }
             
             .subcat-section {
               border: 1px solid #000;
@@ -7840,6 +7838,8 @@ function d2i(val) {
               margin-bottom: 25px;
               overflow: hidden;
               background: #fff;
+              break-inside: avoid;
+              page-break-inside: avoid;
             }
             .subcat-header {
               background: #f8fafc;
@@ -7862,7 +7862,6 @@ function d2i(val) {
         <body>
       `;
 
-      let isFirst = true;
       activeSubCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
           const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
@@ -7935,13 +7934,6 @@ function d2i(val) {
           return `<td class="bold">${colTotals[s] || ''}</td>`;
         }).join('');
 
-        if (!isFirst) {
-          printHtml += `<div class="print-page">`;
-        } else {
-          printHtml += `<div>`;
-          isFirst = false;
-        }
-
         printHtml += `
           <div class="subcat-section">
             <div class="subcat-header">${scName} - TOTAL STOCK LIST ${dateStr}</div>
@@ -7964,7 +7956,6 @@ function d2i(val) {
                 </tbody>
               </table>
             </div>
-          </div>
           </div>
         `;
       });
