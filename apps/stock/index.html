@@ -7561,40 +7561,65 @@ function d2i(val) {
             rest = hashParts.join('#').trim();
           }
           
+          // List of known colors in garment stock (sorted by length descending for greedy matching)
+          const knownColors = [
+            'TURMERIC YELLOW', 'BOTTLE GREEN', 'PARROT GREEN', 'COFFEE BROWN', 
+            'STEEL GRAY', 'STEEL GREY', 'ROYAL BLUE', 'BABY PINK', 'RANI PINK', 
+            'RANI ROSE', 'SKY BLUE', 'C.BROWN', 'B.GREEN', 'D.NAVY', 'WHITE', 
+            'BLACK', 'SKIN', 'NAVY', 'RED', 'PINK', 'BLUE', 'GREEN', 'YELLOW', 
+            'BROWN', 'GREY', 'GRAY', 'MAROON', 'CREAM', 'PEACOCK', 'MUSTARD', 
+            'CORAL', 'OLIVE', 'EMERALD', 'FUCHIA', 'WINE', 'HONEY'
+          ];
+          
           let design = '';
           let color = '';
           
-          const cleanQuery = (query || '').trim().toUpperCase();
-          const cleanRest = rest.toUpperCase();
+          const restUpper = rest.toUpperCase();
+          let matchedColor = '';
           
-          // If a query is provided and the product name starts with it, use it as design name
-          if (cleanQuery && cleanQuery.length >= 3 && cleanRest.startsWith(cleanQuery)) {
-            design = cleanQuery;
-            color = rest.substring(cleanQuery.length).replace(/^[-–—\s]+/i, '').trim();
-          } else {
-            // Fallback splitting logic
-            if (rest.includes(' - ')) {
-              const parts = rest.split(' - ').map(x => x.trim());
-              color = parts.pop();
-              design = parts.join(' - ');
-            } else if (rest.includes('-')) {
-              const parts = rest.split('-').map(x => x.trim());
-              color = parts.pop();
-              design = parts.join(' - ');
+          for (const col of knownColors) {
+            const idx = restUpper.indexOf(col);
+            if (idx !== -1) {
+              matchedColor = col;
+              design = rest.substring(0, idx).trim();
+              color = rest.substring(idx).trim();
+              break;
+            }
+          }
+          
+          // Fallback if no known color matched
+          if (!matchedColor) {
+            const cleanQuery = (query || '').trim().toUpperCase();
+            if (cleanQuery && cleanQuery.length >= 3 && restUpper.startsWith(cleanQuery)) {
+              design = cleanQuery;
+              color = rest.substring(cleanQuery.length).replace(/^[-–—\s]+/i, '').trim();
             } else {
-              const parts = rest.split(/\s+/);
-              if (parts.length > 1) {
+              if (rest.includes(' - ')) {
+                const parts = rest.split(' - ').map(x => x.trim());
                 color = parts.pop();
-                design = parts.join(' ');
+                design = parts.join(' - ');
+              } else if (rest.includes('-')) {
+                const parts = rest.split('-').map(x => x.trim());
+                color = parts.pop();
+                design = parts.join(' - ');
               } else {
-                color = rest;
-                design = 'STOCK LIST';
+                const parts = rest.split(/\s+/);
+                if (parts.length > 1) {
+                  color = parts.pop();
+                  design = parts.join(' ');
+                } else {
+                  color = rest;
+                  design = 'STOCK LIST';
+                }
               }
             }
           }
           
+          // Strip trailing dashes/spaces from design name
+          design = design.replace(/[-–—\s]+$/, '').trim();
+          
           return {
-            design: design.toUpperCase().trim(),
+            design: design.toUpperCase().trim() || 'STOCK LIST',
             color: color.toUpperCase().trim(),
             colorNo: colorNo
           };
@@ -7695,6 +7720,16 @@ function d2i(val) {
           const colTotals = {};
           sizes.forEach(sz => colTotals[sz] = 0);
           let grandTotal = 0;
+          
+          // Sort colors by colorNo numerically if possible
+          group.colors.sort((c1, c2) => {
+            const n1 = parseInt(c1.colorNo);
+            const n2 = parseInt(c2.colorNo);
+            if (!isNaN(n1) && !isNaN(n2)) return n1 - n2;
+            if (!isNaN(n1)) return -1;
+            if (!isNaN(n2)) return 1;
+            return c1.colorName.localeCompare(c2.colorName);
+          });
           
           group.colors.forEach((colObj, index) => {
             let rowTotal = 0;
