@@ -2462,6 +2462,20 @@
         }
         document.title = 'Fitvee Stock Manager';
         
+        // Hide WhatsApp copy button and restrict Stock Print mode options
+        const whatsappBtn = document.querySelector('button[onclick="copyWhatsAppStockText()"]');
+        if (whatsappBtn) {
+          whatsappBtn.style.display = 'none';
+        }
+        const modeFilter = document.getElementById('cs-mode-filter');
+        if (modeFilter) {
+          modeFilter.innerHTML = '<option value="internal">🖨️ Stock Print</option>';
+          modeFilter.value = 'internal';
+          // Force active selection border/styling to standard A4 print color
+          modeFilter.style.borderColor = 'var(--border)';
+          modeFilter.style.color = 'var(--text-main)';
+        }
+        
         const companyTextEl = document.querySelector('.company-name-text');
         if (companyTextEl) {
           companyTextEl.textContent = COMPANY_NAME;
