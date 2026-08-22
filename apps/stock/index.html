@@ -7833,11 +7833,29 @@ function d2i(val) {
             body { font-family: 'Nunito', 'Segoe UI', Arial, sans-serif; margin: 0; padding: 5px; background: #fff; color: #000; }
             .print-page { page-break-after: always; break-after: page; }
             .print-page:last-child { page-break-after: avoid; break-after: avoid; }
-            .title { text-align: center; font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; border-bottom: 2px solid #000; padding-bottom: 8px; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
-            th, td { border: 1.5px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; }
+            
+            .subcat-section {
+              border: 1px solid #000;
+              border-radius: 8px;
+              margin-bottom: 25px;
+              overflow: hidden;
+              background: #fff;
+            }
+            .subcat-header {
+              background: #f8fafc;
+              padding: 10px 14px;
+              border-bottom: 1px solid #000;
+              font-weight: 800;
+              font-size: 13.5px;
+              text-transform: uppercase;
+              color: #000;
+              letter-spacing: 1px;
+            }
+            
+            table { width: 100%; border-collapse: collapse; font-size: 11px; }
+            th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-align: middle; }
             th { font-weight: 800; background-color: #f8fafc; text-transform: uppercase; }
-            .prod-name { text-align: left; padding-left: 12px; font-weight: 700; text-transform: uppercase; }
+            .prod-name { text-align: left; padding-left: 12px; font-weight: 800; text-transform: uppercase; }
             .bold { font-weight: 800; }
           </style>
         </head>
@@ -7861,106 +7879,95 @@ function d2i(val) {
 
         if (!stockCp.length) return;
 
-        // Group by category (size range)
-        const catsMap = new Map();
+        // Gather all size columns across all products in this subcategory (matches Dashboard exactly)
+        let szSet = new Set();
         stockCp.forEach(p => {
-          const catId = String(p.ci);
-          if (!catsMap.has(catId)) {
-            catsMap.set(catId, []);
+          if (p.s) {
+            Object.keys(p.s || {}).forEach(k => szSet.add(k));
           }
-          catsMap.get(catId).push(p);
         });
 
-        catsMap.forEach((prodsList, catId) => {
-          const catObj = S.categories.find(c => String(c.id) === String(catId));
-          const catName = catObj ? catObj.n : 'PRODUCTS';
-          const sizes = catObj && catObj.sizes ? [...catObj.sizes] : ['FREE'];
+        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+        const sz = Array.from(szSet).sort((a, b) => {
+           const aNum = Number(a); const bNum = Number(b);
+           if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+           const aIdx = sizeOrder.indexOf(a.toUpperCase());
+           const bIdx = sizeOrder.indexOf(b.toUpperCase());
+           if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+           if (aIdx !== -1) return -1;
+           if (bIdx !== -1) return 1;
+           return a.localeCompare(b);
+        });
 
-          // Sort sizes
-          sizes.sort((a, b) => {
-            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
-            const cleanA = String(a).toUpperCase().trim();
-            const cleanB = String(b).toUpperCase().trim();
-            const idxA = sizeOrder.indexOf(cleanA);
-            const idxB = sizeOrder.indexOf(cleanB);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            const numA = parseFloat(a);
-            const numB = parseFloat(b);
-            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-            return cleanA.localeCompare(cleanB);
-          });
+        if (sz.length === 0) {
+          sz.push('FREE');
+        }
 
-          let rowHtml = '';
-          const colTotals = {};
-          sizes.forEach(sz => colTotals[sz] = 0);
-          let grandTotal = 0;
+        let rowHtml = '';
+        const colTotals = {};
+        sz.forEach(s => colTotals[s] = 0);
+        let grandTotal = 0;
 
-          // Sort products by name
-          prodsList.sort((p1, p2) => p1.n.localeCompare(p2.n));
+        // Sort products by name
+        stockCp.sort((p1, p2) => p1.n.localeCompare(p2.n));
 
-          prodsList.forEach(p => {
-            let rowTotal = 0;
-            const sizeCols = sizes.map(sz => {
-              const qty = Number(p.s[sz]) || 0;
-              rowTotal += qty;
-              colTotals[sz] += qty;
-              return `<td>${qty || ''}</td>`;
-            }).join('');
-
-            grandTotal += rowTotal;
-
-            rowHtml += `
-              <tr>
-                <td class="prod-name">${p.n}</td>
-                ${sizeCols}
-                <td class="bold">${rowTotal}</td>
-              </tr>
-            `;
-          });
-
-          const footerSizeCols = sizes.map(sz => {
-            return `<td class="bold">${colTotals[sz] || ''}</td>`;
+        stockCp.forEach(p => {
+          let rowTotal = 0;
+          const tds = sz.map(s => {
+            const qty = Number(p.s[s]) || 0;
+            rowTotal += qty;
+            colTotals[s] += qty;
+            return `<td>${qty || ''}</td>`;
           }).join('');
 
-          if (!isFirst) {
-            printHtml += `<div class="print-page">`;
-          } else {
-            printHtml += `<div>`;
-            isFirst = false;
-          }
+          grandTotal += rowTotal;
 
-          printHtml += `
-            <div class="title">${scName} - ${catName} TOTAL STOCK LIST ${dateStr}</div>
-            <table>
-              <thead>
-                <tr>
-                  <th style="width: 30%;">PRODUCAT / SIZE</th>
-                  ${sizes.map(sz => `<th>${sz}</th>`).join('')}
-                  <th style="width: 12%;">TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rowHtml}
-              </tbody>
-              <tfoot>
-                <tr class="bold" style="background-color: #f8fafc;">
-                  <td>TOTAL</td>
-                  ${footerSizeCols}
-                  <td>${grandTotal}</td>
-                </tr>
-              </tfoot>
-            </table>
-            </div>
+          rowHtml += `
+            <tr>
+              <td class="prod-name">${p.n}</td>
+              ${tds}
+              <td class="bold">${rowTotal}</td>
+            </tr>
           `;
         });
-      });
 
-      printHtml += `
-        </body>
-        </html>
-      `;
+        const totTds = sz.map(s => {
+          return `<td class="bold">${colTotals[s] || ''}</td>`;
+        }).join('');
+
+        if (!isFirst) {
+          printHtml += `<div class="print-page">`;
+        } else {
+          printHtml += `<div>`;
+          isFirst = false;
+        }
+
+        printHtml += `
+          <div class="subcat-section">
+            <div class="subcat-header">${scName} - TOTAL STOCK LIST ${dateStr}</div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left; padding-left:12px; width: 35%;">Product</th>
+                    ${sz.map(s => `<th>${s}</th>`).join('')}
+                    <th style="width: 12%;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowHtml}
+                  <tr class="bold" style="background-color: #f8fafc;">
+                    <td style="text-align:left; padding-left:12px;">TOTAL</td>
+                    ${totTds}
+                    <td>${grandTotal}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          </div>
+        `;
+      });
       const win = window.open('', '_blank');
       if (win) {
         win.document.write(printHtml);
