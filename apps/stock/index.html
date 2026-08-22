@@ -1706,7 +1706,7 @@
         <div style="display:flex; align-items:center; gap:10px;">
           <div>
             <div class="logo-title" style="display:flex; align-items:center; gap:8px;">
-              VESTER 
+              <span class="company-name-text">VESTER</span> 
               <span id="conn-status" title="Connecting..." style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; box-shadow:0 0 4px rgba(0,0,0,0.2);"></span>
             </div>
             <div class="logo-sub">Stock Manager</div>
@@ -2462,15 +2462,9 @@
         }
         document.title = 'Fitvee Stock Manager';
         
-        const compEls = document.querySelectorAll('.company, .logo div, .logo span');
-        compEls.forEach(el => {
-          if (el.textContent.trim().toUpperCase() === 'VESTER') {
-            el.textContent = COMPANY_NAME;
-          }
-        });
-        const sidebarLogo = document.querySelector('.sidebar .logo div');
-        if (sidebarLogo && sidebarLogo.textContent.trim().toUpperCase() === 'VESTER') {
-          sidebarLogo.textContent = COMPANY_NAME;
+        const companyTextEl = document.querySelector('.company-name-text');
+        if (companyTextEl) {
+          companyTextEl.textContent = COMPANY_NAME;
         }
       });
     }
@@ -7113,7 +7107,7 @@ function d2i(val) {
               </button>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:1px;">VESTER</div>
+              <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:1px;">${COMPANY_NAME}</div>
               <div style="font-size:13px; font-weight:700; color:var(--accent3); margin-top:4px;">${prodName.toUpperCase()} (${monthName.toUpperCase()})</div>
               <div style="font-size:11px; font-weight:600; color:var(--muted); margin-top:2px;">${detailRangeStr}</div>
             </div>
@@ -7207,7 +7201,7 @@ function d2i(val) {
           <div class="cs-print-preview-wrap">
             <div class="header">
               <div>
-                <div class="company">VESTER</div>
+                <div class="company">${COMPANY_NAME}</div>
                 <div class="title">${docTitle}</div>
               </div>
               <div class="date">Date: ${dateStr}</div>
@@ -7850,7 +7844,7 @@ function d2i(val) {
         <body>
           <div class="header">
             <div>
-              <div class="company">VESTER</div>
+              <div class="company">${COMPANY_NAME}</div>
               <div class="title">${docTitle}</div>
             </div>
             <div class="date">Date: ${dateStr}</div>
