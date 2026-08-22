@@ -7824,44 +7824,10 @@ function d2i(val) {
       }
 
       // --- VESTER ORIGINAL PRINT LAYOUT ---
-      let printHtml = `
-        <html>
-        <head>
-          <title>${COMPANY_NAME} Stock Catalog - ${dateStr}</title>
-          <style>
-            @page { size: A4 portrait; margin: 10mm; }
-            body { font-family: 'Nunito', 'Segoe UI', Arial, sans-serif; margin: 0; padding: 5px; background: #fff; color: #000; }
-            
-            .subcat-section {
-              border: 1px solid #000;
-              border-radius: 8px;
-              margin-bottom: 25px;
-              overflow: hidden;
-              background: #fff;
-              break-inside: avoid;
-              page-break-inside: avoid;
-            }
-            .subcat-header {
-              background: #f8fafc;
-              padding: 10px 14px;
-              border-bottom: 1px solid #000;
-              font-weight: 800;
-              font-size: 13.5px;
-              text-transform: uppercase;
-              color: #000;
-              letter-spacing: 1px;
-            }
-            
-            table { width: 100%; border-collapse: collapse; font-size: 11px; }
-            th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-align: middle; }
-            th { font-weight: 800; background-color: #f8fafc; text-transform: uppercase; }
-            .prod-name { text-align: left; padding-left: 12px; font-weight: 800; text-transform: uppercase; }
-            .bold { font-weight: 800; }
-          </style>
-        </head>
-        <body>
-      `;
-
+      // Gather all size columns across all filtered products with stock
+      let szSet = new Set();
+      const activeProdsBySubcat = {};
+      
       activeSubCats.forEach(scName => {
         const cp = filteredProds.filter(p => {
           const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
@@ -7876,41 +7842,86 @@ function d2i(val) {
           return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
         });
 
-        if (!stockCp.length) return;
-
-        // Gather all size columns across all products in this subcategory (matches Dashboard exactly)
-        let szSet = new Set();
-        stockCp.forEach(p => {
-          if (p.s) {
-            Object.keys(p.s || {}).forEach(k => szSet.add(k));
-          }
-        });
-
-        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
-        const sz = Array.from(szSet).sort((a, b) => {
-           const aNum = Number(a); const bNum = Number(b);
-           if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-           const aIdx = sizeOrder.indexOf(a.toUpperCase());
-           const bIdx = sizeOrder.indexOf(b.toUpperCase());
-           if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-           if (aIdx !== -1) return -1;
-           if (bIdx !== -1) return 1;
-           return a.localeCompare(b);
-        });
-
-        if (sz.length === 0) {
-          sz.push('FREE');
+        if (stockCp.length > 0) {
+          activeProdsBySubcat[scName] = stockCp;
+          stockCp.forEach(p => {
+            if (p.s) {
+              Object.keys(p.s || {}).forEach(k => szSet.add(k));
+            }
+          });
         }
+      });
 
-        let rowHtml = '';
-        const colTotals = {};
-        sz.forEach(s => colTotals[s] = 0);
-        let grandTotal = 0;
+      const activeSubcatNames = Object.keys(activeProdsBySubcat);
+      if (activeSubcatNames.length === 0) {
+        alert('No items with stock found to print!');
+        return;
+      }
+
+      const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+      const sz = Array.from(szSet).sort((a, b) => {
+         const aNum = Number(a); const bNum = Number(b);
+         if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+         const aIdx = sizeOrder.indexOf(a.toUpperCase());
+         const bIdx = sizeOrder.indexOf(b.toUpperCase());
+         if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+         if (aIdx !== -1) return -1;
+         if (bIdx !== -1) return 1;
+         return a.localeCompare(b);
+      });
+
+      if (sz.length === 0) {
+        sz.push('FREE');
+      }
+
+      let printHtml = `
+        <html>
+        <head>
+          <title>${COMPANY_NAME} Stock Catalog - ${dateStr}</title>
+          <style>
+            @page { size: A4 portrait; margin: 10mm; }
+            body { font-family: 'Nunito', 'Segoe UI', Arial, sans-serif; margin: 0; padding: 5px; background: #fff; color: #000; }
+            
+            table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+            th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-align: middle; }
+            th { font-weight: 800; background-color: #f8fafc; text-transform: uppercase; }
+            .prod-name { text-align: left; padding-left: 12px; font-weight: 700; text-transform: uppercase; }
+            .subcat-row { background-color: #f1f5f9; font-weight: 800; text-align: left; padding-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+            .bold { font-weight: 800; }
+          </style>
+        </head>
+        <body>
+          <div style="text-align: center; font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; border-bottom: 2px solid #000; padding-bottom: 8px;">
+            ${COMPANY_NAME} TOTAL STOCK LIST ${dateStr}
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:left; padding-left:12px; width: 35%;">PRODUCAT / SIZE</th>
+                ${sz.map(s => `<th>${s}</th>`).join('')}
+                <th style="width: 12%;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      const colTotals = {};
+      sz.forEach(s => colTotals[s] = 0);
+      let grandTotal = 0;
+
+      activeSubcatNames.forEach(scName => {
+        const prodsList = activeProdsBySubcat[scName];
+        
+        printHtml += `
+          <tr style="background-color: #f1f5f9; font-weight: 800;">
+            <td colspan="${sz.length + 2}" class="subcat-row">${scName}</td>
+          </tr>
+        `;
 
         // Sort products by name
-        stockCp.sort((p1, p2) => p1.n.localeCompare(p2.n));
+        prodsList.sort((p1, p2) => p1.n.localeCompare(p2.n));
 
-        stockCp.forEach(p => {
+        prodsList.forEach(p => {
           let rowTotal = 0;
           const tds = sz.map(s => {
             const qty = Number(p.s[s]) || 0;
@@ -7921,7 +7932,7 @@ function d2i(val) {
 
           grandTotal += rowTotal;
 
-          rowHtml += `
+          printHtml += `
             <tr>
               <td class="prod-name">${p.n}</td>
               ${tds}
@@ -7929,36 +7940,23 @@ function d2i(val) {
             </tr>
           `;
         });
-
-        const totTds = sz.map(s => {
-          return `<td class="bold">${colTotals[s] || ''}</td>`;
-        }).join('');
-
-        printHtml += `
-          <div class="subcat-section">
-            <div class="subcat-header">${scName} - TOTAL STOCK LIST ${dateStr}</div>
-            <div style="overflow-x:auto;">
-              <table style="width:100%; border-collapse:collapse;">
-                <thead>
-                  <tr>
-                    <th style="text-align:left; padding-left:12px; width: 35%;">Product</th>
-                    ${sz.map(s => `<th>${s}</th>`).join('')}
-                    <th style="width: 12%;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rowHtml}
-                  <tr class="bold" style="background-color: #f8fafc;">
-                    <td style="text-align:left; padding-left:12px;">TOTAL</td>
-                    ${totTds}
-                    <td>${grandTotal}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
       });
+
+      const totTds = sz.map(s => {
+        return `<td class="bold">${colTotals[s] || ''}</td>`;
+      }).join('');
+
+      printHtml += `
+            <tr class="bold" style="background-color: #f8fafc;">
+              <td style="text-align:left; padding-left:12px;">TOTAL</td>
+              ${totTds}
+              <td>${grandTotal}</td>
+            </tr>
+          </tbody>
+        </table>
+        </body>
+        </html>
+      `;
       const win = window.open('', '_blank');
       if (win) {
         win.document.write(printHtml);
