@@ -7575,14 +7575,15 @@ function d2i(val) {
             rest = hashParts.join('#').trim();
           }
           
-          // List of known colors in garment stock (sorted by length descending for greedy matching)
+          // List of known colors in garment stock (with compound / adjective priorities)
           const knownColors = [
             'TURMERIC YELLOW', 'BOTTLE GREEN', 'PARROT GREEN', 'COFFEE BROWN', 
             'STEEL GRAY', 'STEEL GREY', 'ROYAL BLUE', 'BABY PINK', 'RANI PINK', 
-            'RANI ROSE', 'SKY BLUE', 'C.BROWN', 'B.GREEN', 'D.NAVY', 'WHITE', 
-            'BLACK', 'SKIN', 'NAVY', 'RED', 'PINK', 'BLUE', 'GREEN', 'YELLOW', 
-            'BROWN', 'GREY', 'GRAY', 'MAROON', 'CREAM', 'PEACOCK', 'MUSTARD', 
-            'CORAL', 'OLIVE', 'EMERALD', 'FUCHIA', 'WINE', 'HONEY'
+            'RANI ROSE', 'SKY BLUE', 'C.BROWN', 'B.GREEN', 'D.NAVY',
+            'OLIVE GREEN', 'MUSTARD YELLOW', 'GOLDEN YELLOW', 'LEMON YELLOW', 'MINT GREEN',
+            'OLIVE', 'MUSTARD', 'GOLDEN', 'LEMON', 'MINT', 'PEACH', 'PEACOCK',
+            'WHITE', 'BLACK', 'SKIN', 'NAVY', 'RED', 'PINK', 'BLUE', 'GREEN', 'YELLOW', 
+            'BROWN', 'GREY', 'GRAY', 'MAROON', 'CREAM', 'CORAL', 'EMERALD', 'FUCHIA', 'WINE', 'HONEY'
           ];
           
           let design = '';
