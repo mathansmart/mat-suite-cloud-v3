@@ -7535,6 +7535,30 @@ function d2i(val) {
       });
     }
 
+    function printHtmlContent(printHtml) {
+      let iframe = document.getElementById('print-iframe');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'print-iframe';
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.style.zIndex = '-1000';
+        document.body.appendChild(iframe);
+      }
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(printHtml);
+      doc.close();
+      setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      }, 200);
+    }
+
     function printCustomerCatalog() {
       const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
       const subCats = S.subCategories || ['GENERAL'];
@@ -7814,14 +7838,7 @@ function d2i(val) {
           </html>
         `;
 
-        const win = window.open('', '_blank');
-        if (win) {
-          win.document.write(printHtml);
-          win.document.close();
-          setTimeout(() => {
-            win.print();
-          }, 300);
-        }
+        printHtmlContent(printHtml);
         return;
       }
 
@@ -7961,14 +7978,7 @@ function d2i(val) {
           </div>
         `;
       });
-      const win = window.open('', '_blank');
-      if (win) {
-        win.document.write(printHtml);
-        win.document.close();
-        setTimeout(() => {
-          win.print();
-        }, 300);
-      }
+      printHtmlContent(printHtml);
     }
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
