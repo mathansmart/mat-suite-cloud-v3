@@ -3246,7 +3246,9 @@
     function getLow() { const r = []; P.forEach(p => szs(p.ci).forEach(sz => { const st = (p.s ? p.s[sz] : 0) || 0; if (st <= p.m) r.push({ p, sz, st }) })); return r }
     function updateBadge() {
       const n = getLow().length; const b = document.getElementById('alert-badge');
-      b.textContent = n; b.style.display = n > 0 ? '' : 'none';
+      if (b) {
+        b.textContent = n; b.style.display = n > 0 ? '' : 'none';
+      }
       ['s-low', 'r-low2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = n });
     }
     function todayStr() { return new Date().toISOString().slice(0, 10) }
