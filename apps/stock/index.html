@@ -8201,7 +8201,7 @@ function d2i(val) {
         });
         excelHtml += `</body></html>`;
       } else {
-        // --- VESTER EXCEL EXPORT ---
+        // --- VESTER EXCEL EXPORT (SEPARATE SUBCATEGORY TABLES) ---
         let szSet = new Set();
         const activeProdsBySubcat = {};
         
@@ -8221,11 +8221,6 @@ function d2i(val) {
 
           if (stockCp.length > 0) {
             activeProdsBySubcat[scName] = stockCp;
-            stockCp.forEach(p => {
-              if (p.s) {
-                Object.keys(p.s || {}).forEach(k => szSet.add(k));
-              }
-            });
           }
         });
 
@@ -8235,51 +8230,52 @@ function d2i(val) {
           return;
         }
 
-        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
-        const sz = Array.from(szSet).sort((a, b) => {
-           const aNum = Number(a); const bNum = Number(b);
-           if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-           const aIdx = sizeOrder.indexOf(a.toUpperCase());
-           const bIdx = sizeOrder.indexOf(b.toUpperCase());
-           if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-           if (aIdx !== -1) return -1;
-           if (bIdx !== -1) return 1;
-           return a.localeCompare(b);
-        });
-        if (sz.length === 0) sz.push('FREE');
-
         excelHtml = `
           <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
           <head><meta charset="UTF-8"></head>
           <body>
             <h3>${COMPANY_NAME} TOTAL STOCK LIST ${dateStr}</h3>
-            <table border="1">
-              <thead>
-                <tr>
-                  <th>PRODUCAT / SIZE</th>
-                  ${sz.map(s => `<th>${s}</th>`).join('')}
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
         `;
 
         activeSubcatNames.forEach(scName => {
           const prodsList = activeProdsBySubcat[scName];
-          excelHtml += `
-            <tr style="font-weight:bold; background-color:#f2f2f2;">
-              <td colspan="${sz.length + 2}">${scName}</td>
-            </tr>
-          `;
+          
+          // Gather size columns for this subcategory ONLY (matches print exactly)
+          let subcatSzSet = new Set();
+          prodsList.forEach(p => {
+            if (p.s) {
+              Object.keys(p.s || {}).forEach(k => subcatSzSet.add(k));
+            }
+          });
+
+          const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+          const sz = Array.from(subcatSzSet).sort((a, b) => {
+             const aNum = Number(a); const bNum = Number(b);
+             if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+             const aIdx = sizeOrder.indexOf(a.toUpperCase());
+             const bIdx = sizeOrder.indexOf(b.toUpperCase());
+             if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+             return a.localeCompare(b);
+          });
+          if (sz.length === 0) sz.push('FREE');
+
+          let rowHtml = '';
+          const colTotals = {};
+          sz.forEach(s => colTotals[s] = 0);
+          let grandTotal = 0;
+
           prodsList.sort((p1, p2) => p1.n.localeCompare(p2.n));
+          
           prodsList.forEach(p => {
             let rowTotal = 0;
             const tds = sz.map(s => {
               const qty = Number(p.s[s]) || 0;
               rowTotal += qty;
+              colTotals[s] += qty;
               return `<td>${qty}</td>`;
             }).join('');
-            excelHtml += `
+            grandTotal += rowTotal;
+            rowHtml += `
               <tr>
                 <td>${p.n}</td>
                 ${tds}
@@ -8287,11 +8283,27 @@ function d2i(val) {
               </tr>
             `;
           });
+
+          excelHtml += `
+            <h4>${scName}</h4>
+            <table border="1">
+              <thead>
+                <tr style="background-color:#f2f2f2;">
+                  <th>PRODUCAT / SIZE</th>
+                  ${sz.map(s => `<th>${s}</th>`).join('')}
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowHtml}
+              </tbody>
+            </table>
+            <br>
+          `;
         });
 
-        excelHtml += `</tbody></table></body></html>`;
+        excelHtml += `</body></html>`;
       }
-
       const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
