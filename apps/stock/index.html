@@ -1939,6 +1939,9 @@
               <button class="btn btn-ghost" onclick="printCustomerCatalog()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px;">
                 <i class="ti ti-printer" style="font-size:16px;"></i> Print Catalog
               </button>
+              <button class="btn btn-ghost" onclick="exportCatalogToExcel()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px; color:#1ea868;">
+                <i class="ti ti-file-spreadsheet" style="font-size:16px;"></i> Export Excel
+              </button>
             </div>
           </div>
 
@@ -7980,6 +7983,326 @@ function d2i(val) {
       });
       printHtmlContent(printHtml);
     }
+    function exportCatalogToExcel() {
+      const q = (document.getElementById('cs-search')?.value || '').toLowerCase().trim();
+      const subCats = S.subCategories || ['GENERAL'];
+      const filterEl = document.getElementById('cs-sc-filter');
+      const selectedSc = filterEl ? filterEl.value : '';
+      const activeSubCats = selectedSc ? [selectedSc] : subCats;
+
+      const mergedList = getMergedProducts(P, '');
+      const hasSelection = csSelectedPids.size > 0;
+      const filteredProds = mergedList.filter(p => {
+        if (!p.n) return false;
+        if (hasSelection && !csSelectedPids.has(p.id)) return false;
+        return p.n.toLowerCase().includes(q);
+      });
+
+      const today = new Date();
+      const d = String(today.getDate()).padStart(2, '0');
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const y = today.getFullYear();
+      const dateStr = `${d}-\/${m}-\/${y}`;
+
+      let excelHtml = '';
+
+      if (PROFILE === '2') {
+        // --- FITVEE EXCEL EXPORT ---
+        function parseProductColor(name, query) {
+          let cleanName = name.trim();
+          let colorNo = '';
+          let rest = cleanName;
+          
+          if (cleanName.includes('#')) {
+            const hashParts = cleanName.split('#');
+            colorNo = hashParts.pop().trim();
+            rest = hashParts.join('#').trim();
+          }
+          
+          const knownColors = [
+            'TURMERIC YELLOW', 'BOTTLE GREEN', 'PARROT GREEN', 'COFFEE BROWN', 
+            'STEEL GRAY', 'STEEL GREY', 'ROYAL BLUE', 'BABY PINK', 'RANI PINK', 
+            'RANI ROSE', 'SKY BLUE', 'C.BROWN', 'B.GREEN', 'D.NAVY',
+            'OLIVE GREEN', 'MUSTARD YELLOW', 'GOLDEN YELLOW', 'LEMON YELLOW', 'MINT GREEN',
+            'T. YELLOW', 'T.YELLOW',
+            'OLIVE', 'MUSTARD', 'GOLDEN', 'LEMON', 'MINT', 'PEACH', 'PEACOCK',
+            'WHITE', 'BLACK', 'SKIN', 'NAVY', 'RED', 'PINK', 'BLUE', 'GREEN', 'YELLOW', 
+            'BROWN', 'GREY', 'GRAY', 'MAROON', 'CREAM', 'CORAL', 'EMERALD', 'FUCHIA', 'WINE', 'HONEY'
+          ];
+          
+          let design = '';
+          let color = '';
+          const restUpper = rest.toUpperCase();
+          let matchedColor = '';
+          
+          for (const col of knownColors) {
+            const idx = restUpper.indexOf(col);
+            if (idx !== -1) {
+              matchedColor = col;
+              design = rest.substring(0, idx).trim();
+              color = rest.substring(idx).trim();
+              break;
+            }
+          }
+          
+          if (!matchedColor) {
+            const cleanQuery = (query || '').trim().toUpperCase();
+            if (cleanQuery && cleanQuery.length >= 3 && restUpper.startsWith(cleanQuery)) {
+              design = cleanQuery;
+              color = rest.substring(cleanQuery.length).replace(/^[-–—\\s]+/i, '').trim();
+            } else {
+              if (rest.includes(' - ')) {
+                const parts = rest.split(' - ').map(x => x.trim());
+                color = parts.pop();
+                design = parts.join(' - ');
+              } else if (rest.includes('-')) {
+                const parts = rest.split('-').map(x => x.trim());
+                color = parts.pop();
+                design = parts.join(' - ');
+              } else {
+                const parts = rest.split(/\\s+/);
+                if (parts.length > 1) {
+                  color = parts.pop();
+                  design = parts.join(' ');
+                } else {
+                  color = rest;
+                  design = 'STOCK LIST';
+                }
+              }
+            }
+          }
+          design = design.replace(/[-–—\\s]+$/, '').trim();
+          return {
+            design: design.toUpperCase().trim() || 'STOCK LIST',
+            color: color.toUpperCase().trim(),
+            colorNo: colorNo
+          };
+        }
+
+        const designsMap = new Map();
+        filteredProds.forEach(p => {
+          const totalStock = Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
+          if (totalStock <= 0) return;
+          const parsed = parseProductColor(p.n, q);
+          const designName = parsed.design;
+          const colorName = parsed.color;
+          const colorNo = parsed.colorNo;
+          
+          if (!designsMap.has(designName)) {
+            designsMap.set(designName, { designName, colors: [], categoryIds: new Set() });
+          }
+          const group = designsMap.get(designName);
+          group.colors.push({ colorName, colorNo, stock: p.s || {}, product: p });
+          if (p.sourceCategoryIds) {
+            p.sourceCategoryIds.forEach(cId => group.categoryIds.add(String(cId)));
+          } else {
+            group.categoryIds.add(String(p.ci));
+          }
+        });
+
+        if (designsMap.size === 0) {
+          alert('No items with stock found to export!');
+          return;
+        }
+
+        excelHtml = `
+          <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+          <head><meta charset="UTF-8"></head>
+          <body>
+        `;
+
+        designsMap.forEach((group, designName) => {
+          const sizesSet = new Set();
+          group.categoryIds.forEach(cId => {
+            const catObj = S.categories.find(c => String(c.id) === String(cId));
+            if (catObj && catObj.sizes) {
+              catObj.sizes.forEach(sz => sizesSet.add(sz));
+            }
+          });
+          const sizes = Array.from(sizesSet);
+          
+          sizes.sort((a, b) => {
+            const sizeOrder = ['FREE', 'FREE SIZE', 'FS', 'XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+            const cleanA = String(a).toUpperCase().trim();
+            const cleanB = String(b).toUpperCase().trim();
+            const idxA = sizeOrder.indexOf(cleanA);
+            const idxB = sizeOrder.indexOf(cleanB);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return cleanA.localeCompare(cleanB);
+          });
+          if (sizes.length === 0) sizes.push('FREE');
+
+          let rowHtml = '';
+          const colTotals = {};
+          sizes.forEach(sz => colTotals[sz] = 0);
+          let grandTotal = 0;
+
+          group.colors.sort((c1, c2) => {
+            const n1 = parseInt(c1.colorNo); const n2 = parseInt(c2.colorNo);
+            if (!isNaN(n1) && !isNaN(n2)) return n1 - n2;
+            if (!isNaN(n1)) return -1;
+            if (!isNaN(n2)) return 1;
+            return c1.colorName.localeCompare(c2.colorName);
+          });
+
+          group.colors.forEach((colObj, index) => {
+            let rowTotal = 0;
+            const sizeCols = sizes.map(sz => {
+              const qty = Number(colObj.stock[sz]) || 0;
+              rowTotal += qty;
+              colTotals[sz] += qty;
+              return `<td>${qty || 0}</td>`;
+            }).join('');
+            grandTotal += rowTotal;
+            const clrNoDisplay = colObj.colorNo || (index + 1);
+            
+            rowHtml += `
+              <tr>
+                <td>${clrNoDisplay}</td>
+                <td>${colObj.colorName}</td>
+                ${sizeCols}
+                <td>${rowTotal}</td>
+              </tr>
+            `;
+          });
+
+          const footerSizeCols = sizes.map(sz => `<td>${colTotals[sz]}</td>`).join('');
+
+          excelHtml += `
+            <h3>${designName} TOTAL STOCK LIST ${dateStr}</h3>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th rowspan="2">CLR NO</th>
+                  <th rowspan="2">COLOUR</th>
+                  <th colspan="${sizes.length}">SIZE</th>
+                  <th rowspan="2">TOTAL</th>
+                </tr>
+                <tr>
+                  ${sizes.map(sz => `<th>${sz}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${rowHtml}
+                <tr style="font-weight:bold; background-color:#f2f2f2;">
+                  <td colspan="2">TOTAL</td>
+                  ${footerSizeCols}
+                  <td>${grandTotal}</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+          `;
+        });
+        excelHtml += `</body></html>`;
+      } else {
+        // --- VESTER EXCEL EXPORT ---
+        let szSet = new Set();
+        const activeProdsBySubcat = {};
+        
+        activeSubCats.forEach(scName => {
+          const cp = filteredProds.filter(p => {
+            const scList = p.sourceSubCategories ? Array.from(p.sourceSubCategories) : [p.sc || 'General'];
+            return scList.some(sSub => {
+              const sVal = sSub ? sSub.toUpperCase().trim() : '';
+              const scNameVal = scName ? scName.toUpperCase().trim() : '';
+              return sVal === scNameVal || (sVal === 'GENERAL' && scNameVal === 'GENERAL') || (sVal === '' && scNameVal === 'GENERAL');
+            });
+          });
+
+          const stockCp = cp.filter(p => {
+            return Object.values(p.s || {}).reduce((sum, v) => sum + (Number(v) || 0), 0) > 0;
+          });
+
+          if (stockCp.length > 0) {
+            activeProdsBySubcat[scName] = stockCp;
+            stockCp.forEach(p => {
+              if (p.s) {
+                Object.keys(p.s || {}).forEach(k => szSet.add(k));
+              }
+            });
+          }
+        });
+
+        const activeSubcatNames = Object.keys(activeProdsBySubcat);
+        if (activeSubcatNames.length === 0) {
+          alert('No items with stock found to export!');
+          return;
+        }
+
+        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+        const sz = Array.from(szSet).sort((a, b) => {
+           const aNum = Number(a); const bNum = Number(b);
+           if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+           const aIdx = sizeOrder.indexOf(a.toUpperCase());
+           const bIdx = sizeOrder.indexOf(b.toUpperCase());
+           if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+           if (aIdx !== -1) return -1;
+           if (bIdx !== -1) return 1;
+           return a.localeCompare(b);
+        });
+        if (sz.length === 0) sz.push('FREE');
+
+        excelHtml = `
+          <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+          <head><meta charset="UTF-8"></head>
+          <body>
+            <h3>${COMPANY_NAME} TOTAL STOCK LIST ${dateStr}</h3>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>PRODUCAT / SIZE</th>
+                  ${sz.map(s => `<th>${s}</th>`).join('')}
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        activeSubcatNames.forEach(scName => {
+          const prodsList = activeProdsBySubcat[scName];
+          excelHtml += `
+            <tr style="font-weight:bold; background-color:#f2f2f2;">
+              <td colspan="${sz.length + 2}">${scName}</td>
+            </tr>
+          `;
+          prodsList.sort((p1, p2) => p1.n.localeCompare(p2.n));
+          prodsList.forEach(p => {
+            let rowTotal = 0;
+            const tds = sz.map(s => {
+              const qty = Number(p.s[s]) || 0;
+              rowTotal += qty;
+              return `<td>${qty}</td>`;
+            }).join('');
+            excelHtml += `
+              <tr>
+                <td>${p.n}</td>
+                ${tds}
+                <td>${rowTotal}</td>
+              </tr>
+            `;
+          });
+        });
+
+        excelHtml += `</tbody></table></body></html>`;
+      }
+
+      const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${COMPANY_NAME}_Stock_${dateStr}.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
       renderUsersTable();
