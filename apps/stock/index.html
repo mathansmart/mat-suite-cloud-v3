@@ -7840,6 +7840,8 @@ function d2i(val) {
               margin-bottom: 15px;
               overflow: hidden;
               background: #fff;
+              break-inside: avoid;
+              page-break-inside: avoid;
             }
             .subcat-header {
               background: #f8fafc;
@@ -7850,6 +7852,8 @@ function d2i(val) {
               text-transform: uppercase;
               color: #000;
               letter-spacing: 0.5px;
+              break-after: avoid;
+              page-break-after: avoid;
             }
             
             table { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -7919,7 +7923,7 @@ function d2i(val) {
             const qty = Number(p.s[s]) || 0;
             rowTotal += qty;
             colTotals[s] += qty;
-            return `<td>${qty || ''}</td>`;
+            return `<td>${qty}</td>`;
           }).join('');
 
           grandTotal += rowTotal;
