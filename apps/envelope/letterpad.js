@@ -4076,10 +4076,12 @@ let envelopeAddresses = [];
     // --- SIDEBAR ADDRESS SEARCH & INSERTION SYSTEM ---
     const sidebarSearchInput = document.getElementById('sidebar-address-search-input');
     const sidebarResultsContainer = document.getElementById('sidebar-address-results');
+    let activeDropdownIndex = -1;
 
     function renderSidebarAddresses() {
         if (!sidebarResultsContainer) return;
         sidebarResultsContainer.innerHTML = '';
+        activeDropdownIndex = -1; // Reset index on new search
 
         const filterText = (sidebarSearchInput ? sidebarSearchInput.value : '').toLowerCase().trim();
         
@@ -4108,8 +4110,10 @@ let envelopeAddresses = [];
             return;
         }
 
-        filtered.forEach(addr => {
+        filtered.forEach((addr, idx) => {
             const item = document.createElement('div');
+            item.className = 'dropdown-item-contact';
+            item.dataset.index = idx;
             item.style.background = '#ffffff';
             item.style.border = '1px solid #e2e8f0';
             item.style.borderRadius = '6px';
@@ -4123,12 +4127,9 @@ let envelopeAddresses = [];
             
             // Hover styles
             item.onmouseover = () => {
-                item.style.borderColor = '#84cc16';
-                item.style.background = '#f8fafc';
-            };
-            item.onmouseout = () => {
-                item.style.borderColor = '#e2e8f0';
-                item.style.background = '#ffffff';
+                activeDropdownIndex = idx;
+                const items = Array.from(sidebarResultsContainer.children);
+                updateDropdownHighlight(items);
             };
 
             const addrPreview = (addr.address || '').split('\n').slice(0, 2).join(', ');
@@ -4169,45 +4170,79 @@ let envelopeAddresses = [];
         sidebarResultsContainer.style.display = 'flex';
     }
 
+    function updateDropdownHighlight(items) {
+        items.forEach((item, idx) => {
+            if (idx === activeDropdownIndex) {
+                item.style.borderColor = '#84cc16';
+                item.style.background = '#f8fafc';
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.style.borderColor = '#e2e8f0';
+                item.style.background = '#ffffff';
+            }
+        });
+    }
+
     function insertAddressAtCursor(addressText) {
         if (!editorTextarea) return;
-        editorTextarea.focus();
         
+        let range = null;
         const sel = window.getSelection();
-        if (sel.getRangeAt && sel.rangeCount) {
-            let range = sel.getRangeAt(0);
-            if (editorTextarea.contains(range.commonAncestorContainer)) {
-                range.deleteContents();
-                
-                // Format multiline address for contenteditable
-                const html = addressText.replace(/\n/g, '<br>');
-                const el = document.createElement('span');
-                el.innerHTML = html;
-                
-                const frag = document.createDocumentFragment();
-                let node, lastNode;
-                while ((node = el.firstChild)) {
-                    lastNode = frag.appendChild(node);
-                }
-                range.insertNode(frag);
-                
-                if (lastNode) {
-                    range = range.cloneRange();
-                    range.setStartAfter(lastNode);
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-                
-                editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                saveHistory();
-                return;
+        
+        // Prioritize last saved active selection inside the editor
+        if (savedSelectionRange && editorTextarea.contains(savedSelectionRange.commonAncestorContainer)) {
+            range = savedSelectionRange;
+        } else if (sel.rangeCount > 0) {
+            const currentRange = sel.getRangeAt(0);
+            if (editorTextarea.contains(currentRange.commonAncestorContainer)) {
+                range = currentRange;
             }
         }
         
-        // Fallback: append
+        if (range) {
+            editorTextarea.focus();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            range.deleteContents();
+            
+            const html = addressText.replace(/\n/g, '<br>');
+            const el = document.createElement('span');
+            el.innerHTML = html;
+            
+            const frag = document.createDocumentFragment();
+            let node, lastNode;
+            while ((node = el.firstChild)) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+            
+            if (lastNode) {
+                const newRange = document.createRange();
+                newRange.setStartAfter(lastNode);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                savedSelectionRange = newRange; // Keep track of the new cursor position!
+            }
+            
+            editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            saveHistory();
+            return;
+        }
+        
+        // Fallback: append at the end
+        editorTextarea.focus();
         const formatted = addressText.replace(/\n/g, '<br>');
         editorTextarea.innerHTML += (editorTextarea.innerHTML ? '<br><br>' : '') + formatted;
+        
+        const newRange = document.createRange();
+        newRange.selectNodeContents(editorTextarea);
+        newRange.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        savedSelectionRange = newRange;
+
         editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
         saveHistory();
     }
@@ -4221,6 +4256,29 @@ let envelopeAddresses = [];
         sidebarSearchInput.addEventListener('focus', () => {
             if (sidebarSearchInput.value.trim().length > 0) {
                 renderSidebarAddresses();
+            }
+        });
+
+        // Keyboard ArrowUp / ArrowDown / Enter key navigation
+        sidebarSearchInput.addEventListener('keydown', (e) => {
+            const items = Array.from(sidebarResultsContainer.children);
+            if (items.length === 0 || sidebarResultsContainer.style.display === 'none') return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeDropdownIndex = (activeDropdownIndex + 1) % items.length;
+                updateDropdownHighlight(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeDropdownIndex = (activeDropdownIndex - 1 + items.length) % items.length;
+                updateDropdownHighlight(items);
+            } else if (e.key === 'Enter') {
+                if (activeDropdownIndex >= 0 && activeDropdownIndex < items.length) {
+                    e.preventDefault();
+                    items[activeDropdownIndex].click(); // Trigger click event!
+                }
+            } else if (e.key === 'Escape') {
+                sidebarResultsContainer.style.display = 'none';
             }
         });
     }

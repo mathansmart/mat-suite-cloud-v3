@@ -279,12 +279,8 @@
                     <div style="display: flex; align-items: center; gap: 8px; max-width: 180px; width: 100%;">
                         <select id="input-category" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; background: #f8fafc; font-weight: 600;"></select>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; max-width: 280px; position: relative;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1; max-width: 280px;">
                         <input type="text" id="input-name" placeholder="Document Name / Title..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none;" autocomplete="off">
-                        <div style="position: relative; width: 100%;" class="no-print">
-                            <input type="text" id="sidebar-address-search-input" placeholder="🔍 Search Envelope Address..." style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; outline: none; background: #f8fafc; box-sizing: border-box;" autocomplete="off">
-                            <div id="sidebar-address-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 250px; overflow-y: auto; z-index: 2100; padding: 6px; box-sizing: border-box; flex-direction: column; gap: 6px;"></div>
-                        </div>
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
@@ -567,6 +563,18 @@
                     </div>
                     
                     <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Page Setup</div>
+                </div>
+
+                <!-- ADDRESS INSERT SECTION -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 4px 15px; gap: 4px; margin-left: 10px; position: relative;" class="no-print">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.75rem; color: #aaa;">Insert Address:</span>
+                        <div style="position: relative; width: 220px;">
+                            <input type="text" id="sidebar-address-search-input" placeholder="🔍 Search Envelope..." style="width: 100%; padding: 4px 8px; border-radius: 4px; border: 1px solid #555; background: #3b3b3b; color: #fff; font-size: 0.8rem; outline: none;" autocomplete="off">
+                            <div id="sidebar-address-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 250px; overflow-y: auto; z-index: 2100; padding: 6px; box-sizing: border-box; flex-direction: column; gap: 6px; color: #000;"></div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.65rem; color: #888; text-align: center; margin-top: 2px;">Address Book</div>
                 </div>
             </div>
 
