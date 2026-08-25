@@ -4201,23 +4201,19 @@ let envelopeAddresses = [];
             
             const html = addressText.replace(/\n/g, '<br>');
             const el = document.createElement('span');
+            el.style.display = 'inline-block';
+            el.style.textAlign = 'left';
+            el.style.verticalAlign = 'top';
             el.innerHTML = html;
             
-            const frag = document.createDocumentFragment();
-            let node, lastNode;
-            while ((node = el.firstChild)) {
-                lastNode = frag.appendChild(node);
-            }
-            range.insertNode(frag);
+            range.insertNode(el);
             
-            if (lastNode) {
-                const newRange = document.createRange();
-                newRange.setStartAfter(lastNode);
-                newRange.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(newRange);
-                savedSelectionRange = newRange; // Keep track of the new cursor position!
-            }
+            const newRange = document.createRange();
+            newRange.setStartAfter(el);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            savedSelectionRange = newRange; // Keep track of the new cursor position!
             
             editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
             saveHistory();
@@ -4227,7 +4223,7 @@ let envelopeAddresses = [];
         // Fallback: append at the end
         editorTextarea.focus();
         const formatted = addressText.replace(/\n/g, '<br>');
-        editorTextarea.innerHTML += (editorTextarea.innerHTML ? '<br><br>' : '') + formatted;
+        editorTextarea.innerHTML += (editorTextarea.innerHTML ? '<br><br>' : '') + `<span style="display: inline-block; text-align: left; vertical-align: top;">${formatted}</span>`;
         
         const newRange = document.createRange();
         newRange.selectNodeContents(editorTextarea);
