@@ -4122,8 +4122,8 @@ let envelopeAddresses = [];
             item.style.transition = 'all 0.15s ease';
             item.style.userSelect = 'none';
             item.style.display = 'flex';
-            item.style.flexDirection = 'column';
-            item.style.gap = '2px';
+            item.style.alignItems = 'center';
+            item.style.justifyContent = 'space-between';
             
             // Hover styles
             item.onmouseover = () => {
@@ -4132,16 +4132,9 @@ let envelopeAddresses = [];
                 updateDropdownHighlight(items);
             };
 
-            const addrPreview = (addr.address || '').split('\n').slice(0, 2).join(', ');
-
             item.innerHTML = `
-                <div style="font-weight: 700; font-size: 0.85rem; color: #0f172a; display: flex; align-items: center; justify-content: space-between; font-family: 'Outfit', sans-serif;">
-                    <span>${addr.name}</span>
-                    <span style="font-size: 0.7rem; color: #65a30d; font-weight: 600;">Insert</span>
-                </div>
-                <div style="font-size: 0.75rem; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Outfit', sans-serif;">
-                    ${addrPreview} ${addr.city ? '(' + addr.city + ')' : ''}
-                </div>
+                <span style="font-weight: 700; font-size: 0.85rem; color: #0f172a; font-family: 'Outfit', sans-serif;">${addr.name}</span>
+                <span style="font-size: 0.7rem; color: #65a30d; font-weight: 600; font-family: 'Outfit', sans-serif; margin-left: 10px;">Insert</span>
             `;
 
             item.addEventListener('click', () => {
