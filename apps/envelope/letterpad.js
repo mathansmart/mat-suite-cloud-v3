@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     let companyCategories = [];
     let companyAddresses = [];
+let envelopeAddresses = [];
 
     let activeCategoryFilter = "";
     let selectedIds = [];
@@ -300,6 +301,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Loading & Saving ---
     const loadSettings = async () => {
         try {
+            // Load Envelope Address Book contacts
+            try {
+                const envAddrResp = await fetch(`${API_BASE}/api/envelope/addresses${PROFILE_QUERY}&t=${Date.now()}`);
+                envelopeAddresses = await envAddrResp.json();
+            } catch (err) {
+                console.error('Failed to load envelope addresses:', err);
+                envelopeAddresses = [];
+            }
+
             const resp = await fetch(`${API_BASE}/api/envelope/settings${PROFILE_QUERY}&t=${Date.now()}`);
             activeSettings = await resp.json();
             
@@ -4073,60 +4083,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const filterText = (sidebarSearchInput ? sidebarSearchInput.value : '').toLowerCase().trim();
         
-        // Filter from global companyAddresses
-        const filtered = companyAddresses.filter(addr => {
-            if (!addr.name) return false;
-            return addr.name.toLowerCase().includes(filterText) || 
-                   (addr.address && addr.address.toLowerCase().includes(filterText));
+        if (filterText.length === 0) {
+            sidebarResultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Filter from global envelopeAddresses (Envelope Address Book)
+        const filtered = envelopeAddresses.filter(addr => {
+            const combinedText = [
+                addr.name || '',
+                addr.address || '',
+                addr.city || '',
+                addr.phone || ''
+            ].join(' ').toLowerCase();
+            return combinedText.includes(filterText);
         });
 
         // Sort A-Z by name
         filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 
         if (filtered.length === 0) {
-            sidebarResultsContainer.innerHTML = '<div style="color: #94a3b8; font-size: 0.8rem; text-align: center; padding: 15px 0;">No matching addresses found.</div>';
+            sidebarResultsContainer.innerHTML = '<div style="color: #64748b; font-size: 0.8rem; text-align: center; padding: 10px 0; font-family: \'Outfit\', sans-serif;">No contacts found.</div>';
+            sidebarResultsContainer.style.display = 'flex';
             return;
         }
 
         filtered.forEach(addr => {
             const item = document.createElement('div');
-            item.style.background = '#0f172a';
-            item.style.border = '1px solid #334155';
-            item.style.borderRadius = '8px';
-            item.style.padding = '10px 12px';
+            item.style.background = '#ffffff';
+            item.style.border = '1px solid #e2e8f0';
+            item.style.borderRadius = '6px';
+            item.style.padding = '8px 10px';
             item.style.cursor = 'pointer';
-            item.style.transition = 'all 0.2s';
+            item.style.transition = 'all 0.15s ease';
             item.style.userSelect = 'none';
+            item.style.display = 'flex';
+            item.style.flexDirection = 'column';
+            item.style.gap = '2px';
             
             // Hover styles
             item.onmouseover = () => {
                 item.style.borderColor = '#84cc16';
-                item.style.background = '#1e293b';
+                item.style.background = '#f8fafc';
             };
             item.onmouseout = () => {
-                item.style.borderColor = '#334155';
-                item.style.background = '#0f172a';
+                item.style.borderColor = '#e2e8f0';
+                item.style.background = '#ffffff';
             };
 
             const addrPreview = (addr.address || '').split('\n').slice(0, 2).join(', ');
 
             item.innerHTML = `
-                <div style="font-weight: 700; font-size: 0.85rem; color: #f8fafc; margin-bottom: 3px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #0f172a; display: flex; align-items: center; justify-content: space-between; font-family: 'Outfit', sans-serif;">
                     <span>${addr.name}</span>
-                    <span style="font-size: 0.7rem; color: #84cc16; background: rgba(132, 204, 22, 0.12); padding: 2px 6px; border-radius: 10px;">Insert</span>
+                    <span style="font-size: 0.7rem; color: #65a30d; font-weight: 600;">Insert</span>
                 </div>
-                <div style="font-size: 0.75rem; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${addrPreview}
+                <div style="font-size: 0.75rem; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Outfit', sans-serif;">
+                    ${addrPreview} ${addr.city ? '(' + addr.city + ')' : ''}
                 </div>
             `;
 
             item.addEventListener('click', () => {
-                insertAddressAtCursor(addr.address);
+                // Combine and format the address fields cleanly
+                let addressParts = [];
+                if (addr.name) addressParts.push(addr.name);
+                if (addr.address) addressParts.push(addr.address);
+                if (addr.city && addr.address && !addr.address.toLowerCase().includes(addr.city.toLowerCase())) {
+                    addressParts.push(addr.city);
+                }
+                if (addr.phone) addressParts.push(addr.phone);
+                
+                const addressText = addressParts.join('\n');
+                
+                insertAddressAtCursor(addressText);
                 showNotification(`Inserted address for "${addr.name}"!`, 'success', 'Address Inserted');
+                
+                // Hide dropdown after insertion
+                sidebarResultsContainer.style.display = 'none';
+                if (sidebarSearchInput) sidebarSearchInput.value = '';
             });
 
             sidebarResultsContainer.appendChild(item);
         });
+
+        sidebarResultsContainer.style.display = 'flex';
     }
 
     function insertAddressAtCursor(addressText) {
@@ -4178,7 +4218,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (sidebarSearchInput) {
         sidebarSearchInput.addEventListener('input', filterSidebarAddresses);
+        sidebarSearchInput.addEventListener('focus', () => {
+            if (sidebarSearchInput.value.trim().length > 0) {
+                renderSidebarAddresses();
+            }
+        });
     }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (sidebarSearchInput && sidebarResultsContainer) {
+            if (!sidebarSearchInput.contains(e.target) && !sidebarResultsContainer.contains(e.target)) {
+                sidebarResultsContainer.style.display = 'none';
+            }
+        }
+    });
 
     // --- Startup connection ---
     loadSettings();
