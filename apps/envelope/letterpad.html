@@ -568,7 +568,7 @@
 
 
             <!-- Page Workspace Area -->
-            <div style="flex: 1; overflow-y: auto; padding: 30px 20px; display: flex; justify-content: center; align-items: flex-start; background: #cbd5e1;">
+            <div style="flex: 1; overflow-y: auto; padding: 30px 20px; display: flex; justify-content: center; align-items: flex-start; gap: 30px; background: #cbd5e1; position: relative;">
                 <!-- A4 Sheet Paper Card -->
                 <div id="editor-a4-sheet" style="width: 100%; max-width: 794px; min-height: 1123px; background: #ffffff; border: 1px solid #94a3b8; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 50px 40px; box-sizing: border-box; display: block; position: relative; transition: all 0.2s;">
                     <!-- Watermark Logo -->
@@ -593,6 +593,22 @@
                     
                     <!-- Word-style Text Input Area -->
                     <div id="editor-textarea" contenteditable="true" placeholder="Type your letter content or address details here..." style="width: 100%; border: none; outline: none; background: transparent; padding: 0; margin: 0; font-size: 12pt; font-weight: 400; line-height: 1.5; font-family: 'Outfit', sans-serif; box-sizing: border-box; white-space: pre-wrap; word-break: normal; overflow-wrap: break-word; min-height: 900px; display: block;" autocomplete="off"></div>
+                </div>
+
+                <!-- Right Side Address Search Panel -->
+                <div id="sidebar-address-search-panel" class="no-print" style="width: 320px; background: #1e293b; border: 1.5px solid #334155; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); padding: 18px; box-sizing: border-box; font-family: 'Outfit', sans-serif; display: flex; flex-direction: column; gap: 15px; position: sticky; top: 0; align-self: flex-start; z-index: 10; color: #f8fafc;">
+                    <div style="font-weight: 800; font-size: 1.1rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+                       🔍 Insert Address
+                    </div>
+                    <div style="font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
+                       Search and click any address below to insert it at your editor's current cursor position.
+                    </div>
+                    <div style="position: relative;">
+                       <input type="text" id="sidebar-address-search-input" placeholder="Search contact name..." style="width: 100%; padding: 10px 12px; border: 1.5px solid #475569; border-radius: 8px; font-size: 0.85rem; outline: none; font-family: inherit; box-sizing: border-box; transition: all 0.2s; background: #0f172a; color: #fff;">
+                    </div>
+                    <div id="sidebar-address-results" style="max-height: 550px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
+                       <!-- Will be populated dynamically by JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>

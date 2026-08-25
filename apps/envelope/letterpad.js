@@ -847,6 +847,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         updateStats();
+        if (typeof renderSidebarAddresses === 'function') {
+            renderSidebarAddresses();
+        }
     };
 
     const toggleSelection = (id) => {
@@ -4058,6 +4061,123 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentActiveTable) {
             updateTableHandles(currentActiveTable);
         }
+    }
+
+    // --- SIDEBAR ADDRESS SEARCH & INSERTION SYSTEM ---
+    const sidebarSearchInput = document.getElementById('sidebar-address-search-input');
+    const sidebarResultsContainer = document.getElementById('sidebar-address-results');
+
+    function renderSidebarAddresses() {
+        if (!sidebarResultsContainer) return;
+        sidebarResultsContainer.innerHTML = '';
+
+        const filterText = (sidebarSearchInput ? sidebarSearchInput.value : '').toLowerCase().trim();
+        
+        // Filter from global companyAddresses
+        const filtered = companyAddresses.filter(addr => {
+            if (!addr.name) return false;
+            return addr.name.toLowerCase().includes(filterText) || 
+                   (addr.address && addr.address.toLowerCase().includes(filterText));
+        });
+
+        // Sort A-Z by name
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+
+        if (filtered.length === 0) {
+            sidebarResultsContainer.innerHTML = '<div style="color: #94a3b8; font-size: 0.8rem; text-align: center; padding: 15px 0;">No matching addresses found.</div>';
+            return;
+        }
+
+        filtered.forEach(addr => {
+            const item = document.createElement('div');
+            item.style.background = '#0f172a';
+            item.style.border = '1px solid #334155';
+            item.style.borderRadius = '8px';
+            item.style.padding = '10px 12px';
+            item.style.cursor = 'pointer';
+            item.style.transition = 'all 0.2s';
+            item.style.userSelect = 'none';
+            
+            // Hover styles
+            item.onmouseover = () => {
+                item.style.borderColor = '#84cc16';
+                item.style.background = '#1e293b';
+            };
+            item.onmouseout = () => {
+                item.style.borderColor = '#334155';
+                item.style.background = '#0f172a';
+            };
+
+            const addrPreview = (addr.address || '').split('\n').slice(0, 2).join(', ');
+
+            item.innerHTML = `
+                <div style="font-weight: 700; font-size: 0.85rem; color: #f8fafc; margin-bottom: 3px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>${addr.name}</span>
+                    <span style="font-size: 0.7rem; color: #84cc16; background: rgba(132, 204, 22, 0.12); padding: 2px 6px; border-radius: 10px;">Insert</span>
+                </div>
+                <div style="font-size: 0.75rem; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${addrPreview}
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                insertAddressAtCursor(addr.address);
+                showNotification(`Inserted address for "${addr.name}"!`, 'success', 'Address Inserted');
+            });
+
+            sidebarResultsContainer.appendChild(item);
+        });
+    }
+
+    function insertAddressAtCursor(addressText) {
+        if (!editorTextarea) return;
+        editorTextarea.focus();
+        
+        const sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            let range = sel.getRangeAt(0);
+            if (editorTextarea.contains(range.commonAncestorContainer)) {
+                range.deleteContents();
+                
+                // Format multiline address for contenteditable
+                const html = addressText.replace(/\n/g, '<br>');
+                const el = document.createElement('span');
+                el.innerHTML = html;
+                
+                const frag = document.createDocumentFragment();
+                let node, lastNode;
+                while ((node = el.firstChild)) {
+                    lastNode = frag.appendChild(node);
+                }
+                range.insertNode(frag);
+                
+                if (lastNode) {
+                    range = range.cloneRange();
+                    range.setStartAfter(lastNode);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+                
+                editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                saveHistory();
+                return;
+            }
+        }
+        
+        // Fallback: append
+        const formatted = addressText.replace(/\n/g, '<br>');
+        editorTextarea.innerHTML += (editorTextarea.innerHTML ? '<br><br>' : '') + formatted;
+        editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        saveHistory();
+    }
+
+    function filterSidebarAddresses() {
+        renderSidebarAddresses();
+    }
+
+    if (sidebarSearchInput) {
+        sidebarSearchInput.addEventListener('input', filterSidebarAddresses);
     }
 
     // --- Startup connection ---
