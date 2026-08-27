@@ -2720,7 +2720,7 @@ let envelopeAddresses = [];
     }
 
     document.querySelectorAll('.case-option-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('mousedown', (e) => {
             e.preventDefault();
             e.stopPropagation();
             const val = btn.dataset.value;
