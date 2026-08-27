@@ -2912,14 +2912,17 @@ let envelopeAddresses = [];
                     span.appendChild(content);
                     range.insertNode(span);
 
-                    // Insert an invisible zero-width space after the span
-                    const zws = document.createTextNode('\u200B');
-                    span.parentNode.insertBefore(zws, span.nextSibling);
+                    // Insert a reset span with default styles after the colored span
+                    const resetSpan = document.createElement('span');
+                    resetSpan.style.color = 'initial';
+                    resetSpan.style.backgroundColor = 'transparent';
+                    resetSpan.innerHTML = '&#8203;';
+                    span.parentNode.insertBefore(resetSpan, span.nextSibling);
 
-                    // Place the cursor in the zero-width space node (outside the styled span)
+                    // Place the cursor inside the reset span node (after the zero-width space)
                     const newRange = document.createRange();
-                    newRange.setStart(zws, 1);
-                    newRange.setEnd(zws, 1);
+                    newRange.setStart(resetSpan.firstChild, 1);
+                    newRange.setEnd(resetSpan.firstChild, 1);
                     selection.removeAllRanges();
                     selection.addRange(newRange);
                     savedSelectionRange = newRange;
