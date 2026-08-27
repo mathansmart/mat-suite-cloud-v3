@@ -1450,6 +1450,13 @@ let envelopeAddresses = [];
     function applyFontSizeToSelection(sizeVal) {
         saveHistory();
         const selection = window.getSelection();
+        
+        // Restore range from savedSelectionRange if lost
+        if (savedSelectionRange && editorTextarea.contains(savedSelectionRange.commonAncestorContainer)) {
+            selection.removeAllRanges();
+            selection.addRange(savedSelectionRange);
+        }
+        
         if (!selection.rangeCount) return;
         const range = selection.getRangeAt(0);
 
@@ -1487,6 +1494,13 @@ let envelopeAddresses = [];
     function applyFontFamilyToSelection(familyVal) {
         saveHistory();
         const selection = window.getSelection();
+        
+        // Restore range from savedSelectionRange if lost
+        if (savedSelectionRange && editorTextarea.contains(savedSelectionRange.commonAncestorContainer)) {
+            selection.removeAllRanges();
+            selection.addRange(savedSelectionRange);
+        }
+        
         if (!selection.rangeCount) return;
         const range = selection.getRangeAt(0);
 
@@ -2541,10 +2555,47 @@ let envelopeAddresses = [];
     // Change Selection Case Function
     function changeSelectionCase(caseType) {
         const selection = window.getSelection();
-        if (!selection.rangeCount || selection.isCollapsed) return;
+        
+        // Restore range from savedSelectionRange if lost
+        if (savedSelectionRange && editorTextarea.contains(savedSelectionRange.commonAncestorContainer)) {
+            selection.removeAllRanges();
+            selection.addRange(savedSelectionRange);
+        }
+        
+        if (!selection.rangeCount) return;
+        let range = selection.getRangeAt(0);
+
+        // If collapsed (no text highlighted), expand to the word containing the cursor
+        if (selection.isCollapsed) {
+            const node = range.startContainer;
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.nodeValue;
+                const offset = range.startOffset;
+                
+                // Find word boundaries
+                let start = offset;
+                while (start > 0 && /\w/.test(text[start - 1])) {
+                    start--;
+                }
+                let end = offset;
+                while (end < text.length && /\w/.test(text[end])) {
+                    end++;
+                }
+                
+                if (start !== end) {
+                    range = document.createRange();
+                    range.setStart(node, start);
+                    range.setEnd(node, end);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    savedSelectionRange = range;
+                }
+            }
+        }
+
+        if (selection.isCollapsed) return;
 
         saveHistory();
-        const range = selection.getRangeAt(0);
         
         // Collect all text nodes that intersect the selection range
         const textNodes = [];
@@ -2594,6 +2645,11 @@ let envelopeAddresses = [];
             
             textNode.nodeValue = originalVal.slice(0, startOffset) + transformed + originalVal.slice(endOffset);
         });
+        
+        // Re-select transformed range to keep highlight
+        selection.removeAllRanges();
+        selection.addRange(range);
+        savedSelectionRange = range;
         
         saveHistory();
     }
@@ -2827,7 +2883,50 @@ let envelopeAddresses = [];
                     indicator.style.background = color === 'transparent' ? 'transparent' : color;
                 }
                 saveHistory();
-                document.execCommand(config.command, false, color);
+                
+                const selection = window.getSelection();
+                // Restore range from savedSelectionRange if lost
+                if (savedSelectionRange && editorTextarea.contains(savedSelectionRange.commonAncestorContainer)) {
+                    selection.removeAllRanges();
+                    selection.addRange(savedSelectionRange);
+                }
+
+                if (!selection.rangeCount || selection.isCollapsed) {
+                    document.execCommand(config.command, false, color);
+                    saveHistory();
+                    return;
+                }
+
+                const range = selection.getRangeAt(0);
+
+                // Use manual wrapping to prevent browser sticky styles carrying over color
+                const span = document.createElement('span');
+                if (config.command === 'foreColor') {
+                    span.style.color = color;
+                } else if (config.command === 'hiliteColor') {
+                    span.style.backgroundColor = color === 'transparent' ? '' : color;
+                }
+
+                try {
+                    const content = range.extractContents();
+                    span.appendChild(content);
+                    range.insertNode(span);
+
+                    // Insert an invisible zero-width space after the span
+                    const zws = document.createTextNode('\u200B');
+                    span.parentNode.insertBefore(zws, span.nextSibling);
+
+                    // Place the cursor in the zero-width space node (outside the styled span)
+                    const newRange = document.createRange();
+                    newRange.setStart(zws, 1);
+                    newRange.setEnd(zws, 1);
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                    savedSelectionRange = newRange;
+                } catch (e) {
+                    document.execCommand(config.command, false, color);
+                }
+
                 saveHistory();
             }
         });
