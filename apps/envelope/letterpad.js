@@ -1662,6 +1662,65 @@ let envelopeAddresses = [];
             if (e.key === ' ' || e.key === 'Enter') {
                 saveHistory();
             }
+
+            // Exit styled span boundary if typing at the end of a highlighted/colored span
+            if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    let node = range.startContainer;
+                    const offset = range.startOffset;
+                    
+                    if (node.nodeType === Node.TEXT_NODE && offset === node.length) {
+                        let parent = node.parentNode;
+                        let styledAncestor = null;
+                        
+                        while (parent && parent !== editorTextarea) {
+                            if ((parent.tagName === 'SPAN' || parent.tagName === 'FONT') && 
+                                (parent.style.backgroundColor || parent.style.color || parent.getAttribute('color'))) {
+                                styledAncestor = parent;
+                                break;
+                            }
+                            parent = parent.parentNode;
+                        }
+                        
+                        if (styledAncestor) {
+                            const walker = document.createTreeWalker(styledAncestor, NodeFilter.SHOW_TEXT);
+                            let lastTextNode = null;
+                            let current;
+                            while (current = walker.nextNode()) {
+                                lastTextNode = current;
+                            }
+                            
+                            if (node === lastTextNode) {
+                                e.preventDefault();
+                                
+                                const nextNode = styledAncestor.nextSibling;
+                                if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
+                                    nextNode.insertData(0, e.key);
+                                    const newRange = document.createRange();
+                                    newRange.setStart(nextNode, 1);
+                                    newRange.setEnd(nextNode, 1);
+                                    selection.removeAllRanges();
+                                    selection.addRange(newRange);
+                                    savedSelectionRange = newRange;
+                                } else {
+                                    const charNode = document.createTextNode(e.key);
+                                    styledAncestor.parentNode.insertBefore(charNode, styledAncestor.nextSibling);
+                                    const newRange = document.createRange();
+                                    newRange.setStart(charNode, 1);
+                                    newRange.setEnd(charNode, 1);
+                                    selection.removeAllRanges();
+                                    selection.addRange(newRange);
+                                    savedSelectionRange = newRange;
+                                }
+                                
+                                editorTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         // Intercept paste event and insert plain text to prevent styling/margin breakages
