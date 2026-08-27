@@ -2899,6 +2899,38 @@ let envelopeAddresses = [];
 
                 const range = selection.getRangeAt(0);
 
+                // If removing color, extract and clear styles without wrapping
+                if (color === 'transparent') {
+                    try {
+                        const content = range.extractContents();
+                        
+                        // Clear style on nested elements
+                        const walker = document.createTreeWalker(content, NodeFilter.SHOW_ELEMENT);
+                        let elNode;
+                        while (elNode = walker.nextNode()) {
+                            if (config.command === 'hiliteColor') {
+                                elNode.style.backgroundColor = '';
+                            } else if (config.command === 'foreColor') {
+                                elNode.style.color = '';
+                            }
+                            if (!elNode.style.cssText) {
+                                elNode.removeAttribute('style');
+                            }
+                        }
+                        
+                        // Insert back unwrapped
+                        range.insertNode(content);
+                        
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        savedSelectionRange = range;
+                    } catch (e) {
+                        document.execCommand(config.command, false, color);
+                    }
+                    saveHistory();
+                    return;
+                }
+
                 // Use manual wrapping to prevent browser sticky styles carrying over color
                 const span = document.createElement('span');
                 if (config.command === 'foreColor') {
