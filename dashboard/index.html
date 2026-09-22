@@ -3,431 +3,666 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAT WORK SPACE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <title>MAT WORKSPACE — Clean Executive Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&family=Italiana&family=Syne:wght@500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --accent: #0284c7;
-            --accent-glow: rgba(2, 132, 199, 0.15);
-            --text: #0f172a;
-            --muted: #475569;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        /* Outer Background: Rich Red with Subtle Black Mix (Black konjam kammiyaa) */
         body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #550a0a;
+            background-image: 
+                radial-gradient(at 20% 20%, rgba(220, 38, 38, 0.65) 0px, transparent 60%),
+                radial-gradient(at 80% 80%, rgba(153, 27, 27, 0.75) 0px, transparent 65%),
+                radial-gradient(at 50% 50%, rgba(185, 28, 28, 0.45) 0px, transparent 70%),
+                linear-gradient(135deg, #380606 0%, #680e0e 45%, #881313 75%, #380606 100%);
+            background-attachment: fixed;
+            color: #0f172a;
+            min-height: 100vh;
         }
 
-        .split-container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
+        .ambient-mesh {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(239, 68, 68, 0.22), transparent 45%),
+                radial-gradient(circle at 80% 70%, rgba(185, 28, 28, 0.26), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: meshBloom 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .left-panel {
-            flex: 1.2;
-            background: url('fabric_rolls_bg.webp') no-repeat center center;
-            background-size: cover;
+        /* 360-degree border beam rotation */
+        @keyframes rotate-beam {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Page Open Entrance Animations */
+        @keyframes pageFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.96) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes slideUpFade {
+            0% {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes heroReveal {
+            0% {
+                opacity: 0;
+                transform: translateX(-16px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes meshBloom {
+            0% {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Staggered entrance animation classes */
+        .anim-page-enter {
+            animation: pageFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .anim-hero-reveal {
+            animation: heroReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+        }
+
+        .anim-header {
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+        }
+
+        .anim-card-1 {
+            animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+        }
+
+        .anim-card-2 {
+            animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+        }
+
+        .anim-footer {
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+        }
+
+        /* Border Wrapper with subtle base line and moving Gold Star Beam on Image directly */
+        .gold-border-beam-wrapper {
             position: relative;
+            padding: 2.5px;
             overflow: hidden;
+            background: rgba(180, 83, 9, 0.25);
+            border-top-left-radius: 28px;
+            border-bottom-left-radius: 28px;
         }
 
-        /* Subtle gradient overlay to tie image to the UI theme */
-        .left-panel::after {
+        @media (max-width: 1023px) {
+            .gold-border-beam-wrapper {
+                border-radius: 28px 28px 0 0;
+            }
+        }
+
+        /* Rotating Dark Rich Gold Star */
+        .gold-border-beam-wrapper::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(to left, rgba(248, 250, 252, 0) 40%, rgba(248, 250, 252, 1) 100%);
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                transparent 300deg,
+                rgba(180, 83, 9, 0.3) 320deg,
+                rgba(217, 119, 6, 0.7) 338deg,
+                rgba(245, 158, 11, 0.95) 350deg,
+                #d97706 356deg,
+                #f59e0b 360deg
+            );
+            animation: rotate-beam 6.5s linear infinite;
             pointer-events: none;
-            z-index: 2;
-        }
-
-        #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             z-index: 1;
         }
 
-        .right-panel {
-            width: 500px;
-            background: linear-gradient(135deg, #ffffff, #f1f5f9);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 40px;
-            z-index: 10;
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .header {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .workspace-logo {
-            max-height: 240px;
-            width: auto;
-            object-fit: contain;
-            display: block;
-        }
-
-        .grid {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            margin: auto 0;
-        }
-
-        .card {
-            width: 100%;
-            height: 180px;
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            padding: 24px;
-            gap: 20px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-        }
-
-        .card::before {
+        /* Deep Amber Gold Ambient Glow */
+        .gold-border-beam-wrapper::after {
             content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(45deg, transparent, rgba(2, 132, 199, 0.05), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                transparent 320deg,
+                rgba(180, 83, 9, 0.45) 338deg,
+                rgba(217, 119, 6, 0.85) 352deg,
+                rgba(245, 158, 11, 0.95) 360deg
+            );
+            animation: rotate-beam 6.5s linear infinite;
+            filter: blur(6px);
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .card:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: var(--accent);
-            box-shadow: 0 15px 30px rgba(2, 132, 199, 0.08), 0 0 20px var(--accent-glow);
+        /* INSIDE: EPAVUM POLA CLEAN WHITE CARDS */
+        .studio-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #0f172a;
         }
 
-        .card:hover::before {
-            transform: translateX(100%);
+        .studio-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 35px -5px rgba(2, 132, 199, 0.12);
         }
 
-        .icon {
-            font-size: 55px;
-            transition: transform 0.4s;
+        .envelope-card:hover {
+            border-color: #0284c7;
+        }
+
+        .stock-card:hover {
+            border-color: #059669;
+        }
+
+        /* Left Side Image: Natural Fabric Rolls with Neutral Dark Tint */
+        .textile-hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(0, 0, 0, 0.75)), url('fabric_rolls_bg.webp');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Interactive Studio Slider Track & Panels */
+        .studio-slider {
+            display: flex;
+            width: 100%;
+            min-height: 640px;
+            transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #panel-hero {
+            width: 42%;
             flex-shrink: 0;
+            overflow: hidden;
+            transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .card:hover .icon {
-            transform: scale(1.1);
+        #panel-apps {
+            width: 58%;
+            flex: 1 1 0%;
+            min-width: 0;
+            transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            background: linear-gradient(180deg, #fff9e3 0%, #fef3c2 40%, #fde891 100%);
         }
 
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            flex: 1;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .card-desc {
-            color: var(--muted);
-            font-size: 0.85rem;
-            line-height: 1.4;
-            margin-bottom: 12px;
-        }
-
-        .btn-link {
-            padding: 6px 14px;
-            border-radius: 8px;
-            background: rgba(2, 132, 199, 0.08);
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 0.8rem;
-            border: 1px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .card:hover .btn-link {
-            background: var(--accent);
-            color: #ffffff;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            padding-top: 15px;
-            font-size: 0.7rem;
-            color: var(--muted);
-            opacity: 0.7;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #22c55e;
-            box-shadow: 0 0 6px #22c55e;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.3);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.hidden {
+        #panel-profiles {
+            width: 0;
             opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+            flex-shrink: 0;
+            background: transparent !important;
+            transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Main Container: Exact proportions matching uploaded photo reference */
+        #main-container {
+            max-width: 960px;
+            width: 92%;
+            margin: auto;
+            border-radius: 28px;
+            min-height: 640px;
+            box-shadow: 0 30px 80px -15px rgba(0,0,0,0.85);
+            transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Active Profile Mode State: Slide left & reveal companies on RED background */
+        #main-container.mode-profiles {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            max-width: 1100px !important;
+            width: 95% !important;
+            min-height: 640px !important;
+        }
+
+        #main-container.mode-profiles #panel-hero {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            opacity: 0 !important;
             pointer-events: none;
         }
-        .modal {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 28px;
-            padding: 40px;
-            text-align: center;
-            transform: translateY(0) scale(1);
-            transition: all 0.3s;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
-            color: var(--text);
-        }
-        .modal-overlay.hidden .modal {
-            transform: translateY(20px) scale(0.95);
-        }
-        .profile-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 40px;
-            border-radius: 18px;
-            text-decoration: none;
-            color: var(--text);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.3s;
-            background: rgba(0, 0, 0, 0.02);
-            min-width: 180px;
-        }
-        .profile-btn:hover {
-            transform: translateY(-5px);
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .milton-btn:hover {
-            border-color: #38bdf8;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.15);
-        }
-        .vester-btn:hover {
-            border-color: #e11d48;
-            box-shadow: 0 10px 20px rgba(225, 29, 72, 0.15);
-        }
-        .fitvee-btn:hover {
-            border-color: #10b981;
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
-        }
-        .profile-btn h3 { margin: 15px 0 5px; font-size: 1.2rem; }
-        .profile-btn p { font-size: 0.8rem; color: var(--muted); }
 
-        /* Responsive Layout */
-        @media (max-width: 992px) {
-            .split-container {
+        #main-container.mode-profiles #panel-apps {
+            width: 330px !important;
+            min-width: 300px !important;
+            max-width: 360px !important;
+            background: transparent !important;
+            border-right: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+            padding: 2rem 1.5rem !important;
+        }
+
+        #main-container.mode-profiles #panel-profiles {
+            flex: 1 1 0%;
+            width: auto !important;
+            min-width: 0 !important;
+            background: transparent !important;
+            opacity: 1;
+            overflow: visible;
+            pointer-events: auto;
+            padding: 2rem 2.25rem !important;
+        }
+
+        /* In Profile Mode: Header and text adapt cleanly over deep RED background */
+        #main-container.mode-profiles #panel-apps h3 {
+            color: #ffffff !important;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        #main-container.mode-profiles #panel-apps .apps-header-badge {
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            backdrop-filter: blur(8px);
+        }
+
+        #main-container.mode-profiles #panel-apps .apps-footer-note {
+            display: none !important;
+        }
+
+        #main-container.mode-profiles #btn-back-hub {
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            backdrop-filter: blur(8px);
+        }
+
+        #main-container.mode-profiles #btn-back-hub:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        /* Profile card staggered entrance animation */
+        @keyframes profileCardSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(24px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .mode-profiles .anim-profile-1 {
+            animation: profileCardSlideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        }
+
+        .mode-profiles .anim-profile-2 {
+            animation: profileCardSlideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+        }
+
+        @media (max-width: 1023px) {
+            .studio-slider {
                 flex-direction: column;
             }
-            .left-panel {
-                flex: 1;
-                min-height: 40vh;
+            #panel-hero, #panel-apps, #panel-profiles {
+                width: 100% !important;
+                min-height: auto;
             }
-            .right-panel {
-                width: 100%;
-                flex: 1.5;
-                min-height: 60vh;
-                border-left: none;
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
-                padding: 30px;
+            .mode-profiles #panel-hero {
+                display: none !important;
             }
-            .grid {
-                margin: 20px 0;
+            #main-container.mode-profiles #panel-apps {
+                width: 100% !important;
+                border-right: none !important;
+                border-bottom: 1.5px solid rgba(255, 255, 255, 0.15) !important;
             }
         }
     </style>
 </head>
-<body>
-    <div class="split-container">
-        <!-- Right Panel: Workspace tools stacked one by one -->
-        <div class="right-panel">
-            <div class="header">
-                <img src="mat_workspace_logo_wing_transparent.png" alt="MAT Workspace" class="workspace-logo" />
-            </div>
+<body class="min-h-screen flex items-center justify-center p-2.5 sm:p-4 lg:p-5 relative">
 
-            <div class="grid">
-                <div class="card" id="card-envelope">
-                    <div class="card-content">
-                        <div class="card-title">Envelope Pro</div>
-                        <div class="card-desc">Advanced envelope printing and contact management system.</div>
-                        <div class="btn-link">LAUNCH APP</div>
+    <div class="ambient-mesh"></div>
+
+    <!-- MAIN STUDIO CONTAINER WITH ENTRANCE ANIMATION -->
+    <div id="main-container" class="w-full relative z-10 anim-page-enter rounded-[28px] overflow-hidden shadow-[0_30px_80px_-15px_rgba(0,0,0,0.85)] border border-white/20 bg-white">
+
+        <!-- SLIDER TRACK FOR SMOOTH HARDWARE-ACCELERATED TRANSITIONS -->
+        <div id="slider-track" class="studio-slider">
+
+            <!-- PANEL 1: HERO IMAGE WITH ROTATING GOLD STAR BEAM (SLIDES OUT TO LEFT ON CLICK) -->
+            <div id="panel-hero" class="gold-border-beam-wrapper flex flex-col justify-stretch">
+                <div class="textile-hero h-full w-[400px] min-w-[400px] rounded-t-[26px] lg:rounded-tr-none lg:rounded-l-[26px] p-7 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden flex-1 z-10">
+                    <!-- Top Logo Header -->
+                    <div class="relative z-10 flex items-center gap-3.5">
+                        <img src="mat_workspace_logo_wing_transparent.png" alt="MAT Logo" class="h-20 sm:h-24 w-auto object-contain brightness-0 invert drop-shadow-lg" />
+                        <div>
+                            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight font-['Outfit'] leading-tight text-white drop-shadow-sm">MAT WORKSPACE</h1>
+                        </div>
                     </div>
-                    <div class="icon">✉️</div>
-                </div>
 
-                <div class="card" id="card-stock" style="cursor: pointer;">
-                    <div class="card-content">
-                        <div class="card-title">Stock Manager</div>
-                        <div class="card-desc">Efficient garment inventory tracking and sales reports.</div>
-                        <div class="btn-link">LAUNCH APP</div>
+                    <!-- Upper Hero Content (Lifted up closer to logo) -->
+                    <div class="relative z-10 mt-6 sm:mt-7 mb-auto space-y-2.5 max-w-sm anim-hero-reveal">
+                        <h2 class="text-3xl sm:text-4xl font-bold font-['Outfit'] leading-tight text-white">
+                            Garments Vault
+                        </h2>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-200">
+                            Stock &amp; Envelope Pro
+                        </p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                            Manage your inventory and send client envelopes seamlessly.
+                        </p>
                     </div>
-                    <div class="icon">📦</div>
+
+                    <!-- Left Footer Specs -->
+                    <div class="relative z-10 pt-3.5 border-t border-white/15 flex items-center justify-between text-xs text-slate-300 anim-footer">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50"></span>
+                            <span class="font-medium tracking-wide">System Online</span>
+                        </div>
+                        <span class="font-mono text-xs text-slate-400 font-medium">v2.1</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="footer">
-                <div class="status">
-                    <div class="status-dot"></div>
-                    <span>System Online</span>
+            <!-- PANEL 2: WORKSPACE APPS COLUMN (SLIDES TO LEFT IN PROFILE MODE) -->
+            <div id="panel-apps" class="p-7 sm:p-9 flex flex-col justify-between">
+                <!-- Workspace Apps Header -->
+                <div class="flex items-center justify-between anim-header">
+                    <div>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-[#3b1803] font-['Outfit']">Workspace Apps</h3>
+                    </div>
                 </div>
-                <div>v2.1.0 (Cloud)</div>
-            </div>
-        </div>
 
-        <!-- Left Panel: Full image view -->
-        <div class="left-panel">
-        </div>
-    </div>
+                <!-- 2 CLEAN PRIMARY CARDS (VERTICALLY CENTERED IN YELLOW PANEL) -->
+                <div class="my-auto py-2 space-y-5 sm:space-y-6">
 
-    <!-- Stock Profile Selection Modal -->
-    <div id="stock-profile-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <h2 style="margin-bottom: 30px; font-family: 'Playfair Display', serif; font-size: 2rem;">Select Stock Profile</h2>
-            <div style="display: flex; gap: 20px; justify-content: center;">
-                <a href="/stock/?profile=1" class="profile-btn milton-btn">
-                    <span style="font-size: 2.5rem;">🏭</span>
-                    <h3>VESTER</h3>
-                </a>
-                <a href="/stock/?profile=2" class="profile-btn fitvee-btn">
-                    <span style="font-size: 2.5rem;">🏢</span>
-                    <h3>FITVEE</h3>
-                </a>
-            </div>
-            <button id="close-stock-modal" style="margin-top: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--muted); color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s;">Cancel</button>
-        </div>
-    </div>
+                    <!-- APP 1: ENVELOPE PRO (Click to Slide & Select Company) -->
+                    <div id="card-envelope" class="studio-card envelope-card rounded-2xl p-5 sm:p-6 flex items-center justify-between group cursor-pointer anim-card-1 select-none">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-[#eff6ff] text-sky-600 flex items-center justify-center text-3xl group-hover:bg-sky-500 group-hover:text-white transition duration-300 shadow-sm flex-shrink-0">
+                                ✉️
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xl text-slate-900 group-hover:text-sky-600 transition leading-snug">Envelope Pro</h4>
+                                <span id="badge-envelope" class="inline-block text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 uppercase tracking-wide">PRINTING SUITE</span>
+                            </div>
+                        </div>
+                        <div class="w-11 h-11 rounded-2xl bg-[#e0f2fe] text-sky-600 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center text-lg font-bold transition shadow-sm flex-shrink-0">
+                            →
+                        </div>
+                    </div>
 
-    <!-- Profile Selection Modal -->
-    <div id="profile-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <h2 style="margin-bottom: 30px; font-family: 'Playfair Display', serif; font-size: 2rem;">Select Address Book</h2>
-            <div style="display: flex; gap: 20px; justify-content: center;">
-                <a href="/envelope/?profile=1" class="profile-btn milton-btn">
-                    <span style="font-size: 2.5rem;">🏢</span>
-                    <h3>MILTON</h3>
-                </a>
-                <a href="/envelope/?profile=2" class="profile-btn vester-btn">
-                    <span style="font-size: 2.5rem;">🏭</span>
-                    <h3>VESTER</h3>
-                </a>
+                    <!-- APP 2: STOCK MANAGER (Click to Slide & Select Company) -->
+                    <div id="card-stock" class="studio-card stock-card rounded-2xl p-5 sm:p-6 flex items-center justify-between group cursor-pointer anim-card-2 select-none">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-[#ecfdf5] text-emerald-600 flex items-center justify-center text-3xl group-hover:bg-emerald-500 group-hover:text-white transition duration-300 shadow-sm flex-shrink-0">
+                                📦
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xl text-slate-900 group-hover:text-emerald-600 transition leading-snug">Stock Manager</h4>
+                                <span id="badge-stock" class="inline-block text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 uppercase tracking-wide">INVENTORY</span>
+                            </div>
+                        </div>
+                        <div class="w-11 h-11 rounded-2xl bg-[#d1fae5] text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white flex items-center justify-center text-lg font-bold transition shadow-sm flex-shrink-0">
+                            →
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom Note -->
+                <div class="apps-footer-note pt-4 border-t border-black/35 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-black font-semibold anim-footer transition-colors">
+                    <span>Milton Garments Private Limited</span>
+                    <span>Kangayam Road, Tirupur - 641 604</span>
+                </div>
             </div>
-            <button id="close-modal" style="margin-top: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--muted); color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s;">Cancel</button>
+
+            <!-- PANEL 3: COMPANY PROFILES PANEL (SLIDES IN FROM RIGHT ON DEEP RED BACKGROUND) -->
+            <div id="panel-profiles" class="flex flex-col justify-between">
+                <div>
+                    <!-- Header with Back Button -->
+                    <div class="flex items-center justify-between mb-7">
+                        <div>
+                            <button id="btn-back-hub" class="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm mb-4 group cursor-pointer">
+                                <span class="group-hover:-translate-x-1 transition-transform">←</span>
+                                <span>Back to Workspace Hub</span>
+                            </button>
+                            <h3 id="profiles-title" class="text-2xl sm:text-3xl font-extrabold text-white font-['Outfit'] drop-shadow-md">Envelope Pro — Company</h3>
+                            <p id="profiles-subtitle" class="text-sm text-slate-200 mt-1 font-medium">Select address book workspace to open</p>
+                        </div>
+                        <span id="profiles-badge" class="text-xs font-mono font-bold px-3 py-1.5 rounded-full bg-sky-400/20 text-sky-200 border border-sky-400/30 shadow-sm backdrop-blur-md">Printing Suite</span>
+                    </div>
+
+                    <!-- 2 Large Animated Company Selection Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+
+                        <!-- COMPANY PROFILE 1 -->
+                        <a id="profile-card-1" href="/envelope/?profile=1" class="studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 hover:border-sky-500 shadow-xl cursor-pointer bg-white group anim-profile-1">
+                            <div>
+                                <div class="flex items-center justify-between mb-3.5">
+                                    <span id="profile-icon-1" class="text-4xl group-hover:scale-110 transition-transform">🏢</span>
+                                    <span id="profile-badge-1" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 font-mono">Profile 1</span>
+                                </div>
+                                <h4 id="profile-name-1" class="font-bold text-xl text-slate-900 group-hover:text-sky-600 transition">MILTON</h4>
+                                <p id="profile-desc-1" class="text-xs text-slate-500 mt-1 leading-relaxed">Master Address Book</p>
+                            </div>
+                            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 group-hover:text-sky-700">
+                                <span>OPEN</span>
+                                <span class="w-7 h-7 rounded-lg bg-sky-50 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center transition font-bold">→</span>
+                            </div>
+                        </a>
+
+                        <!-- COMPANY PROFILE 2 -->
+                        <a id="profile-card-2" href="/envelope/?profile=2" class="studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 hover:border-rose-500 shadow-xl cursor-pointer bg-white group anim-profile-2">
+                            <div>
+                                <div class="flex items-center justify-between mb-3.5">
+                                    <span id="profile-icon-2" class="text-4xl group-hover:scale-110 transition-transform">🏭</span>
+                                    <span id="profile-badge-2" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-mono">Profile 2</span>
+                                </div>
+                                <h4 id="profile-name-2" class="font-bold text-xl text-slate-900 group-hover:text-rose-600 transition">VESTER</h4>
+                                <p id="profile-desc-2" class="text-xs text-slate-500 mt-1 leading-relaxed">Master Address Book</p>
+                            </div>
+                            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-700">
+                                <span>OPEN</span>
+                                <span class="w-7 h-7 rounded-lg bg-rose-50 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center transition font-bold">→</span>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- Bottom Note -->
+                <div class="mt-6 pt-3.5 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10.5px] text-white/60 anim-footer">
+                    <span id="profiles-footer-company">Milton Garments Private Limited</span>
+                    <span>Kangayam Road, Tirupur - 641 604</span>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
+        const mainContainer = document.getElementById('main-container');
         const cardEnvelope = document.getElementById('card-envelope');
-        const profileModal = document.getElementById('profile-modal');
-        const closeModal = document.getElementById('close-modal');
+        const cardStock = document.getElementById('card-stock');
+        const btnBackHub = document.getElementById('btn-back-hub');
+
+        // Dynamic profile elements
+        const profilesTitle = document.getElementById('profiles-title');
+        const profilesSubtitle = document.getElementById('profiles-subtitle');
+        const profilesBadge = document.getElementById('profiles-badge');
+        const profilesFooterCompany = document.getElementById('profiles-footer-company');
+
+        const profileCard1 = document.getElementById('profile-card-1');
+        const profileIcon1 = document.getElementById('profile-icon-1');
+        const profileBadge1 = document.getElementById('profile-badge-1');
+        const profileName1 = document.getElementById('profile-name-1');
+        const profileDesc1 = document.getElementById('profile-desc-1');
+
+        const profileCard2 = document.getElementById('profile-card-2');
+        const profileIcon2 = document.getElementById('profile-icon-2');
+        const profileBadge2 = document.getElementById('profile-badge-2');
+        const profileName2 = document.getElementById('profile-name-2');
+        const profileDesc2 = document.getElementById('profile-desc-2');
+
+        let activeApp = null;
+
+        function openEnvelopeProfiles() {
+            if (activeApp === 'envelope') return;
+            activeApp = 'envelope';
+
+            // Setup Envelope Pro companies
+            profilesTitle.textContent = "Envelope Pro — Company";
+            profilesSubtitle.textContent = "Select address book workspace to open";
+            profilesBadge.textContent = "Printing Suite";
+            profilesBadge.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-full bg-sky-400/20 text-sky-200 border border-sky-400/30 shadow-sm backdrop-blur-md";
+            if (profilesFooterCompany) profilesFooterCompany.textContent = "Milton Garments Private Limited";
+
+            // Company 1: MILTON
+            profileCard1.href = "/envelope/?profile=1";
+            profileIcon1.textContent = "🏢";
+            profileBadge1.textContent = "Profile 1";
+            profileBadge1.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700 font-mono";
+            profileName1.textContent = "MILTON";
+            profileDesc1.textContent = "Master Address Book";
+
+            // Company 2: VESTER
+            profileCard2.href = "/envelope/?profile=2";
+            profileIcon2.textContent = "🏭";
+            profileBadge2.textContent = "Profile 2";
+            profileBadge2.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-mono";
+            profileName2.textContent = "VESTER";
+            profileDesc2.textContent = "Master Address Book";
+
+            // Show only Envelope Pro, hide Stock Manager cleanly
+            cardEnvelope.classList.remove('hidden');
+            cardStock.classList.add('hidden');
+
+            // Highlight card
+            cardEnvelope.classList.add('ring-4', 'ring-sky-400', 'border-sky-500', 'shadow-2xl');
+            cardStock.classList.remove('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
+
+            // Slide to profiles
+            mainContainer.classList.add('mode-profiles');
+
+            // Clean 60fps entrance animation without layout thrashing
+            profileCard1.classList.remove('anim-profile-1');
+            profileCard2.classList.remove('anim-profile-2');
+            requestAnimationFrame(() => {
+                profileCard1.classList.add('anim-profile-1');
+                profileCard2.classList.add('anim-profile-2');
+            });
+        }
+
+        function openStockProfiles() {
+            if (activeApp === 'stock') return;
+            activeApp = 'stock';
+
+            // Setup Stock Manager companies
+            profilesTitle.textContent = "Stock Manager — Company";
+            profilesSubtitle.textContent = "Select factory inventory workspace to open";
+            profilesBadge.textContent = "Inventory";
+            profilesBadge.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-full bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 shadow-sm backdrop-blur-md";
+            if (profilesFooterCompany) profilesFooterCompany.textContent = "VESTER CLOTHING COMPANY";
+
+            // Company 1: VESTER
+            profileCard1.href = "/stock/?profile=1";
+            profileIcon1.textContent = "🏭";
+            profileBadge1.textContent = "Profile 1";
+            profileBadge1.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700 font-mono";
+            profileName1.textContent = "VESTER";
+            profileDesc1.textContent = "Garments Stock";
+
+            // Company 2: FITVEE
+            profileCard2.href = "/stock/?profile=2";
+            profileIcon2.textContent = "🏢";
+            profileBadge2.textContent = "Profile 2";
+            profileBadge2.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-mono";
+            profileName2.textContent = "FITVEE";
+            profileDesc2.textContent = "Garments Stock";
+
+            // Show only Stock Manager, hide Envelope Pro cleanly
+            cardStock.classList.remove('hidden');
+            cardEnvelope.classList.add('hidden');
+
+            // Highlight card
+            cardStock.classList.add('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
+            cardEnvelope.classList.remove('ring-4', 'ring-sky-400', 'border-sky-500', 'shadow-2xl');
+
+            // Slide to profiles
+            mainContainer.classList.add('mode-profiles');
+
+            // Clean 60fps entrance animation without layout thrashing
+            profileCard1.classList.remove('anim-profile-1');
+            profileCard2.classList.remove('anim-profile-2');
+            requestAnimationFrame(() => {
+                profileCard1.classList.add('anim-profile-1');
+                profileCard2.classList.add('anim-profile-2');
+            });
+        }
+
+        function backToHub() {
+            activeApp = null;
+            mainContainer.classList.remove('mode-profiles');
+            // Show both cards again on home hub
+            cardEnvelope.classList.remove('hidden');
+            cardStock.classList.remove('hidden');
+            cardEnvelope.classList.remove('ring-4', 'ring-sky-400', 'border-sky-500', 'shadow-2xl');
+            cardStock.classList.remove('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
+        }
 
         cardEnvelope.addEventListener('click', (e) => {
             e.preventDefault();
-            profileModal.classList.remove('hidden');
+            openEnvelopeProfiles();
         });
-
-        const cardStock = document.getElementById('card-stock');
-        const stockProfileModal = document.getElementById('stock-profile-modal');
-        const closeStockModal = document.getElementById('close-stock-modal');
 
         cardStock.addEventListener('click', (e) => {
+            if (e.target.closest('a')) return;
             e.preventDefault();
-            stockProfileModal.classList.remove('hidden');
+            openStockProfiles();
         });
 
-        closeStockModal.addEventListener('click', () => {
-            stockProfileModal.classList.add('hidden');
+        btnBackHub.addEventListener('click', (e) => {
+            e.preventDefault();
+            backToHub();
         });
 
-        closeStockModal.addEventListener('mouseover', () => closeStockModal.style.color = 'var(--text)');
-        closeStockModal.addEventListener('mouseout', () => closeStockModal.style.color = 'var(--muted)');
-
-        stockProfileModal.addEventListener('click', (e) => {
-            if (e.target === stockProfileModal) stockProfileModal.classList.add('hidden');
-        });
-
-        closeModal.addEventListener('click', () => {
-            profileModal.classList.add('hidden');
-        });
-
-        closeModal.addEventListener('mouseover', () => closeModal.style.color = 'var(--text)');
-        closeModal.addEventListener('mouseout', () => closeModal.style.color = 'var(--muted)');
-
-        profileModal.addEventListener('click', (e) => {
-            if (e.target === profileModal) profileModal.classList.add('hidden');
-        });
-
-        async function checkStatus() {
-            const statusDot = document.querySelector('.status-dot');
-            const statusText = document.querySelector('.status span');
-            try {
-                const res = await fetch('/api/envelope/status');
-                const data = await res.json();
-                if (data.status === 'online') {
-                    statusDot.style.background = '#22c55e';
-                    statusDot.style.boxShadow = '0 0 10px #22c55e';
-                    statusText.textContent = `System Online`;
-                }
-            } catch (e) {
-                statusDot.style.background = '#ef4444';
-                statusDot.style.boxShadow = '0 0 10px #ef4444';
-                statusText.textContent = `System Offline / Searching...`;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mainContainer.classList.contains('mode-profiles')) {
+                backToHub();
             }
-        }
-        checkStatus();
-        setInterval(checkStatus, 5000);
-
-        // MAT Logo Canvas Animation disabled as requested (only static image is used)
+        });
     </script>
 </body>
 </html>
