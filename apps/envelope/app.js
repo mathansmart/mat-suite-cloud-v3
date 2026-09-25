@@ -1058,16 +1058,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStats();
     };
 
-    const toggleSelection = (id) => {
+    const toggleSelection = (id, keepFocus = false) => {
         const idx = selectedIds.indexOf(id);
         if (idx !== -1) {
             selectedIds.splice(idx, 1);
         } else {
             selectedIds.push(id);
         }
-        searchInput.value = '';
-        renderAddresses('');
-        searchInput.focus();
+        renderAddresses(searchInput.value || '');
+        if (keepFocus) {
+            searchInput.focus();
+        }
     };
 
     // --- Address Line Helpers ---
