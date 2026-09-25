@@ -553,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 const isActive = activeCategoryFilter === cat;
-                btn.className = `category-btn w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer border-none ${isActive ? 'active bg-blue-50 text-blue-700 font-bold' : 'text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent'}`;
+                btn.className = `category-btn w-full text-left px-3.5 py-2 rounded-xl text-[13px] font-semibold transition cursor-pointer border-none ${isActive ? 'active bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-white hover:text-slate-950 bg-transparent'}`;
                 btn.dataset.cat = cat;
                 btn.textContent = cat;
                 categoryList.appendChild(btn);
