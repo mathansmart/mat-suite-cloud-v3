@@ -112,57 +112,60 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
-            <header class="main-header flex flex-col md:flex-row items-center justify-between gap-4 p-4 sm:px-6 sm:py-3.5 bg-white rounded-3xl border border-slate-200/70 shadow-sm" style="background: #ffffff; border-radius: 26px; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02); border: 1px solid rgba(226, 232, 240, 0.8); margin: -1.5rem -1rem 0.75rem -1rem !important;">
-                <!-- Left Title: Company Name & Master Address Book & Total Contacts -->
-                <div class="flex items-center gap-3.5 flex-shrink-0">
-                    <div class="w-11 h-11 rounded-full bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-lg shadow-2xs flex-shrink-0" id="opp-company-crest">
-                        M
-                    </div>
-                    <div class="flex flex-col">
-                        <h2 id="opp-company-name" class="font-display font-black text-xl text-slate-900 leading-tight tracking-tight" style="margin: 0;">MILTON</h2>
-                        <span class="text-xs text-slate-500 font-medium mt-0.5">Master Address Book</span>
-                        <div class="flex items-center gap-1.5 mt-0.5 whitespace-nowrap">
-                            <span class="text-[9.5px] font-mono font-bold uppercase tracking-wider text-slate-400">TOTAL CONTACTS</span>
-                            <span id="stat-total" class="text-[10.5px] font-mono font-extrabold text-blue-600 bg-transparent">
-                                0
-                            </span>
+        <main class="main-content" style="display: flex; flex-direction: row; gap: 1.25rem; padding: 1.25rem 1rem; height: 100vh; overflow: hidden; box-sizing: border-box;">
+            
+            <!-- Left Workspace Column: Header + Address Book & Note Views -->
+            <div class="address-workspace-col" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.85rem; height: 100%; overflow: hidden;">
+                <!-- Main Header (Enlarged MILTON, Right-aligned Search & Recycle Bin) -->
+                <header class="main-header flex flex-col md:flex-row items-center justify-between gap-4 p-4 sm:px-6 sm:py-3 bg-white rounded-3xl border border-slate-200/70 shadow-sm" style="background: #ffffff; border-radius: 26px; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02); border: 1px solid rgba(226, 232, 240, 0.8); margin: 0 !important; position: static; flex-shrink: 0; width: 100%; box-sizing: border-box;">
+                    <!-- Left Title: Company Name (Enlarged MILTON) & Master Address Book & Total Contacts -->
+                    <div class="flex items-center gap-3.5 flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-black text-xl shadow-2xs flex-shrink-0" id="opp-company-crest">
+                            M
+                        </div>
+                        <div class="flex flex-col">
+                            <h2 id="opp-company-name" class="font-display font-black text-2xl text-slate-900 leading-tight tracking-tight" style="margin: 0; font-size: 1.65rem; font-weight: 900; letter-spacing: -0.02em;">MILTON</h2>
+                            <span class="text-xs text-slate-500 font-medium mt-0.5">Master Address Book</span>
+                            <div class="flex items-center gap-1.5 mt-0.5 whitespace-nowrap">
+                                <span class="text-[9.5px] font-mono font-bold uppercase tracking-wider text-slate-400">TOTAL CONTACTS</span>
+                                <span id="stat-total" class="text-[10.5px] font-mono font-extrabold text-blue-600 bg-transparent">
+                                    0
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Shifted to Left: Top Row (Search + Recycle) & Bottom Row (Select All / Deselect All) -->
-                <div class="flex flex-col items-start gap-1 w-full md:w-auto md:ml-6 mr-auto">
-                    <!-- Top Action Buttons Row: Search & Recycle Bin -->
-                    <div class="flex items-center gap-2.5 flex-wrap">
-                        <div class="searchBox">
-                            <input class="searchInput" type="text" id="search-input" placeholder="Search contacts..." autocomplete="new-password">
-                            <button class="searchButton" type="button" onclick="document.getElementById('search-input').focus()">
-                                <i class="material-icons">search</i>
+                    <!-- Right Side: Top Row (Search + Recycle) & Bottom Row (Select All / Deselect All) -->
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                        <!-- Top Action Buttons Row: Search & Recycle Bin -->
+                        <div class="flex items-center gap-2.5 flex-wrap justify-end">
+                            <div class="searchBox">
+                                <input class="searchInput" type="text" id="search-input" placeholder="Search contacts..." autocomplete="new-password">
+                                <button class="searchButton" type="button" onclick="document.getElementById('search-input').focus()">
+                                    <i class="material-icons">search</i>
+                                </button>
+                            </div>
+
+                            <!-- Hidden bulk-print-btn to preserve event listeners & shortcuts -->
+                            <button id="bulk-print-btn" style="display: none;"></button>
+
+                            <button id="recycle-bin-btn" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer" style="background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48; font-weight: 800; border-radius: 12px;">
+                                <i class="ti ti-trash text-sm"></i>
+                                <span class="uppercase tracking-wider">RECYCLE BIN</span>
                             </button>
                         </div>
 
-                        <!-- Hidden bulk-print-btn to preserve event listeners & shortcuts -->
-                        <button id="bulk-print-btn" style="display: none;"></button>
-
-                        <button id="recycle-bin-btn" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer" style="background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48; font-weight: 800; border-radius: 12px;">
-                            <i class="ti ti-trash text-sm"></i>
-                            <span class="uppercase tracking-wider">RECYCLE BIN</span>
-                        </button>
+                        <!-- Bottom: Select All / Deselect All right-aligned directly under Search & Recycle -->
+                        <div class="flex items-center text-[11px] font-semibold pr-1 text-slate-500">
+                            <button id="select-all-btn" class="text-slate-600 hover:text-blue-600 px-1 py-0.5 bg-transparent border-none cursor-pointer transition">Select All</button>
+                            <span class="text-slate-300 px-1">/</span>
+                            <button id="unselect-all-btn" class="text-slate-500 hover:text-blue-600 px-1 py-0.5 bg-transparent border-none cursor-pointer transition">Deselect All</button>
+                        </div>
                     </div>
+                </header>
 
-                    <!-- Bottom: Select All / Deselect All directly below Search & Recycle Bin -->
-                    <div class="flex items-center text-[11px] font-semibold pl-1 text-slate-500">
-                        <button id="select-all-btn" class="text-slate-600 hover:text-blue-600 px-1 py-0.5 bg-transparent border-none cursor-pointer transition">Select All</button>
-                        <span class="text-slate-300 px-1">/</span>
-                        <button id="unselect-all-btn" class="text-slate-500 hover:text-blue-600 px-1 py-0.5 bg-transparent border-none cursor-pointer transition">Deselect All</button>
-                    </div>
-                </div>
-            </header>
-
-            <div class="split-layout">
                 <!-- Left Column: Address Book List -->
-                <div class="address-list-section">
+                <div class="address-list-section" style="flex: 1; overflow-y: auto; height: 100%; padding-right: 0.25rem;">
                     <!-- Transparent Active Category Indicator -->
                     <div id="category-status-banner" class="hidden items-center gap-2 px-1 py-1 mb-2 bg-transparent w-fit max-w-full transition-all duration-200">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-blue-600">CATEGORY:</span>
@@ -171,11 +174,6 @@
                         <button type="button" id="clear-category-filter-btn" class="ml-1 text-slate-400 hover:text-rose-500 transition cursor-pointer p-0.5 bg-transparent border-none" title="Clear category filter">
                             <i class="ti ti-x text-xs"></i>
                         </button>
-                    </div>
-
-                    <div style="margin-bottom: 1.5rem;">
-                        <h1 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Address Book</h1>
-                        <p style="font-size: 0.8rem; color: var(--text-secondary);">Select the contacts you want to print.</p>
                     </div>
 
                     <section class="address-grid" id="address-list">
@@ -322,23 +320,23 @@
                         </div>
                     </div>
                 </div>
+            </div> <!-- End address-workspace-col -->
 
-                <!-- Right Column: Notebook Panel -->
-                <div class="notebook-panel">
-                    <div class="notebook-header">
-                        <h2>📝 Notebook</h2>
-                    </div>
-                    <div class="notebook-input-area">
-                        <textarea id="notebook-textarea" placeholder="Type a note here (e.g. reminders, custom margins...)"></textarea>
-                        <button id="save-note-btn" class="save-note-btn">💾 Save Note</button>
-                    </div>
-                    <div class="notes-list-title">Saved Notes</div>
-                    <div style="padding: 0 0 0.5rem 0;">
-                        <input type="text" id="notebook-search-input" placeholder="🔍 Search saved notes..." style="width: 100%; padding: 6px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); color: var(--text-primary); outline: none; box-sizing: border-box;">
-                    </div>
-                    <div id="notebook-notes-list" class="notes-scroll-container">
-                        <!-- Dynamically rendered notes cards -->
-                    </div>
+            <!-- Right Column: Notebook Panel (Top-level Column, side-by-side with Header) -->
+            <div class="notebook-panel" style="width: 290px; flex-shrink: 0; height: 100%; margin: 0; align-self: stretch; background: var(--sidebar-bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); padding: 1rem; display: flex; flex-direction: column; gap: 1rem; overflow: hidden;">
+                <div class="notebook-header">
+                    <h2>📝 Notebook</h2>
+                </div>
+                <div class="notebook-input-area">
+                    <textarea id="notebook-textarea" placeholder="Type a note here (e.g. reminders, custom margins...)"></textarea>
+                    <button id="save-note-btn" class="save-note-btn">💾 Save Note</button>
+                </div>
+                <div class="notes-list-title">Saved Notes</div>
+                <div style="padding: 0 0 0.5rem 0;">
+                    <input type="text" id="notebook-search-input" placeholder="🔍 Search saved notes..." style="width: 100%; padding: 6px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--primary-bg); color: var(--text-primary); outline: none; box-sizing: border-box;">
+                </div>
+                <div id="notebook-notes-list" class="notes-scroll-container">
+                    <!-- Dynamically rendered notes cards -->
                 </div>
             </div>
         </main>
