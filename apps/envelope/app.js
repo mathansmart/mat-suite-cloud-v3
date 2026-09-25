@@ -71,6 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
             badge.textContent = PROFILE === '1' ? 'MILTON' : 'VESTER';
             if(PROFILE === '2') badge.style.background = '#f43f5e';
         }
+        const oppName = document.getElementById('opp-company-name');
+        const oppCrest = document.getElementById('opp-company-crest');
+        if (oppName) oppName.textContent = PROFILE === '1' ? 'MILTON' : 'VESTER';
+        if (oppCrest) {
+            oppCrest.textContent = PROFILE === '1' ? 'M' : 'V';
+            if (PROFILE === '2') {
+                oppCrest.className = 'w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200 text-purple-700 flex items-center justify-center font-bold text-lg shadow-xs';
+            }
+        }
     }, 100);
 
     // --- Startup Connection Check ---
@@ -270,8 +279,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const updateBottomDock = (count) => {
+        const dock = document.getElementById('bottom-action-dock');
+        const countBadge = document.getElementById('dock-count-badge');
+        const countText = document.getElementById('dock-count-text');
+        if (!dock) return;
+
+        if (count > 0) {
+            if (countBadge) countBadge.textContent = count;
+            if (countText) countText.textContent = count === 1 ? '1 Address' : `${count} Addresses`;
+            dock.classList.remove('translate-y-36', 'opacity-0', 'pointer-events-none');
+            dock.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        } else {
+            dock.classList.add('translate-y-36', 'opacity-0', 'pointer-events-none');
+            dock.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        }
+    };
+
     const updateStats = () => {
-        statTotal.textContent = addresses.length;
+        if (statTotal) {
+            statTotal.textContent = addresses.length;
+        }
+        const allContactsBadge = document.getElementById('all-contacts-badge-count');
+        if (allContactsBadge) {
+            allContactsBadge.textContent = addresses.length;
+        }
         
         const count = selectedIds.length;
         const paddedCount = String(count).padStart(4, '0');
@@ -286,6 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statSelected) {
             statSelected.textContent = count;
         }
+
+        updateBottomDock(count);
     };
 
     // --- Export Logic ---
@@ -502,16 +536,52 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderCategories = () => {
-        // Render in Sidebar
+        const btnAll = document.getElementById('btn-all-contacts');
+        const catBadge = document.getElementById('categories-badge-count');
+        const allBadge = document.getElementById('all-contacts-badge-count');
+        const banner = document.getElementById('category-status-banner');
+        const bannerName = document.getElementById('current-category-name');
+        const bannerCount = document.getElementById('current-category-count');
+
+        if (catBadge) catBadge.textContent = categories.length;
+        if (allBadge) allBadge.textContent = addresses.length;
+
+        // Render other categories in Sidebar Collapsible List (#category-list)
         if (categoryList) {
-            categoryList.innerHTML = `<button class="category-btn ${activeCategoryFilter === 'All' ? 'active' : ''}" data-cat="All">All Contacts</button>`;
+            categoryList.innerHTML = '';
             categories.forEach(cat => {
                 const btn = document.createElement('button');
-                btn.className = `category-btn ${activeCategoryFilter === cat ? 'active' : ''}`;
+                btn.type = 'button';
+                const isActive = activeCategoryFilter === cat;
+                btn.className = `category-btn w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer border-none ${isActive ? 'active bg-blue-50 text-blue-700 font-bold' : 'text-slate-600 hover:bg-white hover:text-slate-900 bg-transparent'}`;
                 btn.dataset.cat = cat;
                 btn.textContent = cat;
                 categoryList.appendChild(btn);
             });
+        }
+
+        // Active State & Banner Handling
+        if (activeCategoryFilter === 'All') {
+            if (btnAll) {
+                btnAll.classList.add('active', 'bg-blue-50', 'text-blue-700', 'border-blue-200', 'font-bold');
+                btnAll.classList.remove('bg-transparent', 'border-transparent', 'text-slate-600');
+            }
+            if (banner) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
+        } else {
+            if (btnAll) {
+                btnAll.classList.remove('active', 'bg-blue-50', 'text-blue-700', 'border-blue-200', 'font-bold');
+                btnAll.classList.add('bg-transparent', 'border-transparent', 'text-slate-600');
+            }
+            if (banner) {
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+                if (bannerName) bannerName.textContent = activeCategoryFilter;
+                const matchCount = addresses.filter(a => a.category === activeCategoryFilter).length;
+                if (bannerCount) bannerCount.textContent = `(${matchCount} ${matchCount === 1 ? 'Address' : 'Addresses'})`;
+            }
         }
 
         // Render in Dropdown
@@ -644,6 +714,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCategories();
                 renderAddresses(searchInput.value);
             }
+        });
+    }
+
+    const categoriesToggleBtn = document.getElementById('categories-toggle-btn');
+    if (categoriesToggleBtn) {
+        categoriesToggleBtn.addEventListener('click', () => {
+            const list = document.getElementById('category-list');
+            const chevron = document.getElementById('categories-menu-chevron');
+            if (list) {
+                const isHidden = list.classList.toggle('hidden');
+                if (chevron) {
+                    if (isHidden) chevron.classList.remove('rotate-180');
+                    else chevron.classList.add('rotate-180');
+                }
+            }
+        });
+    }
+
+    const btnAllContacts = document.getElementById('btn-all-contacts');
+    if (btnAllContacts) {
+        btnAllContacts.addEventListener('click', () => {
+            activeCategoryFilter = 'All';
+            renderCategories();
+            renderAddresses(searchInput.value);
+        });
+    }
+
+    const clearCatBannerBtn = document.getElementById('clear-category-filter-btn');
+    if (clearCatBannerBtn) {
+        clearCatBannerBtn.addEventListener('click', () => {
+            activeCategoryFilter = 'All';
+            renderCategories();
+            renderAddresses(searchInput.value);
         });
     }
 
