@@ -1081,15 +1081,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (keepFocus) {
             searchInput.focus();
         }
-
-        if (hadSearchText) {
-            setTimeout(() => {
-                const selectedCard = addressList.querySelector(`.address-card[data-id="${id}"]`);
-                if (selectedCard) {
-                    selectedCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                }
-            }, 30);
-        }
     };
 
     // --- Address Line Helpers ---
