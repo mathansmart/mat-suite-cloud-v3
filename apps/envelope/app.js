@@ -1066,8 +1066,11 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedIds.push(id);
         }
 
-        // If user typed in search and selects a contact, clear search text without losing any selected data
+        // Check if user was searching or if search box was active
+        const searchBox = document.querySelector('.searchBox');
         const hadSearchText = searchInput && searchInput.value && searchInput.value.trim().length > 0;
+        const searchWasActive = hadSearchText || (searchBox && searchBox.classList.contains('active'));
+
         if (hadSearchText) {
             searchInput.value = '';
             const searchClearBtn = document.getElementById('search-clear-btn');
@@ -1078,7 +1081,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderAddresses('');
-        if (keepFocus) {
+
+        // If user was using search box, keep it OPEN and FOCUSED so they can immediately type the next contact without clicking again!
+        if (searchWasActive) {
+            if (searchBox) searchBox.classList.add('active');
+            setTimeout(() => {
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }, 10);
+        } else if (keepFocus) {
             searchInput.focus();
         }
     };
@@ -1342,8 +1354,24 @@ document.addEventListener('DOMContentLoaded', () => {
             searchClearBtn.classList.add('hidden');
             searchFocusIndex = -1;
             renderAddresses('');
+            const searchBox = document.querySelector('.searchBox');
+            if (searchBox) searchBox.classList.remove('active');
         });
     }
+
+    if (searchInput) {
+        searchInput.addEventListener('focus', () => {
+            const searchBox = document.querySelector('.searchBox');
+            if (searchBox) searchBox.classList.add('active');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        const searchBox = document.querySelector('.searchBox');
+        if (searchBox && !searchBox.contains(e.target) && !e.target.closest('.address-card')) {
+            searchBox.classList.remove('active');
+        }
+    });
 
     searchInput.addEventListener('keydown', (e) => {
         const cards = addressList.querySelectorAll('.address-card');
