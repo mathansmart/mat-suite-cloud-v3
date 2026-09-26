@@ -1065,9 +1065,30 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             selectedIds.push(id);
         }
-        renderAddresses(searchInput.value || '');
+
+        // If user typed in search and selects a contact, clear search text without losing any selected data
+        const hadSearchText = searchInput && searchInput.value && searchInput.value.trim().length > 0;
+        if (hadSearchText) {
+            searchInput.value = '';
+            const searchClearBtn = document.getElementById('search-clear-btn');
+            if (searchClearBtn) {
+                searchClearBtn.classList.add('hidden');
+            }
+            searchFocusIndex = -1;
+        }
+
+        renderAddresses('');
         if (keepFocus) {
             searchInput.focus();
+        }
+
+        if (hadSearchText) {
+            setTimeout(() => {
+                const selectedCard = addressList.querySelector(`.address-card[data-id="${id}"]`);
+                if (selectedCard) {
+                    selectedCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            }, 30);
         }
     };
 
@@ -1358,6 +1379,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (searchFocusIndex >= 0 && searchFocusIndex < cards.length) {
                 const focusedItem = cards[searchFocusIndex];
                 const rawId = focusedItem.dataset.id;
+                const addr = addresses.find(a => String(a.id) === rawId);
+                if (addr) toggleSelection(addr.id);
+            } else if (cards.length > 0) {
+                const firstItem = cards[0];
+                const rawId = firstItem.dataset.id;
                 const addr = addresses.find(a => String(a.id) === rawId);
                 if (addr) toggleSelection(addr.id);
             }
