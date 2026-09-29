@@ -1024,6 +1024,15 @@
       }
     }
 
+    @media (max-width: 1024px) {
+      .dash-layout-flex {
+        flex-direction: column !important;
+      }
+      .dash-sidebar-col {
+        width: 100% !important;
+      }
+    }
+
     .premium-tabs {
       display: flex;
       gap: 4px;
@@ -2180,9 +2189,31 @@
 
           </div>
 
-          <div style="display: block;">
-             <!-- Right Side Sidebar (Floated) -->
-             <div style="float: right; width: 300px; margin-left: 25px; margin-bottom: 25px;">
+          <div class="dash-layout-flex" style="display: flex; gap: 24px; align-items: flex-start;">
+             <!-- Left Side Main Content (Aligned at Top with Filter Bar) -->
+             <div style="flex: 1; min-width: 0;">
+                <!-- Modern Unified Dashboard Filter Bar (Matching User Design) -->
+                <div class="dash-filter-container">
+                  <select id="dash-sc-filter" class="dash-filter-select" onchange="renderDashboard()" title="Sub Category">
+                    <option value="">All Categories</option>
+                  </select>
+                  <select id="dash-cat-filter" class="dash-filter-select" onchange="renderDashboard()" title="Category">
+                    <option value="">All Categories</option>
+                  </select>
+                  <div class="dash-filter-search-wrap">
+                    <span class="dash-filter-search-icon"><i class="ti ti-search"></i></span>
+                    <input type="text" id="dash-search" class="dash-filter-search-input" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
+                    <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()" style="top:50%; transform:translateY(-50%);">✕</button>
+                    <div id="dash-search-drop" class="premium-dropdown" style="top: calc(100% + 8px); left: 0; right: 0;"></div>
+                  </div>
+                  <button type="button" class="dash-filter-clear-btn" onclick="clearDashFilter()">CLEAR FILTER</button>
+                </div>
+                <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:0;"></div>
+                <div id="dash-cat-tables"></div>
+             </div>
+
+             <!-- Right Side Sidebar -->
+             <div class="dash-sidebar-col" style="width: 300px; flex-shrink: 0;">
                 <!-- Overall Information Card -->
                 <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                    <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px;">
@@ -2239,30 +2270,6 @@
                    </div>
                 </div>
              </div>
-             <!-- Left Side Main Content -->
-             <div style="min-width: 0;">
-
-                <!-- Modern Unified Dashboard Filter Bar (Matching User Design) -->
-                <div class="dash-filter-container">
-                  <select id="dash-sc-filter" class="dash-filter-select" onchange="renderDashboard()" title="Sub Category">
-                    <option value="">All Categories</option>
-                  </select>
-                  <select id="dash-cat-filter" class="dash-filter-select" onchange="renderDashboard()" title="Category">
-                    <option value="">All Categories</option>
-                  </select>
-                  <div class="dash-filter-search-wrap">
-                    <span class="dash-filter-search-icon"><i class="ti ti-search"></i></span>
-                    <input type="text" id="dash-search" class="dash-filter-search-input" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
-                    <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()" style="top:50%; transform:translateY(-50%);">✕</button>
-                    <div id="dash-search-drop" class="premium-dropdown" style="top: calc(100% + 8px); left: 0; right: 0;"></div>
-                  </div>
-                  <button type="button" class="dash-filter-clear-btn" onclick="clearDashFilter()">CLEAR FILTER</button>
-                </div>
-                <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:0;"></div>
-                <div id="dash-cat-tables"></div>
-             </div>
-             
-             <div style="clear: both;"></div>
           </div>
         </div>
 
