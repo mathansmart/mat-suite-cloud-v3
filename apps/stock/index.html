@@ -2687,6 +2687,8 @@
     const PROFILE = urlParams.get('profile') || '1';
     const PROFILE_QUERY = `?profile=${PROFILE}`;
     const COMPANY_NAME = PROFILE === '2' ? 'FITVEE' : 'VESTER';
+    const API_BASE = (window.location.protocol === 'file:' || !window.location.host) ? 'http://localhost:3000' : '';
+    const CACHE_KEY = `gsm3_stock_cache_p${PROFILE}`;
 
     if (PROFILE === '2') {
       document.addEventListener('DOMContentLoaded', () => {
@@ -3015,7 +3017,10 @@
 
     async function persist() {
       try {
-        await fetch('/api/stock/data' + PROFILE_QUERY, {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ settings: S, products: P, transactions: T, users: USERS }));
+      } catch (e) {}
+      try {
+        await fetch(API_BASE + '/api/stock/data' + PROFILE_QUERY, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ settings: S, products: P, transactions: T, users: USERS })
@@ -9413,7 +9418,7 @@ function d2i(val) {
       const tb = document.getElementById('users-tbody');
       if (!tb) return;
       
-      const resp = await fetch('/api/stock/data' + PROFILE_QUERY);
+      const resp = await fetch(API_BASE + '/api/stock/data' + PROFILE_QUERY);
       const data = await resp.json();
       USERS = data.gsm3_users;
       let users = USERS;
@@ -9789,7 +9794,7 @@ function d2i(val) {
       const localMatch = USERS.find(x => x.username === u && x.password === p);
       
       try {
-        const resp = await fetch('/api/stock/data' + PROFILE_QUERY).catch(() => null);
+        const resp = await fetch(API_BASE + '/api/stock/data' + PROFILE_QUERY).catch(() => null);
         if (resp && resp.ok) {
           const data = await resp.json();
           // Merge server users with local ones if available
@@ -10239,7 +10244,7 @@ function d2i(val) {
 
     async function initApp(retry = 0) {
       try {
-        const resp = await fetch('/api/stock/data' + PROFILE_QUERY + '&v=' + Date.now());
+        const resp = await fetch(API_BASE + '/api/stock/data' + PROFILE_QUERY + '&v=' + Date.now());
         if (resp.ok) {
           const d = await resp.json();
           if (d.settings) S = d.settings;
@@ -10254,12 +10259,25 @@ function d2i(val) {
             });
           }
           if (d.users) USERS = d.users;
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ settings: S, products: P, transactions: T, users: USERS }));
+          } catch(e) {}
           updateStatus(true);
         } else {
           throw new Error('Not OK');
         }
       } catch (e) {
-        console.error('Connection failed, starting in standalone mode...');
+        console.warn('Server connection issue, restoring from local cache...');
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const cd = JSON.parse(cached);
+            if (cd.settings) S = cd.settings;
+            if (cd.products) P = cd.products;
+            if (cd.transactions) T = cd.transactions;
+            if (cd.users) USERS = cd.users;
+          }
+        } catch(err) {}
         updateStatus(false);
       } finally {
         if (!S.categories || S.categories.length === 0) {
