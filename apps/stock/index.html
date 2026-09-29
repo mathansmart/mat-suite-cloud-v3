@@ -4619,7 +4619,13 @@ function renderDashboard() {
       localStorage.setItem('gsm3_si_draft', JSON.stringify({ pids: siAddedPids, data: siTableData, date: document.getElementById('si-date') ? document.getElementById('si-date').value : '', sup: document.getElementById('si-supplier') ? document.getElementById('si-supplier').value : '' }));
     }
     function saveDraftSO() {
-      localStorage.setItem('gsm3_so_draft', JSON.stringify({ pids: soAddedPids, data: soData, date: document.getElementById('so-date') ? document.getElementById('so-date').value : '', cust: document.getElementById('so-customer') ? document.getElementById('so-customer').value : '' }));
+      if (!soAddedPids || soAddedPids.length === 0) {
+        try { localStorage.removeItem('gsm3_so_draft'); } catch(e) {}
+      } else {
+        try {
+          localStorage.setItem('gsm3_so_draft', JSON.stringify({ pids: soAddedPids, data: soData, date: document.getElementById('so-date') ? document.getElementById('so-date').value : '', cust: document.getElementById('so-customer') ? document.getElementById('so-customer').value : '' }));
+        } catch(e) {}
+      }
     }
 
 
@@ -5143,14 +5149,28 @@ function renderDashboard() {
     }
 
     function clearSoEntries() {
-      soData = {}; soAddedPids = [];
-      const s = document.getElementById('so-search'); if (s) s.value = '';
-      const dr = document.getElementById('so-search-drop'); if (dr) dr.style.display = 'none';
+      soData = {};
+      soAddedPids = [];
+      const s = document.getElementById('so-search');
+      if (s) s.value = '';
+      const clearBtn = document.getElementById('so-search-clear');
+      if (clearBtn) clearBtn.classList.remove('visible');
+      const dr = document.getElementById('so-search-drop');
+      if (dr) {
+        dr.style.display = 'none';
+        dr.innerHTML = '';
+      }
+      try {
+        localStorage.removeItem('gsm3_so_draft');
+      } catch (e) {}
+      saveDraftSO();
+      renderSoSearchDropdown();
       renderSoEntries();
+      updateSoSum();
     }
 
     function saveSoEntries() {
-      if (!soAddedPids.length) { showAlert('Stock Out', 'Please select a product!'); return }
+      if (!soAddedPids.length) { showAlert('Stock Out', 'Please select a product!'); return; }
       const dateDisp = document.getElementById('so-date').value || todayD();
       const date = d2i(dateDisp);
       const now = new Date().toTimeString().slice(0, 8);
@@ -5160,18 +5180,19 @@ function renderDashboard() {
         const d = soData[pid] || soData[Number(pid)]; if (!d || !p) return;
         if (!d.sizes) d.sizes = {};
         Object.entries(d.sizes).forEach(([sz, qty]) => {
-          if (!qty || qty <= 0) return;
+          const numQty = Number(qty) || 0;
+          if (!numQty || numQty <= 0) return;
           if (!p.s) p.s = {};
-          p.s[sz] = (p.s[sz] || 0) - qty;
+          p.s[sz] = (p.s[sz] || 0) - numQty;
           T.push({ 
             id: 'T' + Date.now() + Math.random(), 
-            d: date + 'T' + now, 
+            d: (date || todayStr()) + 'T' + now, 
             pid: p.id, 
             pn: p.n, 
             ci: p.ci, 
             sz, 
             tp: 'OUT', 
-            q: qty, 
+            q: numQty, 
             pa: d.supplier || '', 
             rf: d.invoice || '' 
           });
@@ -5182,7 +5203,9 @@ function renderDashboard() {
       if (saved > 0) {
         showCenterToast(`${saved} entries saved!`);
         clearSoEntries();
-        renderSoHistory(); updateBadge();
+        renderSoHistory();
+        renderDashboard();
+        updateBadge();
       } else { showAlert('Stock Out', 'Please enter quantity!'); }
     }
 
@@ -5930,22 +5953,41 @@ function d2i(val) {
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
-          if (draft.pids) soAddedPids = draft.pids.filter(pid => P.some(x => x.id === pid));
-          if (draft.data) {
-            soData = draft.data;
-            for (const k in soData) {
-              if (soData[k] && !soData[k].sizes) soData[k].sizes = {};
+          if (draft.pids && draft.pids.length > 0) {
+            soAddedPids = draft.pids.filter(pid => P.some(x => x.id === pid));
+            if (draft.data) {
+              soData = draft.data;
+              for (const k in soData) {
+                if (soData[k] && !soData[k].sizes) soData[k].sizes = {};
+              }
             }
+          } else {
+            soAddedPids = [];
+            soData = {};
           }
           if (draft.date && d) d.value = draft.date;
           if (draft.cust && custEl) custEl.value = draft.cust;
-        } catch(e) {}
+        } catch(e) {
+          soAddedPids = [];
+          soData = {};
+        }
+      } else {
+        soAddedPids = [];
+        soData = {};
       }
 
-      if (d) d.addEventListener('change', saveDraftSO);
-      if (custEl) custEl.addEventListener('input', saveDraftSO);
+      if (d && !d.__hasDraftListener) {
+        d.addEventListener('change', saveDraftSO);
+        d.__hasDraftListener = true;
+      }
+      if (custEl && !custEl.__hasDraftListener) {
+        custEl.addEventListener('input', saveDraftSO);
+        custEl.__hasDraftListener = true;
+      }
 
-      renderSoEntries(); renderSoHistory();
+      renderSoSearchDropdown();
+      renderSoEntries();
+      renderSoHistory();
     }
     function clearAlertsSearch() {
       const searchEl = document.getElementById('alerts-search');
