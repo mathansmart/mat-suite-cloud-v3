@@ -880,6 +880,150 @@
       z-index: 10;
     }
 
+    /* MODERN UNIFIED DASHBOARD FILTER BAR (Image Matching) */
+    .dash-filter-container {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .dash-filter-select {
+      height: 40px;
+      padding: 0 32px 0 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background-color: #ffffff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23334155' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 13px 13px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: #334155;
+      cursor: pointer;
+      outline: none;
+      min-width: 135px;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    .dash-filter-select:hover {
+      border-color: #cbd5e1;
+    }
+
+    .dash-filter-select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .dash-filter-search-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 200px;
+    }
+
+    .dash-filter-search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 34px 0 36px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 400;
+      color: #1e293b;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    .dash-filter-search-input::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .dash-filter-search-input:hover {
+      border-color: #cbd5e1;
+    }
+
+    .dash-filter-search-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .dash-filter-search-icon {
+      position: absolute;
+      left: 12px;
+      color: #94a3b8;
+      font-size: 15px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .dash-filter-clear-btn {
+      height: 40px;
+      padding: 0 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .dash-filter-clear-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+
+    .dash-filter-clear-btn:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 900px) {
+      .dash-filter-container {
+        flex-wrap: wrap;
+      }
+      .dash-filter-select {
+        flex: 1;
+        min-width: 130px;
+      }
+      .dash-filter-search-wrap {
+        width: 100%;
+        order: 3;
+      }
+      .dash-filter-clear-btn {
+        order: 4;
+        margin-left: auto;
+      }
+    }
+
     .premium-tabs {
       display: flex;
       gap: 4px;
@@ -2098,26 +2242,23 @@
              <!-- Left Side Main Content -->
              <div style="min-width: 0;">
 
-                <div style="margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
-                  <div style="flex:1;min-width:200px;">
-                    <div style="display:flex; gap:10px; margin-bottom:10px;">
-                      <select id="dash-sc-filter" class="form-select" onchange="renderDashboard()">
-                        <option value="">All Categories</option>
-                      </select>
-                      <select id="dash-cat-filter" class="form-select" onchange="renderDashboard()">
-                        <option value="">All Categories</option>
-                      </select>
-                    </div>
-                    <div class="search-wrapper">
-                      <div class="search-icon-left"><i class="ti ti-search" style="font-size: 20px;"></i></div>
-                      <input type="text" id="dash-search" class="premium-search" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
-                      <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()">✕</button>
-                      <div id="dash-search-drop" class="premium-dropdown"></div>
-                    </div>
-                    <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
+                <!-- Modern Unified Dashboard Filter Bar (Matching User Design) -->
+                <div class="dash-filter-container">
+                  <select id="dash-sc-filter" class="dash-filter-select" onchange="renderDashboard()" title="Sub Category">
+                    <option value="">All Categories</option>
+                  </select>
+                  <select id="dash-cat-filter" class="dash-filter-select" onchange="renderDashboard()" title="Category">
+                    <option value="">All Categories</option>
+                  </select>
+                  <div class="dash-filter-search-wrap">
+                    <span class="dash-filter-search-icon"><i class="ti ti-search"></i></span>
+                    <input type="text" id="dash-search" class="dash-filter-search-input" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
+                    <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()" style="top:50%; transform:translateY(-50%);">✕</button>
+                    <div id="dash-search-drop" class="premium-dropdown" style="top: calc(100% + 8px); left: 0; right: 0;"></div>
                   </div>
-                  <button class="btn btn-ghost" onclick="clearDashFilter()" style="margin-top:42px;">Clear Filter</button>
+                  <button type="button" class="dash-filter-clear-btn" onclick="clearDashFilter()">CLEAR FILTER</button>
                 </div>
+                <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:0;"></div>
                 <div id="dash-cat-tables"></div>
              </div>
              
