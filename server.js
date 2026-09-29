@@ -3,6 +3,8 @@ const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
+const dns = require('dns');
+try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (e) {}
 const { existsSync, mkdirSync } = require('fs');
 
 const app = express();
@@ -615,9 +617,15 @@ app.post('/api/stock/data', (req, res) => {
                     await Product.deleteMany({});
                     await Product.insertMany(products.map(p => ({ id: p.id, data: JSON.stringify(p) })));
                 }
-                if (transactions) {
-                    await Transaction.deleteMany({});
-                    await Transaction.insertMany(transactions.map(t => ({ id: t.id, data: JSON.stringify(t) })));
+                if (transactions && transactions.length > 0) {
+                    const ops = transactions.map(t => ({
+                        updateOne: {
+                            filter: { id: t.id },
+                            update: { $set: { id: t.id, data: JSON.stringify(t) } },
+                            upsert: true
+                        }
+                    }));
+                    await Transaction.bulkWrite(ops);
                 }
                 if (users) {
                     await User.deleteMany({});
@@ -642,7 +650,16 @@ app.post('/api/stock/data', (req, res) => {
 
             if (settings) await fs.writeFile(setFile, JSON.stringify(settings, null, 2));
             if (products) await fs.writeFile(prodFile, JSON.stringify(products, null, 2));
-            if (transactions) await fs.writeFile(txFile, JSON.stringify(transactions, null, 2));
+            if (transactions && transactions.length > 0) {
+                let existingTx = [];
+                if (existsSync(txFile)) {
+                    try { existingTx = JSON.parse(await fs.readFile(txFile, 'utf8')) || []; } catch(e) {}
+                }
+                const txMap = new Map();
+                existingTx.forEach(t => txMap.set(t.id, t));
+                transactions.forEach(t => txMap.set(t.id, t));
+                await fs.writeFile(txFile, JSON.stringify(Array.from(txMap.values()), null, 2));
+            }
             if (users) await fs.writeFile(usrFile, JSON.stringify(users, null, 2));
             if (recycleBin) await fs.writeFile(recFile, JSON.stringify(recycleBin, null, 2));
         } catch (err) {
