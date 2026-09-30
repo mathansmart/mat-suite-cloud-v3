@@ -1025,11 +1025,11 @@
     }
 
     @media (max-width: 1024px) {
-      .dash-layout-flex {
-        flex-direction: column !important;
-      }
       .dash-sidebar-col {
+        float: none !important;
         width: 100% !important;
+        margin-left: 0 !important;
+        margin-bottom: 20px !important;
       }
     }
 
@@ -2189,31 +2189,27 @@
 
           </div>
 
-          <div class="dash-layout-flex" style="display: flex; gap: 24px; align-items: flex-start;">
-             <!-- Left Side Main Content (Aligned at Top with Filter Bar) -->
-             <div style="flex: 1; min-width: 0;">
-                <!-- Modern Unified Dashboard Filter Bar (Matching User Design) -->
-                <div class="dash-filter-container">
-                  <select id="dash-sc-filter" class="dash-filter-select" onchange="renderDashboard()" title="Sub Category">
-                    <option value="">All Categories</option>
-                  </select>
-                  <select id="dash-cat-filter" class="dash-filter-select" onchange="renderDashboard()" title="Category">
-                    <option value="">All Categories</option>
-                  </select>
-                  <div class="dash-filter-search-wrap">
-                    <span class="dash-filter-search-icon"><i class="ti ti-search"></i></span>
-                    <input type="text" id="dash-search" class="dash-filter-search-input" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
-                    <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()" style="top:50%; transform:translateY(-50%);">✕</button>
-                    <div id="dash-search-drop" class="premium-dropdown" style="top: calc(100% + 8px); left: 0; right: 0;"></div>
-                  </div>
-                  <button type="button" class="dash-filter-clear-btn" onclick="clearDashFilter()">CLEAR FILTER</button>
-                </div>
-                <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:0;"></div>
-                <div id="dash-cat-tables"></div>
-             </div>
+          <!-- Modern Unified Dashboard Filter Bar (Full Width Top Row - Image Matching) -->
+          <div class="dash-filter-container">
+            <select id="dash-sc-filter" class="dash-filter-select" onchange="renderDashboard()" title="Sub Category">
+              <option value="">All Categories</option>
+            </select>
+            <select id="dash-cat-filter" class="dash-filter-select" onchange="renderDashboard()" title="Category">
+              <option value="">All Categories</option>
+            </select>
+            <div class="dash-filter-search-wrap">
+              <span class="dash-filter-search-icon"><i class="ti ti-search"></i></span>
+              <input type="text" id="dash-search" class="dash-filter-search-input" placeholder="Search and select products..." autocomplete="off" oninput="renderDashProductDrop()" onfocus="renderDashProductDrop()" onkeydown="dropKeyNav(event,'dash-search-drop')">
+              <button class="search-clear-btn" id="dash-search-clear" onclick="clearDashSearch()" style="top:50%; transform:translateY(-50%);">✕</button>
+              <div id="dash-search-drop" class="premium-dropdown" style="top: calc(100% + 8px); left: 0; right: 0;"></div>
+            </div>
+            <button type="button" class="dash-filter-clear-btn" onclick="clearDashFilter()">CLEAR FILTER</button>
+          </div>
+          <div id="dash-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:0;"></div>
 
-             <!-- Right Side Sidebar -->
-             <div class="dash-sidebar-col" style="width: 300px; flex-shrink: 0;">
+          <div class="dash-layout-container" style="position: relative;">
+             <!-- Right Side Sidebar (Floated so content flows beside it and expands to 100% full width below it) -->
+             <div class="dash-sidebar-col" style="float: right; width: 300px; margin-left: 24px; margin-bottom: 24px;">
                 <!-- Overall Information Card -->
                 <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                    <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px;">
@@ -2270,6 +2266,10 @@
                    </div>
                 </div>
              </div>
+
+             <!-- Category Tables Container -->
+             <div id="dash-cat-tables"></div>
+             <div style="clear: both;"></div>
           </div>
         </div>
 
