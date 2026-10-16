@@ -2839,20 +2839,51 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const PROFILE = urlParams.get('profile') || '1';
-    const PROFILE_QUERY = `?profile=${PROFILE}`;
-    const COMPANY_NAME = PROFILE === '2' ? 'FITVEE' : 'VESTER';
+    const PROFILE_QUERY = `?profile=${encodeURIComponent(PROFILE)}`;
+    const urlCompany = urlParams.get('company');
+
+    let cachedCompanies = [];
+    try {
+        cachedCompanies = JSON.parse(localStorage.getItem('mat_stock_companies') || '[]');
+    } catch(e) {}
+    const matchedCompany = cachedCompanies.find(c => String(c.id) === String(PROFILE));
+
+    const COMPANY_NAME = (urlCompany && decodeURIComponent(urlCompany)) || 
+                         (matchedCompany ? matchedCompany.name : (PROFILE === '2' ? 'FITVEE' : 'VESTER'));
     const API_BASE = (window.location.protocol === 'file:' || !window.location.host) ? 'http://localhost:3000' : '';
     const CACHE_KEY = `gsm3_stock_cache_p${PROFILE}`;
 
-    if (PROFILE === '2') {
-      document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.title = `${COMPANY_NAME} Stock Manager`;
+      const companyTextEl = document.querySelector('.company-name-text');
+      if (companyTextEl) {
+        companyTextEl.textContent = COMPANY_NAME;
+      }
+
+      if (matchedCompany && matchedCompany.color) {
+        const colorMap = {
+          emerald: '#10b981',
+          sky: '#0284c7',
+          blue: '#2563eb',
+          indigo: '#4f46e5',
+          violet: '#7c3aed',
+          amber: '#d97706',
+          rose: '#e11d48'
+        };
+        const hex = colorMap[matchedCompany.color];
+        if (hex) {
+          document.documentElement.style.setProperty('--primary', hex);
+          document.documentElement.style.setProperty('--accent', hex);
+        }
+      }
+
+      if (PROFILE === '2') {
         document.documentElement.style.setProperty('--primary', '#10b981');
         document.documentElement.style.setProperty('--accent', '#10b981');
         const sidebar = document.querySelector('.sidebar');
         if (sidebar) {
           sidebar.style.background = 'linear-gradient(180deg, #064e3b 0%, #022c22 100%)';
         }
-        document.title = 'Fitvee Stock Manager';
         
         // Hide WhatsApp copy button and restrict Stock Print mode options
         const whatsappBtn = document.querySelector('button[onclick="copyWhatsAppStockText()"]');
@@ -2867,12 +2898,8 @@
           modeFilter.style.borderColor = 'var(--border)';
           modeFilter.style.color = 'var(--text-main)';
         }
-        
-        const companyTextEl = document.querySelector('.company-name-text');
-        if (companyTextEl) {
-          companyTextEl.textContent = COMPANY_NAME;
-        }
-      });
+      }
+    });
     }
 
     function getSubCategoryIcon(name) {
