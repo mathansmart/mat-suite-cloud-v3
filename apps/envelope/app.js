@@ -2192,13 +2192,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (noteDetailTitle) noteDetailTitle.textContent = (isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note');
                     noteDetailTime.textContent = note.time;
                     
+                    const noteSearchWrap = document.getElementById('note-search-wrap');
+                    const noteSearchClearBtn = document.getElementById('note-search-clear-btn');
                     if (excelViewerSearchInput) {
                         excelViewerSearchInput.value = '';
-                        if (isExcel) {
-                            excelViewerSearchInput.classList.remove('hidden');
-                        } else {
-                            excelViewerSearchInput.classList.add('hidden');
+                        if (noteSearchClearBtn) noteSearchClearBtn.classList.add('hidden');
+                        if (noteSearchWrap) {
+                            noteSearchWrap.classList.remove('hidden');
                         }
+                        excelViewerSearchInput.placeholder = isExcel ? 'Search rows in table...' : 'Search in this note...';
                     }
                     
                     if (isExcel && excelViewerContainer && excelViewerTable) {
@@ -2411,6 +2413,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (excelViewerContainer) excelViewerContainer.classList.add('hidden');
                         if (noteDetailContent) {
                             noteDetailContent.classList.remove('hidden');
+                            noteDetailContent.setAttribute('data-raw-text', note.text || '');
                             noteDetailContent.textContent = note.text;
                             
                             // Apply saved styles for Plain Note
@@ -2536,6 +2539,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                             
                             if (noteDetailSection) noteDetailSection.classList.add('hidden');
+                            const noteSearchWrap = document.getElementById('note-search-wrap');
+                            if (noteSearchWrap) noteSearchWrap.classList.add('hidden');
                             if (noteEditorSection) noteEditorSection.classList.remove('hidden');
                             hideAddressHeaderControls();
                         });
@@ -2576,6 +2581,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (noteDetailTitle && noteDetailTitle.textContent === ((isExcel ? '📊 ' : '📝 ') + (note.title || 'Untitled Note'))) {
                         if (noteDetailSection) noteDetailSection.classList.add('hidden');
                         if (excelViewerContainer) excelViewerContainer.classList.add('hidden');
+                        const noteSearchWrap = document.getElementById('note-search-wrap');
+                        if (noteSearchWrap) noteSearchWrap.classList.add('hidden');
                         if (addressListSection) {
                             addressListSection.classList.remove('hidden');
                             showAddressHeaderControls();
@@ -3477,6 +3484,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteDetailBackBtn && addressListSection && noteDetailSection) {
         noteDetailBackBtn.addEventListener('click', () => {
             noteDetailSection.classList.add('hidden');
+            const noteSearchWrap = document.getElementById('note-search-wrap');
+            if (noteSearchWrap) noteSearchWrap.classList.add('hidden');
+            if (excelViewerSearchInput) excelViewerSearchInput.value = '';
             addressListSection.classList.remove('hidden');
             showAddressHeaderControls();
         });
@@ -3497,29 +3507,74 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Bind real-time row search filter for Excel Viewer table
+    // Bind real-time row search filter for Excel Viewer table & Note Viewer
     const excelViewerSearchInput = document.getElementById('excel-viewer-search-input');
     const excelViewerTable = document.getElementById('excel-viewer-table');
-    if (excelViewerSearchInput && excelViewerTable) {
+    const noteSearchClearBtn = document.getElementById('note-search-clear-btn');
+
+    if (noteSearchClearBtn && excelViewerSearchInput) {
+        noteSearchClearBtn.addEventListener('click', () => {
+            excelViewerSearchInput.value = '';
+            noteSearchClearBtn.classList.add('hidden');
+            excelViewerSearchInput.dispatchEvent(new Event('input'));
+            excelViewerSearchInput.focus();
+        });
+    }
+
+    if (excelViewerSearchInput) {
         excelViewerSearchInput.addEventListener('input', () => {
-            const rawQuery = excelViewerSearchInput.value.trim();
-            const normalizedQuery = rawQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const rows = excelViewerTable.querySelectorAll('tr');
-            // Skip the header row
-            for (let i = 1; i < rows.length; i++) {
-                const tr = rows[i];
-                const cells = tr.querySelectorAll('td');
-                let matches = false;
-                cells.forEach(td => {
-                    const normalizedCell = td.textContent.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    if (normalizedCell.includes(normalizedQuery)) {
-                        matches = true;
-                    }
-                });
-                if (matches || rawQuery === '') {
-                    tr.style.display = '';
+            const rawVal = excelViewerSearchInput.value;
+            if (noteSearchClearBtn) {
+                if (rawVal.length > 0) {
+                    noteSearchClearBtn.classList.remove('hidden');
                 } else {
-                    tr.style.display = 'none';
+                    noteSearchClearBtn.classList.add('hidden');
+                }
+            }
+
+            const rawQuery = rawVal.trim();
+            const normalizedQuery = rawQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            // 1. Search Excel Table if present
+            if (excelViewerTable) {
+                const rows = excelViewerTable.querySelectorAll('tr');
+                // Skip the header row
+                for (let i = 1; i < rows.length; i++) {
+                    const tr = rows[i];
+                    const cells = tr.querySelectorAll('td');
+                    let matches = false;
+                    cells.forEach(td => {
+                        const normalizedCell = td.textContent.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        if (normalizedCell.includes(normalizedQuery)) {
+                            matches = true;
+                        }
+                    });
+                    if (matches || rawQuery === '') {
+                        tr.style.display = '';
+                    } else {
+                        tr.style.display = 'none';
+                    }
+                }
+            }
+
+            // 2. Search & Highlight in Plain Text Note if visible
+            const noteDetailContent = document.getElementById('note-detail-content');
+            if (noteDetailContent && !noteDetailContent.classList.contains('hidden')) {
+                const originalText = noteDetailContent.getAttribute('data-raw-text') || noteDetailContent.textContent;
+                if (!noteDetailContent.hasAttribute('data-raw-text')) {
+                    noteDetailContent.setAttribute('data-raw-text', originalText);
+                }
+                if (rawQuery === '') {
+                    noteDetailContent.textContent = originalText;
+                } else {
+                    const escaped = rawQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escaped})`, 'gi');
+                    const safeHtml = originalText
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(regex, '<mark style="background:#fef08a;color:#854d0e;padding:1px 3px;border-radius:3px;font-weight:700;">$1</mark>');
+                    noteDetailContent.innerHTML = safeHtml;
                 }
             }
         });
