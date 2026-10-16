@@ -464,41 +464,27 @@
                         <span id="profiles-badge" class="text-xs font-mono font-bold px-3 py-1.5 rounded-full bg-sky-400/20 text-sky-200 border border-sky-400/30 shadow-sm backdrop-blur-md">Printing Suite</span>
                     </div>
 
-                    <!-- 2 Large Animated Company Selection Cards -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                    <!-- Dynamic Animated Company Selection Cards Grid -->
+                    <div id="profiles-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 max-h-[460px] overflow-y-auto pr-1">
+                        <!-- Dynamic profile cards injected by JS -->
+                    </div>
 
-                        <!-- COMPANY PROFILE 1 -->
-                        <a id="profile-card-1" href="/envelope/?profile=1" class="studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 hover:border-sky-500 shadow-xl cursor-pointer bg-white group anim-profile-1">
-                            <div>
-                                <div class="flex items-center justify-between mb-3.5">
-                                    <span id="profile-icon-1" class="text-4xl group-hover:scale-110 transition-transform">🏢</span>
-                                    <span id="profile-badge-1" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 font-mono">Profile 1</span>
+                    <!-- Create New Company Option (Only shown for Stock Manager) -->
+                    <div id="create-company-wrapper" class="mt-4 hidden">
+                        <button type="button" id="btn-open-create-company" class="w-full p-4 rounded-2xl border-2 border-dashed border-white/35 hover:border-emerald-400/90 bg-white/5 hover:bg-white/12 text-white flex items-center justify-between transition-all duration-300 group cursor-pointer backdrop-blur-md shadow-lg hover:shadow-emerald-500/10">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform">
+                                    +
                                 </div>
-                                <h4 id="profile-name-1" class="font-bold text-xl text-slate-900 group-hover:text-sky-600 transition">MILTON</h4>
-                                <p id="profile-desc-1" class="text-xs text-slate-500 mt-1 leading-relaxed">Master Address Book</p>
-                            </div>
-                            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 group-hover:text-sky-700">
-                                <span>OPEN</span>
-                                <span class="w-7 h-7 rounded-lg bg-sky-50 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center transition font-bold">→</span>
-                            </div>
-                        </a>
-
-                        <!-- COMPANY PROFILE 2 -->
-                        <a id="profile-card-2" href="/envelope/?profile=2" class="studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 hover:border-rose-500 shadow-xl cursor-pointer bg-white group anim-profile-2">
-                            <div>
-                                <div class="flex items-center justify-between mb-3.5">
-                                    <span id="profile-icon-2" class="text-4xl group-hover:scale-110 transition-transform">🏭</span>
-                                    <span id="profile-badge-2" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-mono">Profile 2</span>
+                                <div class="text-left">
+                                    <h4 class="font-extrabold text-sm text-white group-hover:text-emerald-300 transition">Create New Company</h4>
+                                    <p class="text-[11px] text-slate-300">Add a new factory workspace with all stock manager options</p>
                                 </div>
-                                <h4 id="profile-name-2" class="font-bold text-xl text-slate-900 group-hover:text-rose-600 transition">VESTER</h4>
-                                <p id="profile-desc-2" class="text-xs text-slate-500 mt-1 leading-relaxed">Master Address Book</p>
                             </div>
-                            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-700">
-                                <span>OPEN</span>
-                                <span class="w-7 h-7 rounded-lg bg-rose-50 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center transition font-bold">→</span>
+                            <div class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 group-hover:bg-emerald-500 group-hover:text-white transition">
+                                + Add Company
                             </div>
-                        </a>
-
+                        </button>
                     </div>
                 </div>
 
@@ -512,6 +498,85 @@
         </div>
     </div>
 
+    <!-- CREATE COMPANY MODAL -->
+    <div id="create-company-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
+        <div class="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200/80 transform transition-all duration-300 scale-95 opacity-0" id="create-company-modal-card">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold">
+                        🏢
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-xl text-slate-900 font-['Outfit']">Create New Company</h3>
+                        <p class="text-xs text-slate-500">New Stock Manager factory workspace</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-close-company-modal" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition cursor-pointer border-none font-bold text-base">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form id="create-company-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company Name <span class="text-rose-500">*</span></label>
+                    <input type="text" id="new-company-name" required placeholder="e.g. ROYAL GARMENTS, NEW TEXTILES" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 outline-none font-bold text-slate-900 text-sm uppercase transition" autocomplete="off" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tagline / Subtitle</label>
+                    <input type="text" id="new-company-desc" placeholder="e.g. Garments Stock &amp; Inventory" value="Garments Stock" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 outline-none font-medium text-slate-800 text-sm transition" autocomplete="off" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Icon Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company Icon</label>
+                        <div class="flex items-center gap-2 flex-wrap" id="company-icon-options">
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-emerald-50 text-lg flex items-center justify-center transition cursor-pointer ring-2 ring-emerald-500" data-icon="🏭">🏭</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="🏢">🏢</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="👔">👔</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="🧵">🧵</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="🏬">🏬</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="📦">📦</button>
+                        </div>
+                    </div>
+
+                    <!-- Theme Accent Color -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Theme Accent</label>
+                        <div class="flex items-center gap-2 flex-wrap" id="company-color-options">
+                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-emerald-500 transition cursor-pointer ring-2 ring-offset-2 ring-emerald-500" data-color="emerald" title="Emerald"></button>
+                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-sky-500 transition cursor-pointer" data-color="sky" title="Sky"></button>
+                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-blue-600 transition cursor-pointer" data-color="blue" title="Blue"></button>
+                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-violet-600 transition cursor-pointer" data-color="violet" title="Violet"></button>
+                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-amber-500 transition cursor-pointer" data-color="amber" title="Amber"></button>
+                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-rose-500 transition cursor-pointer" data-color="rose" title="Rose"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guarantee Alert -->
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2.5">
+                    <span class="text-lg flex-shrink-0">✨</span>
+                    <span>Intha new company-kum Dashboard, Items, Categories, Stock In/Out, Reports, Print &amp; Export apdiyee ready-aa kedaikum.</span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" id="btn-cancel-company-modal" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 text-xs uppercase tracking-wider transition cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btn-submit-company" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 transition cursor-pointer flex items-center gap-1.5 border-none">
+                        <span>Create Company</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const mainContainer = document.getElementById('main-container');
         const cardEnvelope = document.getElementById('card-envelope');
@@ -522,124 +587,370 @@
         const profilesTitle = document.getElementById('profiles-title');
         const profilesSubtitle = document.getElementById('profiles-subtitle');
         const profilesBadge = document.getElementById('profiles-badge');
-        const profilesFooterCompany = document.getElementById('profiles-footer-company');
+        const profilesGrid = document.getElementById('profiles-grid');
+        const createCompanyWrapper = document.getElementById('create-company-wrapper');
 
-        const profileCard1 = document.getElementById('profile-card-1');
-        const profileIcon1 = document.getElementById('profile-icon-1');
-        const profileBadge1 = document.getElementById('profile-badge-1');
-        const profileName1 = document.getElementById('profile-name-1');
-        const profileDesc1 = document.getElementById('profile-desc-1');
+        // Modal Elements
+        const createCompanyModal = document.getElementById('create-company-modal');
+        const createCompanyModalCard = document.getElementById('create-company-modal-card');
+        const btnOpenCreateCompany = document.getElementById('btn-open-create-company');
+        const btnCloseCompanyModal = document.getElementById('btn-close-company-modal');
+        const btnCancelCompanyModal = document.getElementById('btn-cancel-company-modal');
+        const createCompanyForm = document.getElementById('create-company-form');
+        const newCompanyName = document.getElementById('new-company-name');
+        const newCompanyDesc = document.getElementById('new-company-desc');
+        const companyIconOptions = document.getElementById('company-icon-options');
+        const companyColorOptions = document.getElementById('company-color-options');
 
-        const profileCard2 = document.getElementById('profile-card-2');
-        const profileIcon2 = document.getElementById('profile-icon-2');
-        const profileBadge2 = document.getElementById('profile-badge-2');
-        const profileName2 = document.getElementById('profile-name-2');
-        const profileDesc2 = document.getElementById('profile-desc-2');
-
+        let selectedIcon = '🏭';
+        let selectedColor = 'emerald';
         let activeApp = null;
 
+        // Default Stock Companies
+        const DEFAULT_STOCK_COMPANIES = [
+            { id: "1", name: "VESTER", desc: "Garments Stock", icon: "🏭", color: "sky", badge: "Profile 1", isDefault: true },
+            { id: "2", name: "FITVEE", desc: "Garments Stock", icon: "🏢", color: "emerald", badge: "Profile 2", isDefault: true }
+        ];
+
+        let stockCompanies = [];
+
+        // Load Stock Companies from server / localStorage
+        async function loadStockCompanies() {
+            try {
+                const resp = await fetch('/api/stock/companies');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        stockCompanies = data;
+                        localStorage.setItem('mat_stock_companies', JSON.stringify(stockCompanies));
+                        return;
+                    }
+                }
+            } catch(e) {
+                console.log('Falling back to local storage companies:', e);
+            }
+
+            try {
+                const local = localStorage.getItem('mat_stock_companies');
+                if (local) {
+                    stockCompanies = JSON.parse(local);
+                    return;
+                }
+            } catch(e) {}
+
+            stockCompanies = [...DEFAULT_STOCK_COMPANIES];
+            localStorage.setItem('mat_stock_companies', JSON.stringify(stockCompanies));
+        }
+
+        // Save Stock Companies to server & localStorage
+        async function saveStockCompanies() {
+            localStorage.setItem('mat_stock_companies', JSON.stringify(stockCompanies));
+            try {
+                await fetch('/api/stock/companies', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(stockCompanies)
+                });
+            } catch(e) {
+                console.error('Failed to sync stock companies to server:', e);
+            }
+        }
+
+        // Color mapping for cards
+        const COLOR_THEMES = {
+            emerald: {
+                borderHover: 'hover:border-emerald-500',
+                textHover: 'group-hover:text-emerald-600',
+                badgeBg: 'bg-emerald-100 text-emerald-700',
+                arrowBg: 'bg-emerald-50 group-hover:bg-emerald-500'
+            },
+            sky: {
+                borderHover: 'hover:border-sky-500',
+                textHover: 'group-hover:text-sky-600',
+                badgeBg: 'bg-sky-100 text-sky-700',
+                arrowBg: 'bg-sky-50 group-hover:bg-sky-500'
+            },
+            blue: {
+                borderHover: 'hover:border-blue-500',
+                textHover: 'group-hover:text-blue-600',
+                badgeBg: 'bg-blue-100 text-blue-700',
+                arrowBg: 'bg-blue-50 group-hover:bg-blue-600'
+            },
+            violet: {
+                borderHover: 'hover:border-violet-500',
+                textHover: 'group-hover:text-violet-600',
+                badgeBg: 'bg-violet-100 text-violet-700',
+                arrowBg: 'bg-violet-50 group-hover:bg-violet-600'
+            },
+            amber: {
+                borderHover: 'hover:border-amber-500',
+                textHover: 'group-hover:text-amber-600',
+                badgeBg: 'bg-amber-100 text-amber-700',
+                arrowBg: 'bg-amber-50 group-hover:bg-amber-500'
+            },
+            rose: {
+                borderHover: 'hover:border-rose-500',
+                textHover: 'group-hover:text-rose-600',
+                badgeBg: 'bg-rose-100 text-rose-700',
+                arrowBg: 'bg-rose-50 group-hover:bg-rose-500'
+            }
+        };
+
+        function renderStockCards() {
+            if (!profilesGrid) return;
+            profilesGrid.innerHTML = '';
+
+            stockCompanies.forEach((comp, idx) => {
+                const theme = COLOR_THEMES[comp.color] || COLOR_THEMES.emerald;
+                const card = document.createElement('div');
+                card.className = `studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 ${theme.borderHover} shadow-xl bg-white group anim-profile-1 relative`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">${comp.icon || '🏭'}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${theme.badgeBg} font-mono">${comp.badge || `Profile ${idx + 1}`}</span>
+                                ${comp.isCustom ? `
+                                    <button type="button" class="btn-delete-company w-6 h-6 rounded-full hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition cursor-pointer border-none text-xs" data-id="${comp.id}" title="Delete company">
+                                        ✕
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-xl text-slate-900 ${theme.textHover} transition">${comp.name}</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${comp.desc || 'Garments Stock'}</p>
+                    </div>
+                    <a href="/stock/?profile=${encodeURIComponent(comp.id)}&company=${encodeURIComponent(comp.name)}" class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold ${comp.color === 'emerald' ? 'text-emerald-600 group-hover:text-emerald-700' : 'text-sky-600 group-hover:text-sky-700'} text-decoration-none">
+                        <span>OPEN</span>
+                        <span class="w-7 h-7 rounded-lg ${theme.arrowBg} group-hover:text-white flex items-center justify-center transition font-bold">→</span>
+                    </a>
+                `;
+
+                // Wire delete for custom company
+                const delBtn = card.querySelector('.btn-delete-company');
+                if (delBtn) {
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (confirm(`Are you sure you want to delete company "${comp.name}"?`)) {
+                            stockCompanies = stockCompanies.filter(c => String(c.id) !== String(comp.id));
+                            saveStockCompanies();
+                            renderStockCards();
+                        }
+                    });
+                }
+
+                profilesGrid.appendChild(card);
+            });
+        }
+
+        function renderEnvelopeCards() {
+            if (!profilesGrid) return;
+            profilesGrid.innerHTML = `
+                <!-- COMPANY PROFILE 1 -->
+                <a href="/envelope/?profile=1" class="studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 hover:border-sky-500 shadow-xl cursor-pointer bg-white group anim-profile-1">
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">🏢</span>
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 font-mono">Profile 1</span>
+                        </div>
+                        <h4 class="font-bold text-xl text-slate-900 group-hover:text-sky-600 transition">MILTON</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Master Address Book</p>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 group-hover:text-sky-700">
+                        <span>OPEN</span>
+                        <span class="w-7 h-7 rounded-lg bg-sky-50 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center transition font-bold">→</span>
+                    </div>
+                </a>
+
+                <!-- COMPANY PROFILE 2 -->
+                <a href="/envelope/?profile=2" class="studio-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 border-2 border-white/80 hover:border-rose-500 shadow-xl cursor-pointer bg-white group anim-profile-2">
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-4xl group-hover:scale-110 transition-transform">🏭</span>
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-mono">Profile 2</span>
+                        </div>
+                        <h4 class="font-bold text-xl text-slate-900 group-hover:text-rose-600 transition">VESTER</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Master Address Book</p>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-700">
+                        <span>OPEN</span>
+                        <span class="w-7 h-7 rounded-lg bg-rose-50 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center transition font-bold">→</span>
+                    </div>
+                </a>
+            `;
+        }
+
         function openEnvelopeProfiles() {
-            if (activeApp === 'envelope') return;
             activeApp = 'envelope';
 
-            // Setup Envelope Pro companies
             profilesTitle.textContent = "Envelope Pro — Company";
             profilesSubtitle.textContent = "Select address book workspace to open";
             profilesBadge.textContent = "Printing Suite";
             profilesBadge.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-full bg-sky-400/20 text-sky-200 border border-sky-400/30 shadow-sm backdrop-blur-md";
-            if (profilesFooterCompany) profilesFooterCompany.textContent = "Milton Garments Private Limited";
 
-            // Company 1: MILTON
-            profileCard1.href = "/envelope/?profile=1";
-            profileIcon1.textContent = "🏢";
-            profileBadge1.textContent = "Profile 1";
-            profileBadge1.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700 font-mono";
-            profileName1.textContent = "MILTON";
-            profileDesc1.textContent = "Master Address Book";
-
-            // Company 2: VESTER
-            profileCard2.href = "/envelope/?profile=2";
-            profileIcon2.textContent = "🏭";
-            profileBadge2.textContent = "Profile 2";
-            profileBadge2.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-mono";
-            profileName2.textContent = "VESTER";
-            profileDesc2.textContent = "Master Address Book";
+            if (createCompanyWrapper) createCompanyWrapper.classList.add('hidden');
+            renderEnvelopeCards();
 
             // Show only Envelope Pro, hide Stock Manager cleanly
             cardEnvelope.classList.remove('hidden');
             cardStock.classList.add('hidden');
-
-            // Highlight card
             cardEnvelope.classList.add('ring-4', 'ring-sky-400', 'border-sky-500', 'shadow-2xl');
             cardStock.classList.remove('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
 
-            // Slide to profiles
             mainContainer.classList.add('mode-profiles');
-
-            // Clean 60fps entrance animation without layout thrashing
-            profileCard1.classList.remove('anim-profile-1');
-            profileCard2.classList.remove('anim-profile-2');
-            requestAnimationFrame(() => {
-                profileCard1.classList.add('anim-profile-1');
-                profileCard2.classList.add('anim-profile-2');
-            });
         }
 
-        function openStockProfiles() {
-            if (activeApp === 'stock') return;
+        async function openStockProfiles() {
             activeApp = 'stock';
 
-            // Setup Stock Manager companies
             profilesTitle.textContent = "Stock Manager — Company";
             profilesSubtitle.textContent = "Select factory inventory workspace to open";
             profilesBadge.textContent = "Inventory";
             profilesBadge.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-full bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 shadow-sm backdrop-blur-md";
-            if (profilesFooterCompany) profilesFooterCompany.textContent = "VESTER CLOTHING COMPANY";
 
-            // Company 1: VESTER
-            profileCard1.href = "/stock/?profile=1";
-            profileIcon1.textContent = "🏭";
-            profileBadge1.textContent = "Profile 1";
-            profileBadge1.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700 font-mono";
-            profileName1.textContent = "VESTER";
-            profileDesc1.textContent = "Garments Stock";
-
-            // Company 2: FITVEE
-            profileCard2.href = "/stock/?profile=2";
-            profileIcon2.textContent = "🏢";
-            profileBadge2.textContent = "Profile 2";
-            profileBadge2.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-mono";
-            profileName2.textContent = "FITVEE";
-            profileDesc2.textContent = "Garments Stock";
+            await loadStockCompanies();
+            renderStockCards();
+            if (createCompanyWrapper) createCompanyWrapper.classList.remove('hidden');
 
             // Show only Stock Manager, hide Envelope Pro cleanly
             cardStock.classList.remove('hidden');
             cardEnvelope.classList.add('hidden');
-
-            // Highlight card
             cardStock.classList.add('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
             cardEnvelope.classList.remove('ring-4', 'ring-sky-400', 'border-sky-500', 'shadow-2xl');
 
-            // Slide to profiles
             mainContainer.classList.add('mode-profiles');
-
-            // Clean 60fps entrance animation without layout thrashing
-            profileCard1.classList.remove('anim-profile-1');
-            profileCard2.classList.remove('anim-profile-2');
-            requestAnimationFrame(() => {
-                profileCard1.classList.add('anim-profile-1');
-                profileCard2.classList.add('anim-profile-2');
-            });
         }
 
         function backToHub() {
             activeApp = null;
             mainContainer.classList.remove('mode-profiles');
-            // Show both cards again on home hub
+            if (createCompanyWrapper) createCompanyWrapper.classList.add('hidden');
             cardEnvelope.classList.remove('hidden');
             cardStock.classList.remove('hidden');
             cardEnvelope.classList.remove('ring-4', 'ring-sky-400', 'border-sky-500', 'shadow-2xl');
             cardStock.classList.remove('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
+        }
+
+        // Modal Controls
+        function openCreateModal() {
+            if (!createCompanyModal) return;
+            createCompanyForm.reset();
+            newCompanyDesc.value = "Garments Stock";
+            selectedIcon = '🏭';
+            selectedColor = 'emerald';
+            updateIconSelectionUI();
+            updateColorSelectionUI();
+            createCompanyModal.classList.remove('hidden');
+            setTimeout(() => {
+                createCompanyModalCard.classList.remove('scale-95', 'opacity-0');
+                createCompanyModalCard.classList.add('scale-100', 'opacity-100');
+                newCompanyName.focus();
+            }, 20);
+        }
+
+        function closeCreateModal() {
+            if (!createCompanyModal) return;
+            createCompanyModalCard.classList.remove('scale-100', 'opacity-100');
+            createCompanyModalCard.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                createCompanyModal.classList.add('hidden');
+            }, 200);
+        }
+
+        function updateIconSelectionUI() {
+            if (!companyIconOptions) return;
+            companyIconOptions.querySelectorAll('.icon-opt-btn').forEach(btn => {
+                if (btn.dataset.icon === selectedIcon) {
+                    btn.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50');
+                    btn.classList.remove('bg-slate-50');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-50');
+                    btn.classList.add('bg-slate-50');
+                }
+            });
+        }
+
+        function updateColorSelectionUI() {
+            if (!companyColorOptions) return;
+            companyColorOptions.querySelectorAll('.color-opt-btn').forEach(btn => {
+                if (btn.dataset.color === selectedColor) {
+                    btn.classList.add('ring-2', 'ring-offset-2', 'ring-emerald-500');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-emerald-500');
+                }
+            });
+        }
+
+        if (companyIconOptions) {
+            companyIconOptions.addEventListener('click', (e) => {
+                const btn = e.target.closest('.icon-opt-btn');
+                if (btn) {
+                    selectedIcon = btn.dataset.icon;
+                    updateIconSelectionUI();
+                }
+            });
+        }
+
+        if (companyColorOptions) {
+            companyColorOptions.addEventListener('click', (e) => {
+                const btn = e.target.closest('.color-opt-btn');
+                if (btn) {
+                    selectedColor = btn.dataset.color;
+                    updateColorSelectionUI();
+                }
+            });
+        }
+
+        if (btnOpenCreateCompany) {
+            btnOpenCreateCompany.addEventListener('click', openCreateModal);
+        }
+        if (btnCloseCompanyModal) {
+            btnCloseCompanyModal.addEventListener('click', closeCreateModal);
+        }
+        if (btnCancelCompanyModal) {
+            btnCancelCompanyModal.addEventListener('click', closeCreateModal);
+        }
+
+        if (createCompanyForm) {
+            createCompanyForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = newCompanyName.value.trim().toUpperCase();
+                const desc = newCompanyDesc.value.trim() || 'Garments Stock';
+
+                if (!name) {
+                    alert('Please enter a valid company name.');
+                    return;
+                }
+
+                // Check duplicate
+                if (stockCompanies.some(c => c.name.toUpperCase() === name)) {
+                    alert('A company with this name already exists.');
+                    return;
+                }
+
+                // Find next available profile ID
+                let nextNum = 3;
+                while (stockCompanies.some(c => String(c.id) === String(nextNum))) {
+                    nextNum++;
+                }
+
+                const newCompany = {
+                    id: String(nextNum),
+                    name: name,
+                    desc: desc,
+                    icon: selectedIcon,
+                    color: selectedColor,
+                    badge: `Profile ${nextNum}`,
+                    isCustom: true
+                };
+
+                stockCompanies.push(newCompany);
+                await saveStockCompanies();
+                renderStockCards();
+                closeCreateModal();
+            });
         }
 
         cardEnvelope.addEventListener('click', (e) => {
@@ -659,10 +970,17 @@
         });
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && mainContainer.classList.contains('mode-profiles')) {
-                backToHub();
+            if (e.key === 'Escape') {
+                if (createCompanyModal && !createCompanyModal.classList.contains('hidden')) {
+                    closeCreateModal();
+                } else if (mainContainer.classList.contains('mode-profiles')) {
+                    backToHub();
+                }
             }
         });
+
+        // Preload stock companies on startup
+        loadStockCompanies();
     </script>
 </body>
 </html>
