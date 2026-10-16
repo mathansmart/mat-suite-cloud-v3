@@ -53,7 +53,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Dynamic localStorage key for profile isolation
     const NOTEBOOK_STORAGE_KEY = `envelope_notebook_notes_prof_${PROFILE}`;
-    const mainSearchBar = document.querySelector('.search-bar');
+    const mainSearchBar = document.querySelector('.searchBox');
+    
+    function hideAddressHeaderControls() {
+        const searchBox = document.querySelector('.searchBox');
+        if (searchBox) {
+            searchBox.classList.add('hidden');
+            searchBox.classList.remove('active');
+        }
+        const selectActions = document.getElementById('header-select-actions');
+        if (selectActions) selectActions.classList.add('hidden');
+        const sInput = document.getElementById('search-input');
+        if (sInput) sInput.blur();
+    }
+
+    function showAddressHeaderControls() {
+        const searchBox = document.querySelector('.searchBox');
+        if (searchBox) {
+            searchBox.classList.remove('hidden');
+            searchBox.classList.remove('active');
+        }
+        const selectActions = document.getElementById('header-select-actions');
+        if (selectActions) selectActions.classList.remove('hidden');
+    }
     
     // Migration: If Milton (Profile 1) and new key is empty, but old shared key contains notes, copy them
     if (PROFILE === '1' && !localStorage.getItem(NOTEBOOK_STORAGE_KEY)) {
@@ -2515,13 +2537,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             if (noteDetailSection) noteDetailSection.classList.add('hidden');
                             if (noteEditorSection) noteEditorSection.classList.remove('hidden');
+                            hideAddressHeaderControls();
                         });
                     }
                     
                     if (addressListSection) {
                         addressListSection.classList.add('hidden');
-                        if (mainSearchBar) mainSearchBar.classList.add('hidden');
                     }
+                    hideAddressHeaderControls();
                     noteDetailSection.classList.remove('hidden');
                 }
             });
@@ -2555,7 +2578,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (excelViewerContainer) excelViewerContainer.classList.add('hidden');
                         if (addressListSection) {
                             addressListSection.classList.remove('hidden');
-                            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
+                            showAddressHeaderControls();
                         }
                     }
 
@@ -3272,7 +3295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Hide normal address list and active view note sections
             addressListSection.classList.add('hidden');
-            if (mainSearchBar) mainSearchBar.classList.add('hidden');
+            hideAddressHeaderControls();
             if (noteDetailSection) noteDetailSection.classList.add('hidden');
             
             // Show note editor section in the center
@@ -3291,7 +3314,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             noteEditorSection.classList.add('hidden');
             addressListSection.classList.remove('hidden');
-            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
+            showAddressHeaderControls();
         });
     }
 
@@ -3442,7 +3465,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Revert back to address list
             noteEditorSection.classList.add('hidden');
             addressListSection.classList.remove('hidden');
-            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
+            showAddressHeaderControls();
             
             showNotification('Note saved successfully!', 'success', 'Saved');
         });
@@ -3455,7 +3478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         noteDetailBackBtn.addEventListener('click', () => {
             noteDetailSection.classList.add('hidden');
             addressListSection.classList.remove('hidden');
-            if (mainSearchBar) mainSearchBar.classList.remove('hidden');
+            showAddressHeaderControls();
         });
     }
 
