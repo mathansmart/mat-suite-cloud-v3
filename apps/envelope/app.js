@@ -56,6 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainSearchBar = document.querySelector('.searchBox');
     
     function hideAddressHeaderControls() {
+        const mainHeader = document.getElementById('envelope-main-header') || document.querySelector('.main-header');
+        if (mainHeader) {
+            mainHeader.classList.add('hidden');
+        }
         const searchBox = document.querySelector('.searchBox');
         if (searchBox) {
             searchBox.classList.add('hidden');
@@ -68,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showAddressHeaderControls() {
+        const mainHeader = document.getElementById('envelope-main-header') || document.querySelector('.main-header');
+        if (mainHeader) {
+            mainHeader.classList.remove('hidden');
+        }
         const searchBox = document.querySelector('.searchBox');
         if (searchBox) {
             searchBox.classList.remove('hidden');
@@ -733,6 +741,10 @@ document.addEventListener('DOMContentLoaded', () => {
         categoryList.addEventListener('click', (e) => {
             if (e.target.classList.contains('category-btn')) {
                 activeCategoryFilter = e.target.dataset.cat;
+                if (noteDetailSection) noteDetailSection.classList.add('hidden');
+                if (noteEditorSection) noteEditorSection.classList.add('hidden');
+                if (addressListSection) addressListSection.classList.remove('hidden');
+                showAddressHeaderControls();
                 renderCategories();
                 renderAddresses(searchInput.value);
             }
@@ -758,6 +770,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnAllContacts) {
         btnAllContacts.addEventListener('click', () => {
             activeCategoryFilter = 'All';
+            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+            if (noteEditorSection) noteEditorSection.classList.add('hidden');
+            if (addressListSection) addressListSection.classList.remove('hidden');
+            showAddressHeaderControls();
             renderCategories();
             renderAddresses(searchInput.value);
         });
@@ -767,6 +783,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clearCatBannerBtn) {
         clearCatBannerBtn.addEventListener('click', () => {
             activeCategoryFilter = 'All';
+            if (noteDetailSection) noteDetailSection.classList.add('hidden');
+            if (noteEditorSection) noteEditorSection.classList.add('hidden');
+            if (addressListSection) addressListSection.classList.remove('hidden');
+            showAddressHeaderControls();
             renderCategories();
             renderAddresses(searchInput.value);
         });

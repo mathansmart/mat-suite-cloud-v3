@@ -314,6 +314,10 @@ select, input[type="range"], input[type="number"] {
     border-bottom: 1px solid var(--border-color);
 }
 
+.main-header.hidden {
+    display: none !important;
+}
+
 .search-bar {
     flex: 1;
     position: relative;
