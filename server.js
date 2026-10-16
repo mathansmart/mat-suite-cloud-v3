@@ -56,15 +56,20 @@ const STOCK_RECYCLE_FILE = path.join(STORAGE_DIR, 'stock_recycles.json');
 const STOCK_SETTINGS_FILE = path.join(STORAGE_DIR, 'stock_settings.json');
 const STOCK_USERS_FILE = path.join(STORAGE_DIR, 'stock_users.json');
 const STOCK_TRANSACTIONS_FILE = path.join(STORAGE_DIR, 'stock_transactions.json');
+const STOCK_COMPANIES_FILE = path.join(STORAGE_DIR, 'stock_companies.json');
 
 const getProfileFile = (filePath, profile) => {
+    if (!profile || profile === '1') {
+        return filePath;
+    }
     if (profile === '2') {
         if (filePath.includes('stock')) {
             return filePath.replace(/\.json$/, '_fitvee.json');
         }
         return filePath.replace(/\.json$/, '_vester.json');
     }
-    return filePath;
+    const cleanProfile = String(profile).replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+    return filePath.replace(/\.json$/, `_${cleanProfile}.json`);
 };
 
 // --- MongoDB Configuration ---
@@ -139,11 +144,26 @@ try {
     const StockUser2 = mongoose.model('StockUser2', StockUserSchema, 'stockusers2');
     const StockSettings2 = mongoose.model('StockSettings2', StockSettingsSchema, 'stocksettings2');
 
+    const dynamicStockModels = {};
     getStockModels = (profile) => {
+        if (!profile || profile === '1') {
+            return { Product: StockProduct, Transaction: StockTransaction, Recycle: StockRecycle, User: StockUser, Settings: StockSettings };
+        }
         if (profile === '2') {
             return { Product: StockProduct2, Transaction: StockTransaction2, Recycle: StockRecycle2, User: StockUser2, Settings: StockSettings2 };
         }
-        return { Product: StockProduct, Transaction: StockTransaction, Recycle: StockRecycle, User: StockUser, Settings: StockSettings };
+        const cleanProfile = String(profile).replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+        if (dynamicStockModels[cleanProfile]) {
+            return dynamicStockModels[cleanProfile];
+        }
+        const suffix = `_${cleanProfile}`;
+        const Product = mongoose.models[`StockProduct${suffix}`] || mongoose.model(`StockProduct${suffix}`, StockProductSchema, `stockproducts${suffix}`);
+        const Transaction = mongoose.models[`StockTransaction${suffix}`] || mongoose.model(`StockTransaction${suffix}`, StockTransactionSchema, `stocktransactions${suffix}`);
+        const Recycle = mongoose.models[`StockRecycle${suffix}`] || mongoose.model(`StockRecycle${suffix}`, StockRecycleSchema, `stockrecycles${suffix}`);
+        const User = mongoose.models[`StockUser${suffix}`] || mongoose.model(`StockUser${suffix}`, StockUserSchema, `stockusers${suffix}`);
+        const Settings = mongoose.models[`StockSettings${suffix}`] || mongoose.model(`StockSettings${suffix}`, StockSettingsSchema, `stocksettings${suffix}`);
+        dynamicStockModels[cleanProfile] = { Product, Transaction, Recycle, User, Settings };
+        return dynamicStockModels[cleanProfile];
     };
 
 } catch (e) {
@@ -198,8 +218,9 @@ app.use((req, res, next) => {
 // 3. Strict Profile Input Validation
 app.use((req, res, next) => {
     if (req.query && req.query.profile) {
-        if (req.query.profile !== '1' && req.query.profile !== '2') {
-            req.query.profile = '1'; // Force safe fallback
+        req.query.profile = String(req.query.profile).replace(/[^a-zA-Z0-9_-]/g, '');
+        if (!req.query.profile) {
+            req.query.profile = '1';
         }
     }
     next();
@@ -507,6 +528,37 @@ app.post(['/api/settings', '/api/envelope/settings'], async (req, res) => {
 
 
 // --- Stock APIs ---
+
+// Stock Companies Directory API
+app.get('/api/stock/companies', async (req, res) => {
+    try {
+        if (existsSync(STOCK_COMPANIES_FILE)) {
+            const data = await fs.readFile(STOCK_COMPANIES_FILE, 'utf8');
+            return res.json(JSON.parse(data));
+        }
+    } catch(err) {
+        console.error('Failed to read stock companies file:', err.message);
+    }
+    const defaultCompanies = [
+        { id: "1", name: "VESTER", desc: "Garments Stock", icon: "🏭", color: "sky", badge: "Profile 1", isDefault: true },
+        { id: "2", name: "FITVEE", desc: "Garments Stock", icon: "🏢", color: "emerald", badge: "Profile 2", isDefault: true }
+    ];
+    res.json(defaultCompanies);
+});
+
+app.post('/api/stock/companies', async (req, res) => {
+    try {
+        const companies = req.body;
+        if (!Array.isArray(companies)) {
+            return res.status(400).json({ error: 'Companies must be an array' });
+        }
+        await fs.writeFile(STOCK_COMPANIES_FILE, JSON.stringify(companies, null, 2));
+        res.json({ success: true, count: companies.length });
+    } catch(err) {
+        console.error('Failed to save stock companies:', err.message);
+        res.status(500).json({ error: 'Failed to save companies' });
+    }
+});
 
 app.post('/api/stock/login', async (req, res) => {
     const { username, password } = req.body;
