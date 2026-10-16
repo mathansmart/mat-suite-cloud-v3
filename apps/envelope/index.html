@@ -676,18 +676,14 @@
     </div>
 
     <!-- Floating Bottom Action Dock (Slides up when cards selected) -->
-    <div id="bottom-action-dock" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 translate-y-36 opacity-0 pointer-events-none transition-all duration-300 ease-out z-50 flex items-center gap-4 px-5 py-3 rounded-full bg-white/90 backdrop-blur-xl border border-white/80 shadow-2xl shadow-slate-900/15">
-        <div class="flex items-center gap-3">
-            <div class="relative flex items-center justify-center">
-                <span class="absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-60 animate-ping"></span>
-                <span class="relative flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-400 text-white font-mono font-black text-xs shadow-xs" id="dock-count-badge">0</span>
-            </div>
-            <div class="flex flex-col">
-                <span class="font-display font-black text-sm text-slate-900 tracking-tight" id="dock-count-text">0 Addresses</span>
-                <span class="text-[11px] font-medium text-slate-500 font-sans">Ready for bulk print</span>
-            </div>
+    <div id="bottom-action-dock" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 translate-y-36 opacity-0 pointer-events-none transition-all duration-300 ease-out z-50 flex items-center gap-3.5 px-4 py-2.5 rounded-full bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-2xl shadow-slate-900/15">
+        <div class="relative flex items-center justify-center pl-1">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-60 animate-ping"></span>
+            <span class="relative flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-400 text-white font-mono font-black text-xs shadow-xs" id="dock-count-badge">0</span>
         </div>
-        <div class="flex items-center gap-2.5">
+        <span id="dock-count-text" class="hidden"></span>
+        <div class="h-6 w-px bg-slate-200/80"></div>
+        <div class="flex items-center gap-2">
             <button type="button" onclick="document.getElementById('bulk-print-btn').click()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-display font-extrabold text-xs tracking-wider uppercase flex items-center gap-1.5 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/45 transition-all duration-200 active:scale-95 cursor-pointer border-none">
                 <i class="material-icons text-base">print</i>
                 <span>PRINT</span>

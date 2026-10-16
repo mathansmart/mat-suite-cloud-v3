@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (count > 0) {
             if (countBadge) countBadge.textContent = count;
-            if (countText) countText.textContent = count === 1 ? '1 Address' : `${count} Addresses`;
+            if (countText) countText.textContent = '';
             dock.classList.remove('translate-y-36', 'opacity-0', 'pointer-events-none');
             dock.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
         } else {
