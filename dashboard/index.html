@@ -498,79 +498,108 @@
         </div>
     </div>
 
-    <!-- CREATE COMPANY MODAL -->
-    <div id="create-company-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
-        <div class="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200/80 transform transition-all duration-300 scale-95 opacity-0" id="create-company-modal-card">
+    <!-- CREATE COMPANY MODAL (Ultra-Modern Executive Redesign) -->
+    <div id="create-company-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl hidden transition-all duration-300">
+        <div class="w-full max-w-lg bg-white rounded-[28px] p-6 sm:p-7 shadow-[0_30px_90px_-15px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.9)_inset] border border-slate-200/90 transform transition-all duration-300 scale-95 opacity-0 relative overflow-hidden" id="create-company-modal-card">
+            
+            <!-- Ambient Top Mesh Glow (Dynamically tinted) -->
+            <div id="modal-ambient-glow" class="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-36 bg-gradient-to-b from-emerald-400/20 via-teal-300/10 to-transparent blur-2xl pointer-events-none rounded-full transition-colors duration-500"></div>
+
             <!-- Modal Header -->
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4 relative z-10">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold">
-                        🏢
+                    <div id="modal-header-icon-box" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-50 to-teal-50 border border-emerald-200/60 text-2xl flex items-center justify-center shadow-xs transition-transform duration-300">
+                        🏭
                     </div>
                     <div>
-                        <h3 class="font-extrabold text-xl text-slate-900 font-['Outfit']">Create New Company</h3>
-                        <p class="text-xs text-slate-500">New Stock Manager factory workspace</p>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-extrabold text-xl text-slate-900 font-['Outfit'] tracking-tight">Create New Company</h3>
+                            <span class="text-[9.5px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono">STOCK</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium mt-0.5">Configure a new factory inventory workspace</p>
                     </div>
                 </div>
-                <button type="button" id="btn-close-company-modal" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition cursor-pointer border-none font-bold text-base">
+                <button type="button" id="btn-close-company-modal" class="w-8 h-8 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer border-none font-bold text-xs hover:rotate-90">
                     ✕
                 </button>
             </div>
 
+            <!-- Interactive Live Preview Card -->
+            <div id="company-live-preview" class="mb-4 p-3 rounded-2xl border-2 border-emerald-500/30 bg-gradient-to-r from-emerald-50/50 via-white to-slate-50/40 flex items-center justify-between transition-all duration-300 shadow-2xs relative z-10">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div id="preview-icon-box" class="w-10 h-10 rounded-xl bg-white shadow-2xs border border-slate-200 flex items-center justify-center text-xl flex-shrink-0 transition-transform">
+                        🏭
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h4 id="preview-name-text" class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight truncate">COMPANY NAME</h4>
+                            <span id="preview-badge-pill" class="text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex-shrink-0">Profile 3</span>
+                        </div>
+                        <p id="preview-desc-text" class="text-xs text-slate-500 mt-0.5 font-medium truncate">Garments Stock</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10.5px] font-extrabold text-emerald-600 bg-white/90 px-2 py-0.5 rounded-lg border border-emerald-200/60 shadow-2xs font-mono flex-shrink-0 ml-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>PREVIEW</span>
+                </div>
+            </div>
+
             <!-- Form -->
-            <form id="create-company-form" class="space-y-4">
+            <form id="create-company-form" class="space-y-3.5 relative z-10">
+                <!-- Company Name Input -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company Name <span class="text-rose-500">*</span></label>
-                    <input type="text" id="new-company-name" required placeholder="e.g. ROYAL GARMENTS, NEW TEXTILES" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 outline-none font-bold text-slate-900 text-sm uppercase transition" autocomplete="off" />
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider">Company Name</label>
+                        <span class="text-[9.5px] font-extrabold text-rose-500 bg-rose-50 border border-rose-200/80 px-1.5 py-0.5 rounded font-mono">REQUIRED</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="new-company-name" required placeholder="e.g. ROYAL GARMENTS, NEW TEXTILES" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-slate-50/70 focus:bg-white text-slate-900 font-extrabold text-sm tracking-wide uppercase transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 outline-none placeholder:text-slate-400 placeholder:font-normal placeholder:normal-case shadow-2xs" autocomplete="off" />
+                    </div>
                 </div>
 
+                <!-- Tagline / Subtitle Input -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tagline / Subtitle</label>
-                    <input type="text" id="new-company-desc" placeholder="e.g. Garments Stock &amp; Inventory" value="Garments Stock" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 outline-none font-medium text-slate-800 text-sm transition" autocomplete="off" />
+                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">Tagline / Subtitle</label>
+                    <input type="text" id="new-company-desc" placeholder="e.g. Garments Stock &amp; Inventory" value="Garments Stock" class="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-slate-50/70 focus:bg-white text-slate-800 font-semibold text-xs sm:text-sm transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 outline-none placeholder:text-slate-400 shadow-2xs" autocomplete="off" />
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Bento Control: Icon & Accent Color -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80">
                     <!-- Icon Selection -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company Icon</label>
-                        <div class="flex items-center gap-2 flex-wrap" id="company-icon-options">
-                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-emerald-50 text-lg flex items-center justify-center transition cursor-pointer ring-2 ring-emerald-500" data-icon="🏭">🏭</button>
-                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="🏢">🏢</button>
-                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="👔">👔</button>
-                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="🧵">🧵</button>
-                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="🏬">🏬</button>
-                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-lg flex items-center justify-center transition cursor-pointer" data-icon="📦">📦</button>
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Company Icon</label>
+                        <div class="flex items-center gap-1.5 flex-wrap" id="company-icon-options">
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-lg flex items-center justify-center transition-all cursor-pointer ring-2 ring-emerald-500 shadow-xs scale-105" data-icon="🏭" title="Factory">🏭</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-lg flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105" data-icon="🏢" title="Corporate">🏢</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-lg flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105" data-icon="👔" title="Garments">👔</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-lg flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105" data-icon="🧵" title="Textiles">🧵</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-lg flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105" data-icon="🏬" title="Showroom">🏬</button>
+                            <button type="button" class="icon-opt-btn w-9 h-9 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-lg flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105" data-icon="📦" title="Warehouse">📦</button>
                         </div>
                     </div>
 
                     <!-- Theme Accent Color -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Theme Accent</label>
-                        <div class="flex items-center gap-2 flex-wrap" id="company-color-options">
-                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-emerald-500 transition cursor-pointer ring-2 ring-offset-2 ring-emerald-500" data-color="emerald" title="Emerald"></button>
-                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-sky-500 transition cursor-pointer" data-color="sky" title="Sky"></button>
-                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-blue-600 transition cursor-pointer" data-color="blue" title="Blue"></button>
-                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-violet-600 transition cursor-pointer" data-color="violet" title="Violet"></button>
-                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-amber-500 transition cursor-pointer" data-color="amber" title="Amber"></button>
-                            <button type="button" class="color-opt-btn w-8 h-8 rounded-full bg-rose-500 transition cursor-pointer" data-color="rose" title="Rose"></button>
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Theme Accent</label>
+                        <div class="flex items-center gap-2 flex-wrap pt-0.5" id="company-color-options">
+                            <button type="button" class="color-opt-btn w-7 h-7 rounded-full bg-emerald-500 transition-all cursor-pointer ring-2 ring-offset-2 ring-emerald-500 shadow-sm scale-110" data-color="emerald" title="Emerald"></button>
+                            <button type="button" class="color-opt-btn w-7 h-7 rounded-full bg-sky-500 transition-all cursor-pointer hover:scale-110" data-color="sky" title="Sky"></button>
+                            <button type="button" class="color-opt-btn w-7 h-7 rounded-full bg-blue-600 transition-all cursor-pointer hover:scale-110" data-color="blue" title="Blue"></button>
+                            <button type="button" class="color-opt-btn w-7 h-7 rounded-full bg-violet-600 transition-all cursor-pointer hover:scale-110" data-color="violet" title="Violet"></button>
+                            <button type="button" class="color-opt-btn w-7 h-7 rounded-full bg-amber-500 transition-all cursor-pointer hover:scale-110" data-color="amber" title="Amber"></button>
+                            <button type="button" class="color-opt-btn w-7 h-7 rounded-full bg-rose-500 transition-all cursor-pointer hover:scale-110" data-color="rose" title="Rose"></button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Guarantee Alert -->
-                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2.5">
-                    <span class="text-lg flex-shrink-0">✨</span>
-                    <span>Intha new company-kum Dashboard, Items, Categories, Stock In/Out, Reports, Print &amp; Export apdiyee ready-aa kedaikum.</span>
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button type="button" id="btn-cancel-company-modal" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 text-xs uppercase tracking-wider transition cursor-pointer">
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 mt-1">
+                    <button type="button" id="btn-cancel-company-modal" class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 text-xs uppercase tracking-wider transition-all cursor-pointer active:scale-95">
                         Cancel
                     </button>
-                    <button type="submit" id="btn-submit-company" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 transition cursor-pointer flex items-center gap-1.5 border-none">
+                    <button type="submit" id="btn-submit-company" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-md shadow-emerald-600/30 hover:shadow-emerald-600/45 transition-all cursor-pointer flex items-center gap-1.5 border-none active:scale-95">
                         <span>Create Company</span>
-                        <span>→</span>
+                        <span class="text-xs font-bold">→</span>
                     </button>
                 </div>
             </form>
@@ -601,6 +630,14 @@
         const newCompanyDesc = document.getElementById('new-company-desc');
         const companyIconOptions = document.getElementById('company-icon-options');
         const companyColorOptions = document.getElementById('company-color-options');
+        const previewNameText = document.getElementById('preview-name-text');
+        const previewDescText = document.getElementById('preview-desc-text');
+        const previewIconBox = document.getElementById('preview-icon-box');
+        const previewBadgePill = document.getElementById('preview-badge-pill');
+        const companyLivePreview = document.getElementById('company-live-preview');
+        const modalAmbientGlow = document.getElementById('modal-ambient-glow');
+        const modalHeaderIconBox = document.getElementById('modal-header-icon-box');
+        const btnSubmitCompany = document.getElementById('btn-submit-company');
 
         let selectedIcon = '🏭';
         let selectedColor = 'emerald';
@@ -833,7 +870,103 @@
             cardStock.classList.remove('ring-4', 'ring-emerald-400', 'border-emerald-500', 'shadow-2xl');
         }
 
-        // Modal Controls
+        // Modal Controls & Live Preview
+        const THEME_CONFIG = {
+            emerald: {
+                previewBadge: "bg-emerald-100 text-emerald-700",
+                previewCard: "border-emerald-500/30 bg-gradient-to-r from-emerald-50/50 via-white to-slate-50/40",
+                glow: "from-emerald-400/20 via-teal-300/10",
+                headerIconBox: "from-emerald-50 to-teal-50 border-emerald-200/60",
+                submitBtn: "from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/30 hover:shadow-emerald-600/45"
+            },
+            sky: {
+                previewBadge: "bg-sky-100 text-sky-700",
+                previewCard: "border-sky-500/30 bg-gradient-to-r from-sky-50/50 via-white to-slate-50/40",
+                glow: "from-sky-400/20 via-cyan-300/10",
+                headerIconBox: "from-sky-50 to-cyan-50 border-sky-200/60",
+                submitBtn: "from-sky-600 via-cyan-600 to-sky-700 hover:from-sky-500 hover:to-cyan-500 shadow-sky-600/30 hover:shadow-sky-600/45"
+            },
+            blue: {
+                previewBadge: "bg-blue-100 text-blue-700",
+                previewCard: "border-blue-500/30 bg-gradient-to-r from-blue-50/50 via-white to-slate-50/40",
+                glow: "from-blue-400/20 via-indigo-300/10",
+                headerIconBox: "from-blue-50 to-indigo-50 border-blue-200/60",
+                submitBtn: "from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 shadow-blue-600/30 hover:shadow-blue-600/45"
+            },
+            violet: {
+                previewBadge: "bg-violet-100 text-violet-700",
+                previewCard: "border-violet-500/30 bg-gradient-to-r from-violet-50/50 via-white to-slate-50/40",
+                glow: "from-violet-400/20 via-purple-300/10",
+                headerIconBox: "from-violet-50 to-purple-50 border-violet-200/60",
+                submitBtn: "from-violet-600 via-purple-600 to-violet-700 hover:from-violet-500 hover:to-purple-500 shadow-violet-600/30 hover:shadow-violet-600/45"
+            },
+            amber: {
+                previewBadge: "bg-amber-100 text-amber-700",
+                previewCard: "border-amber-500/30 bg-gradient-to-r from-amber-50/50 via-white to-slate-50/40",
+                glow: "from-amber-400/20 via-orange-300/10",
+                headerIconBox: "from-amber-50 to-orange-50 border-amber-200/60",
+                submitBtn: "from-amber-600 via-orange-600 to-amber-700 hover:from-amber-500 hover:to-orange-500 shadow-amber-600/30 hover:shadow-amber-600/45"
+            },
+            rose: {
+                previewBadge: "bg-rose-100 text-rose-700",
+                previewCard: "border-rose-500/30 bg-gradient-to-r from-rose-50/50 via-white to-slate-50/40",
+                glow: "from-rose-400/20 via-pink-300/10",
+                headerIconBox: "from-rose-50 to-pink-50 border-rose-200/60",
+                submitBtn: "from-rose-600 via-pink-600 to-rose-700 hover:from-rose-500 hover:to-pink-500 shadow-rose-600/30 hover:shadow-rose-600/45"
+            }
+        };
+
+        function updateLivePreview() {
+            if (!companyLivePreview) return;
+            const nameVal = newCompanyName ? newCompanyName.value.trim().toUpperCase() : '';
+            const descVal = newCompanyDesc ? newCompanyDesc.value.trim() : '';
+
+            if (previewNameText) {
+                previewNameText.textContent = nameVal || 'COMPANY NAME';
+                previewNameText.className = nameVal
+                    ? "font-extrabold text-sm sm:text-base text-slate-900 tracking-tight truncate"
+                    : "font-extrabold text-sm sm:text-base text-slate-400 tracking-tight truncate italic";
+            }
+            if (previewDescText) {
+                previewDescText.textContent = descVal || 'Garments Stock';
+            }
+            if (previewIconBox) {
+                previewIconBox.textContent = selectedIcon || '🏭';
+            }
+            if (modalHeaderIconBox) {
+                modalHeaderIconBox.textContent = selectedIcon || '🏭';
+            }
+
+            // Calculate next profile number
+            let nextNum = 3;
+            if (Array.isArray(stockCompanies)) {
+                while (stockCompanies.some(c => String(c.id) === String(nextNum))) {
+                    nextNum++;
+                }
+            }
+            if (previewBadgePill) {
+                previewBadgePill.textContent = `Profile ${nextNum}`;
+            }
+
+            const theme = THEME_CONFIG[selectedColor] || THEME_CONFIG.emerald;
+
+            if (previewBadgePill) {
+                previewBadgePill.className = `text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-full flex-shrink-0 transition-colors ${theme.previewBadge}`;
+            }
+            if (companyLivePreview) {
+                companyLivePreview.className = `mb-4 p-3 rounded-2xl border-2 flex items-center justify-between transition-all duration-300 shadow-2xs relative z-10 ${theme.previewCard}`;
+            }
+            if (modalAmbientGlow) {
+                modalAmbientGlow.className = `absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-36 bg-gradient-to-b to-transparent blur-2xl pointer-events-none rounded-full transition-colors duration-500 ${theme.glow}`;
+            }
+            if (modalHeaderIconBox) {
+                modalHeaderIconBox.className = `w-11 h-11 rounded-2xl bg-gradient-to-tr text-2xl flex items-center justify-center shadow-xs transition-transform duration-300 ${theme.headerIconBox}`;
+            }
+            if (btnSubmitCompany) {
+                btnSubmitCompany.className = `px-5 py-2.5 rounded-xl bg-gradient-to-r text-white font-extrabold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center gap-1.5 border-none active:scale-95 ${theme.submitBtn}`;
+            }
+        }
+
         function openCreateModal() {
             if (!createCompanyModal) return;
             createCompanyForm.reset();
@@ -842,6 +975,7 @@
             selectedColor = 'emerald';
             updateIconSelectionUI();
             updateColorSelectionUI();
+            updateLivePreview();
             createCompanyModal.classList.remove('hidden');
             setTimeout(() => {
                 createCompanyModalCard.classList.remove('scale-95', 'opacity-0');
@@ -863,11 +997,11 @@
             if (!companyIconOptions) return;
             companyIconOptions.querySelectorAll('.icon-opt-btn').forEach(btn => {
                 if (btn.dataset.icon === selectedIcon) {
-                    btn.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50');
-                    btn.classList.remove('bg-slate-50');
+                    btn.classList.add('ring-2', 'ring-slate-900', 'bg-slate-100', 'scale-105');
+                    btn.classList.remove('bg-white');
                 } else {
-                    btn.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-50');
-                    btn.classList.add('bg-slate-50');
+                    btn.classList.remove('ring-2', 'ring-slate-900', 'bg-slate-100', 'scale-105');
+                    btn.classList.add('bg-white');
                 }
             });
         }
@@ -876,9 +1010,9 @@
             if (!companyColorOptions) return;
             companyColorOptions.querySelectorAll('.color-opt-btn').forEach(btn => {
                 if (btn.dataset.color === selectedColor) {
-                    btn.classList.add('ring-2', 'ring-offset-2', 'ring-emerald-500');
+                    btn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-900', 'scale-110');
                 } else {
-                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-emerald-500');
+                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-slate-900', 'scale-110');
                 }
             });
         }
@@ -889,6 +1023,7 @@
                 if (btn) {
                     selectedIcon = btn.dataset.icon;
                     updateIconSelectionUI();
+                    updateLivePreview();
                 }
             });
         }
@@ -899,8 +1034,16 @@
                 if (btn) {
                     selectedColor = btn.dataset.color;
                     updateColorSelectionUI();
+                    updateLivePreview();
                 }
             });
+        }
+
+        if (newCompanyName) {
+            newCompanyName.addEventListener('input', updateLivePreview);
+        }
+        if (newCompanyDesc) {
+            newCompanyDesc.addEventListener('input', updateLivePreview);
         }
 
         if (btnOpenCreateCompany) {
