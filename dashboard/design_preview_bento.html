@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAT WORKSPACE — Next-Gen Suite Hub</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        dark: {
+                            base: '#080c14',
+                            surface: '#0f172a',
+                            card: 'rgba(15, 23, 42, 0.65)',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            hover: 'rgba(255, 255, 255, 0.12)',
+                        }
+                    },
+                    boxShadow: {
+                        'glow-sky': '0 0 30px -5px rgba(14, 165, 233, 0.25)',
+                        'glow-emerald': '0 0 30px -5px rgba(16, 185, 129, 0.25)',
+                        'glow-rose': '0 0 30px -5px rgba(244, 63, 94, 0.25)',
+                        'glow-amber': '0 0 30px -5px rgba(245, 158, 11, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Ambient Glow & Noise Background */
+        .bg-mesh {
+            background-color: #080c14;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(244, 63, 94, 0.08) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.06) 0px, transparent 50%);
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+        }
+
+        /* Subtle grid background pattern */
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Shimmer on active cards */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        .shimmer-effect::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+            animation: shimmer 4s infinite;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-mesh bg-grid min-h-screen text-slate-100 selection:bg-brand-500/30 selection:text-brand-100 flex flex-col justify-between">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="border-b border-white/5 backdrop-blur-xl bg-dark-base/70 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <!-- Brand & Workspace Title -->
+            <div class="flex items-center gap-4">
+                <div class="relative group cursor-pointer">
+                    <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-brand-500 to-emerald-500 opacity-30 group-hover:opacity-70 blur transition duration-300"></div>
+                    <div class="relative h-11 px-3 bg-slate-900/90 border border-white/10 rounded-xl flex items-center gap-2">
+                        <img src="mat_workspace_logo_wing_transparent.png" alt="MAT Logo" class="h-8 w-auto object-contain" />
+                        <span class="font-display font-bold tracking-tight text-white text-base">MAT<span class="text-brand-400">.SUITE</span></span>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-slate-400 font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Cloud Unified v2.1.0</span>
+                </div>
+            </div>
+
+            <!-- Header Center: Quick Search / Command Pill -->
+            <div class="hidden md:flex items-center gap-3 bg-white/[0.04] border border-white/10 px-4 py-2 rounded-xl text-slate-400 text-sm w-80 hover:border-white/20 transition cursor-pointer">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <span class="flex-1 text-xs text-slate-400">Search apps, contacts, stock...</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300">⌘K</span>
+            </div>
+
+            <!-- Right Controls: Status & Profile Fast-Switch -->
+            <div class="flex items-center gap-3">
+                <div class="hidden lg:flex flex-col text-right">
+                    <span id="live-time" class="text-xs font-mono font-medium text-slate-200">14:25:00 IST</span>
+                    <span class="text-[11px] text-slate-400">Tirupur Hub • Connected</span>
+                </div>
+                
+                <div class="h-6 w-px bg-white/10 hidden sm:block"></div>
+
+                <!-- Active Profile Pill -->
+                <div class="flex items-center gap-2 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 border border-sky-500/20 px-3 py-1.5 rounded-xl">
+                    <span class="text-lg">🏭</span>
+                    <div class="text-left">
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-sky-400 leading-none">Profile</div>
+                        <div class="text-xs font-semibold text-white leading-tight">Milton / Vester</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BENTO CONTAINER -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+        <!-- Hero Tagline -->
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
+                    Executive <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400">Workspace Hub</span>
+                </h1>
+                <p class="text-sm text-slate-400 mt-1 max-w-xl">
+                    Integrated garment production suite: dispatch addresses, automated envelope printing, stock ledger, and executive letterhead publishing.
+                </p>
+            </div>
+            <!-- Quick Action Shortcuts -->
+            <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+                <span class="px-2 py-1 rounded bg-white/5 border border-white/5">Storage: D:\Desktop\PRINTER</span>
+            </div>
+        </div>
+
+        <!-- BENTO GRID (3 COLUMNS) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- BENTO 1: ENVELOPE PRO (Primary Feature Card - 2 cols on lg) -->
+            <div class="lg:col-span-2 glass-card rounded-3xl p-7 relative overflow-hidden group hover:shadow-glow-sky border-sky-500/20 hover:border-sky-400/40 shimmer-effect flex flex-col justify-between">
+                <!-- Background Accent Graphic -->
+                <div class="absolute -right-16 -top-16 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-sky-500/20 transition duration-500"></div>
+
+                <div>
+                    <!-- Card Header -->
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-sky-500/30 group-hover:scale-105 transition">
+                                ✉️
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="font-display font-bold text-xl text-white">Envelope Pro</h2>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 uppercase tracking-wide">Core</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-0.5">High-speed address book & professional envelope dispatch system</p>
+                            </div>
+                        </div>
+
+                        <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Printer Ready
+                        </span>
+                    </div>
+
+                    <!-- Mini Live Dashboard / Metrics Row inside Card -->
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-3.5 hover:bg-white/[0.06] transition">
+                            <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Address Book</div>
+                            <div class="text-xl font-bold text-white mt-1">Multi-Category</div>
+                            <div class="text-[10px] text-sky-400 mt-0.5">Auto-categorized</div>
+                        </div>
+                        <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-3.5 hover:bg-white/[0.06] transition">
+                            <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Bulk Print</div>
+                            <div class="text-xl font-bold text-emerald-400 mt-1">Digital Odo</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">4-digit counter</div>
+                        </div>
+                        <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-3.5 hover:bg-white/[0.06] transition">
+                            <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Format Engine</div>
+                            <div class="text-xl font-bold text-white mt-1">9 Preset Sizes</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">Custom margin tuning</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Actions Row -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/5">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-400">Quick Jump:</span>
+                        <a href="/apps/envelope/index.html" class="text-xs text-sky-400 hover:text-sky-300 hover:underline">Addresses</a>
+                        <span class="text-white/20">•</span>
+                        <a href="/apps/envelope/index.html" class="text-xs text-sky-400 hover:text-sky-300 hover:underline">Batch Print</a>
+                    </div>
+                    <a href="/apps/envelope/index.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-sky-500/20 hover:shadow-sky-500/40 transition duration-200">
+                        <span>LAUNCH ENVELOPE PRO</span>
+                        <svg class="w-4 h-4 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- BENTO 2: LETTER PAD STUDIO (Dedicated Spotlight Card) -->
+            <div class="glass-card rounded-3xl p-7 relative overflow-hidden group hover:shadow-glow-amber border-amber-500/20 hover:border-amber-400/40 flex flex-col justify-between">
+                <!-- Amber Aura -->
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition"></div>
+
+                <div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/30">
+                            📝
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wide">Studio</span>
+                    </div>
+
+                    <h3 class="font-display font-bold text-lg text-white">Letter Pad Studio</h3>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Executive document editor featuring MS-Word style ribbon, company letterheads, instant address insertion, and zero-leak rich text styling.
+                    </p>
+
+                    <!-- Feature Tags -->
+                    <div class="flex flex-wrap gap-1.5 mt-5">
+                        <span class="px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-300">Word Ribbon</span>
+                        <span class="px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-300">A4 WYSIWYG</span>
+                        <span class="px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-300">Direct Envelope Link</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-white/5 flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Direct Open</span>
+                    <a href="/apps/envelope/letterpad.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-amber-500/20 transition">
+                        <span>OPEN STUDIO</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- BENTO 3: STOCK MANAGER (Full Enterprise Inventory Card) -->
+            <div class="lg:col-span-2 glass-card rounded-3xl p-7 relative overflow-hidden group hover:shadow-glow-emerald border-emerald-500/20 hover:border-emerald-400/40 flex flex-col justify-between">
+                <div class="absolute -right-16 -top-16 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition"></div>
+
+                <div>
+                    <!-- Header -->
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-3xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition">
+                                📦
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="font-display font-bold text-xl text-white">Stock Manager Pro</h2>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">Enterprise</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-0.5">Garment inventory tracking, sales analytics, multi-company profile engine</p>
+                            </div>
+                        </div>
+
+                        <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+                            Dual Profile Active
+                        </span>
+                    </div>
+
+                    <!-- Profile Switcher Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <!-- Profile 1: VESTER -->
+                        <a href="/stock/?profile=1" class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-sky-500/30 hover:border-sky-400 p-4 rounded-2xl flex items-center justify-between group/vest transition duration-200 hover:shadow-lg hover:shadow-sky-500/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center text-xl">
+                                    🏭
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-white group-hover/vest:text-sky-300 transition">VESTER PROFILE</div>
+                                    <div class="text-[11px] text-slate-400">Garment Inventory Profile #1</div>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold text-sky-400 px-3 py-1 rounded-lg bg-sky-500/10 group-hover/vest:bg-sky-500 group-hover/vest:text-white transition">OPEN →</span>
+                        </a>
+
+                        <!-- Profile 2: FITVEE -->
+                        <a href="/stock/?profile=2" class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-emerald-500/30 hover:border-emerald-400 p-4 rounded-2xl flex items-center justify-between group/fit transition duration-200 hover:shadow-lg hover:shadow-emerald-500/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xl">
+                                    🏢
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-white group-hover/fit:text-emerald-300 transition">FITVEE PROFILE</div>
+                                    <div class="text-[11px] text-slate-400">Garment Inventory Profile #2</div>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold text-emerald-400 px-3 py-1 rounded-lg bg-emerald-500/10 group-hover/fit:bg-emerald-500 group-hover/fit:text-white transition">OPEN →</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Footer info inside card -->
+                <div class="flex items-center justify-between pt-4 border-t border-white/5 text-xs text-slate-400">
+                    <div class="flex items-center gap-4">
+                        <span>Realtime Stock Calc</span>
+                        <span class="text-white/20">•</span>
+                        <span>Multi-user Cloud Sync</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400">Click either profile above to launch directly</span>
+                </div>
+            </div>
+
+            <!-- BENTO 4: SYSTEM STATUS & DIAGNOSTICS CARD -->
+            <div class="glass-card rounded-3xl p-7 relative overflow-hidden group hover:shadow-lg border-white/10 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
+                                ⚙️
+                            </div>
+                            <h3 class="font-display font-bold text-sm text-white">System Diagnostics</h3>
+                        </div>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    </div>
+
+                    <div class="space-y-3 mt-4 text-xs font-mono">
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="text-slate-400">Node Server</span>
+                            <span class="text-emerald-400 font-semibold">Running (Port 3000)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="text-slate-400">Primary Storage</span>
+                            <span class="text-sky-300 font-semibold">D:\Desktop\PRINTER</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="text-slate-400">Active Profiles</span>
+                            <span class="text-amber-300 font-semibold">Vester / Fitvee / Milton</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="text-slate-400">Autosave Engine</span>
+                            <span class="text-emerald-400 font-semibold">Zero-Loss Enabled</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>MAT Cloud Suite</span>
+                    <span class="font-mono text-slate-400">Build 2026.09</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 bg-dark-base/50 backdrop-blur-md py-4">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>All services operating normally</span>
+            </div>
+            <div>
+                <span>© 2026 Milton Garments Private Limited • Designed with Inspo & 21st UI</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LIVE CLOCK SCRIPT -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            const clockEl = document.getElementById('live-time');
+            if (clockEl) {
+                clockEl.textContent = `${timeStr} IST`;
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
