@@ -2354,6 +2354,132 @@
   font-weight: 800;
   font-size: 11.5px;
 }
+/* Drill-down Card Styles */
+.cal-stat-card-clickable {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  user-select: none;
+}
+.cal-stat-card-clickable:hover {
+  transform: translateY(-2px);
+}
+.cal-stat-card-clickable.active-in {
+  border-color: #10b981 !important;
+  background: #ecfdf5 !important;
+  box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.25), 0 8px 16px rgba(16, 185, 129, 0.12) !important;
+}
+.cal-stat-card-clickable.active-out {
+  border-color: #f43f5e !important;
+  background: #fff1f2 !important;
+  box-shadow: 0 0 0 3.5px rgba(244, 63, 94, 0.25), 0 8px 16px rgba(244, 63, 94, 0.12) !important;
+}
+.cal-card-hint {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 6px;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.cal-drill-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.cal-drill-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+}
+.cal-drill-card.open {
+  border-color: #4f46e5;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.12);
+}
+.cal-drill-card-header {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cal-drill-prod-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  font-family: 'Outfit', sans-serif;
+}
+.cal-drill-total-qty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+}
+.cal-drill-total-qty.qty-in {
+  color: #059669;
+}
+.cal-drill-total-qty.qty-out {
+  color: #e11d48;
+}
+.cal-drill-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.cal-drill-card.open .cal-drill-chevron {
+  transform: rotate(180deg);
+  color: #4f46e5;
+}
+.cal-drill-sizes-panel {
+  background: #f8fafc;
+  border-top: 1px dashed var(--border);
+  padding: 14px;
+  animation: calMenuFadeIn 0.15s ease;
+}
+.cal-drill-sizes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.cal-size-box {
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.cal-size-tag {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.cal-size-val {
+  font-size: 12.5px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: #334155;
+}
+.cal-drill-meta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+}
 @media print {
   .sidebar, .cal-sidebar, .cal-nav-btns, .btn, .header {
     display: none !important;
@@ -10047,8 +10173,146 @@ function d2i(val) {
       gridContainer.innerHTML = html;
     }
 
+    let currentModalDateStr = '';
+    let currentModalType = 'IN';
+
+    function toggleItemSizes(key) {
+      const panel = document.getElementById('panel-' + key);
+      const card = document.getElementById('card-' + key);
+      if (panel && card) {
+        const isClosed = (panel.style.display === 'none' || panel.style.display === '');
+        panel.style.display = isClosed ? 'block' : 'none';
+        card.classList.toggle('open', isClosed);
+      }
+    }
+
+    function switchDateDrilldown(type) {
+      currentModalType = type;
+      renderDateDrilldownContent();
+    }
+
+    function renderDateDrilldownContent() {
+      const container = document.getElementById('cal-drilldown-area');
+      const cardIn = document.getElementById('cal-card-stock-in');
+      const cardOut = document.getElementById('cal-card-stock-out');
+
+      if (cardIn) cardIn.classList.toggle('active-in', currentModalType === 'IN');
+      if (cardOut) cardOut.classList.toggle('active-out', currentModalType === 'OUT');
+
+      if (!container || !Array.isArray(T)) return;
+
+      const dayTxns = T.filter(t => t && t.d && String(t.d).startsWith(currentModalDateStr) && t.tp === currentModalType);
+
+      if (dayTxns.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:24px 12px; background:var(--surface2); border:1.5px dashed var(--border); border-radius:12px; color:var(--text-muted); font-size:13px; font-weight:700;">
+            No ${currentModalType === 'IN' ? 'Stock In' : 'Stock Out'} items recorded on this date.
+          </div>
+        `;
+        return;
+      }
+
+      // Group by Product Name
+      const prodMap = {};
+      dayTxns.forEach(t => {
+        const pName = t.pn || 'Item';
+        if (!prodMap[pName]) {
+          prodMap[pName] = {
+            pn: pName,
+            totalQty: 0,
+            sizes: {},
+            parties: new Set(),
+            refs: new Set()
+          };
+        }
+        const q = Number(t.q) || 0;
+        prodMap[pName].totalQty += q;
+        const sz = t.sz || 'FREE';
+        if (!prodMap[pName].sizes[sz]) prodMap[pName].sizes[sz] = 0;
+        prodMap[pName].sizes[sz] += q;
+        if (t.pa) prodMap[pName].parties.add(t.pa);
+        if (t.rf) prodMap[pName].refs.add(t.rf);
+      });
+
+      const prodsList = Object.values(prodMap).sort((a, b) => b.totalQty - a.totalQty);
+      const isIN = (currentModalType === 'IN');
+      const badgeClass = isIN ? 'cal-pill-in' : 'cal-pill-out';
+      const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', 'XXXL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL'];
+
+      let itemsHtml = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:12px; font-weight:800; color:var(--text-main); font-family:'Outfit',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">
+            ${isIN ? '🟢 Stock In Products' : '🔴 Stock Out Products'} (${prodsList.length})
+          </div>
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted);">Click item to view sizes</span>
+        </div>
+      `;
+
+      itemsHtml += prodsList.map((prod, idx) => {
+        const itemKey = `item_${idx}`;
+        // Sort sizes
+        const sortedSizes = Object.keys(prod.sizes).sort((a, b) => {
+          const idxA = sizeOrder.indexOf(a.toUpperCase());
+          const idxB = sizeOrder.indexOf(b.toUpperCase());
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          if (idxA !== -1) return -1;
+          if (idxB !== -1) return 1;
+          const numA = parseFloat(a);
+          const numB = parseFloat(b);
+          if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+          return a.localeCompare(b);
+        });
+
+        const sizeBoxes = sortedSizes.map(sz => `
+          <div class="cal-size-box">
+            <span class="cal-size-tag">${escapeCalHtml(sz)}</span>
+            <span class="cal-size-val">${prod.sizes[sz].toLocaleString()} Boxes</span>
+          </div>
+        `).join('');
+
+        const partiesStr = Array.from(prod.parties).join(', ');
+        const refsStr = Array.from(prod.refs).join(', ');
+
+        return `
+          <div class="cal-drill-card" id="card-${itemKey}" onclick="toggleItemSizes('${itemKey}')">
+            <div class="cal-drill-card-header">
+              <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                <span class="cal-pill ${badgeClass}" style="padding:2px 8px; font-size:10px; border-radius:6px; flex-shrink:0;">
+                  ${isIN ? 'IN' : 'OUT'}
+                </span>
+                <span class="cal-drill-prod-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeCalHtml(prod.pn)}">
+                  ${escapeCalHtml(prod.pn)}
+                </span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+                <span class="cal-drill-total-qty ${isIN ? 'qty-in' : 'qty-out'}">
+                  ${isIN ? '+' : '-'}${prod.totalQty.toLocaleString()} Boxes
+                </span>
+                <i class="ti ti-chevron-down cal-drill-chevron" id="chevron-${itemKey}"></i>
+              </div>
+            </div>
+
+            <!-- Size Breakdown (Expands on click) -->
+            <div class="cal-drill-sizes-panel" id="panel-${itemKey}" style="display:none;" onclick="event.stopPropagation()">
+              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; display:flex; align-items:center; gap:5px;">
+                <i class="ti ti-ruler-2" style="color:#6366f1;"></i> Sizes Arrived &amp; Quantities:
+              </div>
+              <div class="cal-drill-sizes-grid">
+                ${sizeBoxes}
+              </div>
+              ${partiesStr ? `<div class="cal-drill-meta"><i class="ti ti-building-store"></i> <strong>Party:</strong> ${escapeCalHtml(partiesStr)}</div>` : ''}
+              ${refsStr ? `<div class="cal-drill-meta"><i class="ti ti-file-invoice"></i> <strong>Ref:</strong> ${escapeCalHtml(refsStr)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = itemsHtml;
+    }
+
     function showDateStockModal(dateStr) {
       if (!Array.isArray(T)) return;
+      currentModalDateStr = dateStr;
       const dayTxns = T.filter(t => t && t.d && String(t.d).startsWith(dateStr));
       if (!dayTxns.length) return;
 
@@ -10056,45 +10320,54 @@ function d2i(val) {
       const totalOut = dayTxns.filter(t => t.tp === 'OUT').reduce((acc, t) => acc + (Number(t.q) || 0), 0);
       const net = totalIn - totalOut;
 
+      currentModalType = (totalIn > 0) ? 'IN' : 'OUT';
+
       const dObj = new Date(dateStr + 'T00:00:00');
       const dateFormatted = dObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
       const modalHtml = `
-        <div style="display:flex; flex-direction:column; gap:16px; padding:10px 0;">
-          <!-- Stat Cards (Total Stock In & Total Stock Out Boxes) -->
-          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;">
-            <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:14px; padding:18px 14px; text-align:center; box-shadow:0 4px 12px rgba(16, 185, 129, 0.08);">
-              <div style="font-size:12px; font-weight:800; text-transform:uppercase; color:#065f46; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:5px;">
+        <div style="display:flex; flex-direction:column; gap:14px; padding:6px 0;">
+          <!-- Clickable Stat Cards (Stock In & Stock Out) -->
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
+            <div class="cal-stat-card-clickable" id="cal-card-stock-in" onclick="switchDateDrilldown('IN')" style="background:#ecfdf5; border:2px solid #a7f3d0; border-radius:14px; padding:14px 12px; text-align:center;">
+              <div style="font-size:11.5px; font-weight:800; text-transform:uppercase; color:#065f46; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:5px;">
                 <i class="ti ti-arrow-down-left" style="font-size:16px;"></i> Total Stock In
               </div>
-              <div style="font-size:26px; font-weight:900; color:#059669; font-family:'JetBrains Mono',monospace; margin-top:6px;">
-                +${totalIn.toLocaleString()} <span style="font-size:14px; font-weight:700;">Boxes</span>
+              <div style="font-size:24px; font-weight:900; color:#059669; font-family:'JetBrains Mono',monospace; margin-top:4px;">
+                +${totalIn.toLocaleString()} <span style="font-size:13px; font-weight:700;">Boxes</span>
               </div>
+              <div class="cal-card-hint" style="color:#065f46;"><i class="ti ti-hand-click"></i> Click to view items</div>
             </div>
 
-            <div style="background:#fff1f2; border:1.5px solid #fecdd3; border-radius:14px; padding:18px 14px; text-align:center; box-shadow:0 4px 12px rgba(244, 63, 94, 0.08);">
-              <div style="font-size:12px; font-weight:800; text-transform:uppercase; color:#9f1239; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:5px;">
+            <div class="cal-stat-card-clickable" id="cal-card-stock-out" onclick="switchDateDrilldown('OUT')" style="background:#fff1f2; border:2px solid #fecdd3; border-radius:14px; padding:14px 12px; text-align:center;">
+              <div style="font-size:11.5px; font-weight:800; text-transform:uppercase; color:#9f1239; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:5px;">
                 <i class="ti ti-arrow-up-right" style="font-size:16px;"></i> Total Stock Out
               </div>
-              <div style="font-size:26px; font-weight:900; color:#e11d48; font-family:'JetBrains Mono',monospace; margin-top:6px;">
-                -${totalOut.toLocaleString()} <span style="font-size:14px; font-weight:700;">Boxes</span>
+              <div style="font-size:24px; font-weight:900; color:#e11d48; font-family:'JetBrains Mono',monospace; margin-top:4px;">
+                -${totalOut.toLocaleString()} <span style="font-size:13px; font-weight:700;">Boxes</span>
               </div>
+              <div class="cal-card-hint" style="color:#9f1239;"><i class="ti ti-hand-click"></i> Click to view items</div>
             </div>
           </div>
 
           <!-- Net Movement Banner -->
-          <div style="background:var(--surface2); border:1.5px solid var(--border); border-radius:12px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:13px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Net Movement</span>
-            <span style="font-size:20px; font-weight:900; color:${net >= 0 ? '#059669' : '#e11d48'}; font-family:'JetBrains Mono',monospace;">
+          <div style="background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Net Movement</span>
+            <span style="font-size:17px; font-weight:900; color:${net >= 0 ? '#059669' : '#e11d48'}; font-family:'JetBrains Mono',monospace;">
               ${net >= 0 ? '+' : ''}${net.toLocaleString()} Boxes
             </span>
+          </div>
+
+          <!-- Drilldown Items Section -->
+          <div id="cal-drilldown-area" style="display:flex; flex-direction:column; gap:8px; max-height:48vh; overflow-y:auto; padding-right:4px;">
+            <!-- Rendered by renderDateDrilldownContent() -->
           </div>
         </div>
       `;
 
       const modalEl = document.getElementById('modal-overlay').querySelector('.modal');
-      modalEl.style.width = '520px';
-      modalEl.style.maxWidth = '92vw';
+      modalEl.style.width = '620px';
+      modalEl.style.maxWidth = '95vw';
       document.getElementById('modal-title').innerHTML = `📅 ${dateFormatted}`;
       document.getElementById('modal-content').innerHTML = modalHtml;
 
@@ -10107,6 +10380,7 @@ function d2i(val) {
       const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
       if (cancelBtn) cancelBtn.style.display = 'none';
 
+      renderDateDrilldownContent();
       document.getElementById('modal-overlay').classList.add('open');
     }
 
