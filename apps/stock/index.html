@@ -1995,6 +1995,331 @@
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+
+/* ========================================================
+   STOCK CALENDAR MODULE STYLES
+   ======================================================== */
+.cal-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+}
+@media (max-width: 992px) {
+  .cal-wrapper {
+    flex-direction: column;
+  }
+}
+.cal-sidebar {
+  width: 270px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (max-width: 992px) {
+  .cal-sidebar {
+    width: 100%;
+  }
+}
+.cal-sidebar-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cal-year-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cal-year-pill {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.cal-year-pill:hover {
+  border-color: var(--primary);
+  background: rgba(254, 159, 67, 0.08);
+}
+.cal-year-pill.active {
+  background: linear-gradient(135deg, #FE9F43 0%, #ea580c 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+}
+.cal-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.cal-month-pill {
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.cal-month-pill:hover {
+  border-color: var(--primary);
+  background: rgba(254, 159, 67, 0.08);
+}
+.cal-month-pill.active {
+  background: linear-gradient(135deg, #092C4C 0%, #1e3a5f 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 10px rgba(9, 44, 76, 0.3);
+}
+.cal-month-has-data {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+.cal-month-pill.active .cal-month-has-data {
+  background: #34d399;
+  box-shadow: 0 0 5px #34d399;
+}
+.cal-sidebar-summary {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cal-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.cal-summary-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.cal-summary-val {
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cal-main-area {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cal-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+}
+.cal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cal-title-text {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+.cal-nav-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cal-icon-btn:hover {
+  background: var(--surface2);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.cal-grid-container {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.cal-weekday-header {
+  background: #f8fafc;
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+.cal-weekday-header.sun {
+  color: #ea580c;
+}
+.cal-day-cell {
+  background: var(--surface);
+  min-height: 110px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+.cal-day-cell:hover {
+  background: #fffcf8;
+}
+.cal-day-cell.other-month {
+  background: #fbfcfe;
+  opacity: 0.45;
+  cursor: default;
+}
+.cal-day-cell.is-today {
+  background: #fffbf0;
+}
+.cal-day-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+.cal-date-number {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 5px;
+  border-radius: 6px;
+}
+.cal-day-cell.is-today .cal-date-number {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+}
+.cal-day-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.cal-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  user-select: none;
+}
+.cal-pill:hover {
+  transform: translateY(-1px);
+}
+.cal-pill-in {
+  background: #eefdf5;
+  border-left: 3px solid #10b981;
+  color: #065f46;
+}
+.cal-pill-in:hover {
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+.cal-pill-out {
+  background: #fff1f2;
+  border-left: 3px solid #ef4444;
+  color: #9f1239;
+}
+.cal-pill-out:hover {
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+.cal-pill-label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.cal-pill-qty {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+}
+@media print {
+  .sidebar, .cal-sidebar, .cal-nav-btns, .btn, .header {
+    display: none !important;
+  }
+  .app, .main-wrapper, .content, #section-calendar, .cal-wrapper, .cal-main-area {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+  .cal-grid-container {
+    border: 1px solid #000 !important;
+  }
+  .cal-weekday-header, .cal-day-cell {
+    border: 1px solid #ccc !important;
+  }
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -2020,6 +2345,7 @@
         <div class="nav-item active" onclick="nav('dashboard')" title="Dashboard"><span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span><div class="nav-label">Dashboard</div></div>
         <div class="nav-item" onclick="nav('preview')" title="Preview"><span class="nav-icon"><i class="ti ti-eye"></i></span><div class="nav-label">Preview</div></div>
         <div class="nav-item" onclick="nav('stock-print')" id="nav-item-stock-print" title="Stock Print"><span class="nav-icon"><i class="ti ti-printer"></i></span><div class="nav-label">Stock Print</div></div>
+        <div class="nav-item" onclick="nav('calendar')" id="nav-item-calendar" title="Calendar"><span class="nav-icon"><i class="ti ti-calendar"></i></span><div class="nav-label">Calendar</div></div>
         
         <div class="nav-item has-submenu" onclick="toggleSubmenu('stock-submenu')" id="nav-group-stock">
           <span class="nav-icon"><i class="ti ti-package"></i></span>
@@ -2328,6 +2654,76 @@
 
           <!-- Customer Stock List -->
           <div id="cs-stock-list"></div>
+        </div>
+
+        <!-- CALENDAR -->
+        <div class="section fade-up" id="section-calendar">
+          <div class="cal-wrapper">
+            <!-- Left Sidebar: Year & Month Filter -->
+            <div class="cal-sidebar">
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px;">
+                <span style="font-size:14px; font-weight:800; font-family:'Outfit',sans-serif; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                  <i class="ti ti-calendar-event" style="color:var(--primary); font-size:18px;"></i> Date Filter
+                </span>
+                <button class="btn btn-ghost" onclick="jumpCalToday()" style="padding:4px 8px; font-size:11px; height:auto; border:1px solid var(--border); font-weight:700;">Today</button>
+              </div>
+
+              <!-- Year Selection -->
+              <div>
+                <div class="cal-sidebar-section-title">
+                  <span>Year</span>
+                  <span id="cal-selected-year-badge" style="color:var(--primary); font-weight:800;">2026</span>
+                </div>
+                <div class="cal-year-list" id="cal-year-container"></div>
+              </div>
+
+              <!-- Month Selection -->
+              <div>
+                <div class="cal-sidebar-section-title">
+                  <span>Month</span>
+                  <span id="cal-selected-month-badge" style="color:var(--primary); font-weight:800;">May</span>
+                </div>
+                <div class="cal-month-grid" id="cal-month-container"></div>
+              </div>
+
+              <!-- Month Summary Box -->
+              <div class="cal-sidebar-summary" id="cal-sidebar-summary"></div>
+            </div>
+
+            <!-- Right Main Calendar Area -->
+            <div class="cal-main-area">
+              <div class="cal-top-bar">
+                <div class="cal-title-wrap">
+                  <span class="cal-title-text" id="cal-header-title">May 2026</span>
+                  <div class="cal-nav-btns">
+                    <button class="cal-icon-btn" onclick="prevCalMonth()" title="Previous Month"><i class="ti ti-chevron-left"></i></button>
+                    <button class="cal-icon-btn" onclick="nextCalMonth()" title="Next Month"><i class="ti ti-chevron-right"></i></button>
+                  </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                  <!-- Legend -->
+                  <div style="display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700;">
+                    <span style="display:inline-flex; align-items:center; gap:5px; color:#065f46; background:#eefdf5; padding:3px 8px; border-radius:6px; border:1px solid #a7f3d0;">
+                      <span style="width:8px; height:8px; border-radius:2px; background:#10b981;"></span> Stock In
+                    </span>
+                    <span style="display:inline-flex; align-items:center; gap:5px; color:#9f1239; background:#fff1f2; padding:3px 8px; border-radius:6px; border:1px solid #fecdd3;">
+                      <span style="width:8px; height:8px; border-radius:2px; background:#ef4444;"></span> Stock Out
+                    </span>
+                  </div>
+
+                  <button class="btn btn-ghost" onclick="printCalendarView()" style="border:1px solid var(--border); font-weight:700; height:34px; padding:0 10px; display:flex; align-items:center; gap:5px; font-size:12px;">
+                    <i class="ti ti-printer"></i> Print
+                  </button>
+                </div>
+              </div>
+
+              <!-- Calendar Weekdays + Grid -->
+              <div class="cal-grid-container" id="cal-grid-container">
+                <!-- Injected dynamically by renderCalendar() -->
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- INVENTORY -->
@@ -3595,7 +3991,7 @@
     }
     function tick() { const s = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });['clock', 'clock2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = s }) }
     tick();
-    const PT = { dashboard: 'Dashboard', preview: 'App Preview', 'stock-print': 'Stock Print', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Low Stock Alerts', transactions: 'Stock Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings', categories: 'Product Categories', subcategories: 'Sub Categories', suppliers: 'Suppliers' };
+    const PT = { dashboard: 'Dashboard', preview: 'App Preview', 'stock-print': 'Stock Print', calendar: 'Calendar', inventory: 'Inventory', 'stock-in': 'Stock In', 'stock-out': 'Stock Out', alerts: 'Low Stock Alerts', transactions: 'Stock Transactions', reports: 'Reports', bulk: 'Bulk Stock Out', settings: 'Settings', categories: 'Product Categories', subcategories: 'Sub Categories', suppliers: 'Suppliers' };
     
     function toggleSubmenu(id) {
       const el = document.getElementById(id);
@@ -3651,7 +4047,7 @@
       const mainContent = document.querySelector('.content');
       if (mainContent) mainContent.scrollTop = 0;
 
-      const fn = { dashboard: renderDashboard, preview: renderPreview, 'stock-print': renderCustomerShare, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), categories: renderSettingsCategories, subcategories: renderSettingsSubCategories, suppliers: renderSettingsSuppliers };
+      const fn = { dashboard: renderDashboard, preview: renderPreview, 'stock-print': renderCustomerShare, calendar: renderCalendar, inventory: renderInventory, 'stock-in': initSI, 'stock-out': initSO, alerts: renderAlerts, transactions: () => renderTxns(), reports: renderReports, bulk: () => renderBulkHistory(), categories: renderSettingsCategories, subcategories: renderSettingsSubCategories, suppliers: renderSettingsSuppliers };
       if (id === 'settings') {
         loadSettings();
       } else if (fn[id]) {
@@ -9260,6 +9656,409 @@ function d2i(val) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+
+    // ========================================================
+    // STOCK CALENDAR CONTROLLER & RENDER LOGIC
+    // ========================================================
+    let calSelectedYear = new Date().getFullYear();
+    let calSelectedMonth = new Date().getMonth(); // 0 - 11
+    const CAL_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const CAL_MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const CAL_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    function escapeCalHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getAvailableCalYears() {
+      const yearSet = new Set();
+      const currentY = new Date().getFullYear();
+      yearSet.add(currentY);
+      yearSet.add(currentY - 1);
+      yearSet.add(currentY + 1);
+
+      if (Array.isArray(T)) {
+        T.forEach(t => {
+          if (t && t.d) {
+            const m = String(t.d).match(/^(\d{4})/);
+            if (m) yearSet.add(parseInt(m[1], 10));
+          }
+        });
+      }
+      return Array.from(yearSet).sort((a, b) => a - b);
+    }
+
+    function getMonthTxnStats(year, monthIndex) {
+      let inQty = 0;
+      let outQty = 0;
+      let inCount = 0;
+      let outCount = 0;
+      const daysMap = {}; // key: 'YYYY-MM-DD' -> { inQty, outQty, inCount, outCount, txns: [] }
+
+      const targetPrefix = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+
+      if (Array.isArray(T)) {
+        T.forEach(t => {
+          if (!t || !t.d) return;
+          const dStr = String(t.d).substring(0, 10);
+          if (dStr.startsWith(targetPrefix)) {
+            if (!daysMap[dStr]) {
+              daysMap[dStr] = { inQty: 0, outQty: 0, inCount: 0, outCount: 0, txns: [] };
+            }
+            daysMap[dStr].txns.push(t);
+            const q = Number(t.q) || 0;
+            if (t.tp === 'IN') {
+              inQty += q;
+              inCount++;
+              daysMap[dStr].inQty += q;
+              daysMap[dStr].inCount++;
+            } else if (t.tp === 'OUT') {
+              outQty += q;
+              outCount++;
+              daysMap[dStr].outQty += q;
+              daysMap[dStr].outCount++;
+            }
+          }
+        });
+      }
+      return { inQty, outQty, inCount, outCount, daysMap };
+    }
+
+    function selectCalYear(y) {
+      calSelectedYear = y;
+      renderCalendar();
+    }
+
+    function selectCalMonth(m) {
+      calSelectedMonth = m;
+      renderCalendar();
+    }
+
+    function prevCalMonth() {
+      calSelectedMonth--;
+      if (calSelectedMonth < 0) {
+        calSelectedMonth = 11;
+        calSelectedYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextCalMonth() {
+      calSelectedMonth++;
+      if (calSelectedMonth > 11) {
+        calSelectedMonth = 0;
+        calSelectedYear++;
+      }
+      renderCalendar();
+    }
+
+    function jumpCalToday() {
+      const now = new Date();
+      calSelectedYear = now.getFullYear();
+      calSelectedMonth = now.getMonth();
+      renderCalendar();
+    }
+
+    function printCalendarView() {
+      window.print();
+    }
+
+    let calHasAutoSelectedLatestMonth = false;
+
+    function renderCalendar() {
+      const yearContainer = document.getElementById('cal-year-container');
+      const monthContainer = document.getElementById('cal-month-container');
+      const gridContainer = document.getElementById('cal-grid-container');
+      const headerTitle = document.getElementById('cal-header-title');
+      const yearBadge = document.getElementById('cal-selected-year-badge');
+      const monthBadge = document.getElementById('cal-selected-month-badge');
+      const summaryBox = document.getElementById('cal-sidebar-summary');
+
+      if (!gridContainer) return;
+
+      // Smart initial month focus: If current month has 0 transactions, jump to latest month that has data
+      if (!calHasAutoSelectedLatestMonth && Array.isArray(T) && T.length > 0) {
+        const curStats = getMonthTxnStats(calSelectedYear, calSelectedMonth);
+        if (curStats.inQty === 0 && curStats.outQty === 0) {
+          const validDates = T.filter(t => t && t.d).map(t => {
+            const m = String(t.d).match(/^(\d{4})-(\d{1,2})/);
+            return m ? { y: parseInt(m[1], 10), m: parseInt(m[2], 10) - 1 } : null;
+          }).filter(Boolean);
+          if (validDates.length > 0) {
+            validDates.sort((a, b) => (b.y * 12 + b.m) - (a.y * 12 + a.m));
+            calSelectedYear = validDates[0].y;
+            calSelectedMonth = validDates[0].m;
+          }
+        }
+        calHasAutoSelectedLatestMonth = true;
+      }
+
+      // 1. Header and Badges
+      if (headerTitle) headerTitle.textContent = `${CAL_MONTH_NAMES[calSelectedMonth]} ${calSelectedYear}`;
+      if (yearBadge) yearBadge.textContent = calSelectedYear;
+      if (monthBadge) monthBadge.textContent = CAL_MONTH_SHORT[calSelectedMonth];
+
+      // 2. Year Pills
+      if (yearContainer) {
+        const years = getAvailableCalYears();
+        yearContainer.innerHTML = years.map(y => `
+          <div class="cal-year-pill ${y === calSelectedYear ? 'active' : ''}" onclick="selectCalYear(${y})">${y}</div>
+        `).join('');
+      }
+
+      // 3. Month Pills with transaction presence indicators
+      if (monthContainer) {
+        const monthDataMap = {};
+        if (Array.isArray(T)) {
+          T.forEach(t => {
+            if (!t || !t.d) return;
+            const m = String(t.d).match(/^(\d{4})-(\d{1,2})/);
+            if (m && parseInt(m[1], 10) === calSelectedYear) {
+              const mo = parseInt(m[2], 10) - 1;
+              monthDataMap[mo] = true;
+            }
+          });
+        }
+
+        monthContainer.innerHTML = CAL_MONTH_SHORT.map((name, idx) => `
+          <div class="cal-month-pill ${idx === calSelectedMonth ? 'active' : ''}" onclick="selectCalMonth(${idx})">
+            ${name}
+            ${monthDataMap[idx] ? '<span class="cal-month-has-data" title="Transactions available"></span>' : ''}
+          </div>
+        `).join('');
+      }
+
+      // 4. Monthly Stats & Sidebar Overview
+      const stats = getMonthTxnStats(calSelectedYear, calSelectedMonth);
+      if (summaryBox) {
+        const net = stats.inQty - stats.outQty;
+        const netColor = net > 0 ? '#10b981' : (net < 0 ? '#ef4444' : 'var(--text-main)');
+        const netSign = net > 0 ? '+' : '';
+        const activeDaysCount = Object.keys(stats.daysMap).length;
+
+        summaryBox.innerHTML = `
+          <div style="font-weight:800; font-size:13px; color:var(--text-main); margin-bottom:4px; font-family:'Outfit',sans-serif;">
+            📊 ${CAL_MONTH_SHORT[calSelectedMonth]} ${calSelectedYear} Summary
+          </div>
+          <div class="cal-summary-row">
+            <span class="cal-summary-label">Total Stock In:</span>
+            <span class="cal-summary-val" style="color:#10b981;">+${stats.inQty.toLocaleString()}</span>
+          </div>
+          <div class="cal-summary-row">
+            <span class="cal-summary-label">Total Stock Out:</span>
+            <span class="cal-summary-val" style="color:#ef4444;">-${stats.outQty.toLocaleString()}</span>
+          </div>
+          <div class="cal-summary-row" style="border-top:1px dashed var(--border); padding-top:6px; margin-top:2px;">
+            <span class="cal-summary-label">Net Movement:</span>
+            <span class="cal-summary-val" style="color:${netColor};">${netSign}${net.toLocaleString()}</span>
+          </div>
+          <div class="cal-summary-row">
+            <span class="cal-summary-label">Active Days:</span>
+            <span class="cal-summary-val" style="color:var(--text-main);">${activeDaysCount} Days</span>
+          </div>
+          <div class="cal-summary-row">
+            <span class="cal-summary-label">Total Records:</span>
+            <span class="cal-summary-val" style="color:var(--text-muted);">${stats.inCount + stats.outCount}</span>
+          </div>
+        `;
+      }
+
+      // 5. Calendar Grid Generation
+      let html = CAL_WEEKDAYS.map((w, i) => `
+        <div class="cal-weekday-header ${i === 0 ? 'sun' : ''}">${w}</div>
+      `).join('');
+
+      const firstDay = new Date(calSelectedYear, calSelectedMonth, 1).getDay();
+      const daysInMonth = new Date(calSelectedYear, calSelectedMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(calSelectedYear, calSelectedMonth, 0).getDate();
+
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      // Trailing previous month days
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const prevDayNum = daysInPrevMonth - i;
+        const formattedNum = String(prevDayNum).padStart(2, '0');
+        html += `
+          <div class="cal-day-cell other-month">
+            <div class="cal-day-top">
+              <span class="cal-date-number">${formattedNum}</span>
+            </div>
+            <div class="cal-day-body"></div>
+          </div>
+        `;
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const formattedDay = String(d).padStart(2, '0');
+        const dateStr = `${calSelectedYear}-${String(calSelectedMonth + 1).padStart(2, '0')}-${formattedDay}`;
+        const isToday = (dateStr === todayStr);
+        const dayData = stats.daysMap[dateStr];
+
+        let pillsHtml = '';
+        if (dayData) {
+          if (dayData.inQty > 0) {
+            pillsHtml += `
+              <div class="cal-pill cal-pill-in" onclick="event.stopPropagation(); showDateStockModal('${dateStr}', 'IN')" title="Stock In: ${dayData.inQty.toLocaleString()} pcs (${dayData.inCount} entries)">
+                <span class="cal-pill-label"><i class="ti ti-arrow-down-left"></i> In</span>
+                <span class="cal-pill-qty">+${dayData.inQty.toLocaleString()}</span>
+              </div>
+            `;
+          }
+          if (dayData.outQty > 0) {
+            pillsHtml += `
+              <div class="cal-pill cal-pill-out" onclick="event.stopPropagation(); showDateStockModal('${dateStr}', 'OUT')" title="Stock Out: ${dayData.outQty.toLocaleString()} pcs (${dayData.outCount} entries)">
+                <span class="cal-pill-label"><i class="ti ti-arrow-up-right"></i> Out</span>
+                <span class="cal-pill-qty">-${dayData.outQty.toLocaleString()}</span>
+              </div>
+            `;
+          }
+        }
+
+        const clickAttr = dayData ? `onclick="showDateStockModal('${dateStr}', 'ALL')"` : '';
+        const hoverTitle = dayData ? `title="Click to view ${dayData.txns.length} stock transactions on ${dateStr}"` : '';
+
+        html += `
+          <div class="cal-day-cell ${isToday ? 'is-today' : ''}" ${clickAttr} ${hoverTitle}>
+            <div class="cal-day-top">
+              <span class="cal-date-number">${formattedDay}</span>
+            </div>
+            <div class="cal-day-body">
+              ${pillsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // Leading next month days
+      const totalCells = firstDay + daysInMonth;
+      const remainingCells = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
+      for (let n = 1; n <= remainingCells; n++) {
+        const formattedNum = String(n).padStart(2, '0');
+        html += `
+          <div class="cal-day-cell other-month">
+            <div class="cal-day-top">
+              <span class="cal-date-number">${formattedNum}</span>
+            </div>
+            <div class="cal-day-body"></div>
+          </div>
+        `;
+      }
+
+      gridContainer.innerHTML = html;
+    }
+
+    function showDateStockModal(dateStr, filterType = 'ALL') {
+      if (!Array.isArray(T)) return;
+      const dayTxns = T.filter(t => t && t.d && String(t.d).startsWith(dateStr));
+      if (!dayTxns.length) return;
+
+      const totalIn = dayTxns.filter(t => t.tp === 'IN').reduce((acc, t) => acc + (Number(t.q) || 0), 0);
+      const totalOut = dayTxns.filter(t => t.tp === 'OUT').reduce((acc, t) => acc + (Number(t.q) || 0), 0);
+      const net = totalIn - totalOut;
+
+      const dObj = new Date(dateStr + 'T00:00:00');
+      const dateFormatted = dObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      let filtered = dayTxns;
+      if (filterType === 'IN') filtered = dayTxns.filter(t => t.tp === 'IN');
+      if (filterType === 'OUT') filtered = dayTxns.filter(t => t.tp === 'OUT');
+
+      const rows = filtered.map(t => {
+        const isIn = t.tp === 'IN';
+        const badgeColor = isIn ? '#10b981' : '#ef4444';
+        const badgeBg = isIn ? '#eefdf5' : '#fff1f2';
+        const sign = isIn ? '+' : '-';
+        const timeStr = t.d && t.d.includes('T') ? t.d.split('T')[1].substring(0, 5) : (t.d && t.d.includes(' ') ? t.d.split(' ')[1].substring(0, 5) : '-');
+
+        return `
+          <tr style="border-bottom:1px solid var(--border); font-size:12px;">
+            <td style="padding:8px 6px; text-align:center;">
+              <span style="display:inline-block; padding:2px 8px; border-radius:4px; font-weight:800; font-size:11px; color:${badgeColor}; background:${badgeBg}; border:1px solid ${badgeColor}40;">
+                ${t.tp}
+              </span>
+            </td>
+            <td style="padding:8px 6px; font-weight:700; color:var(--text-main);">${escapeCalHtml(t.pn || 'Item')}</td>
+            <td style="padding:8px 6px; text-align:center;"><span style="display:inline-block; padding:2px 6px; border-radius:4px; background:var(--surface2); border:1px solid var(--border); font-weight:700; font-size:11px;">${escapeCalHtml(t.sz || '-')}</span></td>
+            <td style="padding:8px 6px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:${badgeColor};">${sign}${Number(t.q || 0).toLocaleString()}</td>
+            <td style="padding:8px 6px; color:var(--text-muted);">${escapeCalHtml(t.pa || '-')}</td>
+            <td style="padding:8px 6px; color:var(--text-muted); font-size:11px;">${escapeCalHtml(t.rf || '-')}</td>
+            <td style="padding:8px 6px; color:var(--text-muted); font-size:11px; text-align:center;">${timeStr}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const modalHtml = `
+        <div style="display:flex; flex-direction:column; gap:16px; max-height:75vh; overflow-y:auto; padding-right:4px;">
+          <!-- Stat Cards -->
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+            <div style="background:#eefdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#065f46;">Stock In</div>
+              <div style="font-size:18px; font-weight:800; color:#10b981; font-family:'JetBrains Mono',monospace;">+${totalIn.toLocaleString()}</div>
+            </div>
+            <div style="background:#fff1f2; border:1px solid #fecdd3; border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#9f1239;">Stock Out</div>
+              <div style="font-size:18px; font-weight:800; color:#ef4444; font-family:'JetBrains Mono',monospace;">-${totalOut.toLocaleString()}</div>
+            </div>
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted);">Net Movement</div>
+              <div style="font-size:18px; font-weight:800; color:${net >= 0 ? '#10b981' : '#ef4444'}; font-family:'JetBrains Mono',monospace;">${net >= 0 ? '+' : ''}${net.toLocaleString()}</div>
+            </div>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div style="display:flex; gap:6px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+            <button class="btn btn-ghost" onclick="showDateStockModal('${dateStr}', 'ALL')" style="padding:4px 10px; font-size:12px; height:auto; border-radius:6px; font-weight:700; ${filterType === 'ALL' ? 'background:var(--primary); color:#fff;' : 'border:1px solid var(--border);'}">All (${dayTxns.length})</button>
+            <button class="btn btn-ghost" onclick="showDateStockModal('${dateStr}', 'IN')" style="padding:4px 10px; font-size:12px; height:auto; border-radius:6px; font-weight:700; ${filterType === 'IN' ? 'background:#10b981; color:#fff;' : 'border:1px solid var(--border); color:#10b981;'}">In Only (${dayTxns.filter(t=>t.tp==='IN').length})</button>
+            <button class="btn btn-ghost" onclick="showDateStockModal('${dateStr}', 'OUT')" style="padding:4px 10px; font-size:12px; height:auto; border-radius:6px; font-weight:700; ${filterType === 'OUT' ? 'background:#ef4444; color:#fff;' : 'border:1px solid var(--border); color:#ef4444;'}">Out Only (${dayTxns.filter(t=>t.tp==='OUT').length})</button>
+          </div>
+
+          <!-- Table -->
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--surface2); border-bottom:1.5px solid var(--border); font-size:11px; text-transform:uppercase; color:var(--text-muted);">
+                  <th style="padding:8px 6px; text-align:center;">Type</th>
+                  <th style="padding:8px 6px; text-align:left;">Product</th>
+                  <th style="padding:8px 6px; text-align:center;">Size</th>
+                  <th style="padding:8px 6px; text-align:right;">Qty</th>
+                  <th style="padding:8px 6px; text-align:left;">Party / Client</th>
+                  <th style="padding:8px 6px; text-align:left;">Ref / Bill</th>
+                  <th style="padding:8px 6px; text-align:center;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows || '<tr><td colspan="7" style="padding:20px; text-align:center; color:var(--text-muted);">No records found</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      const modalEl = document.getElementById('modal-overlay').querySelector('.modal');
+      modalEl.style.width = '850px';
+      modalEl.style.maxWidth = '95vw';
+      document.getElementById('modal-title').innerHTML = `📅 Stock Details &bull; ${dateFormatted}`;
+      document.getElementById('modal-content').innerHTML = modalHtml;
+
+      const btn = document.getElementById('modal-btn');
+      btn.textContent = 'Close';
+      btn.className = 'btn btn-primary';
+      btn.onclick = closeModal;
+
+      const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
 
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
