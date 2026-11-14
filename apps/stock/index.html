@@ -2781,10 +2781,6 @@
                       <span style="width:8px; height:8px; border-radius:50%; background:#f43f5e;"></span> Stock Out
                     </span>
                   </div>
-
-                  <button class="btn btn-ghost" onclick="printCalendarView()" style="border:1px solid var(--border); font-weight:700; height:36px; padding:0 12px; display:flex; align-items:center; gap:6px; font-size:12px; border-radius:10px;">
-                    <i class="ti ti-printer"></i> Print
-                  </button>
                 </div>
               </div>
                     <i class="ti ti-printer"></i> Print
@@ -9952,23 +9948,19 @@ function d2i(val) {
           </div>
           <div class="cal-summary-row">
             <span class="cal-summary-label">Total Stock In:</span>
-            <span class="cal-summary-val" style="color:#10b981;">+${stats.inQty.toLocaleString()}</span>
+            <span class="cal-summary-val" style="color:#10b981;">+${stats.inQty.toLocaleString()} Boxes</span>
           </div>
           <div class="cal-summary-row">
             <span class="cal-summary-label">Total Stock Out:</span>
-            <span class="cal-summary-val" style="color:#ef4444;">-${stats.outQty.toLocaleString()}</span>
+            <span class="cal-summary-val" style="color:#ef4444;">-${stats.outQty.toLocaleString()} Boxes</span>
           </div>
           <div class="cal-summary-row" style="border-top:1px dashed var(--border); padding-top:6px; margin-top:2px;">
             <span class="cal-summary-label">Net Movement:</span>
-            <span class="cal-summary-val" style="color:${netColor};">${netSign}${net.toLocaleString()}</span>
+            <span class="cal-summary-val" style="color:${netColor};">${netSign}${net.toLocaleString()} Boxes</span>
           </div>
           <div class="cal-summary-row">
             <span class="cal-summary-label">Active Days:</span>
             <span class="cal-summary-val" style="color:var(--text-main);">${activeDaysCount} Days</span>
-          </div>
-          <div class="cal-summary-row">
-            <span class="cal-summary-label">Total Records:</span>
-            <span class="cal-summary-val" style="color:var(--text-muted);">${stats.inCount + stats.outCount}</span>
           </div>
         `;
       }
@@ -10010,24 +10002,24 @@ function d2i(val) {
         if (dayData) {
           if (dayData.inQty > 0) {
             pillsHtml += `
-              <div class="cal-pill cal-pill-in" onclick="event.stopPropagation(); showDateStockModal('${dateStr}')" title="Stock In: ${dayData.inQty.toLocaleString()} pcs (${dayData.inCount} entries)">
+              <div class="cal-pill cal-pill-in" onclick="event.stopPropagation(); showDateStockModal('${dateStr}')" title="Stock In: ${dayData.inQty.toLocaleString()} Boxes">
                 <span class="cal-pill-label"><i class="ti ti-arrow-down-left"></i> In</span>
-                <span class="cal-pill-qty">+${dayData.inQty.toLocaleString()}</span>
+                <span class="cal-pill-qty">+${dayData.inQty.toLocaleString()} Boxes</span>
               </div>
             `;
           }
           if (dayData.outQty > 0) {
             pillsHtml += `
-              <div class="cal-pill cal-pill-out" onclick="event.stopPropagation(); showDateStockModal('${dateStr}')" title="Stock Out: ${dayData.outQty.toLocaleString()} pcs (${dayData.outCount} entries)">
+              <div class="cal-pill cal-pill-out" onclick="event.stopPropagation(); showDateStockModal('${dateStr}')" title="Stock Out: ${dayData.outQty.toLocaleString()} Boxes">
                 <span class="cal-pill-label"><i class="ti ti-arrow-up-right"></i> Out</span>
-                <span class="cal-pill-qty">-${dayData.outQty.toLocaleString()}</span>
+                <span class="cal-pill-qty">-${dayData.outQty.toLocaleString()} Boxes</span>
               </div>
             `;
           }
         }
 
         const clickAttr = dayData ? `onclick="showDateStockModal('${dateStr}')"` : '';
-        const hoverTitle = dayData ? `title="Click to view ${dayData.txns.length} stock transactions on ${dateStr}"` : '';
+        const hoverTitle = dayData ? `title="Click to view total boxes for ${dateStr}"` : '';
 
         html += `
           <div class="cal-day-cell ${isToday ? 'is-today' : ''}" ${clickAttr} ${hoverTitle}>
@@ -10071,79 +10063,43 @@ function d2i(val) {
       const dObj = new Date(dateStr + 'T00:00:00');
       const dateFormatted = dObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-      const rows = dayTxns.map(t => {
-        const isIn = t.tp === 'IN';
-        const badgeColor = isIn ? '#059669' : '#e11d48';
-        const badgeBg = isIn ? '#ecfdf5' : '#fff1f2';
-        const badgeBorder = isIn ? '#a7f3d0' : '#fecdd3';
-        const sign = isIn ? '+' : '-';
-        const timeStr = t.d && t.d.includes('T') ? t.d.split('T')[1].substring(0, 5) : (t.d && t.d.includes(' ') ? t.d.split(' ')[1].substring(0, 5) : '-');
-
-        return `
-          <tr style="border-bottom:1px solid var(--border); font-size:12.5px; transition:background 0.1s ease;">
-            <td style="padding:9px 8px; text-align:center;">
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; font-weight:800; font-size:11px; color:${badgeColor}; background:${badgeBg}; border:1px solid ${badgeBorder};">
-                <i class="ti ${isIn ? 'ti-arrow-down-left' : 'ti-arrow-up-right'}"></i> ${t.tp}
-              </span>
-            </td>
-            <td style="padding:9px 8px; font-weight:700; color:var(--text-main);">${escapeCalHtml(t.pn || 'Item')}</td>
-            <td style="padding:9px 8px; text-align:center;"><span style="display:inline-block; padding:2px 7px; border-radius:6px; background:var(--surface2); border:1px solid var(--border); font-weight:700; font-size:11.5px;">${escapeCalHtml(t.sz || '-')}</span></td>
-            <td style="padding:9px 8px; text-align:right; font-weight:800; font-family:'JetBrains Mono',monospace; color:${badgeColor}; font-size:13px;">${sign}${Number(t.q || 0).toLocaleString()}</td>
-            <td style="padding:9px 8px; color:var(--text-muted); font-weight:600;">${escapeCalHtml(t.pa || '-')}</td>
-            <td style="padding:9px 8px; color:var(--text-muted); font-size:11.5px; font-family:'JetBrains Mono',monospace;">${escapeCalHtml(t.rf || '-')}</td>
-            <td style="padding:9px 8px; color:var(--text-muted); font-size:11px; text-align:center;">${timeStr}</td>
-          </tr>
-        `;
-      }).join('');
-
       const modalHtml = `
-        <div style="display:flex; flex-direction:column; gap:16px; max-height:75vh; overflow-y:auto; padding-right:4px;">
-          <!-- Stat Cards (Stock In & Stock Out) -->
-          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;">
-            <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:12px; text-align:center;">
-              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#065f46; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:4px;">
-                <i class="ti ti-arrow-down-left"></i> Stock In
+        <div style="display:flex; flex-direction:column; gap:16px; padding:10px 0;">
+          <!-- Stat Cards (Total Stock In & Total Stock Out Boxes) -->
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;">
+            <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:14px; padding:18px 14px; text-align:center; box-shadow:0 4px 12px rgba(16, 185, 129, 0.08);">
+              <div style="font-size:12px; font-weight:800; text-transform:uppercase; color:#065f46; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:5px;">
+                <i class="ti ti-arrow-down-left" style="font-size:16px;"></i> Total Stock In
               </div>
-              <div style="font-size:20px; font-weight:800; color:#059669; font-family:'JetBrains Mono',monospace; margin-top:2px;">+${totalIn.toLocaleString()}</div>
-            </div>
-            <div style="background:#fff1f2; border:1px solid #fecdd3; border-radius:12px; padding:12px; text-align:center;">
-              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#9f1239; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:4px;">
-                <i class="ti ti-arrow-up-right"></i> Stock Out
+              <div style="font-size:26px; font-weight:900; color:#059669; font-family:'JetBrains Mono',monospace; margin-top:6px;">
+                +${totalIn.toLocaleString()} <span style="font-size:14px; font-weight:700;">Boxes</span>
               </div>
-              <div style="font-size:20px; font-weight:800; color:#e11d48; font-family:'JetBrains Mono',monospace; margin-top:2px;">-${totalOut.toLocaleString()}</div>
             </div>
-            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
-              <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Net Movement</div>
-              <div style="font-size:20px; font-weight:800; color:${net >= 0 ? '#059669' : '#e11d48'}; font-family:'JetBrains Mono',monospace; margin-top:2px;">${net >= 0 ? '+' : ''}${net.toLocaleString()}</div>
+
+            <div style="background:#fff1f2; border:1.5px solid #fecdd3; border-radius:14px; padding:18px 14px; text-align:center; box-shadow:0 4px 12px rgba(244, 63, 94, 0.08);">
+              <div style="font-size:12px; font-weight:800; text-transform:uppercase; color:#9f1239; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:5px;">
+                <i class="ti ti-arrow-up-right" style="font-size:16px;"></i> Total Stock Out
+              </div>
+              <div style="font-size:26px; font-weight:900; color:#e11d48; font-family:'JetBrains Mono',monospace; margin-top:6px;">
+                -${totalOut.toLocaleString()} <span style="font-size:14px; font-weight:700;">Boxes</span>
+              </div>
             </div>
           </div>
 
-          <!-- Transactions Table -->
-          <div style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
-            <table style="width:100%; border-collapse:collapse;">
-              <thead>
-                <tr style="background:#f8fafc; border-bottom:1.5px solid var(--border); font-size:11px; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">
-                  <th style="padding:10px 8px; text-align:center;">Type</th>
-                  <th style="padding:10px 8px; text-align:left;">Product</th>
-                  <th style="padding:10px 8px; text-align:center;">Size</th>
-                  <th style="padding:10px 8px; text-align:right;">Qty</th>
-                  <th style="padding:10px 8px; text-align:left;">Party / Client</th>
-                  <th style="padding:10px 8px; text-align:left;">Ref / Bill</th>
-                  <th style="padding:10px 8px; text-align:center;">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rows || '<tr><td colspan="7" style="padding:24px; text-align:center; color:var(--text-muted);">No records found for this date</td></tr>'}
-              </tbody>
-            </table>
+          <!-- Net Movement Banner -->
+          <div style="background:var(--surface2); border:1.5px solid var(--border); border-radius:12px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Net Movement</span>
+            <span style="font-size:20px; font-weight:900; color:${net >= 0 ? '#059669' : '#e11d48'}; font-family:'JetBrains Mono',monospace;">
+              ${net >= 0 ? '+' : ''}${net.toLocaleString()} Boxes
+            </span>
           </div>
         </div>
       `;
 
       const modalEl = document.getElementById('modal-overlay').querySelector('.modal');
-      modalEl.style.width = '880px';
-      modalEl.style.maxWidth = '95vw';
-      document.getElementById('modal-title').innerHTML = `📅 Stock Details &bull; ${dateFormatted}`;
+      modalEl.style.width = '520px';
+      modalEl.style.maxWidth = '92vw';
+      document.getElementById('modal-title').innerHTML = `📅 ${dateFormatted}`;
       document.getElementById('modal-content').innerHTML = modalHtml;
 
       const btn = document.getElementById('modal-btn');
@@ -10157,7 +10113,6 @@ function d2i(val) {
 
       document.getElementById('modal-overlay').classList.add('open');
     }
-
 
     function loadSettings() { 
       const m = document.getElementById('s-min'); if (m) m.value = S.defMin;
