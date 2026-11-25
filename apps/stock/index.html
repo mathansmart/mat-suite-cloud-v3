@@ -8546,24 +8546,41 @@ function d2i(val) {
       showProductMonthlyLedger(prodName);
     }
 
-    let cpSelectedYear = new Date().getFullYear();
-    let cpSelectedMonth = new Date().getMonth();
-    let cpIsFullYear = false;
+    function setCpPreset(type) {
+      const now = new Date();
+      let startYear = now.getFullYear();
+      if (now.getMonth() < 3) {
+        startYear = startYear - 1;
+      }
+      const pad = (n) => String(n).padStart(2, '0');
+      let fromStr = '';
+      let toStr = '';
 
-    function selectCpYear(year, prodName) {
-      cpSelectedYear = year;
-      renderCpModalContent(prodName);
-    }
+      if (type === 'cur_fy') {
+        fromStr = `01-04-${startYear}`;
+        toStr = `31-03-${startYear + 1}`;
+      } else if (type === 'prev_fy') {
+        fromStr = `01-04-${startYear - 1}`;
+        toStr = `31-03-${startYear}`;
+      } else if (type === 'this_month') {
+        const y = now.getFullYear();
+        const m = now.getMonth();
+        const lastDay = new Date(y, m + 1, 0).getDate();
+        fromStr = `01-${pad(m + 1)}-${y}`;
+        toStr = `${pad(lastDay)}-${pad(m + 1)}-${y}`;
+      } else if (type === 'prev_month') {
+        const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const y = prev.getFullYear();
+        const m = prev.getMonth();
+        const lastDay = new Date(y, m + 1, 0).getDate();
+        fromStr = `01-${pad(m + 1)}-${y}`;
+        toStr = `${pad(lastDay)}-${pad(m + 1)}-${y}`;
+      }
 
-    function selectCpMonth(monthIdx, prodName) {
-      cpSelectedMonth = monthIdx;
-      cpIsFullYear = false;
-      renderCpModalContent(prodName);
-    }
-
-    function selectCpFullYear(prodName) {
-      cpIsFullYear = true;
-      renderCpModalContent(prodName);
+      const cpFrom = document.getElementById('cp-from');
+      const cpTo = document.getElementById('cp-to');
+      if (cpFrom && fromStr) cpFrom.value = fromStr;
+      if (cpTo && toStr) cpTo.value = toStr;
     }
 
     function openChangePeriodModal(prodName) {
@@ -8587,120 +8604,120 @@ function d2i(val) {
         cancelBtn.style.display = '';
       }
 
-      const activeDate = globalLedgerFrom || new Date();
-      cpSelectedYear = activeDate.getFullYear();
-      cpSelectedMonth = activeDate.getMonth();
+      const fromVal = formatDateToDMY(globalLedgerFrom || new Date());
+      const toVal = formatDateToDMY(globalLedgerTo || new Date());
 
-      if (globalLedgerFrom && globalLedgerTo) {
-        const diffMonths = (globalLedgerTo.getFullYear() - globalLedgerFrom.getFullYear()) * 12 + (globalLedgerTo.getMonth() - globalLedgerFrom.getMonth());
-        cpIsFullYear = diffMonths >= 11;
-      } else {
-        cpIsFullYear = false;
-      }
-
-      renderCpModalContent(prodName);
-      modalOverlay.classList.add('open');
-    }
-
-    function renderCpModalContent(prodName) {
-      const contentEl = document.getElementById('modal-content');
-      if (!contentEl) return;
-
-      const years = [2024, 2025, 2026, 2027];
-      const monthShorts = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const monthFulls = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-      const yearPills = years.map(y => {
-        const isAct = y === cpSelectedYear;
-        return `
-          <button type="button" 
-                  class="btn btn-sm ${isAct ? 'btn-primary' : 'btn-ghost'}"
-                  onclick="selectCpYear(${y}, '${prodName.replace(/'/g, "\\'")}')"
-                  style="flex:1; font-weight:700; border-radius:8px; border:1.5px solid ${isAct ? 'var(--primary)' : 'var(--border)'};"
-          >
-            ${y}
-          </button>
-        `;
-      }).join('');
-
-      const monthGrid = monthShorts.map((mName, idx) => {
-        const isAct = !cpIsFullYear && idx === cpSelectedMonth;
-        return `
-          <button type="button" 
-                  class="btn btn-sm ${isAct ? 'btn-primary' : 'btn-ghost'}"
-                  onclick="selectCpMonth(${idx}, '${prodName.replace(/'/g, "\\'")}')"
-                  style="font-weight:700; padding:10px 4px; border-radius:8px; border:1.5px solid ${isAct ? 'var(--primary)' : 'var(--border)'}; ${isAct ? 'background:linear-gradient(135deg, #092c4c, #1e3a5f); color:#fff; box-shadow:0 3px 8px rgba(9,44,76,0.3);' : ''}"
-          >
-            ${mName}
-          </button>
-        `;
-      }).join('');
-
-      const lastDayOfSelectedMonth = new Date(cpSelectedYear, cpSelectedMonth + 1, 0).getDate();
-      const monthPreviewStr = `01-${String(cpSelectedMonth + 1).padStart(2, '0')}-${cpSelectedYear} to ${lastDayOfSelectedMonth}-${String(cpSelectedMonth + 1).padStart(2, '0')}-${cpSelectedYear}`;
-
-      let selectionBanner = '';
-      if (cpIsFullYear) {
-        selectionBanner = `
-          <div style="margin-top:14px; padding:10px 14px; background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.3); border-radius:8px; font-size:12px; font-weight:700; color:var(--accent3); display:flex; align-items:center; gap:8px;">
-            <i class="ti ti-calendar-check" style="font-size:16px;"></i>
-            <span>Selected: <strong>Full Financial Year ${cpSelectedYear}-${cpSelectedYear + 1}</strong> (All 12 Months)</span>
-          </div>
-        `;
-      } else {
-        selectionBanner = `
-          <div style="margin-top:14px; padding:10px 14px; background:rgba(37,99,235,0.08); border:1.5px solid rgba(37,99,235,0.3); border-radius:8px; font-size:12px; font-weight:700; color:var(--primary); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-            <span style="display:flex; align-items:center; gap:6px;">
-              <i class="ti ti-calendar-event" style="font-size:16px;"></i>
-              Selected: <strong>${monthFulls[cpSelectedMonth]} ${cpSelectedYear}</strong>
-            </span>
-            <span style="font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;">${monthPreviewStr}</span>
-          </div>
-        `;
-      }
-
-      contentEl.innerHTML = `
+      document.getElementById('modal-content').innerHTML = `
         <div style="padding: 10px 0;">
-          <div style="margin-bottom:16px;">
-            <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Select Year</div>
-            <div style="display:flex; gap:8px;">
-              ${yearPills}
+          <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Type From Date and To Date to filter the stock ledger report.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight:700; margin-bottom:6px; font-size:12px;">From Date</label>
+              <input class="form-input" type="text" id="cp-from" placeholder="DD-MM-YYYY" value="${fromVal}" autocomplete="off" style="font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px;" onkeydown="if(event.key==='Enter'){document.getElementById('cp-to').focus();}">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight:700; margin-bottom:6px; font-size:12px;">To Date</label>
+              <input class="form-input" type="text" id="cp-to" placeholder="DD-MM-YYYY" value="${toVal}" autocomplete="off" style="font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px;" onkeydown="if(event.key==='Enter')applyChangePeriod('${prodName.replace(/'/g, "\\'")}')">
             </div>
           </div>
 
-          <div style="margin-bottom:16px;">
-            <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Select Month (Single Month View)</div>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
-              ${monthGrid}
-            </div>
+          <div style="font-size:11px; color:var(--muted); margin-bottom:16px;">
+            Format: <strong>DD-MM-YYYY</strong> (e.g. 01-11-2026 to 30-11-2026)
           </div>
 
-          <div style="border-top:1px dashed var(--border); padding-top:12px;">
-            <button type="button" 
-                    class="btn btn-ghost btn-sm"
-                    onclick="selectCpFullYear('${prodName.replace(/'/g, "\\'")}')"
-                    style="width:100%; font-weight:700; height:38px; border:1.5px solid ${cpIsFullYear ? 'var(--primary)' : 'var(--border)'}; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; ${cpIsFullYear ? 'background:rgba(37,99,235,0.08); color:var(--primary);' : ''}"
-            >
-              <i class="ti ti-calendar"></i> View Full Financial Year (${cpSelectedYear}-${cpSelectedYear + 1})
-            </button>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; border-top:1px dashed var(--border); padding-top:14px;">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:4px;">Quick Fill:</span>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setCpPreset('this_month')" style="padding:4px 10px; font-size:11px; font-weight:700; border:1px solid var(--border); border-radius:6px; cursor:pointer;">This Month</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setCpPreset('last_month')" style="padding:4px 10px; font-size:11px; font-weight:700; border:1px solid var(--border); border-radius:6px; cursor:pointer;">Last Month</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setCpPreset('cur_fy')" style="padding:4px 10px; font-size:11px; font-weight:700; border:1px solid var(--border); border-radius:6px; cursor:pointer;">Full FY (12 Months)</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setCpPreset('prev_fy')" style="padding:4px 10px; font-size:11px; font-weight:700; border:1px solid var(--border); border-radius:6px; cursor:pointer;">Prev FY</button>
           </div>
 
-          ${selectionBanner}
-
-          <div id="cp-err" style="color:var(--danger); font-size:12px; font-weight:700; display:none; margin-top:8px; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:6px;"></div>
+          <div id="cp-err" style="color:var(--danger); font-size:12px; font-weight:700; display:none; margin-top:12px; padding:8px 12px; background:rgba(239,68,68,0.1); border-radius:6px;"></div>
         </div>
       `;
+
+      modalOverlay.classList.add('open');
+      setTimeout(() => {
+        const fromInput = document.getElementById('cp-from');
+        if (fromInput) {
+          fromInput.focus();
+          fromInput.select();
+        }
+      }, 50);
     }
 
     function applyChangePeriod(prodName) {
-      if (cpIsFullYear) {
-        globalLedgerFrom = new Date(cpSelectedYear, 3, 1, 0, 0, 0); // April 1st
-        globalLedgerTo = new Date(cpSelectedYear + 1, 2, 31, 23, 59, 59); // March 31st
-      } else {
-        const lastDay = new Date(cpSelectedYear, cpSelectedMonth + 1, 0).getDate();
-        globalLedgerFrom = new Date(cpSelectedYear, cpSelectedMonth, 1, 0, 0, 0);
-        globalLedgerTo = new Date(cpSelectedYear, cpSelectedMonth, lastDay, 23, 59, 59);
+      const fromEl = document.getElementById('cp-from');
+      const toEl = document.getElementById('cp-to');
+      const errEl = document.getElementById('cp-err');
+
+      if (!fromEl || !toEl) return;
+      const fromStr = fromEl.value.trim();
+      const toStr = toEl.value.trim();
+
+      if (!fromStr || !toStr) {
+        if (errEl) {
+          errEl.textContent = 'Please type both From Date and To Date!';
+          errEl.style.display = 'block';
+        }
+        return;
       }
+
+      function parseTypedDate(val, isEnd) {
+        if (!val || typeof val !== 'string') return null;
+        val = val.trim().replace(/[\/\.]/g, '-');
+        const parts = val.split('-').filter(Boolean);
+        if (parts.length === 2) {
+          let m = parseInt(parts[0], 10) - 1;
+          let y = parseInt(parts[1], 10);
+          if (parts[0].length === 4) { y = parseInt(parts[0], 10); m = parseInt(parts[1], 10) - 1; }
+          if (y < 100) y += 2000;
+          if (!isNaN(y) && !isNaN(m) && m >= 0 && m <= 11) {
+            if (isEnd) return new Date(y, m + 1, 0, 23, 59, 59, 999);
+            return new Date(y, m, 1, 0, 0, 0, 0);
+          }
+        }
+        if (parts.length === 3) {
+          let d = parseInt(parts[0], 10);
+          let m = parseInt(parts[1], 10) - 1;
+          let y = parseInt(parts[2], 10);
+          if (parts[0].length === 4) {
+            y = parseInt(parts[0], 10);
+            m = parseInt(parts[1], 10) - 1;
+            d = parseInt(parts[2], 10);
+          }
+          if (y < 100) y += 2000;
+          if (!isNaN(y) && !isNaN(m) && !isNaN(d) && m >= 0 && m <= 11 && d >= 1 && d <= 31) {
+            if (isEnd) return new Date(y, m, d, 23, 59, 59, 999);
+            return new Date(y, m, d, 0, 0, 0, 0);
+          }
+        }
+        return null;
+      }
+
+      const fromDate = parseTypedDate(fromStr, false);
+      const toDate = parseTypedDate(toStr, true);
+
+      if (!fromDate || !toDate) {
+        if (errEl) {
+          errEl.textContent = 'Invalid date format! Please type as DD-MM-YYYY (e.g. 01-11-2026).';
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+
+      if (fromDate.getTime() > toDate.getTime()) {
+        if (errEl) {
+          errEl.textContent = 'From Date cannot be after To Date!';
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+
+      globalLedgerFrom = fromDate;
+      globalLedgerTo = toDate;
 
       closeModal();
       showProductMonthlyLedger(prodName);
