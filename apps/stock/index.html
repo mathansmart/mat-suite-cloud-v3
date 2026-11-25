@@ -3073,6 +3073,66 @@
 
           <!-- PRODUCT WISE REPORT (NEW) -->
           <div id="rpt-prod-analysis" style="display:none;">
+
+            <!-- TOP HEADER WITH NEW STYLE SEARCH BOX (SIDE BY SIDE) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:16px 20px; box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+              <!-- Left: Title & Subtitle -->
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, rgba(37,99,235,0.12), rgba(30,58,95,0.18)); display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:22px;">
+                  <i class="ti ti-chart-pie"></i>
+                </div>
+                <div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text-main); letter-spacing:0.5px;">Product Analysis</div>
+                  <div style="font-size:12px; color:var(--muted); font-weight:600;">Sales trends, distribution & individual product insights</div>
+                </div>
+              </div>
+
+              <!-- Right: NEW STYLE SEARCH BOX -->
+              <div style="position:relative; width:100%; max-width:440px;">
+                <div class="pa-modern-search-wrap" style="display:flex; align-items:center; background:var(--surface2); border:1.5px solid var(--border); border-radius:30px; padding:6px 14px 6px 16px; box-shadow:0 2px 6px rgba(0,0,0,0.02); transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onfocusin="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 4px rgba(37,99,235,0.12), 0 4px 12px rgba(0,0,0,0.04)'; this.style.background='var(--surface)';" onfocusout="this.style.borderColor='var(--border)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.02)'; this.style.background='var(--surface2)';">
+                  <div style="display:flex; align-items:center; justify-content:center; margin-right:10px; color:var(--primary); font-size:17px;">
+                    <i class="ti ti-search"></i>
+                  </div>
+                  <input type="text" 
+                         id="pa-search-input" 
+                         placeholder="Type product name to search..." 
+                         autocomplete="off" 
+                         oninput="onProductAnalysisSearch()" 
+                         onfocus="this.select(); onProductAnalysisSearchFocus()"
+                         style="border:none; background:transparent; outline:none; width:100%; font-size:13.5px; font-weight:600; color:var(--text-main); padding:4px 0;">
+                  <button class="search-clear-btn" 
+                          id="pa-search-clear" 
+                          onclick="clearProductAnalysisSearch()" 
+                          title="Clear search"
+                          style="display:none; border:none; background:rgba(0,0,0,0.06); color:var(--muted); width:22px; height:22px; border-radius:50%; cursor:pointer; font-size:11px; align-items:center; justify-content:center; margin-right:6px; transition:all 0.15s;" 
+                          onmouseover="this.style.background='var(--danger)'; this.style.color='#fff';" 
+                          onmouseout="this.style.background='rgba(0,0,0,0.06)'; this.style.color='var(--muted)';">
+                    ✕
+                  </button>
+                  <div style="font-size:10px; font-weight:700; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap; letter-spacing:0.5px; text-transform:uppercase;">
+                    Search
+                  </div>
+                </div>
+
+                <!-- Modern Search Suggestions Dropdown with Floating Card & Blur -->
+                <div id="pa-search-dropdown" 
+                     class="premium-dropdown" 
+                     style="display:none; position:absolute; width:100%; z-index:1050; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; max-height:280px; overflow-y:auto; box-shadow:0 16px 36px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06); margin-top:6px; padding:6px;">
+                  <!-- Dynamically populated products -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Selected Product info & Matched Similar Products -->
+            <div id="pa-selection-summary" style="display:none; margin-bottom:20px; padding:16px 20px; background:var(--surface); border-radius:12px; border:1.5px solid var(--border); box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+              <!-- Will be updated dynamically -->
+            </div>
+
+            <!-- Container for decoupled product analyses -->
+            <div id="pa-products-container" style="display:none; margin-bottom:30px;">
+              <!-- Dynamically rendered per-product blocks -->
+            </div>
+
             <!-- GLOBAL OVERVIEW DASHBOARD -->
             <div id="pa-global-dashboard" style="margin-bottom: 30px;">
               <div class="sec-title" style="margin-bottom: 15px; display:flex; align-items:center; gap:8px;">
@@ -3198,33 +3258,7 @@
                  </div>
                </div>
                
-            <hr style="border:none; border-top:1px dashed var(--border-light); margin:30px 0;">
 
-            <!-- Search Section -->
-            <div style="margin-bottom: 24px;">
-              <div class="sec-title">Search & Select Product</div>
-              <div style="position: relative; max-width: 500px;">
-                <div class="search-wrapper" style="margin:0;">
-                  <span class="search-icon-left">🔍</span>
-                  <input type="text" id="pa-search-input" placeholder="Type product name to search..." class="premium-search" autocomplete="off" oninput="onProductAnalysisSearch()" onfocus="this.select(); onProductAnalysisSearchFocus()">
-                  <button class="search-clear-btn" id="pa-search-clear" onclick="clearProductAnalysisSearch()" style="display:none;">✕</button>
-                </div>
-                <!-- Search Suggestions Dropdown -->
-                <div id="pa-search-dropdown" class="premium-dropdown" style="display:none; position:absolute; width:100%; z-index:1000; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; max-height:250px; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.1); margin-top:4px;">
-                  <!-- Dynamically populated products -->
-                </div>
-              </div>
-            </div>
-
-            <!-- Active Selected Product info & Matched Similar Products -->
-            <div id="pa-selection-summary" style="display:none; margin-bottom:24px; padding:16px; background:var(--surface2); border-radius:12px; border:1px solid var(--border);">
-              <!-- Will be updated dynamically -->
-            </div>
-
-            <!-- Container for decoupled product analyses -->
-            <div id="pa-products-container" style="display:none; margin-top:24px;">
-              <!-- Dynamically rendered per-product blocks -->
-            </div>
 
           </div>
 
@@ -7598,9 +7632,12 @@ function d2i(val) {
       
       if (drop) {
         drop.innerHTML = matches.map(p => `
-          <div class="drop-item" onclick="selectProductAnalysis('${p.id}')">
-            <span>${p.n}</span>
-            <span style="font-size:10px; color:var(--text-muted);">${cn(p.ci)}</span>
+          <div class="drop-item" onclick="selectProductAnalysis('${p.id}')" style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border-radius:8px; cursor:pointer; margin-bottom:3px; transition:all 0.15s ease;" onmouseover="this.style.background='var(--surface2)';" onmouseout="this.style.background='transparent';">
+            <div style="display:flex; align-items:center; gap:9px;">
+              <span style="font-size:14px; opacity:0.8;">📦</span>
+              <span style="font-weight:700; font-size:13px; color:var(--text-main);">${p.n}</span>
+            </div>
+            <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:12px; background:var(--surface2); color:var(--muted); border:1px solid var(--border);">${cn(p.ci)}</span>
           </div>
         `).join('');
         drop.style.display = 'block';
@@ -7617,9 +7654,12 @@ function d2i(val) {
           const mergedList = getMergedProducts(P, '');
           const sorted = [...mergedList].sort((a, b) => a.n.localeCompare(b.n)).slice(0, 20);
           drop.innerHTML = sorted.map(p => `
-            <div class="drop-item" onclick="selectProductAnalysis('${p.id}')">
-              <span>${p.n}</span>
-              <span style="font-size:10px; color:var(--text-muted);">${cn(p.ci)}</span>
+            <div class="drop-item" onclick="selectProductAnalysis('${p.id}')" style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border-radius:8px; cursor:pointer; margin-bottom:3px; transition:all 0.15s ease;" onmouseover="this.style.background='var(--surface2)';" onmouseout="this.style.background='transparent';">
+              <div style="display:flex; align-items:center; gap:9px;">
+                <span style="font-size:14px; opacity:0.8;">📦</span>
+                <span style="font-weight:700; font-size:13px; color:var(--text-main);">${p.n}</span>
+              </div>
+              <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:12px; background:var(--surface2); color:var(--muted); border:1px solid var(--border);">${cn(p.ci)}</span>
             </div>
           `).join('');
           drop.style.display = 'block';
