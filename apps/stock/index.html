@@ -8128,10 +8128,19 @@ function d2i(val) {
     let globalLedgerTo = null;
 
     const formatDateToDMY = (date) => {
+      if (!date || !(date instanceof Date) || isNaN(date.getTime())) return '';
       const d = String(date.getDate()).padStart(2, '0');
       const m = String(date.getMonth() + 1).padStart(2, '0');
       const y = date.getFullYear();
       return `${d}-${m}-${y}`;
+    };
+
+    const formatDateToISO = (date) => {
+      if (!date || !(date instanceof Date) || isNaN(date.getTime())) return '';
+      const d = String(date.getDate()).padStart(2, '0');
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const y = date.getFullYear();
+      return `${y}-${m}-${d}`;
     };
 
     function showProductMonthlyLedger(prodName) {
@@ -8177,29 +8186,39 @@ function d2i(val) {
         }
       });
 
-      const monthKeys = [
-        { name: 'April', mIndex: 3, yearOffset: 0 },
-        { name: 'May', mIndex: 4, yearOffset: 0 },
-        { name: 'June', mIndex: 5, yearOffset: 0 },
-        { name: 'July', mIndex: 6, yearOffset: 0 },
-        { name: 'August', mIndex: 7, yearOffset: 0 },
-        { name: 'September', mIndex: 8, yearOffset: 0 },
-        { name: 'October', mIndex: 9, yearOffset: 0 },
-        { name: 'November', mIndex: 10, yearOffset: 0 },
-        { name: 'December', mIndex: 11, yearOffset: 0 },
-        { name: 'January', mIndex: 0, yearOffset: 1 },
-        { name: 'February', mIndex: 1, yearOffset: 1 },
-        { name: 'March', mIndex: 2, yearOffset: 1 }
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
       ];
+
+      const monthsToDisplay = [];
+      let curY = globalLedgerFrom.getFullYear();
+      let curM = globalLedgerFrom.getMonth();
+      const endY = globalLedgerTo.getFullYear();
+      const endM = globalLedgerTo.getMonth();
+
+      while (curY < endY || (curY === endY && curM <= endM)) {
+        const hasDiffYear = (globalLedgerFrom.getFullYear() !== globalLedgerTo.getFullYear()) || (curY !== new Date().getFullYear());
+        monthsToDisplay.push({
+          year: curY,
+          mIndex: curM,
+          name: monthNames[curM] + (hasDiffYear ? ' ' + curY : ''),
+          rawMonthName: monthNames[curM]
+        });
+        curM++;
+        if (curM > 11) {
+          curM = 0;
+          curY++;
+        }
+      }
 
       let runningBalance = openingStock;
       let grandInQty = 0;
       let grandOutQty = 0;
 
-      const stats = monthKeys.map(m => {
-        const year = startYear + m.yearOffset;
-        const monthStart = new Date(year, m.mIndex, 1, 0, 0, 0);
-        const monthEnd = new Date(year, m.mIndex + 1, 0, 23, 59, 59);
+      const stats = monthsToDisplay.map(m => {
+        const monthStart = new Date(m.year, m.mIndex, 1, 0, 0, 0);
+        const monthEnd = new Date(m.year, m.mIndex + 1, 0, 23, 59, 59);
 
         const rangeStart = Math.max(monthStart.getTime(), globalLedgerFrom.getTime());
         const rangeEnd = Math.min(monthEnd.getTime(), globalLedgerTo.getTime());
@@ -8225,6 +8244,9 @@ function d2i(val) {
 
         return {
           name: m.name,
+          mIndex: m.mIndex,
+          year: m.year,
+          rawMonthName: m.rawMonthName,
           inwardsQty,
           outwardsQty,
           closingBal: runningBalance
@@ -8245,17 +8267,12 @@ function d2i(val) {
         return `${absVal.toLocaleString()} ${unit}`;
       };
 
-       const shopName = COMPANY_NAME;
+      const shopName = COMPANY_NAME;
       const dateRangeStr = `${formatDateToDMY(globalLedgerFrom)} to ${formatDateToDMY(globalLedgerTo)}`;
 
-      const rowsHtml = stats.map(s => {
-        const mKey = monthKeys.find(mk => mk.name === s.name);
-        const mIndex = mKey ? mKey.mIndex : 0;
-        const yearOffset = mKey ? mKey.yearOffset : 0;
-        const targetYear = startYear + yearOffset;
-
+      const rowsHtml = stats.length > 0 ? stats.map(s => {
         return `
-          <tr onclick="showLedgerMonthDetail('${prodName.replace(/'/g, "\\'")}', ${mIndex}, ${targetYear}, '${s.name}')" 
+          <tr onclick="showLedgerMonthDetail('${prodName.replace(/'/g, "\\'")}', ${s.mIndex}, ${s.year}, '${s.name.replace(/'/g, "\\'")}')" 
               style="cursor:pointer; border-bottom: 1px solid var(--border-light); transition: background 0.15s;"
               onmouseover="this.style.background='var(--surface2)';"
               onmouseout="this.style.background='transparent';"
@@ -8266,7 +8283,11 @@ function d2i(val) {
             <td style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:${s.closingBal < 0 ? 'var(--danger)' : 'var(--text-main)'}; border-left:1px solid var(--border-light);">${formatBal(s.closingBal)}</td>
           </tr>
         `;
-      }).join('');
+      }).join('') : `
+        <tr style="border-bottom: 1px solid var(--border-light);">
+          <td colspan="4" style="padding:20px; text-align:center; color:var(--muted); font-style:italic;">No transactions in this period</td>
+        </tr>
+      `;
 
       tablesWrap.innerHTML = `
         <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px; margin-top:20px;">
@@ -8331,7 +8352,7 @@ function d2i(val) {
           ledgerChartInstance.destroy();
         }
         
-        const labels = stats.map(s => s.name.substring(0, 3));
+        const labels = stats.map(s => s.name);
         const dataValues = stats.map(s => s.outwardsQty);
 
         ledgerChartInstance = new Chart(ctx, {
@@ -8378,6 +8399,46 @@ function d2i(val) {
       }, 50);
     }
 
+    function setChangePeriodPreset(type) {
+      const now = new Date();
+      let startYear = now.getFullYear();
+      if (now.getMonth() < 3) {
+        startYear = startYear - 1;
+      }
+      const pad = (n) => String(n).padStart(2, '0');
+      let fromStr = '';
+      let toStr = '';
+
+      if (type === 'cur_fy') {
+        fromStr = `${startYear}-04-01`;
+        toStr = `${startYear + 1}-03-31`;
+      } else if (type === 'prev_fy') {
+        fromStr = `${startYear - 1}-04-01`;
+        toStr = `${startYear}-03-31`;
+      } else if (type === 'this_month') {
+        const y = now.getFullYear();
+        const m = now.getMonth();
+        const lastDay = new Date(y, m + 1, 0).getDate();
+        fromStr = `${y}-${pad(m + 1)}-01`;
+        toStr = `${y}-${pad(m + 1)}-${pad(lastDay)}`;
+      } else if (type === 'prev_month') {
+        const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const y = prev.getFullYear();
+        const m = prev.getMonth();
+        const lastDay = new Date(y, m + 1, 0).getDate();
+        fromStr = `${y}-${pad(m + 1)}-01`;
+        toStr = `${y}-${pad(m + 1)}-${pad(lastDay)}`;
+      } else if (type === 'all_time') {
+        fromStr = `2024-01-01`;
+        toStr = `${now.getFullYear() + 1}-12-31`;
+      }
+
+      const cpFrom = document.getElementById('cp-from');
+      const cpTo = document.getElementById('cp-to');
+      if (cpFrom && fromStr) cpFrom.value = fromStr;
+      if (cpTo && toStr) cpTo.value = toStr;
+    }
+
     function openChangePeriodModal(prodName) {
       curModal = 'changePeriod';
       
@@ -8390,6 +8451,7 @@ function d2i(val) {
       btn.textContent = 'Apply';
       btn.className = 'btn btn-primary';
       btn.style.display = '';
+      btn.removeAttribute('onclick');
       btn.onclick = () => applyChangePeriod(prodName);
 
       const cancelBtn = document.querySelector('.modal-footer .btn-ghost');
@@ -8398,21 +8460,33 @@ function d2i(val) {
         cancelBtn.style.display = '';
       }
 
-      const fromVal = formatDateToDMY(globalLedgerFrom);
-      const toVal = formatDateToDMY(globalLedgerTo);
+      const fromVal = formatDateToISO(globalLedgerFrom || new Date());
+      const toVal = formatDateToISO(globalLedgerTo || new Date());
 
       document.getElementById('modal-content').innerHTML = `
         <div style="padding: 10px 0;">
-          <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Specify the period for the stock ledger report.</p>
-          <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
-            <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">From</label>
-            <input class="form-input" type="text" id="cp-from" placeholder="DD-MM-YYYY" value="${fromVal}" style="max-width:200px;" autocomplete="off">
+          <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Specify the period for the stock ledger report.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight:700; margin-bottom:6px; font-size:12px;">From Date</label>
+              <input class="form-input" type="date" id="cp-from" value="${fromVal}" style="width:100%; font-family:'JetBrains Mono',monospace; font-weight:600;" onkeydown="if(event.key==='Enter')applyChangePeriod('${prodName.replace(/'/g, "\\'")}')">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight:700; margin-bottom:6px; font-size:12px;">To Date</label>
+              <input class="form-input" type="date" id="cp-to" value="${toVal}" style="width:100%; font-family:'JetBrains Mono',monospace; font-weight:600;" onkeydown="if(event.key==='Enter')applyChangePeriod('${prodName.replace(/'/g, "\\'")}')">
+            </div>
           </div>
-          <div class="form-group" style="margin-bottom:15px; display:flex; align-items:center; gap:12px;">
-            <label class="form-label" style="width:60px; margin-bottom:0; font-weight:700;">To</label>
-            <input class="form-input" type="text" id="cp-to" placeholder="DD-MM-YYYY" value="${toVal}" style="max-width:200px;" autocomplete="off">
+
+          <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;">
+            <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:4px;">Presets:</span>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setChangePeriodPreset('cur_fy')" style="padding:3px 8px; font-size:11px; border:1px solid var(--border); border-radius:6px; cursor:pointer;">Current FY</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setChangePeriodPreset('this_month')" style="padding:3px 8px; font-size:11px; border:1px solid var(--border); border-radius:6px; cursor:pointer;">This Month</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setChangePeriodPreset('prev_month')" style="padding:3px 8px; font-size:11px; border:1px solid var(--border); border-radius:6px; cursor:pointer;">Last Month</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="setChangePeriodPreset('prev_fy')" style="padding:3px 8px; font-size:11px; border:1px solid var(--border); border-radius:6px; cursor:pointer;">Prev FY</button>
           </div>
-          <div id="cp-err" style="color:var(--danger); font-size:11px; font-weight:700; display:none; margin-top:10px;"></div>
+
+          <div id="cp-err" style="color:var(--danger); font-size:12px; font-weight:700; display:none; margin-top:8px; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:6px;"></div>
         </div>
       `;
 
@@ -8420,9 +8494,13 @@ function d2i(val) {
     }
 
     function applyChangePeriod(prodName) {
-      const fromStr = document.getElementById('cp-from').value.trim();
-      const toStr = document.getElementById('cp-to').value.trim();
+      const fromEl = document.getElementById('cp-from');
+      const toEl = document.getElementById('cp-to');
       const errEl = document.getElementById('cp-err');
+
+      if (!fromEl || !toEl) return;
+      const fromStr = fromEl.value.trim();
+      const toStr = toEl.value.trim();
 
       if (!fromStr || !toStr) {
         if (errEl) {
@@ -8432,29 +8510,41 @@ function d2i(val) {
         return;
       }
 
-      const fromIso = d2i(fromStr);
-      const toIso = d2i(toStr);
+      function parseAnyDateInput(val, isEnd) {
+        if (!val || typeof val !== 'string') return null;
+        val = val.trim().replace(/[\/\.]/g, '-');
+        const parts = val.split('-');
+        if (parts.length === 3) {
+          let y, m, d;
+          if (parts[0].length === 4) { // YYYY-MM-DD
+            y = parseInt(parts[0], 10);
+            m = parseInt(parts[1], 10) - 1;
+            d = parseInt(parts[2], 10);
+          } else { // DD-MM-YYYY
+            d = parseInt(parts[0], 10);
+            m = parseInt(parts[1], 10) - 1;
+            y = parseInt(parts[2], 10);
+          }
+          if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+            if (isEnd) return new Date(y, m, d, 23, 59, 59, 999);
+            return new Date(y, m, d, 0, 0, 0, 0);
+          }
+        }
+        return null;
+      }
 
-      if (!fromIso || !toIso || fromIso.split('-').length !== 3 || toIso.split('-').length !== 3) {
+      const fromDate = parseAnyDateInput(fromStr, false);
+      const toDate = parseAnyDateInput(toStr, true);
+
+      if (!fromDate || !toDate) {
         if (errEl) {
-          errEl.textContent = 'Invalid date format! Please use DD-MM-YYYY (e.g., 01-07-2026).';
+          errEl.textContent = 'Invalid date format! Please select valid dates.';
           errEl.style.display = 'block';
         }
         return;
       }
 
-      const parseISOToDate = (isoStr, isEnd) => {
-        const parts = isoStr.split('-');
-        if (isEnd) {
-          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59);
-        }
-        return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0);
-      };
-
-      const fromDate = parseISOToDate(fromIso, false);
-      const toDate = parseISOToDate(toIso, true);
-
-      if (fromDate > toDate) {
+      if (fromDate.getTime() > toDate.getTime()) {
         if (errEl) {
           errEl.textContent = 'From date cannot be after To date!';
           errEl.style.display = 'block';
@@ -8465,7 +8555,7 @@ function d2i(val) {
       globalLedgerFrom = fromDate;
       globalLedgerTo = toDate;
 
-      document.getElementById('modal-overlay').classList.remove('open');
+      closeModal();
       showProductMonthlyLedger(prodName);
     }
 
